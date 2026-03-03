@@ -1,25 +1,152 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>EEOS Poll</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter (optional, matches your app direction) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    html, body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  </style>
 </head>
-<body>
-  <h1 id="title"></h1>
-  <p id="intro"></p>
+<body class="min-h-screen bg-slate-50 text-slate-900">
 
-  <h3>Choose an event</h3>
-  <div id="events"></div>
+  <!-- Top bar -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-slate-900"></div>
+        <div class="font-semibold tracking-tight">EEOS</div>
+      </div>
+      <div class="text-sm text-slate-500">Team Poll</div>
+    </div>
+  </header>
 
-  <h3>Select times that work</h3>
-  <div id="times"></div>
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <!-- Loading / error banner -->
+    <div id="banner" class="hidden mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div id="bannerTitle" class="text-sm font-semibold text-slate-900">Loading…</div>
+          <div id="bannerBody" class="text-sm text-slate-600">Please wait.</div>
+        </div>
+        <button id="bannerClose" class="hidden text-sm font-medium text-slate-600 hover:text-slate-900">Close</button>
+      </div>
+    </div>
 
-  <button id="submit">Submit</button>
-  <pre id="status"></pre>
+    <!-- Poll card -->
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="px-6 py-6 border-b border-slate-200">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <h1 id="title" class="text-2xl font-semibold tracking-tight">Loading poll…</h1>
+            <p id="intro" class="mt-2 text-slate-600">Please wait.</p>
+          </div>
+
+          <!-- Deadline pill -->
+          <div id="deadlineWrap" class="hidden shrink-0">
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700">
+              <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+              <span id="deadlineText" class="font-medium">Poll closes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-6 space-y-6">
+        <!-- Question 1 -->
+        <div>
+          <div class="flex items-center justify-between gap-4">
+            <h2 class="text-base font-semibold text-slate-900">Which event would you join?</h2>
+            <div id="eventCount" class="text-sm text-slate-500"></div>
+          </div>
+
+          <div id="events" class="mt-3 grid gap-2"></div>
+          <p id="eventError" class="hidden mt-2 text-sm text-rose-600">Please select an event.</p>
+        </div>
+
+        <!-- Divider -->
+        <div class="h-px bg-slate-200"></div>
+
+        <!-- Question 2 -->
+        <div>
+          <div class="flex items-center justify-between gap-4">
+            <h2 class="text-base font-semibold text-slate-900">Which times work?</h2>
+            <div id="timeCount" class="text-sm text-slate-500"></div>
+          </div>
+
+          <div id="times" class="mt-3 grid gap-2"></div>
+          <p id="timeError" class="hidden mt-2 text-sm text-rose-600">Please select at least one time.</p>
+
+          <p class="mt-3 text-sm text-slate-500">
+            Tip: Pick every time you could make it — it helps us find the best overlap.
+          </p>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+          <div class="text-sm text-slate-500">
+            <span id="smallStatus">2 quick questions — takes under a minute.</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button
+              id="submit"
+              class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 active:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Vote
+            </button>
+          </div>
+        </div>
+
+        <!-- Status output (hidden unless needed) -->
+        <pre id="status" class="hidden mt-2 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700"></pre>
+      </div>
+    </section>
+
+    <!-- Footer note -->
+    <div class="mt-6 text-center text-xs text-slate-500">
+      Powered by EEOS • Your vote is anonymous in this MVP
+    </div>
+  </main>
 
   <script>
+    // ✅ Your Worker
     const API_BASE = "https://esos-polls.ajolly2.workers.dev/api";
+
+    const els = {
+      banner: document.getElementById("banner"),
+      bannerTitle: document.getElementById("bannerTitle"),
+      bannerBody: document.getElementById("bannerBody"),
+      bannerClose: document.getElementById("bannerClose"),
+
+      title: document.getElementById("title"),
+      intro: document.getElementById("intro"),
+
+      deadlineWrap: document.getElementById("deadlineWrap"),
+      deadlineText: document.getElementById("deadlineText"),
+
+      events: document.getElementById("events"),
+      times: document.getElementById("times"),
+
+      eventError: document.getElementById("eventError"),
+      timeError: document.getElementById("timeError"),
+
+      eventCount: document.getElementById("eventCount"),
+      timeCount: document.getElementById("timeCount"),
+
+      submit: document.getElementById("submit"),
+      status: document.getElementById("status"),
+      smallStatus: document.getElementById("smallStatus"),
+    };
 
     const params = new URLSearchParams(location.search);
     const pollId = params.get("pollId");
@@ -28,74 +155,233 @@
     let selectedEvent = null;
     const selectedTimes = new Set();
 
-    async function loadPoll() {
-      const res = await fetch(`${API_BASE}/polls/${encodeURIComponent(pollId)}`);
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "Failed to load poll");
-      poll = data.poll;
+    function showBanner(title, body, closable = false) {
+      els.bannerTitle.textContent = title || "";
+      els.bannerBody.textContent = body || "";
+      els.banner.classList.remove("hidden");
+      if (closable) {
+        els.bannerClose.classList.remove("hidden");
+      } else {
+        els.bannerClose.classList.add("hidden");
+      }
+    }
+    els.bannerClose.onclick = () => els.banner.classList.add("hidden");
 
-      document.getElementById("title").textContent = poll.title;
-      document.getElementById("intro").textContent = poll.intro;
-
-      const eventsDiv = document.getElementById("events");
-      eventsDiv.innerHTML = "";
-      poll.options.forEach(o => {
-        const label = document.createElement("label");
-        label.style.display = "block";
-        const input = document.createElement("input");
-        input.type = "radio";
-        input.name = "event";
-        input.value = o.id;
-        input.onchange = () => selectedEvent = o.id;
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(" " + o.label));
-        eventsDiv.appendChild(label);
-      });
-
-      const timesDiv = document.getElementById("times");
-      timesDiv.innerHTML = "";
-      poll.times.forEach(t => {
-        const label = document.createElement("label");
-        label.style.display = "block";
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.value = t.id;
-        input.onchange = () => {
-          if (input.checked) selectedTimes.add(t.id);
-          else selectedTimes.delete(t.id);
-        };
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(" " + t.label));
-        timesDiv.appendChild(label);
-      });
+    function setStatus(objOrText) {
+      els.status.classList.remove("hidden");
+      els.status.textContent = typeof objOrText === "string" ? objOrText : JSON.stringify(objOrText, null, 2);
     }
 
-    document.getElementById("submit").onclick = async () => {
-      const status = document.getElementById("status");
-      status.textContent = "Submitting...";
+    function formatDeadline(iso) {
+      try {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      } catch {
+        return null;
+      }
+    }
+
+    function setDeadlinePill(deadlineIso) {
+      if (!deadlineIso) return;
+      const formatted = formatDeadline(deadlineIso);
+      if (!formatted) return;
+
+      // No urgency colors; calm enterprise.
+      els.deadlineText.textContent = `Closes ${formatted}`;
+      els.deadlineWrap.classList.remove("hidden");
+    }
+
+    function renderRadioOption({ id, label }) {
+      const wrapper = document.createElement("label");
+      wrapper.className =
+        "group flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "event";
+      input.value = id;
+      input.className = "mt-1 h-4 w-4 accent-slate-900";
+
+      const textWrap = document.createElement("div");
+      textWrap.className = "min-w-0";
+
+      const title = document.createElement("div");
+      title.className = "text-sm font-medium text-slate-900";
+      title.textContent = label;
+
+      const sub = document.createElement("div");
+      sub.className = "mt-0.5 text-xs text-slate-500";
+      sub.textContent = "Select one option";
+
+      textWrap.appendChild(title);
+      textWrap.appendChild(sub);
+
+      input.onchange = () => {
+        selectedEvent = id;
+        els.eventError.classList.add("hidden");
+      };
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(textWrap);
+
+      return wrapper;
+    }
+
+    function renderCheckboxOption({ id, label }) {
+      const wrapper = document.createElement("label");
+      wrapper.className =
+        "group flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = id;
+      input.className = "mt-1 h-4 w-4 accent-slate-900";
+
+      const textWrap = document.createElement("div");
+      textWrap.className = "min-w-0";
+
+      const title = document.createElement("div");
+      title.className = "text-sm font-medium text-slate-900";
+      title.textContent = label;
+
+      const sub = document.createElement("div");
+      sub.className = "mt-0.5 text-xs text-slate-500";
+      sub.textContent = "You can pick multiple times";
+
+      textWrap.appendChild(title);
+      textWrap.appendChild(sub);
+
+      input.onchange = () => {
+        if (input.checked) selectedTimes.add(id);
+        else selectedTimes.delete(id);
+        if (selectedTimes.size > 0) els.timeError.classList.add("hidden");
+      };
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(textWrap);
+
+      return wrapper;
+    }
+
+    async function loadPoll() {
+      if (!pollId) {
+        els.title.textContent = "Missing poll link";
+        els.intro.textContent = "This poll link is missing a pollId. Ask the organizer to resend it.";
+        showBanner("Link error", "Missing pollId in URL. Please use the full poll link.", true);
+        els.submit.disabled = true;
+        return;
+      }
+
+      showBanner("Loading poll…", "Just a moment.");
+
+      const res = await fetch(`${API_BASE}/polls/${encodeURIComponent(pollId)}`);
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        els.title.textContent = "Poll not found";
+        els.intro.textContent = "This poll may have been deleted or the link is incorrect.";
+        showBanner("Poll not found", data?.error ? `Error: ${data.error}` : "Unknown error.", true);
+        els.submit.disabled = true;
+        return;
+      }
+
+      poll = data.poll;
+
+      els.banner.classList.add("hidden");
+      els.title.textContent = poll.title || "Team poll";
+      els.intro.textContent = poll.intro || "";
+
+      setDeadlinePill(poll.deadlineIso);
+
+      // Counts
+      els.eventCount.textContent = poll.options?.length ? `${poll.options.length} options` : "";
+      els.timeCount.textContent = poll.times?.length ? `${poll.times.length} times` : "";
+
+      // Render events
+      els.events.innerHTML = "";
+      (poll.options || []).forEach((o) => els.events.appendChild(renderRadioOption(o)));
+
+      // Render times
+      els.times.innerHTML = "";
+      (poll.times || []).forEach((t) => els.times.appendChild(renderCheckboxOption(t)));
+
+      // Button label
+      els.submit.textContent = "Vote";
+      els.smallStatus.textContent = "2 quick questions — takes under a minute.";
+    }
+
+    async function submitVote() {
+      els.eventError.classList.add("hidden");
+      els.timeError.classList.add("hidden");
+      els.status.classList.add("hidden");
+
+      const hasEvent = Boolean(selectedEvent);
+      const hasTimes = selectedTimes.size > 0;
+
+      if (!hasEvent) els.eventError.classList.remove("hidden");
+      if (!hasTimes) els.timeError.classList.remove("hidden");
+      if (!hasEvent || !hasTimes) return;
+
+      els.submit.disabled = true;
+      els.submit.textContent = "Submitting…";
 
       const payload = {
         eventOptionId: selectedEvent,
-        timeOptionIds: Array.from(selectedTimes)
+        timeOptionIds: Array.from(selectedTimes),
+        // Name/email intentionally omitted for MVP (no friction).
       };
 
       const res = await fetch(`${API_BASE}/polls/${encodeURIComponent(pollId)}/votes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      status.textContent = JSON.stringify(data, null, 2);
-    };
 
-    if (!pollId) {
-      document.getElementById("status").textContent = "Missing pollId in URL.";
-    } else {
-      loadPoll().catch(err => {
-        document.getElementById("status").textContent = String(err.message || err);
-      });
+      if (res.ok && data.ok) {
+        // Success state
+        els.smallStatus.textContent = "Thanks — your vote is in.";
+        els.submit.textContent = "Submitted";
+        els.submit.classList.remove("hover:bg-slate-800");
+        els.submit.classList.add("bg-slate-700");
+        // Disable further edits
+        const inputs = document.querySelectorAll("input");
+        inputs.forEach((i) => i.disabled = true);
+        return;
+      }
+
+      // Errors
+      els.submit.disabled = false;
+      els.submit.textContent = "Vote";
+
+      if (data?.error === "already_voted") {
+        showBanner("Vote already received", "It looks like you’ve already voted from this device/browser.", true);
+        return;
+      }
+      if (data?.error === "poll_closed") {
+        showBanner("Poll closed", "This poll is no longer accepting votes.", true);
+        return;
+      }
+      if (data?.error === "poll_not_found") {
+        showBanner("Poll not found", "This poll link may be incorrect or expired.", true);
+        return;
+      }
+
+      showBanner("Couldn’t submit vote", data?.message || "Please try again.", true);
+      setStatus(data);
     }
+
+    els.submit.onclick = submitVote;
+
+    loadPoll();
   </script>
 </body>
 </html>
