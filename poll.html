@@ -1,1 +1,101 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EEOS Poll</title>
+</head>
+<body>
+  <h1 id="title"></h1>
+  <p id="intro"></p>
 
+  <h3>Choose an event</h3>
+  <div id="events"></div>
+
+  <h3>Select times that work</h3>
+  <div id="times"></div>
+
+  <button id="submit">Submit</button>
+  <pre id="status"></pre>
+
+  <script>
+    const API_BASE = "https://esos-polls.ajolly2.workers.dev/api";
+
+    const params = new URLSearchParams(location.search);
+    const pollId = params.get("pollId");
+
+    let poll = null;
+    let selectedEvent = null;
+    const selectedTimes = new Set();
+
+    async function loadPoll() {
+      const res = await fetch(`${API_BASE}/polls/${encodeURIComponent(pollId)}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Failed to load poll");
+      poll = data.poll;
+
+      document.getElementById("title").textContent = poll.title;
+      document.getElementById("intro").textContent = poll.intro;
+
+      const eventsDiv = document.getElementById("events");
+      eventsDiv.innerHTML = "";
+      poll.options.forEach(o => {
+        const label = document.createElement("label");
+        label.style.display = "block";
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "event";
+        input.value = o.id;
+        input.onchange = () => selectedEvent = o.id;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + o.label));
+        eventsDiv.appendChild(label);
+      });
+
+      const timesDiv = document.getElementById("times");
+      timesDiv.innerHTML = "";
+      poll.times.forEach(t => {
+        const label = document.createElement("label");
+        label.style.display = "block";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = t.id;
+        input.onchange = () => {
+          if (input.checked) selectedTimes.add(t.id);
+          else selectedTimes.delete(t.id);
+        };
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + t.label));
+        timesDiv.appendChild(label);
+      });
+    }
+
+    document.getElementById("submit").onclick = async () => {
+      const status = document.getElementById("status");
+      status.textContent = "Submitting...";
+
+      const payload = {
+        eventOptionId: selectedEvent,
+        timeOptionIds: Array.from(selectedTimes)
+      };
+
+      const res = await fetch(`${API_BASE}/polls/${encodeURIComponent(pollId)}/votes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      status.textContent = JSON.stringify(data, null, 2);
+    };
+
+    if (!pollId) {
+      document.getElementById("status").textContent = "Missing pollId in URL.";
+    } else {
+      loadPoll().catch(err => {
+        document.getElementById("status").textContent = String(err.message || err);
+      });
+    }
+  </script>
+</body>
+</html>
