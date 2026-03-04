@@ -1,351 +1,267 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>EEOS RSVP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    html, body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EEOS RSVP</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+</style>
 </head>
+
 <body class="min-h-screen bg-slate-50 text-slate-900">
-  <header class="border-b border-slate-200 bg-white">
-    <div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="h-8 w-8 rounded-lg bg-slate-900"></div>
-        <div class="font-semibold tracking-tight">EEOS</div>
-      </div>
-      <div class="text-sm text-slate-500">RSVP</div>
-    </div>
-  </header>
 
-  <main class="mx-auto max-w-3xl px-4 py-8">
-    <!-- Banner -->
-    <div id="banner" class="hidden mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <div id="bannerTitle" class="text-sm font-semibold text-slate-900">Loading…</div>
-          <div id="bannerBody" class="text-sm text-slate-600">Please wait.</div>
-        </div>
-        <button id="bannerClose" class="hidden text-sm font-medium text-slate-600 hover:text-slate-900">Close</button>
-      </div>
-    </div>
+<header class="border-b border-slate-200 bg-white">
+<div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
 
-    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <!-- Top -->
-      <div class="px-6 py-6 border-b border-slate-200">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <h1 id="title" class="text-2xl font-semibold tracking-tight">Loading RSVP…</h1>
-            <p id="intro" class="mt-2 text-slate-600">Please wait.</p>
-          </div>
+<div class="flex items-center gap-2">
+<div class="h-8 w-8 rounded-lg bg-slate-900"></div>
+<div class="font-semibold tracking-tight">EEOS</div>
+</div>
 
-          <div class="flex flex-col items-end gap-2 shrink-0">
-            <div id="deadlineWrap" class="hidden">
-              <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700">
-                <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-                <span id="deadlineText" class="font-medium">RSVP closes</span>
-              </div>
-            </div>
-            <div id="statusPill" class="hidden">
-              <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
-                <span id="statusDot" class="h-2 w-2 rounded-full bg-slate-400"></span>
-                <span id="statusText" class="font-medium">Open</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="text-sm text-slate-500">RSVP</div>
 
-      <!-- Content -->
-      <div class="px-6 py-6 space-y-6">
-        <!-- Event details -->
-        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div class="grid gap-3 sm:grid-cols-3">
-            <div class="sm:col-span-2">
-              <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Event</div>
-              <div id="eventName" class="mt-1 text-sm font-semibold text-slate-900">—</div>
-              <div id="locationLabel" class="mt-1 text-sm text-slate-600"></div>
-            </div>
-            <div class="sm:col-span-1 sm:text-right">
-              <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">When</div>
-              <div id="whenText" class="mt-1 text-sm font-semibold text-slate-900">—</div>
-              <div id="timezoneHint" class="mt-1 text-xs text-slate-500">Times shown in organizer’s timezone.</div>
-            </div>
-          </div>
+</div>
+</header>
 
-          <div id="vendorWrap" class="hidden mt-4">
-            <a id="vendorLink" href="#" target="_blank" rel="noopener noreferrer"
-              class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100">
-              View event details
-              <span class="ml-2">↗</span>
-            </a>
-          </div>
-        </div>
 
-        <!-- Prompt -->
-        <div>
-          <h2 class="text-base font-semibold text-slate-900">Will you attend?</h2>
-          <p class="mt-1 text-sm text-slate-600">Please answer Yes or No. This takes one click.</p>
-        </div>
+<main class="mx-auto max-w-3xl px-4 py-8">
 
-        <!-- Buttons -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button id="btnYes"
-            class="w-full inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 active:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed">
-            Yes, I’m in
-          </button>
-          <button id="btnNo"
-            class="w-full inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 active:bg-white disabled:opacity-50 disabled:cursor-not-allowed">
-            No, can’t make it
-          </button>
-        </div>
+<section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-        <!-- Small status -->
-        <div class="flex items-center justify-between gap-3 pt-1">
-          <div class="text-sm text-slate-500"><span id="smallStatus">One click — you’re done.</span></div>
-        </div>
+<div class="px-6 py-6 border-b border-slate-200">
 
-        <pre id="debug" class="hidden mt-2 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700"></pre>
-      </div>
-    </section>
+<h1 id="title" class="text-2xl font-semibold tracking-tight">
+Loading RSVP…
+</h1>
 
-    <div class="mt-6 text-center text-xs text-slate-500">Powered by EEOS • RSVP is anonymous in this MVP</div>
-  </main>
+<p id="intro" class="mt-2 text-slate-600">
+Please wait.
+</p>
 
-  <script>
-    const API_BASE = "https://esos-polls.ajolly2.workers.dev/api";
+</div>
 
-    const els = {
-      banner: document.getElementById("banner"),
-      bannerTitle: document.getElementById("bannerTitle"),
-      bannerBody: document.getElementById("bannerBody"),
-      bannerClose: document.getElementById("bannerClose"),
 
-      title: document.getElementById("title"),
-      intro: document.getElementById("intro"),
+<div class="px-6 py-6 space-y-6">
 
-      deadlineWrap: document.getElementById("deadlineWrap"),
-      deadlineText: document.getElementById("deadlineText"),
+<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-      statusPill: document.getElementById("statusPill"),
-      statusDot: document.getElementById("statusDot"),
-      statusText: document.getElementById("statusText"),
+<div class="text-xs font-semibold uppercase text-slate-500">
+Event
+</div>
 
-      eventName: document.getElementById("eventName"),
-      whenText: document.getElementById("whenText"),
-      locationLabel: document.getElementById("locationLabel"),
-      vendorWrap: document.getElementById("vendorWrap"),
-      vendorLink: document.getElementById("vendorLink"),
+<div id="eventName" class="mt-1 text-sm font-semibold">
+—
+</div>
 
-      btnYes: document.getElementById("btnYes"),
-      btnNo: document.getElementById("btnNo"),
-      smallStatus: document.getElementById("smallStatus"),
+<div id="whenText" class="mt-2 text-sm text-slate-600">
+—
+</div>
 
-      debug: document.getElementById("debug"),
-    };
+<div id="locationLabel" class="mt-1 text-sm text-slate-600"></div>
 
-    const params = new URLSearchParams(location.search);
-    const rsvpId = params.get("rsvpId");
+</div>
 
-    let rsvp = null;
 
-    function showBanner(title, body, closable = false) {
-      els.bannerTitle.textContent = title || "";
-      els.bannerBody.textContent = body || "";
-      els.banner.classList.remove("hidden");
-      els.bannerClose.classList.toggle("hidden", !closable);
-    }
+<div>
 
-    els.bannerClose.onclick = () => els.banner.classList.add("hidden");
+<h2 class="text-base font-semibold">
+Will you attend?
+</h2>
 
-    async function safeJson(response) {
-      try { return await response.json(); }
-      catch { return null; }
-    }
+</div>
 
-    function formatDeadline(iso) {
-      try {
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return null;
-        return d.toLocaleString(undefined, {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit"
-        });
-      } catch {
-        return null;
-      }
-    }
 
-    function setDeadlinePill(deadlineIso) {
-      if (!deadlineIso) return;
-      const formatted = formatDeadline(deadlineIso);
-      if (!formatted) return;
-      els.deadlineText.textContent = `Closes ${formatted}`;
-      els.deadlineWrap.classList.remove("hidden");
-    }
+<div class="flex flex-col sm:flex-row gap-3">
 
-    function setOpenClosed(isClosed) {
-      els.statusPill.classList.remove("hidden");
-      if (isClosed) {
-        els.statusDot.classList.remove("bg-slate-400");
-        els.statusDot.classList.add("bg-rose-500");
-        els.statusText.textContent = "Closed";
-      } else {
-        els.statusDot.classList.remove("bg-rose-500");
-        els.statusDot.classList.add("bg-emerald-500");
-        els.statusText.textContent = "Open";
-      }
-    }
+<button
+id="btnYes"
+class="w-full rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
 
-    function disableButtons(disabled) {
-      els.btnYes.disabled = disabled;
-      els.btnNo.disabled = disabled;
-    }
+Yes, I'm in
 
-    function setSubmittedState(answer) {
-      disableButtons(true);
-      els.smallStatus.textContent = "Thanks — your RSVP is saved.";
-      showBanner("RSVP received", answer === "yes" ? "You’re marked as attending." : "You’re marked as not attending.", true);
+</button>
 
-      // Visual nudge: make the chosen button look “selected”
-      if (answer === "yes") {
-        els.btnYes.classList.add("bg-slate-700");
-        els.btnYes.classList.remove("hover:bg-slate-800");
-      } else {
-        els.btnNo.classList.add("bg-slate-100");
-      }
-    }
 
-    async function loadRsvp() {
-      if (!rsvpId) {
-        els.title.textContent = "Missing RSVP link";
-        els.intro.textContent = "This RSVP link is missing an rsvpId. Ask the organizer to resend it.";
-        showBanner("Link error", "Missing rsvpId in URL. Please use the full RSVP link.", true);
-        disableButtons(true);
-        return;
-      }
+<button
+id="btnNo"
+class="w-full rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50">
 
-      showBanner("Loading RSVP…", "Just a moment.");
-      try {
-        const res = await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}`, {
-          method: "GET",
-          headers: { Accept: "application/json" }
-        });
-        const data = await safeJson(res);
+No, can't make it
 
-        if (!res.ok || !data || data.ok !== true || !data.rsvp) {
-          els.title.textContent = "RSVP not found";
-          els.intro.textContent = "This RSVP may have been deleted or the link is incorrect.";
-          showBanner("RSVP not found", data?.error ? `Error: ${data.error}` : `Request failed (${res.status}).`, true);
-          disableButtons(true);
-          return;
-        }
+</button>
 
-        rsvp = data.rsvp;
+</div>
 
-        els.banner.classList.add("hidden");
-        els.title.textContent = "RSVP";
-        els.intro.textContent = "Please confirm if you can attend.";
 
-        els.eventName.textContent = rsvp.eventName || "Team event";
-        const when = [rsvp.eventDate, rsvp.eventTime].filter(Boolean).join(" @ ");
-        els.whenText.textContent = when || "—";
+<!-- NAME + EMAIL (hidden until YES clicked) -->
 
-        const loc = (rsvp.locationLabel || "").trim();
-        els.locationLabel.textContent = loc ? loc : "";
-        els.locationLabel.classList.toggle("hidden", !loc);
+<div id="yesForm" class="hidden space-y-3">
 
-        const vendor = (rsvp.vendorUrl || "").trim();
-        if (vendor) {
-          els.vendorLink.href = vendor;
-          els.vendorWrap.classList.remove("hidden");
-        } else {
-          els.vendorWrap.classList.add("hidden");
-        }
+<div class="text-sm text-slate-600">
+Great! Please enter your name so we can add you to the attendee list.
+</div>
 
-        setDeadlinePill(rsvp.deadlineIso);
+<input
+id="nameInput"
+placeholder="Your name"
+class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+/>
 
-        // Determine closed/open locally from deadline if present
-        let isClosed = false;
-        if (rsvp.deadlineIso) {
-          const ms = Date.parse(rsvp.deadlineIso);
-          if (!Number.isNaN(ms) && Date.now() > ms) isClosed = true;
-        }
-        setOpenClosed(isClosed);
+<input
+id="emailInput"
+placeholder="Your email"
+class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+/>
 
-        disableButtons(isClosed);
-        els.smallStatus.textContent = isClosed ? "RSVP is closed." : "One click — you’re done.";
-      } catch (error) {
-        console.error("rsvp-load-failed", error);
-        showBanner("Couldn’t load RSVP", "Network error while loading. Please refresh and try again.", true);
-        disableButtons(true);
-      }
-    }
+<button
+id="confirmYes"
+class="w-full rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
 
-    async function submitRsvp(answer) {
-      els.debug.classList.add("hidden");
-      disableButtons(true);
+Confirm RSVP
 
-      // optimistic UX
-      els.smallStatus.textContent = "Submitting…";
+</button>
 
-      try {
-        const res = await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}/respond`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ answer })
-        });
+</div>
 
-        const data = await safeJson(res);
 
-        if (res.ok && data?.ok) {
-          setSubmittedState(answer);
-          return;
-        }
+<div id="smallStatus" class="text-sm text-slate-500">
+One click — you're done.
+</div>
 
-        // restore buttons unless closed/already responded
-        if (data?.error === "already_responded") {
-          showBanner("RSVP already received", "It looks like you already responded from this device/browser.", true);
-          els.smallStatus.textContent = "Already submitted.";
-          return;
-        }
-        if (data?.error === "rsvp_closed") {
-          showBanner("RSVP closed", "This RSVP is no longer accepting responses.", true);
-          els.smallStatus.textContent = "RSVP is closed.";
-          setOpenClosed(true);
-          return;
-        }
-        if (data?.error === "rsvp_not_found") {
-          showBanner("RSVP not found", "This RSVP link may be incorrect or expired.", true);
-          els.smallStatus.textContent = "Couldn’t submit.";
-          return;
-        }
+</div>
+</section>
 
-        disableButtons(false);
-        els.smallStatus.textContent = "Couldn’t submit — please try again.";
-        showBanner("Couldn’t submit RSVP", data?.message || data?.error || `Request failed (${res.status}).`, true);
-        els.debug.classList.remove("hidden");
-        els.debug.textContent = JSON.stringify(data || { error: "no_json" }, null, 2);
-      } catch (error) {
-        console.error("rsvp-submit-failed", error);
-        disableButtons(false);
-        els.smallStatus.textContent = "Network error — please retry.";
-        showBanner("Couldn’t submit RSVP", "Network/CORS error while submitting. Please retry.", true);
-      }
-    }
 
-    els.btnYes.onclick = () => submitRsvp("yes");
-    els.btnNo.onclick = () => submitRsvp("no");
+<div class="mt-6 text-center text-xs text-slate-500">
+Powered by EEOS
+</div>
 
-    loadRsvp();
-  </script>
+</main>
+
+
+<script>
+
+const API_BASE="https://esos-polls.ajolly2.workers.dev/api";
+
+const params=new URLSearchParams(location.search);
+
+const rsvpId=params.get("rsvpId");
+
+let rsvp=null;
+
+
+async function safeJson(r){
+
+try{return await r.json()}
+
+catch{return null}
+
+}
+
+
+async function loadRsvp(){
+
+const res=await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}`);
+
+const data=await safeJson(res);
+
+if(!data||!data.ok){
+
+document.getElementById("title").textContent="RSVP not found";
+
+return;
+
+}
+
+rsvp=data.rsvp;
+
+document.getElementById("title").textContent="RSVP";
+
+document.getElementById("intro").textContent="Please confirm if you can attend.";
+
+document.getElementById("eventName").textContent=rsvp.eventName;
+
+document.getElementById("whenText").textContent=`${rsvp.eventDate} @ ${rsvp.eventTime}`;
+
+if(rsvp.locationLabel){
+
+document.getElementById("locationLabel").textContent=rsvp.locationLabel;
+
+}
+
+}
+
+
+async function submit(answer,name,email){
+
+const payload={answer};
+
+if(name)payload.name=name;
+
+if(email)payload.email=email;
+
+const res=await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}/respond`,{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify(payload)
+
+});
+
+const data=await safeJson(res);
+
+if(data&&data.ok){
+
+document.getElementById("smallStatus").textContent="Thanks — your RSVP is saved.";
+
+document.getElementById("btnYes").disabled=true;
+
+document.getElementById("btnNo").disabled=true;
+
+document.getElementById("yesForm").classList.add("hidden");
+
+}
+
+}
+
+
+document.getElementById("btnYes").onclick=()=>{
+
+document.getElementById("yesForm").classList.remove("hidden");
+
+document.getElementById("smallStatus").textContent="Just your name and email.";
+
+};
+
+
+document.getElementById("confirmYes").onclick=()=>{
+
+const name=document.getElementById("nameInput").value.trim();
+
+const email=document.getElementById("emailInput").value.trim();
+
+submit("yes",name,email);
+
+};
+
+
+document.getElementById("btnNo").onclick=()=>submit("no");
+
+
+loadRsvp();
+
+</script>
+
 </body>
 </html>
