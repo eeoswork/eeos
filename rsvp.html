@@ -1,267 +1,385 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>EEOS RSVP</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EEOS RSVP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  </style>
 </head>
 
 <body class="min-h-screen bg-slate-50 text-slate-900">
-
-<header class="border-b border-slate-200 bg-white">
-<div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
-
-<div class="flex items-center gap-2">
-<div class="h-8 w-8 rounded-lg bg-slate-900"></div>
-<div class="font-semibold tracking-tight">EEOS</div>
-</div>
-
-<div class="text-sm text-slate-500">RSVP</div>
-
-</div>
-</header>
-
-
-<main class="mx-auto max-w-3xl px-4 py-8">
-
-<section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-<div class="px-6 py-6 border-b border-slate-200">
-
-<h1 id="title" class="text-2xl font-semibold tracking-tight">
-Loading RSVP…
-</h1>
-
-<p id="intro" class="mt-2 text-slate-600">
-Please wait.
-</p>
-
-</div>
-
-
-<div class="px-6 py-6 space-y-6">
-
-<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-
-<div class="text-xs font-semibold uppercase text-slate-500">
-Event
-</div>
-
-<div id="eventName" class="mt-1 text-sm font-semibold">
-—
-</div>
-
-<div id="whenText" class="mt-2 text-sm text-slate-600">
-—
-</div>
-
-<div id="locationLabel" class="mt-1 text-sm text-slate-600"></div>
-
-</div>
-
-
-<div>
-
-<h2 class="text-base font-semibold">
-Will you attend?
-</h2>
-
-</div>
-
-
-<div class="flex flex-col sm:flex-row gap-3">
-
-<button
-id="btnYes"
-class="w-full rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
-
-Yes, I'm in
-
-</button>
-
-
-<button
-id="btnNo"
-class="w-full rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50">
-
-No, can't make it
-
-</button>
-
-</div>
-
-
-<!-- NAME + EMAIL (hidden until YES clicked) -->
-
-<div id="yesForm" class="hidden space-y-3">
-
-<div class="text-sm text-slate-600">
-Great! Please enter your name so we can add you to the attendee list.
-</div>
-
-<input
-id="nameInput"
-placeholder="Your name"
-class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-/>
-
-<input
-id="emailInput"
-placeholder="Your email"
-class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-/>
-
-<button
-id="confirmYes"
-class="w-full rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
-
-Confirm RSVP
-
-</button>
-
-</div>
-
-
-<div id="smallStatus" class="text-sm text-slate-500">
-One click — you're done.
-</div>
-
-</div>
-</section>
-
-
-<div class="mt-6 text-center text-xs text-slate-500">
-Powered by EEOS
-</div>
-
-</main>
-
-
-<script>
-
-const API_BASE="https://esos-polls.ajolly2.workers.dev/api";
-
-const params=new URLSearchParams(location.search);
-
-const rsvpId=params.get("rsvpId");
-
-let rsvp=null;
-
-
-async function safeJson(r){
-
-try{return await r.json()}
-
-catch{return null}
-
-}
-
-
-async function loadRsvp(){
-
-const res=await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}`);
-
-const data=await safeJson(res);
-
-if(!data||!data.ok){
-
-document.getElementById("title").textContent="RSVP not found";
-
-return;
-
-}
-
-rsvp=data.rsvp;
-
-document.getElementById("title").textContent="RSVP";
-
-document.getElementById("intro").textContent="Please confirm if you can attend.";
-
-document.getElementById("eventName").textContent=rsvp.eventName;
-
-document.getElementById("whenText").textContent=`${rsvp.eventDate} @ ${rsvp.eventTime}`;
-
-if(rsvp.locationLabel){
-
-document.getElementById("locationLabel").textContent=rsvp.locationLabel;
-
-}
-
-}
-
-
-async function submit(answer,name,email){
-
-const payload={answer};
-
-if(name)payload.name=name;
-
-if(email)payload.email=email;
-
-const res=await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}/respond`,{
-
-method:"POST",
-
-headers:{"Content-Type":"application/json"},
-
-body:JSON.stringify(payload)
-
-});
-
-const data=await safeJson(res);
-
-if(data&&data.ok){
-
-document.getElementById("smallStatus").textContent="Thanks — your RSVP is saved.";
-
-document.getElementById("btnYes").disabled=true;
-
-document.getElementById("btnNo").disabled=true;
-
-document.getElementById("yesForm").classList.add("hidden");
-
-}
-
-}
-
-
-document.getElementById("btnYes").onclick=()=>{
-
-document.getElementById("yesForm").classList.remove("hidden");
-
-document.getElementById("smallStatus").textContent="Just your name and email.";
-
-};
-
-
-document.getElementById("confirmYes").onclick=()=>{
-
-const name=document.getElementById("nameInput").value.trim();
-
-const email=document.getElementById("emailInput").value.trim();
-
-submit("yes",name,email);
-
-};
-
-
-document.getElementById("btnNo").onclick=()=>submit("no");
-
-
-loadRsvp();
-
-</script>
-
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-slate-900"></div>
+        <div class="font-semibold tracking-tight">EEOS</div>
+      </div>
+      <div class="text-sm text-slate-500">RSVP</div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <!-- Banner -->
+    <div id="banner" class="hidden mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div id="bannerTitle" class="text-sm font-semibold text-slate-900">Loading…</div>
+          <div id="bannerBody" class="text-sm text-slate-600">Please wait.</div>
+        </div>
+        <button id="bannerClose" class="hidden text-sm font-medium text-slate-600 hover:text-slate-900">Close</button>
+      </div>
+    </div>
+
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <!-- Header -->
+      <div class="px-6 py-6 border-b border-slate-200">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <h1 id="title" class="text-2xl font-semibold tracking-tight">Loading RSVP…</h1>
+            <p id="subtitle" class="mt-2 text-slate-600">Please wait.</p>
+          </div>
+          <div id="deadlineWrap" class="hidden shrink-0">
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700">
+              <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+              <span id="deadlineText" class="font-medium">Closes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-6 space-y-6">
+        <!-- Event details -->
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div class="text-xs font-semibold tracking-wide text-slate-500">EVENT</div>
+          <div id="eventName" class="mt-1 text-base font-semibold text-slate-900">—</div>
+          <div id="eventWhenWhere" class="mt-1 text-sm text-slate-600">—</div>
+        </div>
+
+        <!-- Choice buttons -->
+        <div>
+          <h2 class="text-base font-semibold text-slate-900">Can you make it?</h2>
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button id="btnYes" type="button"
+              class="group rounded-xl border border-slate-200 bg-white px-4 py-3 text-left hover:bg-slate-50">
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-sm font-semibold text-slate-900">Yes, I’m in</div>
+                <div id="yesCheck" class="hidden h-5 w-5 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">✓</div>
+              </div>
+              <div class="mt-1 text-xs text-slate-500">We’ll count you in the final headcount.</div>
+            </button>
+
+            <button id="btnNo" type="button"
+              class="group rounded-xl border border-slate-200 bg-white px-4 py-3 text-left hover:bg-slate-50">
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-sm font-semibold text-slate-900">No, can’t make it</div>
+                <div id="noCheck" class="hidden h-5 w-5 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">✓</div>
+              </div>
+              <div class="mt-1 text-xs text-slate-500">No worries — thanks for the quick reply.</div>
+            </button>
+          </div>
+          <p id="answerError" class="hidden mt-2 text-sm text-rose-600">Please choose Yes or No.</p>
+        </div>
+
+        <!-- Name/email (only when Yes) -->
+        <div id="yesFields" class="hidden">
+          <div class="h-px bg-slate-200 mb-6"></div>
+
+          <div class="flex items-center justify-between gap-4">
+            <h2 class="text-base font-semibold text-slate-900">Quick details</h2>
+            <div class="text-sm text-slate-500">Required for attendance</div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1" for="nameInput">Name</label>
+              <input id="nameInput" type="text" autocomplete="name"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                placeholder="Your name" />
+              <p id="nameError" class="hidden mt-1 text-xs text-rose-600">Name is required.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1" for="emailInput">Email</label>
+              <input id="emailInput" type="email" autocomplete="email"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                placeholder="you@company.com" />
+              <p id="emailError" class="hidden mt-1 text-xs text-rose-600">Email is required.</p>
+            </div>
+          </div>
+
+          <p class="mt-3 text-sm text-slate-500">
+            We use this only to finalize headcount and send the calendar invite.
+          </p>
+        </div>
+
+        <!-- Submit row -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+          <div class="text-sm text-slate-500"><span id="smallStatus">Takes under a minute.</span></div>
+          <div class="flex items-center gap-3">
+            <button id="submit" type="button"
+              class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 active:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed">
+              Confirm RSVP
+            </button>
+          </div>
+        </div>
+
+        <pre id="debug" class="hidden mt-2 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700"></pre>
+      </div>
+    </section>
+
+    <div class="mt-6 text-center text-xs text-slate-500">Powered by EEOS</div>
+  </main>
+
+  <script>
+    const API_BASE = "https://esos-polls.ajolly2.workers.dev/api";
+
+    const els = {
+      banner: document.getElementById("banner"),
+      bannerTitle: document.getElementById("bannerTitle"),
+      bannerBody: document.getElementById("bannerBody"),
+      bannerClose: document.getElementById("bannerClose"),
+
+      title: document.getElementById("title"),
+      subtitle: document.getElementById("subtitle"),
+      deadlineWrap: document.getElementById("deadlineWrap"),
+      deadlineText: document.getElementById("deadlineText"),
+
+      eventName: document.getElementById("eventName"),
+      eventWhenWhere: document.getElementById("eventWhenWhere"),
+
+      btnYes: document.getElementById("btnYes"),
+      btnNo: document.getElementById("btnNo"),
+      yesCheck: document.getElementById("yesCheck"),
+      noCheck: document.getElementById("noCheck"),
+      answerError: document.getElementById("answerError"),
+
+      yesFields: document.getElementById("yesFields"),
+      nameInput: document.getElementById("nameInput"),
+      emailInput: document.getElementById("emailInput"),
+      nameError: document.getElementById("nameError"),
+      emailError: document.getElementById("emailError"),
+
+      submit: document.getElementById("submit"),
+      smallStatus: document.getElementById("smallStatus"),
+      debug: document.getElementById("debug"),
+    };
+
+    const params = new URLSearchParams(location.search);
+    const rsvpId = params.get("rsvpId");
+
+    let rsvp = null;
+    let selectedAnswer = null; // "yes" | "no"
+
+    function showBanner(title, body, closable = false) {
+      els.bannerTitle.textContent = title || "";
+      els.bannerBody.textContent = body || "";
+      els.banner.classList.remove("hidden");
+      els.bannerClose.classList.toggle("hidden", !closable);
+    }
+    els.bannerClose.onclick = () => els.banner.classList.add("hidden");
+
+    async function safeJson(response) {
+      try { return await response.json(); } catch { return null; }
+    }
+
+    function formatDeadline(iso) {
+      try {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleString(undefined, { weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+      } catch { return null; }
+    }
+
+    function setDeadlinePill(deadlineIso) {
+      if (!deadlineIso) return;
+      const formatted = formatDeadline(deadlineIso);
+      if (!formatted) return;
+      els.deadlineText.textContent = `Closes ${formatted}`;
+      els.deadlineWrap.classList.remove("hidden");
+    }
+
+    function setAnswer(answer) {
+      selectedAnswer = answer;
+
+      els.answerError.classList.add("hidden");
+
+      const yesSelected = answer === "yes";
+      const noSelected = answer === "no";
+
+      els.yesCheck.classList.toggle("hidden", !yesSelected);
+      els.noCheck.classList.toggle("hidden", !noSelected);
+
+      els.yesFields.classList.toggle("hidden", !yesSelected);
+
+      // Visual emphasis (subtle)
+      els.btnYes.classList.toggle("border-slate-900", yesSelected);
+      els.btnYes.classList.toggle("bg-slate-50", yesSelected);
+      els.btnNo.classList.toggle("border-slate-900", noSelected);
+      els.btnNo.classList.toggle("bg-slate-50", noSelected);
+
+      if (!yesSelected) {
+        // Clear errors if they picked No
+        els.nameError.classList.add("hidden");
+        els.emailError.classList.add("hidden");
+      }
+    }
+
+    els.btnYes.addEventListener("click", () => setAnswer("yes"));
+    els.btnNo.addEventListener("click", () => setAnswer("no"));
+
+    function validateYesFields() {
+      let ok = true;
+      els.nameError.classList.add("hidden");
+      els.emailError.classList.add("hidden");
+
+      const name = String(els.nameInput.value || "").trim();
+      const email = String(els.emailInput.value || "").trim();
+
+      if (!name) { els.nameError.classList.remove("hidden"); ok = false; }
+      if (!email) { els.emailError.classList.remove("hidden"); ok = false; }
+
+      return ok;
+    }
+
+    async function loadRsvp() {
+      if (!rsvpId) {
+        els.title.textContent = "Missing RSVP link";
+        els.subtitle.textContent = "This link is missing an rsvpId. Ask the organizer to resend it.";
+        showBanner("Link error", "Missing rsvpId in URL. Please use the full RSVP link.", true);
+        els.submit.disabled = true;
+        return;
+      }
+
+      showBanner("Loading RSVP…", "Just a moment.");
+      try {
+        const res = await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}`, {
+          method: "GET",
+          headers: { Accept: "application/json" }
+        });
+        const data = await safeJson(res);
+
+        if (!res.ok || !data || data.ok !== true || !data.rsvp) {
+          els.title.textContent = "RSVP not found";
+          els.subtitle.textContent = "This RSVP may have been deleted or the link is incorrect.";
+          showBanner("RSVP not found", data?.error ? `Error: ${data.error}` : `Request failed (${res.status}).`, true);
+          els.submit.disabled = true;
+          return;
+        }
+
+        rsvp = data.rsvp;
+
+        els.banner.classList.add("hidden");
+        els.title.textContent = "RSVP for your team event";
+        els.subtitle.textContent = "Please confirm if you can attend.";
+
+        els.eventName.textContent = rsvp.eventName || "Team Event";
+        const parts = [];
+        if (rsvp.eventDate) parts.push(rsvp.eventDate);
+        if (rsvp.eventTime) parts.push(rsvp.eventTime);
+        const when = parts.join(" • ");
+        const where = rsvp.locationLabel ? ` • ${rsvp.locationLabel}` : "";
+        els.eventWhenWhere.textContent = (when || "Date/time TBD") + where;
+
+        setDeadlinePill(rsvp.deadlineIso);
+
+        els.submit.disabled = false;
+        els.smallStatus.textContent = "Takes under a minute.";
+      } catch (err) {
+        console.error("rsvp-load-failed", err);
+        showBanner("Couldn’t load RSVP", "Network error while loading. Please refresh and try again.", true);
+        els.submit.disabled = true;
+      }
+    }
+
+    async function submitRsvp() {
+      els.debug.classList.add("hidden");
+
+      if (!selectedAnswer) {
+        els.answerError.classList.remove("hidden");
+        return;
+      }
+
+      if (selectedAnswer === "yes") {
+        const ok = validateYesFields();
+        if (!ok) return;
+      }
+
+      const payload = { answer: selectedAnswer };
+
+      // Only include these for YES
+      if (selectedAnswer === "yes") {
+        payload.name = String(els.nameInput.value || "").trim();
+        payload.email = String(els.emailInput.value || "").trim();
+      }
+
+      els.submit.disabled = true;
+      els.submit.textContent = "Submitting…";
+
+      try {
+        const res = await fetch(`${API_BASE}/rsvps/${encodeURIComponent(rsvpId)}/respond`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await safeJson(res);
+
+        if (res.ok && data?.ok) {
+          els.smallStatus.textContent = "Thanks — your RSVP is saved.";
+          els.submit.textContent = "Submitted";
+          els.submit.classList.remove("hover:bg-slate-800");
+          els.submit.classList.add("bg-slate-700");
+
+          // Lock inputs
+          document.querySelectorAll("input, button").forEach((el) => {
+            if (el.id === "bannerClose") return;
+            el.disabled = true;
+          });
+
+          showBanner("RSVP received", "Thanks — your response was saved.", true);
+          return;
+        }
+
+        // Re-enable if failure
+        els.submit.disabled = false;
+        els.submit.textContent = "Confirm RSVP";
+
+        if (data?.error === "already_responded") {
+          showBanner("Already received", "It looks like you’ve already RSVPed from this device/browser.", true);
+          return;
+        }
+        if (data?.error === "rsvp_closed") {
+          showBanner("RSVP closed", "This RSVP is no longer accepting responses.", true);
+          return;
+        }
+        if (data?.error === "rsvp_not_found") {
+          showBanner("RSVP not found", "This RSVP link may be incorrect or expired.", true);
+          return;
+        }
+
+        showBanner("Couldn’t submit RSVP", data?.message || data?.error || `Request failed (${res.status}).`, true);
+        els.debug.classList.remove("hidden");
+        els.debug.textContent = JSON.stringify(data || { error: "no_json" }, null, 2);
+      } catch (err) {
+        console.error("rsvp-submit-failed", err);
+        els.submit.disabled = false;
+        els.submit.textContent = "Confirm RSVP";
+        showBanner("Couldn’t submit RSVP", "Network/CORS error while submitting. Please retry.", true);
+      }
+    }
+
+    // IMPORTANT: binding is explicit and cannot fail silently
+    els.submit.addEventListener("click", submitRsvp);
+
+    // Load on boot
+    loadRsvp();
+  </script>
 </body>
 </html>
