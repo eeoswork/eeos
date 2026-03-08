@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jolly HR — Culture OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="assets/styles.css" />
+<script src="config.js"></script>
+<script src="app.js" defer></script>
+</head>
+<body class="bg-slate-100 text-slate-900">
+<div id="authBanner" class="hidden px-4 py-2 text-sm bg-amber-100 text-amber-900 border-b border-amber-200"></div>
+
+<section id="authGate" class="hidden fixed inset-0 z-[1200] bg-slate-900/35 px-4 py-8">
+  <div class="mx-auto mt-10 max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h1 id="authGateTitle" class="text-xl font-semibold text-slate-900">Save your progress</h1>
+        <p id="authGateSubtitle" class="mt-1 text-sm text-slate-600">Create a free account to keep your workspace across browsers and devices.</p>
+      </div>
+      <button id="authGateClose" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 hover:bg-slate-50">×</button>
+    </div>
+    <div class="mt-4 space-y-3">
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Company name</span>
+        <input id="authCompanyName" type="text" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Acme Inc." />
+      </label>
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Email</span>
+        <input id="authEmail" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="you@company.com" />
+      </label>
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Password</span>
+        <input id="authPassword" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+      </label>
+      <div id="authStatus" class="min-h-[20px] text-xs text-slate-600"></div>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <button id="authCreateAccount" type="button" class="h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">Create free account</button>
+        <button id="authSignIn" type="button" class="h-10 w-full rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800">Sign in</button>
+      </div>
+      <button id="authContinueWithoutSaving" type="button" class="hidden h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">Continue without saving</button>
+    </div>
+  </div>
+</section>
+
+
+
+
+<div id="appShell" class="eeos-layout h-screen">
+  <aside class="eeos-sidebar">
+    <div class="eeos-head">
+      <img src="assets/eeos.svg" alt="EEOS" style="height: 30px; width: auto;" />
+    </div>
+
+
+
+
+      <section id="sidebarIdentityStack" class="mb-3" style="margin-top: 25px; margin-bottom: 50px;">
+        <div style="margin-bottom: 0;">
+          <label id="appCompanyLabel" class="text-xs uppercase tracking-wide text-slate-500">Company Name</label>
+          <div id="appCompanyInputWrap">
+            <input id="companyName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Acme Inc." />
+          </div>
+          <div id="appCompanyDisplayRow" class="hidden items-center justify-between">
+            <div id="appCompanyDisplay" class="text-slate-900" style="font-size: 24px; font-weight: 600; line-height: 1;"></div>
+            <button id="appIdentityEdit" type="button" onclick="editAppIdentity()" class="text-xs text-slate-600 hover:text-slate-900">Edit</button>
+          </div>
+        </div>
+        <div>
+          <label id="appAdminLabel" class="text-xs uppercase tracking-wide text-slate-500" style="display: block; margin-top: 15px;">Admin Name</label>
+          <div id="appAdminInputWrap">
+            <input id="adminName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="People Ops Manager" />
+            <button id="appIdentitySubmit" type="button" onclick="submitAppIdentity()" class="mt-2 inline-flex items-center rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Submit</button>
+          </div>
+          <div id="appAdminDisplay" class="hidden text-slate-900" style="font-size: 12px; font-weight: 500; line-height: 1; margin-top: 10px;"></div>
+        </div>
+      </section>
+
+
+
+
+      <div id="sidebarSetupHeading" class="text-xs uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span id="sidebarSetupCheck" aria-hidden="true" style="display: none; width: 6px; height: 3.3px; border-left: 1.33px solid currentColor; border-bottom: 1.33px solid currentColor; transform: translateY(-1px) rotate(-45deg); box-sizing: border-box;"></span>
+          <span id="sidebarSetupLabel">SETUP</span>
+        </div>
+        <a id="sidebarSetupEditPrefs" href="#" style="display: none; font-size: 9px; color: #64748b; font-weight: 500; text-decoration: none; margin-left: auto; text-transform: none;">Edit</a>
+      </div>
+      <div id="sidebarSetupMenuCollapse" style="transition: max-height 0.3s cubic-bezier(.4,0,.2,1); overflow: hidden;">
+        <section id="sidebarSetupMenu" class="mb-3">
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="cadence" style="margin-bottom: 0.3125px;">Cadence</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="setting" style="margin-bottom: 0.3125px;">Setting</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="goals" style="margin-bottom: 0.3125px;">Goals</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="budget" style="margin-bottom: 0.3125px;">Budget</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="availability" style="margin-bottom: 0.3125px;">Availability</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="interests" style="margin-bottom: 0.3125px;">Interests</div>
+          <!-- EMPLOYEE INPUT - Hidden during setup
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="employee-input" style="margin-bottom: 12.5px;">Employee Input</div>
+          -->
+        </section>
+      </div>
+      <div id="sidebarEventWorkflowSection" style="display: none;">
+        <div class="text-xs uppercase tracking-wide text-slate-500 mt-5 mb-2">EVENT WORKFLOW</div>
+        <section id="sidebarEventWorkflowMenu" class="mb-3">
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="events-shortlist" style="margin-bottom: 0.3125px;">Shortlist Events</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="poll" style="margin-bottom: 0.3125px;">Poll Team</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="book-event" style="margin-bottom: 0.3125px;">Book Event</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="tell-team" style="margin-bottom: 0.3125px;">Promote Event</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="run-event" style="margin-bottom: 0.3125px;">Run Event</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="track-results" style="margin-bottom: 0.3125px;">Collect Feedback</div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="review-impact" style="margin-bottom: 0.3125px;">Review Impact</div>
+        </section>
+      </div>
+      <!-- EVENT WORKFLOW - Hidden on landing page, shown after signup
+      <div class="text-xs uppercase tracking-wide text-slate-500 mt-5 mb-2 px-1">EVENT WORKFLOW</div>
+      <section id="sidebarEventWorkflowMenu" class="mb-3">
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="1" style="margin-bottom: 0.3125px;">Shortlist Events</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="2" style="margin-bottom: 0.3125px;">Copy Poll</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="3" style="margin-bottom: 0.3125px;">Book Event</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="4" style="margin-bottom: 0.3125px;">Tell the Team</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="5" style="margin-bottom: 0.3125px;">Run the Event</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="6">Track Results</div>
+      </section>
+      -->
+      <div class="hidden">
+        <span id="activeEventLabel"></span>
+        <span id="activeEventMeta"></span>
+      </div>
+
+
+
+
+      <!-- UPCOMING EVENTS - Hidden on landing page, shown after signup
+      <section class="eeos-block mt-5" id="sidebarUpcoming">
+        <h3 class="text-xs uppercase tracking-wide text-slate-500 mb-2">Upcoming Events</h3>
+        <ul id="upcomingList" class="space-y-2 text-sm"></ul>
+      </section>
+      -->
+
+
+
+
+      <!-- PAST EVENTS - Hidden on landing page, shown after signup
+      <section class="eeos-block mt-5" id="sidebarPast">
+        <details>
+          <summary class="cursor-pointer text-xs uppercase tracking-wide text-slate-500">Past Events</summary>
+          <ul id="pastList" class="mt-2 space-y-2 text-sm"></ul>
+        </details>
+      </section>
+      -->
+
+
+
+
+      <section id="sidebarUpcomingEventCard" class="hidden mt-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Upcoming event</div>
+        <div id="sidebarUpcomingEventContent" class="mt-2"></div>
+      </section>
+
+      <button id="budgetFooter" class="eeos-budget-sticky" type="button">
+        <span id="budgetTotalLabel">Total: $0</span>
+        <span id="budgetSpentLabel">Spent: $0</span>
+        <span id="budgetRemainingLabel">Remaining: $0</span>
+      </button>
+      <div class="mt-3 px-1">
+        <button id="saveProgressAction" type="button" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Save progress</button>
+        <div class="mt-2 flex items-center justify-center gap-3 text-xs text-slate-500">
+          <button id="createAccountAction" type="button" class="underline hover:text-slate-700">Create a free account</button>
+          <span>•</span>
+          <button id="signInAction" type="button" class="underline hover:text-slate-700">Sign in</button>
+        </div>
+      </div>
+  </aside>
+
+
+
+
+  <main class="eeos-main">
+    <section id="landingView" class="min-h-screen px-4 py-8">
+      <div class="mx-auto max-w-5xl">
+        <div id="landingSetupFlow">
+          <!-- Hero copy placeholder -->
+          <div class="mb-8 text-center">
+            <h2 class="text-2xl font-semibold mb-3">Hero copy goes here</h2>
+            <p class="text-slate-600">(Placeholder — provided later.)</p>
+          </div>
+
+
+          <!-- Setup Steps -->
+          <div id="setupStepsContainer" class="space-y-3 mb-8">
+            <div id="setupHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; position: relative; display: flex; align-items: center; justify-content: space-between; width: calc(100% - 60px);">
+              <span id="setupSectionIcon" aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; line-height: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0 .274 1.128 1.514 1.66 2.515 1.168 1.556-.765 3.323 1.002 2.558 2.558-.492 1.001.04 2.241 1.168 2.515 1.756.426 1.756 2.924 0 3.35-1.128.274-1.66 1.514-1.168 2.515.765 1.556-1.002 3.323-2.558 2.558-1.001-.492-2.241.04-2.515 1.168-.426 1.756-2.924 1.756-3.35 0-.274-1.128-1.514-1.66-2.515-1.168-1.556.765-3.323-1.002-2.558-2.558.492-1.001-.04-2.241-1.168-2.515-1.756-.426-1.756-2.924 0-3.35 1.128-.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323 2.558-2.558 1.001.492 2.241-.04 2.515-1.168Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span id="setupHeadingMainLabel">SETUP</span>
+              <a id="setupHeadingMainEdit" href="#" style="display: none; margin-left: auto; font-size: 12px; color: #94a3b8; font-weight: 500; text-decoration: none; text-transform: none;">Edit</a>
+            </div>
+            <!-- Step 1: Goals -->
+            <div class="setup-step active" data-step="1">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #1e293b; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600;">1</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium">Goals</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▾</span>
+              </div>
+              <div class="setup-step-content" style="padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="block text-sm font-medium mb-3">
+                  <p class="mb-2">What are you hoping to improve?</p>
+                  <p class="text-xs font-normal text-slate-600">Select up to 3 goals — we'll recommend events that support them.</p>
+                </div>
+                <div id="landingGoalsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="1">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 2: Budget -->
+            <div class="setup-step" data-step="2">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">2</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Budget</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-6">
+                  <h4 class="text-sm font-medium mb-1">Set your program budget</h4>
+                  <p class="text-xs text-slate-600 mb-4">Choose the way that makes the most sense for your team. You can update this anytime.</p>
+                  
+                  <!-- Field 1: Total Monthly Budget -->
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Enter total monthly budget ($)</label>
+                    <input id="setupTotalBudget" type="number" min="0" placeholder="e.g. 2500" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                    <p class="text-xs text-slate-500 mt-1">We'll recommend events that stay within this amount.</p>
+                  </div>
+                  
+                  <!-- Divider -->
+                  <div class="flex items-center gap-3 my-4">
+                    <div class="flex-1 border-t border-slate-300"></div>
+                    <span class="text-xs text-slate-500 font-medium">OR</span>
+                    <div class="flex-1 border-t border-slate-300"></div>
+                  </div>
+                  
+                  <!-- Field 2 & 3: Employee-based -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Number of employees</label>
+                      <input id="setupEmployeeCount" type="number" min="0" placeholder="e.g. 50" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Investment per employee per month ($)</label>
+                      <input id="setupPerEmployee" type="number" min="0" step="0.01" placeholder="e.g. 60" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                      <button id="setupBudgetGuidanceToggle" type="button" class="mt-2 text-xs text-slate-600 underline" style="background: transparent; border: none; padding: 0;">Not sure what to choose?</button>
+                      <div id="setupBudgetGuidanceOptions" class="hidden mt-2 rounded-lg border border-slate-200 bg-white p-2 space-y-1">
+                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="40">Growing teams focused on engagement: $40</button>
+                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="60">Retention-focused teams investing in culture consistency: $60</button>
+                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="90">High-growth or competitive hiring environments: $90</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="2">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 3: Cadence -->
+            <div class="setup-step" data-step="3">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">3</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Cadence</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-2">How often should events occur?</label>
+                  <select id="setupCadence" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></select>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="3">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 4: Preferred Schedule -->
+            <div class="setup-step" data-step="4">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">4</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Setting</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <label class="block text-sm font-medium mb-1">Where should team events take place?</label>
+                <div class="text-xs text-slate-500 mb-2">Check all that apply</div>
+                <div id="setupSchedule" class="flex flex-wrap gap-2 mb-4"></div>
+                <div id="setupLocalCityRow" class="hidden" style="margin-bottom: 12px;">
+                  <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
+                  <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" />
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="4">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 5: Availability -->
+            <div class="setup-step" data-step="5">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">5</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Availability</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-6">
+                  <label class="block text-sm font-medium mb-1">What days and times usually work best for team events?</label>
+                  <div class="text-xs text-slate-500 mb-2">Check all that apply</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="M" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">M</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="T" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">T</span>
+                    </label>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                      <div style="display: flex; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
+                          <input type="checkbox" value="W" />
+                          <span style="font-size: 14px; font-weight: 500; color: inherit;">W</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
+                          <input type="checkbox" value="Th" />
+                          <span style="font-size: 14px; font-weight: 500; color: inherit;">Th</span>
+                        </label>
+                      </div>
+                      <span style="font-size: 10px; font-weight: 500; color: #64748b;">most common</span>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="F" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">F</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="Sa" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Sa</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="Su" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Su</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="mb-6">
+                  <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="Before 9a" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Before 9a</span>
+                    </label>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                      <div style="display: flex; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
+                          <input type="checkbox" value="12-1p" />
+                          <span style="font-size: 14px; font-weight: 500; color: inherit;">12-1p</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
+                          <input type="checkbox" value="After 5p" />
+                          <span style="font-size: 14px; font-weight: 500; color: inherit;">After 5p</span>
+                        </label>
+                      </div>
+                      <span style="font-size: 10px; font-weight: 500; color: #64748b;">most common</span>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                      <input type="checkbox" value="Weekends" />
+                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Weekends</span>
+                    </label>
+                  </div>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="5">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 6: Interests -->
+            <div class="setup-step" data-step="6">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">6</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Interests</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="block text-sm font-medium mb-3">
+                  <p class="mb-2">To get your first event moving quickly, tell us what you think your team would enjoy most.</p>
+                  <p class="text-xs font-normal text-slate-600">Later, we'll gather direct employee input with a short team survey to refine future events.</p>
+                  <p class="text-xs font-normal text-slate-600 mt-2">Select up to 3 options.</p>
+                </div>
+                <div id="landingInterestsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">Submit</button>
+                <p class="text-xs text-slate-500 mt-2">We'll use these preferences to weight your first event recommendations.</p>
+              </div>
+            </div>
+
+
+            <!-- Step 7: Events Shortlist -->
+            <div id="eventWorkflowHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; margin-top: 2em; position: relative; display: none;">
+              <span aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h16M14 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span id="eventWorkflowHeadingMainLabel">EVENT WORKFLOW</span>
+            </div>
+            <div class="setup-step" data-step="7">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px;">🎉</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Shortlist Events</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▾</span>
+              </div>
+              <div class="setup-step-content" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px; position: relative;">
+                <div id="eventsSelectionHint" class="hidden" style="margin: 0 0 12px 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
+                  <div style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                      <span id="eventsSelectionHintIcon" style="font-size: 28px; line-height: 1;">📈</span>
+                      <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
+                        <span id="eventsSelectionHintPrimary" style="font-weight: 400;">Teams that vote on events usually see higher attendance and engagement.</span><br id="eventsSelectionHintBreak" />
+                        <span id="eventsSelectionHintSecondary" style="font-weight: 700;">Choose up to 3 events for your team to vote on.</span>
+                      </p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; margin-right: 15px;">
+                      <p id="eventsModePromptText" style="margin: 0; font-size: 12px; font-weight: 400; color: #334155;">Prefer to choose the event yourself?</p>
+                      <button id="eventsModeToggleButton" type="button" style="height: 32px; padding: 4px 20px; border-radius: 10px; border: 2px solid #c9d5ea; background: #f8fafc; color: #0f172a; font-size: 13px; font-weight: 700;">Skip poll → Book now</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="events-shortlist-overlay" id="eventsShortlistOverlay">
+                  <div class="events-overlay-card">
+                    <p class="events-overlay-title">Complete setup to unlock your personalized event recommendations</p>
+                    <p class="events-overlay-subtitle">Takes about 60 seconds.</p>
+                  </div>
+                </div>
+                <div class="flex gap-[15px] mb-4 events-locked" id="eventsShortlistCards" style="position: relative;">
+                  <!-- Event 1: Virtual Mixology Class -->
+                  <div class="event-card selected">
+                    <div class="event-circle selected"></div>
+                    <div class="event-title">Virtual Craft Cocktail Class</div>
+                    <div class="event-preview-wrap">
+                      <div class="event-preview">
+                        <p class="event-why">Fun, social, easy win for team bonding</p>
+                        <p class="event-description">A guided cocktail/mocktail class led by a mixologist. Learn drink basics, flavor pairing, and techniques you can reuse at home.</p>
+                        <div class="event-footer">
+                          <span>$45 per person</span>
+                          <span>60 minutes</span>
+                          <a href="#">View Event</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Event 2: Workplace Communication Skills Workshop -->
+                  <div class="event-card selected">
+                    <div class="event-circle selected"></div>
+                    <div class="event-title">Communication Skills Workshop</div>
+                    <div class="event-preview-wrap">
+                      <div class="event-preview">
+                        <p class="event-why">Improve teamwork and everyday collaboration</p>
+                        <p class="event-description">An interactive session where your team learns practical focus strategies, distraction-control techniques, and more.</p>
+                        <div class="event-footer">
+                          <span>$60 per person</span>
+                          <span>60 minutes</span>
+                          <a href="#">View Event</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Event 3: Escape Room Experience -->
+                  <div class="event-card selected">
+                    <div class="event-circle selected"></div>
+                    <div class="event-title">Escape Room Experience</div>
+                    <div class="event-preview-wrap">
+                      <div class="event-preview">
+                        <p class="event-why">Strong team bonding through shared challenge</p>
+                        <p class="event-description">A collaborative puzzle-solving experience (virtual or in-person) where teams work together to solve clues and "escape" within a time limit.</p>
+                        <div class="event-footer">
+                          <span>$50 per person</span>
+                          <span>60 minutes</span>
+                          <a href="#">View Event</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Event 4: Sourdough Baking Class -->
+                  <div class="event-card">
+                    <div class="event-circle empty">○</div>
+                    <div class="event-title">Sourdough Baking Class</div>
+                    <div class="event-preview-wrap">
+                      <div class="event-preview">
+                        <p class="event-why">Relaxing, hands-on, and rewarding</p>
+                        <p class="event-description">Learn sourdough basics—from starter care to baking technique—plus tips to continue baking confidently at home.</p>
+                        <div class="event-footer">
+                          <span>$40 per person</span>
+                          <span>60 minutes</span>
+                          <a href="#">View Event</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Event 5: Intro to Bodyweight Workouts -->
+                  <div class="event-card">
+                    <div class="event-circle empty">○</div>
+                    <div class="event-title">Intro to Bodyweight Workouts</div>
+                    <div class="event-preview-wrap">
+                      <div class="event-preview">
+                        <p class="event-why">Learn at-home exercise principles via guided workout</p>
+                        <p class="event-description">Beginner-friendly session covering core bodyweight exercises, proper form, and how to build quick, sustainable home workouts.</p>
+                        <div class="event-footer">
+                          <span>$35 per person</span>
+                          <span>60 minutes</span>
+                          <a href="#">View Event</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="eventsPollButtonContainer" class="hidden" style="padding-top: 16px;">
+                  <button id="eventsPollButton" type="button" class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="7">Let your team choose — Generate poll</button>
+                  <p id="eventsPrimaryHelperText" class="hidden" style="margin: 8px 0 0 0; font-size: 12px; color: #64748b; text-align: center;">You'll be redirected to the event page to pick a date/time and complete booking.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 8: Poll -->
+            <div class="setup-step" data-step="8">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="4" cy="5" r="2" fill="currentColor"/>
+                    <rect x="7" y="3.5" width="13" height="3" rx="1.5" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="2" fill="currentColor"/>
+                    <rect x="7" y="10.5" width="9" height="3" rx="1.5" fill="currentColor"/>
+                    <circle cx="4" cy="19" r="2" fill="currentColor"/>
+                    <rect x="7" y="17.5" width="13" height="3" rx="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Poll Team</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="pollBuilderIntroCard" style="margin: 0 0 12px 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
+                  <div style="display: flex; width: 100%; align-items: center; gap: 12px; min-width: 0;">
+                    <span style="font-size: 28px; line-height: 1;">📅</span>
+                    <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
+                      <span style="font-weight: 700;">Finalize your team poll by adding a deadline and proposed dates below. </span><span style="font-weight: 400;">We’ll generate a shareable link you can send out right away.</span>
+                    </p>
+                  </div>
+                </div>
+                <div id="pollBuilder" class="space-y-3">
+                  <div id="pollReadyBanner" class="hidden" style="margin: 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
+                    <div style="display: flex; width: 100%; align-items: center; gap: 12px; min-width: 0;">
+                      <span style="font-size: 28px; line-height: 1; color: #22c55e; font-weight: 700;">✓</span>
+                      <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
+                        <span style="font-weight: 700;">Your poll is ready:</span> <a id="pollReadyBannerLink" href="#" target="_blank" rel="noopener noreferrer" style="font-weight: 400; text-decoration: underline; color: inherit;">link</a><br>
+                        <span style="font-weight: 400;">Preview on the left. Share it to begin collecting responses</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div id="pollCardsRow" class="flex items-stretch gap-4">
+                  <article id="pollPreviewCard" class="w-[375px] shrink-0 rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                    <h4 class="text-base font-semibold text-slate-400">Choose the event you'd join</h4>
+
+                    <p id="pollIntroPreview" class="text-sm text-slate-400" style="white-space: pre-line;"></p>
+                    <div id="pollDeadlinePickerWrap" class="mt-1">
+                      <div class="flex items-center gap-2 text-sm text-slate-400">
+                        <span id="pollDeadlineLabel">Deadline to vote:</span>
+                        <div id="pollDeadlineDateTimePicker" class="flex-1"></div>
+                      </div>
+                    </div>
+
+                    <div style="height: 0.5rem;"></div>
+
+                    <div>
+                      <div class="flex items-baseline gap-2">
+                        <span id="pollEventsPromptPrimary" class="text-sm font-semibold text-slate-400">Which events would you attend?</span>
+                        <span id="pollEventsPromptSecondary" class="text-xs text-slate-400">Select all that apply.</span>
+                      </div>
+                      <div id="pollEventOptionsPreview" class="mt-2 space-y-2 text-sm text-slate-400"></div>
+                    </div>
+
+                    <div style="height: 1rem;"></div>
+
+                    <div>
+                      <div class="flex items-baseline gap-2">
+                        <span id="pollTimesPromptPrimary" class="text-sm font-semibold text-slate-400">Which times work for you?</span>
+                        <span id="pollTimesPromptSecondary" class="text-xs text-slate-400">Select all that apply.</span>
+                      </div>
+                      <div id="pollTimesTimezoneHint" class="text-xs italic text-slate-400 mt-0.5"></div>
+                      <ul id="pollTimesPreview" class="mt-2 space-y-2 text-sm text-slate-400"></ul>
+                    </div>
+
+                    <div id="pollPreviewSubmitWrap" class="hidden pt-6">
+                      <div class="flex justify-center">
+                        <button type="button" disabled aria-disabled="true" class="w-40 rounded-lg bg-slate-300 px-4 py-2.5 text-sm font-medium text-white opacity-90 cursor-not-allowed">Vote</button>
+                      </div>
+                    </div>
+
+                    <div id="pollDateTimeEntryCard" class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+                      <h5 class="text-sm font-semibold text-slate-800">Please enter dates and times for your team to choose from.<span id="pollAvailabilityWrap" class="relative inline-flex items-center gap-1 align-baseline">&nbsp;&nbsp;<a href="#" id="pollAvailabilityLink" class="text-sm text-slate-600 underline hover:text-slate-900 font-normal">Check availability</a><button type="button" id="pollAvailabilityChevron" aria-label="Choose calendar provider" class="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:text-slate-900"><span aria-hidden="true">▾</span></button><div id="pollAvailabilityPopover" class="hidden absolute left-0 top-full z-20 mt-1 w-[172px] rounded-md border border-slate-200 bg-white p-1 shadow-sm"><button type="button" data-poll-calendar-provider="google" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>Google Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" data-poll-calendar-provider="icloud" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>iCloud Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" data-poll-calendar-provider="outlook" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>Outlook Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div></span></h5>
+                      <div id="pollDateTimesInputs" class="space-y-2"></div>
+                      <div id="pollDateTimesValidation" class="text-xs text-rose-600 hidden">Add at least 2 proposed times.</div>
+
+                      <div>
+                        <button id="pollCreateShareLink" type="button" class="w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700">Finalize poll → Generate link</button>
+                        <p class="mt-2 text-xs text-slate-600 text-center">Share this link in Slack or email so your team can vote.</p>
+                        <div id="pollShareLinkWrap" class="hidden mt-3 rounded-lg border border-slate-200 bg-white p-3">
+                          <div class="text-xs font-medium text-slate-500 mb-1">Share link</div>
+                          <div style="display:flex; align-items:center; gap:8px;">
+                            <input id="pollShareLinkOutput" readonly class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-slate-50" />
+                            <button id="pollCopyShareLink" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Copy</button>
+                          </div>
+                          <div id="pollLinkSuccess" class="mt-2 text-xs text-emerald-600">Link created. Share it with your team to collect votes.</div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </article>
+
+                  <article id="pollSharePanelCard" class="hidden flex-1 rounded-xl border-2 border-sky-300 bg-sky-50 p-4 pb-10">
+                    <div id="pollFinalizeShareCards" class="hidden"></div>
+                  </article>
+                  </div>
+
+                  <div id="pollShareContinueRow" class="hidden flex flex-col items-end gap-2" style="margin-top: 1em; margin-bottom: 2em;">
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                      <input id="pollSharedConfirmed" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
+                      <span>I shared the poll with my team</span>
+                    </label>
+                    <button id="pollShareContinue" type="button" class="h-11 rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900">Review responses →</button>
+                  </div>
+
+                  <div id="pollResultsPage" class="hidden rounded-xl border border-slate-200 bg-white p-6 text-base font-semibold text-slate-900">
+                    Poll Responses
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 9: Book Event -->
+            <div class="setup-step" data-step="9">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">↗</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Book Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="bookEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 10: Promote Event -->
+            <div class="setup-step" data-step="10">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">✉️</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Promote Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="promoteEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 11: Run Event -->
+            <div class="setup-step" data-step="11">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🏁</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Run Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="runEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 12: Collect Feedback -->
+            <div class="setup-step" data-step="12">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">📊</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Collect Feedback</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="collectFeedbackPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 13: Review Impact -->
+            <div class="setup-step" data-step="13">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">📈</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Review Impact</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="reviewImpactPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+
+            <!-- Step 7: Employee Input Survey - Hidden during setup
+            <div class="setup-step" data-step="6">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">6</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Employee Input Survey</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <label class="block text-sm font-medium mb-3">Answer these 10 questions</label>
+                <div id="setupSurvey" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">Complete Setup</button>
+              </div>
+            </div>
+            -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="appView" class="hidden">
+      <header class="eeos-main-header">
+        <h1 class="text-xl font-semibold">Employee Experience Workflow</h1>
+      </header>
+
+
+
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section class="xl:col-span-2 rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="programSetupCard">
+          <h2 class="text-base font-semibold mb-3">Program Setup</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm mb-1">Budget Mode</label>
+                <select id="budgetMode" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                  <option value="total">Total Monthly Budget</option>
+                  <option value="perEmployee">Per Employee Budget + Employee Count</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Cadence</label>
+                <select id="cadence" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></select>
+              </div>
+            </div>
+
+
+
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-sm mb-1">Total Budget ($)</label>
+                <input id="totalBudget" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Per Employee ($)</label>
+                <input id="perEmployeeBudget" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Employee Count</label>
+                <input id="employeeCount" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Select Top 3 Goals</label>
+              <div id="goalOptions" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Preferred Schedule</label>
+              <div id="scheduleOptions" class="flex flex-wrap gap-2"></div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Employee Input Survey (10 questions)</label>
+              <div id="surveyQuestions" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+            </div>
+
+
+
+
+            <button id="btnSaveProgramSetup" class="rounded-lg bg-slate-800 text-white px-4 py-2 text-sm font-medium hover:bg-slate-700">Save Program Setup</button>
+          </div>
+        </section>
+
+
+
+
+        <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="impactSummary">
+          <h2 class="text-base font-semibold mb-3">Program Impact (ROI)</h2>
+          <div class="space-y-2 text-sm">
+            <div class="metric-row"><span>Total Spend</span><strong id="impactSpend">$0</strong></div>
+            <div class="metric-row"><span>Participation Trend</span><strong id="impactParticipation">0%</strong></div>
+            <div class="metric-row"><span>Avg Satisfaction</span><strong id="impactSatisfaction">0/5</strong></div>
+            <div class="metric-row"><span>Cost / Participant</span><strong id="impactCostPerParticipant">$0</strong></div>
+          </div>
+        </section>
+      </div>
+
+
+
+
+      <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm mt-4" id="activeWorkflowCard">
+        <h2 class="text-base font-semibold mb-3">Active Event Workflow</h2>
+        <ol id="workflowStepper" class="workflow-stepper space-y-4"></ol>
+      </section>
+
+
+
+
+      <section id="browserPanel" class="hidden rounded-xl bg-white border border-slate-200 p-4 shadow-sm mt-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold">Vendor Browser Tabs (Desktop)</h3>
+          <button id="btnCloseBrowserPanel" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs">Back to Dashboard</button>
+        </div>
+        <div id="browserTabs" class="flex flex-wrap gap-2 mb-3"></div>
+        <div id="browserHost" class="h-[520px] rounded-lg border border-slate-200 overflow-hidden">
+          <div id="browserPlaceholder" class="h-full flex items-center justify-center text-sm text-slate-500">Desktop keeps tabs embedded; web opens vendor links in normal browser tabs.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+<div id="setupSignUpPopup" class="hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+  <div style="position: relative; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; width: 100%; max-width: 420px; text-align: center;">
+    <button id="setupSignUpPopupCloseX" type="button" aria-label="Close" style="position: absolute; top: 8px; right: 10px; border: none; background: transparent; color: #64748b; font-size: 18px; line-height: 1; cursor: pointer;">×</button>
+    <p style="margin: 0 0 12px 0; font-size: 14px; color: #0f172a; font-weight: 600;">sign up goes here</p>
+    <button id="setupSignUpPopupClose" type="button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">Close</button>
+  </div>
+</div>
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69acc229e13b5e1c381bf039/1jj5dkhkf';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+</body>
+</html>
+
+
+
