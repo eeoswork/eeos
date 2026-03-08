@@ -4814,7 +4814,7 @@ function reorderMainSetupCards() {
   const workflowHeading = document.getElementById("eventWorkflowHeadingMain");
   if (!setupContainer || !workflowHeading) return;
 
-  const orderedSteps = [3, 4, 1, 2, 5, 6];
+  const orderedSteps = [1, 2, 3, 4, 5, 6];
   orderedSteps.forEach((stepNum) => {
     const stepEl = setupContainer.querySelector(`.setup-step[data-step="${stepNum}"]`);
     if (stepEl) {
