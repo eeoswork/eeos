@@ -44,11 +44,12 @@
       </label>
       <label class="block">
         <span class="text-xs font-medium text-slate-600">Password</span>
-        <input id="authPassword" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+        <input id="authPassword" type="password" minlength="8" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+        <span class="mt-1 block text-[11px] text-slate-500">8 character minimum</span>
       </label>
       <label id="authPasswordConfirmRow" class="block">
         <span class="text-xs font-medium text-slate-600">Confirm password</span>
-        <input id="authPasswordConfirm" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+        <input id="authPasswordConfirm" type="password" minlength="8" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
       </label>
       <div id="authStatus" class="min-h-[20px] text-xs text-slate-600"></div>
       <div class="flex flex-col gap-2 sm:flex-row">

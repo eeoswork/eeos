@@ -4264,6 +4264,10 @@ function bindAuthGateActions() {
       setAuthStatus("Enter company name to create account.", true);
       return;
     }
+    if (mode === "signup" && password.length < 8) {
+      setAuthStatus("Password must be at least 8 characters", true);
+      return;
+    }
     if (mode === "signup" && password !== passwordConfirm) {
       setAuthStatus("Passwords do not match", true);
       return;
