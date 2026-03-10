@@ -1,0 +1,1 @@
+cd /Users/avery/jolly-hr && python3 -m http.server 5173

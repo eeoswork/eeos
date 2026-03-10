@@ -299,7 +299,7 @@ const WORKFLOW_STEPS = [
 "Review Impact"
 ];
 
-const FORCE_POLL_CLOSED_ADMIN_VIEW = true;
+const FORCE_POLL_CLOSED_ADMIN_VIEW = false;
 const FORCE_POLL_OPEN_ADMIN_VIEW = false;
 const FORCE_POLL_PRE_SHARE_VIEW = false;
 const APP_CONFIG = window.__EEOS_CONFIG__ || {};
@@ -10549,9 +10549,17 @@ function renderPollBuilderStep() {
         const label = (eventItem.defaultLabel || "").trim();
         return label && label === String(resultsModel.topEvent?.label || "").trim();
       })?.url || "";
+      const shouldShowClosedPlan = Boolean(effectiveView.countdownStatus.isClosed)
+        && (
+          Boolean(state.pollBuilder?.pollSharedConfirmed)
+          || Boolean(pollUiState.rsvpSetupOpen)
+          || Boolean(pollUiState.rsvpCollectionStarted)
+          || Boolean(state.pollBuilder?.rsvpSent)
+        );
+
       pollResultsPage.innerHTML = getPollResponsesPageHtml(resultsModel, {
         reminderPanelOpen: pollUiState.reminderPanelOpen,
-        isPollClosed: effectiveView.countdownStatus.isClosed,
+        isPollClosed: shouldShowClosedPlan,
         isDebugMode: effectiveView.isDebugMode,
         debugPreviewPanelOpen: pollUiState.debugPreviewPanelOpen,
         debugResponsesPreset: pollUiState.pollPreviewResponsesPreset,
@@ -10562,7 +10570,7 @@ function renderPollBuilderStep() {
         rsvpCollectionStarted: pollUiState.rsvpCollectionStarted,
         pollCreated: Boolean(String(state.pollBuilder.shareLink || "").trim()),
         pollLive: Boolean(state.pollBuilder.showResultsPage),
-        pollClosed: Boolean(effectiveView.countdownStatus.isClosed),
+        pollClosed: shouldShowClosedPlan,
         pollRsvpSent: Boolean(state.pollBuilder.rsvpSent),
         rsvpDeadlineDate: pollUiState.rsvpDeadlineDate,
         rsvpDeadlineHour: pollUiState.rsvpDeadlineHour || fallbackRsvpFields.hour,
@@ -10813,7 +10821,7 @@ function renderPollBuilderStep() {
 
       const continueRsvpFlowButton = document.getElementById("pollRsvpContinueCollecting");
       if (continueRsvpFlowButton) {
-        const continueToRsvpReview = () => {
+        const continueToRsvpReview = async () => {
           if (!isRsvpDeadlineSubmitted) {
             showMiniToast("Submit the RSVP deadline first.");
             return;
@@ -10822,40 +10830,35 @@ function renderPollBuilderStep() {
             showMiniToast("Confirm you shared the RSVP first.");
             return;
           }
-          const statusBlock = document.getElementById("pollRsvpStatusBlock");
-          if (statusBlock) {
-            statusBlock.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-            try { statusBlock.focus({ preventScroll: true }); } catch (_error) { statusBlock.focus(); }
-            return;
-          }
-          const canAdvanceToBookEvent = Boolean(effectiveView?.countdownStatus?.isClosed)
-            || Boolean(state.debugModeOn)
-            || isPollResponsesDebugMode();
-          if (!canAdvanceToBookEvent) {
-            state.pollBuilder.showResultsPage = true;
-            pollUiState.rsvpSetupOpen = false;
-            pollUiState.rsvpCollectionStarted = false;
-            persistState();
-            renderPollBuilderStep();
-            showMiniToast("Poll is still open. Continue after the deadline.");
-            return;
-          }
+
+          // After RSVP is shared, always route to Poll Team -> Poll Live responses view.
+          state.setupShortlistMode = "poll";
+          state.pollBuilder.showResultsPage = true;
+          state.eventWorkflowProcessStep = 8;
+          state.currentSetupStep = 8;
           pollUiState.rsvpSetupOpen = false;
-          pollUiState.rsvpCollectionStarted = true;
-          state.pollBuilder.rsvpSent = true;
-          state.pollBuilder.vendorLinkOpened = false;
-          state.pollBuilder.markedBooked = false;
-          if (!state.completedSetupSteps.includes(8)) {
-            state.completedSetupSteps.push(8);
-          }
-          state.eventWorkflowProcessStep = 9;
-          collapseSetupViewsForWorkflowStep();
-          state.currentSetupStep = 9;
+          pollUiState.rsvpCollectionStarted = false;
           persistState();
           renderSetupMenuState();
           renderSetupStepStates();
           renderSidebarStepMenus();
-          scrollSetupStepIntoView(9, "smooth");
+          scrollSetupStepIntoView(8, "smooth");
+          renderPollBuilderStep();
+
+          if (pollUiState.resultsSyncBusy) return;
+          pollUiState.resultsSyncBusy = true;
+          pollUiState.resultsSyncError = "";
+          renderPollBuilderStep();
+          try {
+            await syncPollResultsFromBackend();
+            pollUiState.resultsSyncError = "";
+          } catch (error) {
+            pollUiState.resultsSyncError = String(error?.message || "Couldn’t refresh live poll votes.").trim();
+            showMiniToast("Couldn’t refresh live votes. Showing latest saved results.");
+          } finally {
+            pollUiState.resultsSyncBusy = false;
+            renderPollBuilderStep();
+          }
         };
 
         continueRsvpFlowButton.onclick = () => {
@@ -10869,12 +10872,12 @@ function renderPollBuilderStep() {
           }
           if (!getAuthToken()) {
             setPendingPostAuthAction("reviewRsvpResponses", () => {
-              continueToRsvpReview();
+              continueToRsvpReview().catch(() => {});
             });
             openAuthGateWithContext("rsvp_review");
             return;
           }
-          continueToRsvpReview();
+          continueToRsvpReview().catch(() => {});
         };
       }
 
@@ -11652,7 +11655,7 @@ function initializePollBuilderInteractions() {
         state.pollBuilder.createdAt = new Date().toISOString();
         state.pollBuilder.shareLink = apiResponse.shareUrl;
         state.pollBuilder.pollSharedConfirmed = false;
-        state.pollBuilder.showResultsPage = false;
+        state.pollBuilder.showResultsPage = true;
         state.pollBuilder.backendOptionLabels = [];
         state.pollBuilder.backendTimeLabels = [];
         pollUiState.editingDeadline = false;
