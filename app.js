@@ -312,6 +312,14 @@ const MAGIC_LINK_HOST_DEFAULTS = {
   },
   ...((APP_CONFIG.magicLinks && APP_CONFIG.magicLinks.hostDefaults) || {})
 };
+const MAGIC_LINK_SETUP_DEFAULTS = {
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": {
+    totalBudget: 390,
+    employeeCount: 39,
+    perEmployee: 10,
+    localCity: "New Orleans"
+  }
+};
 
 const SETUP_MENU_ITEM_TO_STEP = {
   cadence: 3,
@@ -720,6 +728,41 @@ function applyResolvedMagicIdentity(identity = {}) {
   }
 }
 
+function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
+  const host = String(parsedMagicLink?.host || "").trim().toLowerCase();
+  const tokenId = String(parsedMagicLink?.tokenId || "").trim();
+  if (!host || !tokenId) return;
+
+  const defaults = MAGIC_LINK_SETUP_DEFAULTS[`${host}/${tokenId}`];
+  if (!defaults || typeof defaults !== "object") return;
+
+  const currentTotalBudget = Number(state?.landingDraft?.totalBudget || 0);
+  const currentEmployeeCount = Number(state?.landingDraft?.employeeCount || 0);
+  const currentPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
+  const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
+
+  const shouldSetBudget = !currentTotalBudget || currentTotalBudget === 3000;
+  const shouldSetEmployees = !currentEmployeeCount;
+  const shouldSetPerEmployee = !currentPerEmployee;
+  const shouldSetCity = !currentLocalCity;
+
+  if (shouldSetBudget) {
+    state.landingDraft.totalBudget = Number(defaults.totalBudget || 0);
+    state.programSettings.totalBudget = state.landingDraft.totalBudget;
+  }
+  if (shouldSetEmployees) {
+    state.landingDraft.employeeCount = Number(defaults.employeeCount || 0);
+    state.programSettings.employeeCount = state.landingDraft.employeeCount;
+  }
+  if (shouldSetPerEmployee) {
+    state.landingDraft.perEmployee = Number(defaults.perEmployee || 0);
+    state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee;
+  }
+  if (shouldSetCity) {
+    state.landingDraft.localCity = String(defaults.localCity || "").trim();
+  }
+}
+
 async function applyLandingIdentityFromMagicLinkHostPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return;
@@ -739,6 +782,7 @@ async function applyLandingIdentityFromMagicLinkHostPath() {
     });
     const root = (response?.data && typeof response.data === "object") ? response.data : response;
     applyResolvedMagicIdentity(root?.workspace || fallbackIdentity);
+    applyMagicLinkSetupDefaults(parsed);
   } catch (error) {
     const message = String(error?.message || "").toLowerCase();
     const isInvalidLink = message.includes("not found")
@@ -752,6 +796,7 @@ async function applyLandingIdentityFromMagicLinkHostPath() {
       state.landingIdentityMode = "generic";
     } else {
       applyResolvedMagicIdentity(fallbackIdentity);
+      applyMagicLinkSetupDefaults(parsed);
     }
     console.warn("Magic link resolve failed", error?.message || error);
   }
@@ -7367,13 +7412,13 @@ function getPollResponsesPageHtml(model, reminderUi = {}) {
   const presetButtonClass = (isActive) => isActive
     ? "rounded-full bg-slate-900 px-3 py-1.5 text-xs font-medium text-white"
     : "rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50";
-  const pollProgressStages = ["Poll Created", "Poll Live", "Poll Closed", "RSVP Sent"];
+  const pollProgressStages = ["Create Poll", "Poll Live", "Poll Closed", "Send RSVP"];
   const pollProgressActiveIndex = (() => {
     if (!pollCreated) return 0;
-    if (!pollLive) return 1;
-    if (!pollClosed) return 2;
-    if (!pollRsvpSent) return 3;
-    return pollProgressStages.length;
+    if (!pollLive) return 0;
+    if (!pollClosed) return 1;
+    if (!pollRsvpSent) return 2;
+    return 3;
   })();
   const pollProgressBarHtml = getHorizontalProcessBarHtml(pollProgressStages, pollProgressActiveIndex);
   return `
@@ -7387,10 +7432,9 @@ function getPollResponsesPageHtml(model, reminderUi = {}) {
       </div>
       ${resultsSyncBusy ? `<div class="mt-2 text-xs text-slate-500">Refreshing latest votes…</div>` : ""}
       ${resultsSyncError ? `<div class="mt-2 text-xs text-amber-700">${escapeHtml(resultsSyncError)}</div>` : ""}
+      <div class="mt-3">${pollProgressBarHtml}</div>
       ${isPollClosed ? `
         <section id="pollClosedTopPanel" class="w-full space-y-4">
-          ${pollProgressBarHtml}
-
           <div class="flex flex-col gap-6 md:flex-row md:items-stretch">
             <div id="recommendedPlanLeft" class="space-y-4 md:flex md:h-full md:w-[65%] md:flex-col">
               <article id="recommendedEventBlock" class="rounded-xl border border-slate-200 bg-white p-5 md:flex-1">
