@@ -503,7 +503,7 @@ landingDraft: {
   goals: [],
   teamPreferenceEstimate: [],
   schedule: [],
-  daysSelected: [],
+  daysSelected: ["Sa"],
   timesSelected: [],
   localCity: "",
   surveyAnswers: {}
@@ -1766,11 +1766,7 @@ try {
     state.landingDraft.teamPreferenceEstimate = [];
   }
   if (typeof state.landingDraft?.budgetConfigured !== "boolean") {
-    const draftTotal = Number(state.landingDraft?.totalBudget || 0);
-    const draftEmployeeCount = Number(state.landingDraft?.employeeCount || 0);
-    const draftPerEmployee = Number(state.landingDraft?.perEmployee || 0);
-    const step2Completed = Array.isArray(state.completedSetupSteps) && state.completedSetupSteps.includes(2);
-    state.landingDraft.budgetConfigured = Boolean(step2Completed && (draftTotal > 0 || draftEmployeeCount > 0 || draftPerEmployee > 0));
+    state.landingDraft.budgetConfigured = false;
   }
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
     state.pollBuilder = {
@@ -4582,6 +4578,11 @@ function initializeLandingSetupFlow() {
   // Populate step 5: Availability (Days and Times)
   const setupStepContent5 = document.querySelector('.setup-step[data-step="5"] .setup-step-content');
   if (setupStepContent5) {
+    if (!Array.isArray(state.landingDraft.daysSelected) || state.landingDraft.daysSelected.length === 0) {
+      state.landingDraft.daysSelected = ["Sa"];
+      persistState();
+    }
+
     const dayCheckboxes = Array.from(setupStepContent5.querySelectorAll('input[type="checkbox"]')).filter(cb => 
       ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].includes(cb.value)
     );
@@ -4676,9 +4677,8 @@ function initializeLandingSetupFlow() {
   // Initialize values from state
   if (totalBudgetInput) {
     const currentTotal = Number(state.landingDraft.totalBudget || 0);
-    const magicTotal = Number(magicBudgetDefaults?.totalBudget || 0);
-    const shouldHideMagicDefaultTotal = Boolean(magicBudgetDefaults) && currentTotal === magicTotal;
-    totalBudgetInput.value = (!shouldHideMagicDefaultTotal && currentTotal > 0) ? String(currentTotal) : "";
+    const shouldShowConfiguredTotal = Boolean(state.landingDraft?.budgetConfigured) && currentTotal > 0;
+    totalBudgetInput.value = shouldShowConfiguredTotal ? String(currentTotal) : "";
   }
   if (employeeCountInput) {
     employeeCountInput.value = "";
