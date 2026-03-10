@@ -46,6 +46,10 @@
         <span class="text-xs font-medium text-slate-600">Password</span>
         <input id="authPassword" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
       </label>
+      <label id="authPasswordConfirmRow" class="block">
+        <span class="text-xs font-medium text-slate-600">Confirm password</span>
+        <input id="authPasswordConfirm" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+      </label>
       <div id="authStatus" class="min-h-[20px] text-xs text-slate-600"></div>
       <div class="flex flex-col gap-2 sm:flex-row">
         <button id="authCreateAccount" type="button" class="h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">Create free account</button>
@@ -102,7 +106,7 @@
       <div id="sidebarSetupMenuCollapse" style="transition: max-height 0.3s cubic-bezier(.4,0,.2,1); overflow: hidden;">
         <section id="sidebarSetupMenu" class="mb-3">
           <div class="eeos-block text-sm font-medium" data-setup-menu-item="goals" style="margin-bottom: 0.3125px;">Goals</div>
-          <div class="eeos-block text-sm font-medium" data-setup-menu-item="budget" style="margin-bottom: 0.3125px;">Budget</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="budget" style="margin-bottom: 0.3125px;">Investment</div>
           <div class="eeos-block text-sm font-medium" data-setup-menu-item="cadence" style="margin-bottom: 0.3125px;">Cadence</div>
           <div class="eeos-block text-sm font-medium" data-setup-menu-item="setting" style="margin-bottom: 0.3125px;">Setting</div>
           <div class="eeos-block text-sm font-medium" data-setup-menu-item="availability" style="margin-bottom: 0.3125px;">Availability</div>
@@ -228,49 +232,73 @@
             </div>
 
 
-            <!-- Step 2: Budget -->
+            <!-- Step 2: Investment -->
             <div class="setup-step" data-step="2">
               <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
                 <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">2</div>
                 <div style="flex: 1;">
-                  <h3 class="text-sm font-medium text-slate-500">Budget</h3>
+                  <h3 class="text-sm font-medium text-slate-500">Investment</h3>
                 </div>
                 <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="mb-6">
-                  <h4 class="text-sm font-medium mb-1">Set your program budget</h4>
-                  <p class="text-xs text-slate-600 mb-4">Choose the way that makes the most sense for your team. You can update this anytime.</p>
-                  
-                  <!-- Field 1: Total Monthly Budget -->
-                  <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Enter total monthly budget ($)</label>
-                    <input id="setupTotalBudget" type="number" min="0" placeholder="e.g. 2500" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-                    <p class="text-xs text-slate-500 mt-1">We'll recommend events that stay within this amount.</p>
-                  </div>
-                  
-                  <!-- Divider -->
-                  <div class="flex items-center gap-3 my-4">
-                    <div class="flex-1 border-t border-slate-300"></div>
-                    <span class="text-xs text-slate-500 font-medium">OR</span>
-                    <div class="flex-1 border-t border-slate-300"></div>
-                  </div>
-                  
-                  <!-- Field 2 & 3: Employee-based -->
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-sm font-medium mb-1">Number of employees</label>
-                      <input id="setupEmployeeCount" type="number" min="0" placeholder="e.g. 50" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                  <div class="mb-6">
+                    <div class="mb-3 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
+                      <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Team Size</h4>
                     </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1">Investment per employee per month ($)</label>
-                      <input id="setupPerEmployee" type="number" min="0" step="0.01" placeholder="e.g. 60" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-                      <button id="setupBudgetGuidanceToggle" type="button" class="mt-2 text-xs text-slate-600 underline" style="background: transparent; border: none; padding: 0;">Not sure what to choose?</button>
-                      <div id="setupBudgetGuidanceOptions" class="hidden mt-2 rounded-lg border border-slate-200 bg-white p-2 space-y-1">
-                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="40">Growing teams focused on engagement: $40</button>
-                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="60">Retention-focused teams investing in culture consistency: $60</button>
-                        <button type="button" class="setup-budget-guidance-option w-full text-left text-xs text-slate-700 px-2 py-1 rounded hover:bg-slate-50" data-value="90">High-growth or competitive hiring environments: $90</button>
+                    <p class="mb-2 text-[14px] text-slate-600">How many employees are in this program?</p>
+                    <div class="relative max-w-[220px]">
+                      <input id="setupEmployeeCount" type="number" min="0" placeholder="e.g. 25" class="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2.5 pr-14 text-lg font-semibold text-slate-900 focus:border-blue-600 focus:outline-none" />
+                      <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">Emps</span>
+                    </div>
+                  </div>
+
+                  <div class="mb-4 mt-12">
+                    <div class="mb-3 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
+                      <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Funding</h4>
+                    </div>
+                    <p class="mb-3 text-[14px] text-slate-600">Choose how you want to define your monthly investment.</p>
+                    <div class="flex gap-2 rounded-lg bg-slate-200 p-1">
+                      <button id="setupModeTotal" type="button" class="flex-1 rounded-md bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-blue-700 shadow-sm">Total Monthly</button>
+                      <button id="setupModePerEmployee" type="button" class="flex-1 rounded-md px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-600 hover:text-slate-800">Per Employee</button>
+                    </div>
+                  </div>
+
+                  <div class="overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm">
+                    <div class="p-4">
+                      <label id="setupBudgetInputLabel" class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Current Monthly Allocation</label>
+
+                      <div id="setupTotalBudgetPanel" class="flex items-center gap-2">
+                        <span class="text-2xl font-semibold text-slate-400">$</span>
+                        <input id="setupTotalBudget" type="number" min="300" placeholder="e.g. 2500" class="w-full bg-transparent text-3xl font-semibold text-slate-900 focus:outline-none" />
                       </div>
+
+                      <div id="setupPerEmployeePanel" class="hidden flex items-center gap-2">
+                        <span class="text-2xl font-semibold text-slate-400">$</span>
+                        <input id="setupPerEmployee" type="number" min="0" step="0.01" placeholder="e.g. 60" class="w-full bg-transparent text-3xl font-semibold text-slate-900 focus:outline-none" />
+                      </div>
+
+                      <div class="mt-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                        <span id="setupBudgetHelper">Investment: $0 / employee</span>
+                      </div>
+
+                      <button id="setupBudgetGuidanceToggle" type="button" class="mt-3 text-xs font-medium text-slate-600 underline" style="background: transparent; border: none; padding: 0;">Not sure what to choose?</button>
+                      <div id="setupBudgetGuidanceOptions" class="hidden mt-2 rounded-lg border border-slate-200 bg-white p-2 space-y-1">
+                        <button type="button" class="setup-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="40">Growing teams focused on engagement: $40</button>
+                        <button type="button" class="setup-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="60">Retention-focused teams investing in culture consistency: $60</button>
+                        <button type="button" class="setup-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="90">High-growth or competitive hiring environments: $90</button>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-slate-900 px-4 py-3">
+                      <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Projected Annual Investment</p>
+                        <p class="text-lg font-semibold text-white"><span id="setupAnnualTotal">$0</span><span class="ml-1 text-[10px] font-medium text-slate-500">/YR</span></p>
+                      </div>
+                      <!-- <span class="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-300">Impact Range</span> -->
                     </div>
                   </div>
                 </div>
@@ -331,67 +359,61 @@
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="mb-6">
-                  <label class="block text-sm font-medium mb-1">What days and times usually work best for team events?</label>
-                  <div class="text-xs text-slate-500 mb-2">Check all that apply</div>
-                  <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="M" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">M</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="T" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">T</span>
-                    </label>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <div style="display: flex; gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
-                          <input type="checkbox" value="W" />
-                          <span style="font-size: 14px; font-weight: 500; color: inherit;">W</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
-                          <input type="checkbox" value="Th" />
-                          <span style="font-size: 14px; font-weight: 500; color: inherit;">Th</span>
-                        </label>
-                      </div>
-                      <span style="font-size: 10px; font-weight: 500; color: #64748b;">most common - *best day for volunteer outings</span>
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
+                      <span class="text-sm font-medium text-slate-700">What days work best for team events?</span>
                     </div>
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="F" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">F</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="Sa" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Sa</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="Su" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Su</span>
-                    </label>
+                    <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
+                    <section>
+                      <div class="flex flex-wrap gap-1">
+                        <button id="setupAvailabilityDayM" data-availability-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">M</button>
+                        <button id="setupAvailabilityDayT" data-availability-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">T</button>
+                        <button id="setupAvailabilityDayW" data-availability-day="W" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">W</button>
+                        <button id="setupAvailabilityDayTh" data-availability-day="Th" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">Th</button>
+                        <button id="setupAvailabilityDayF" data-availability-day="F" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">F</button>
+                      </div>
+                    </section>
                   </div>
-                </div>
-                <div class="mb-6">
-                  <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="Before 9a" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Before 9a</span>
-                    </label>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <div style="display: flex; gap: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
-                          <input type="checkbox" value="12-1p" />
-                          <span style="font-size: 14px; font-weight: 500; color: inherit;">12-1p</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #0f172a; background: #f8fafc; color: #0f172a;">
-                          <input type="checkbox" value="After 5p" />
-                          <span style="font-size: 14px; font-weight: 500; color: inherit;">After 5p</span>
-                        </label>
-                      </div>
-                      <span style="font-size: 10px; font-weight: 500; color: #64748b;">most common</span>
+
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
+                      <span class="text-sm font-medium text-slate-700">What time windows on these days work best?</span>
                     </div>
-                    <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cbd5e1; background: #f8fafc;">
-                      <input type="checkbox" value="Weekends" />
-                      <span style="font-size: 14px; font-weight: 500; color: #0f172a;">Weekends</span>
-                    </label>
+                    <section>
+                      <div class="max-w-md rounded-sm bg-slate-100 p-1">
+                        <div class="grid grid-cols-1 gap-1 sm:grid-cols-3">
+                          <button data-availability-time="Before 9a" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">Before 9a</button>
+                          <button data-availability-time="12-1p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">12-1p (Lunch)</button>
+                          <button data-availability-time="After 5p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">After 5p</button>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">iii</span>
+                      <span class="text-sm font-medium text-slate-700">Include weekends?</span>
+                    </div>
+                    <section>
+                      <button id="setupSaturdayToggle" type="button" class="flex w-full items-center justify-between rounded-sm border border-slate-200 bg-slate-50/50 p-4 text-left transition-all hover:border-slate-300">
+                        <div>
+                          <p id="setupSaturdayLabel" class="text-[11px] font-bold uppercase text-slate-700">Saturday Availability</p>
+                          <p class="mt-1 text-[10px] italic text-slate-500">Most group volunteer opportunities are on Saturdays</p>
+                        </div>
+                        <span id="setupSaturdaySwitch" class="relative h-5 w-10 rounded-full bg-slate-300 transition-colors">
+                          <span id="setupSaturdaySwitchKnob" class="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition-all"></span>
+                        </span>
+                      </button>
+                    </section>
+                  </div>
+
+                  <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                    <p>Best days: <span id="setupAvailabilitySummaryDays" class="font-medium text-slate-800">Th</span><span id="setupAvailabilitySummarySaturday" class="font-medium text-slate-800">, Sa</span></p>
+                    <p class="mt-1">Best time of day: <span id="setupAvailabilitySummaryTimes" class="font-medium text-slate-800">After 5p</span></p>
+                    <p class="mt-1">Saturday availability? <span id="setupAvailabilitySummarySatEnabled" class="font-medium text-slate-800">YES</span></p>
                   </div>
                 </div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="5">Next</button>

@@ -320,6 +320,12 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
     localCity: "New Orleans"
   }
 };
+const MAGIC_LINK_AUTH_DEFAULTS = {
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": {
+    companyName: "Revelry Labs",
+    email: "jennifer.baldwin@revelry.co"
+  }
+};
 
 const SETUP_MENU_ITEM_TO_STEP = {
   cadence: 3,
@@ -351,6 +357,7 @@ const SIDEBAR_SNAPSHOT_KEY_PREFIX = "eeos.m1.sidebarSnapshot::";
 const CALENDAR_PROVIDER_KEY = "eeos.calendarProvider";
 const AUTH_TOKEN_KEY = "eeos.auth.token";
 const AUTH_COMPANY_ID_KEY = "eeos.auth.companyId";
+const MAGIC_LINK_AUTH_STAGE_PREFIX = "eeos.magicLink.authStage::";
 
 function getEffectiveStorageAccountId(accountId = null) {
   const explicit = String(accountId || "").trim();
@@ -503,8 +510,8 @@ landingDraft: {
   goals: [],
   teamPreferenceEstimate: [],
   schedule: [],
-  daysSelected: ["Sa"],
-  timesSelected: [],
+  daysSelected: ["Th", "Sa"],
+  timesSelected: ["After 5p"],
   localCity: "",
   surveyAnswers: {}
 }
@@ -715,6 +722,38 @@ function parseMagicLinkFromHostPath() {
   return { host, tokenId };
 }
 
+function getMagicLinkAuthStageKey(parsedMagicLink = null) {
+  const host = String(parsedMagicLink?.host || "").trim().toLowerCase();
+  const tokenId = String(parsedMagicLink?.tokenId || "").trim();
+  if (!host || !tokenId) return "";
+  return `${MAGIC_LINK_AUTH_STAGE_PREFIX}${host}/${tokenId}`;
+}
+
+function getMagicLinkAuthStage(parsedMagicLink = null) {
+  const key = getMagicLinkAuthStageKey(parsedMagicLink);
+  if (!key) return "";
+  try {
+    return String(localStorage.getItem(key) || "").trim().toLowerCase();
+  } catch (_error) {
+    return "";
+  }
+}
+
+function setMagicLinkAuthStage(parsedMagicLink = null, stage = "") {
+  const key = getMagicLinkAuthStageKey(parsedMagicLink);
+  if (!key) return;
+  const normalized = String(stage || "").trim().toLowerCase();
+  try {
+    if (normalized === "signin") {
+      localStorage.setItem(key, "signin");
+    } else if (!normalized) {
+      localStorage.removeItem(key);
+    }
+  } catch (_error) {
+    // Non-fatal storage failure; default modal behavior will remain available.
+  }
+}
+
 function applyResolvedMagicIdentity(identity = {}) {
   const company = String(identity.companyNameDefault || identity.companyName || "").trim();
   const admin = String(identity.adminNameDefault || identity.adminName || "").trim();
@@ -763,6 +802,12 @@ function getMagicLinkSetupDefaultsForCurrentPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return null;
   return MAGIC_LINK_SETUP_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
+}
+
+function getMagicLinkAuthDefaultsForCurrentPath() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return null;
+  return MAGIC_LINK_AUTH_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
 }
 
 async function applyLandingIdentityFromMagicLinkHostPath() {
@@ -1008,7 +1053,13 @@ function openAuthGateWithContext(context = "save") {
   const subtitleEl = $("authGateSubtitle");
   const continueButton = $("authContinueWithoutSaving");
   const createAccountButton = $("authCreateAccount");
+  const signInButton = $("authSignIn");
   const statusEl = $("authStatus");
+  const parsedMagicLink = parseMagicLinkFromHostPath();
+  const isMagicLink = Boolean(parsedMagicLink?.host && parsedMagicLink?.tokenId);
+  const magicAuthStage = isMagicLink ? getMagicLinkAuthStage(parsedMagicLink) : "";
+  const showCreateOnly = isMagicLink && magicAuthStage !== "signin";
+  const showSignInOnly = isMagicLink && magicAuthStage === "signin";
   const mode = String(context || "save").trim();
   if (titleEl) {
     titleEl.textContent = mode === "poll_review"
@@ -1026,6 +1077,10 @@ function openAuthGateWithContext(context = "save") {
   }
   if (createAccountButton) {
     createAccountButton.textContent = "Create free account";
+    createAccountButton.classList.toggle("hidden", showSignInOnly);
+  }
+  if (signInButton) {
+    signInButton.classList.toggle("hidden", showCreateOnly);
   }
   if (continueButton) {
     const shouldShowContinue = mode === "poll_review" || mode === "rsvp_review";
@@ -1040,6 +1095,22 @@ function openAuthGateWithContext(context = "save") {
     statusEl.classList.add("text-slate-600");
   }
   const emailInput = $("authEmail");
+  const companyInput = $("authCompanyName");
+  const passwordConfirmRow = $("authPasswordConfirmRow");
+  const authDefaults = getMagicLinkAuthDefaultsForCurrentPath();
+  if (authDefaults && companyInput && !String(companyInput.value || "").trim()) {
+    companyInput.value = String(authDefaults.companyName || "").trim();
+  }
+  if (authDefaults && emailInput && !String(emailInput.value || "").trim()) {
+    emailInput.value = String(authDefaults.email || "").trim();
+  }
+  if (companyInput) {
+    companyInput.closest("label")?.classList.toggle("hidden", showSignInOnly);
+  }
+  if (passwordConfirmRow) {
+    const hideConfirm = showSignInOnly || context === "signin";
+    passwordConfirmRow.classList.toggle("hidden", hideConfirm);
+  }
   if (emailInput && context === "signin") {
     emailInput.focus();
   }
@@ -4169,6 +4240,7 @@ function bindAuthGateActions() {
     if (authRequestBusy) return;
     const email = String($("authEmail")?.value || "").trim();
     const password = String($("authPassword")?.value || "").trim();
+    const passwordConfirm = String($("authPasswordConfirm")?.value || "").trim();
     const companyName = String($("authCompanyName")?.value || "").trim();
 
     if (!email || !password) {
@@ -4177,6 +4249,10 @@ function bindAuthGateActions() {
     }
     if (mode === "signup" && !companyName) {
       setAuthStatus("Enter company name to create account.", true);
+      return;
+    }
+    if (mode === "signup" && password !== passwordConfirm) {
+      setAuthStatus("Passwords do not match", true);
       return;
     }
 
@@ -4206,6 +4282,9 @@ function bindAuthGateActions() {
       await hydrateCloudStateForSession(companyId);
 
       if (mode === "signup") {
+        if (magicLinkContext) {
+          setMagicLinkAuthStage(magicLinkContext, "signin");
+        }
         const synced = await syncSignupDraftToCloud(companyId, anonymousDraftPayload, {
           companyName: companyName || state.companyName,
           adminName: state.adminName
@@ -4578,50 +4657,167 @@ function initializeLandingSetupFlow() {
   // Populate step 5: Availability (Days and Times)
   const setupStepContent5 = document.querySelector('.setup-step[data-step="5"] .setup-step-content');
   if (setupStepContent5) {
-    if (!Array.isArray(state.landingDraft.daysSelected) || state.landingDraft.daysSelected.length === 0) {
-      state.landingDraft.daysSelected = ["Sa"];
+    const weekdayOptions = ["M", "T", "W", "Th", "F"];
+    const supportedDayOptions = [...weekdayOptions, "Sa"];
+    const supportedTimeOptions = ["Before 9a", "12-1p", "After 5p"];
+    const dayButtons = Array.from(setupStepContent5.querySelectorAll('[data-availability-day]'));
+    const timeButtons = Array.from(setupStepContent5.querySelectorAll('[data-availability-time]'));
+    const saturdayToggle = $("setupSaturdayToggle");
+    const saturdayLabel = $("setupSaturdayLabel");
+    const saturdaySwitch = $("setupSaturdaySwitch");
+    const saturdaySwitchKnob = $("setupSaturdaySwitchKnob");
+    const summaryDays = $("setupAvailabilitySummaryDays");
+    const summarySaturday = $("setupAvailabilitySummarySaturday");
+    const summaryTimes = $("setupAvailabilitySummaryTimes");
+    const summarySatEnabled = $("setupAvailabilitySummarySatEnabled");
+    const selectedDays = Array.isArray(state.landingDraft.daysSelected)
+      ? state.landingDraft.daysSelected.filter((day) => supportedDayOptions.includes(day))
+      : [];
+    const selectedTimes = Array.isArray(state.landingDraft.timesSelected)
+      ? state.landingDraft.timesSelected.filter((time) => supportedTimeOptions.includes(time))
+      : [];
+    const step5Completed = Array.isArray(state.completedSetupSteps) && state.completedSetupSteps.includes(5);
+    const looksLikeLegacyDefault = selectedDays.length === 1 && selectedDays[0] === "Sa" && selectedTimes.length === 0 && !step5Completed;
+    const looksLikePreviousDefault = selectedDays.length === 2
+      && selectedDays.includes("W")
+      && selectedDays.includes("Th")
+      && selectedTimes.length === 1
+      && selectedTimes[0] === "12-1p"
+      && !step5Completed;
+
+    let normalizedDays = selectedDays;
+    let normalizedTimes = selectedTimes;
+
+    if (normalizedDays.length === 0 || looksLikeLegacyDefault || looksLikePreviousDefault) {
+      normalizedDays = ["Th", "Sa"];
+    }
+    if (normalizedTimes.length === 0 || looksLikeLegacyDefault || looksLikePreviousDefault) {
+      normalizedTimes = ["After 5p"];
+    }
+
+    const daysChanged = JSON.stringify(normalizedDays) !== JSON.stringify(state.landingDraft.daysSelected || []);
+    const timesChanged = JSON.stringify(normalizedTimes) !== JSON.stringify(state.landingDraft.timesSelected || []);
+    if (daysChanged || timesChanged) {
+      state.landingDraft.daysSelected = normalizedDays;
+      state.landingDraft.timesSelected = normalizedTimes;
       persistState();
     }
 
-    const dayCheckboxes = Array.from(setupStepContent5.querySelectorAll('input[type="checkbox"]')).filter(cb => 
-      ['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].includes(cb.value)
-    );
-    const timeCheckboxes = Array.from(setupStepContent5.querySelectorAll('input[type="checkbox"]')).filter(cb => 
-      ['Before 9a', '12-1p', 'After 5p', 'Weekends'].includes(cb.value)
-    );
+    const renderAvailabilityState = () => {
+      const activeDays = Array.isArray(state.landingDraft.daysSelected) ? state.landingDraft.daysSelected : [];
+      const activeTimes = Array.isArray(state.landingDraft.timesSelected) ? state.landingDraft.timesSelected : [];
+      const saturdayOn = activeDays.includes("Sa");
+      const activeWeekdays = activeDays.filter((day) => weekdayOptions.includes(day));
 
-    // Restore checked state from state
-    dayCheckboxes.forEach(cb => {
-      if (state.landingDraft.daysSelected.includes(cb.value)) {
-        cb.checked = true;
+      dayButtons.forEach((button) => {
+        const value = button.dataset.availabilityDay;
+        const selected = activeWeekdays.includes(value);
+        button.classList.toggle("border-slate-800", selected);
+        button.classList.toggle("bg-slate-800", selected);
+        button.classList.toggle("text-white", selected);
+        button.classList.toggle("border-slate-200", !selected);
+        button.classList.toggle("bg-white", !selected);
+        button.classList.toggle("text-slate-400", !selected);
+      });
+
+      timeButtons.forEach((button) => {
+        const value = button.dataset.availabilityTime;
+        const selected = activeTimes.includes(value);
+        button.classList.toggle("border-slate-800", selected);
+        button.classList.toggle("bg-slate-800", selected);
+        button.classList.toggle("text-white", selected);
+        button.classList.toggle("bg-white", !selected);
+        button.classList.toggle("border-transparent", !selected);
+        button.classList.toggle("text-slate-500", !selected);
+      });
+
+      if (saturdayToggle) {
+        saturdayToggle.classList.toggle("border-blue-600", saturdayOn);
+        saturdayToggle.classList.toggle("border-slate-200", !saturdayOn);
       }
-      cb.addEventListener("change", () => {
+      if (saturdayLabel) {
+        saturdayLabel.classList.toggle("text-slate-900", saturdayOn);
+        saturdayLabel.classList.toggle("text-slate-700", !saturdayOn);
+      }
+      if (saturdaySwitch) {
+        saturdaySwitch.classList.toggle("bg-blue-600", saturdayOn);
+        saturdaySwitch.classList.toggle("bg-slate-300", !saturdayOn);
+      }
+      if (saturdaySwitchKnob) {
+        saturdaySwitchKnob.classList.toggle("left-6", saturdayOn);
+        saturdaySwitchKnob.classList.toggle("left-1", !saturdayOn);
+      }
+
+      if (summaryDays) {
+        summaryDays.textContent = activeWeekdays.length ? activeWeekdays.join(", ") : "-";
+      }
+      if (summarySaturday) {
+        summarySaturday.classList.toggle("hidden", !saturdayOn);
+      }
+      if (summaryTimes) {
+        summaryTimes.textContent = activeTimes.length ? activeTimes.join(" / ") : "-";
+      }
+      if (summarySatEnabled) {
+        summarySatEnabled.textContent = saturdayOn ? "YES" : "NO";
+      }
+    };
+
+    const commitAvailabilityState = () => {
+      persistState();
+      renderAvailabilityState();
+      validateAndUpdateStep5();
+    };
+
+    dayButtons.forEach((button) => {
+      button.addEventListener("click", () => {
         if (isCompletedStepEditBlocked(5)) {
-          cb.checked = state.landingDraft.daysSelected.includes(cb.value);
           showSetupSignUpPopup();
+          renderAvailabilityState();
           return;
         }
-        state.landingDraft.daysSelected = dayCheckboxes.filter(c => c.checked).map(c => c.value);
-        persistState();
-        validateAndUpdateStep5();
+        const value = button.dataset.availabilityDay;
+        const current = Array.isArray(state.landingDraft.daysSelected) ? state.landingDraft.daysSelected.filter((day) => supportedDayOptions.includes(day)) : [];
+        const saturdaySelected = current.includes("Sa") ? ["Sa"] : [];
+        const weekdays = current.filter((day) => weekdayOptions.includes(day));
+        state.landingDraft.daysSelected = weekdays.includes(value)
+          ? [...weekdays.filter((day) => day !== value), ...saturdaySelected]
+          : [...weekdays, value, ...saturdaySelected];
+        commitAvailabilityState();
       });
     });
 
-    timeCheckboxes.forEach(cb => {
-      if (state.landingDraft.timesSelected.includes(cb.value)) {
-        cb.checked = true;
-      }
-      cb.addEventListener("change", () => {
+    timeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
         if (isCompletedStepEditBlocked(5)) {
-          cb.checked = state.landingDraft.timesSelected.includes(cb.value);
           showSetupSignUpPopup();
+          renderAvailabilityState();
           return;
         }
-        state.landingDraft.timesSelected = timeCheckboxes.filter(c => c.checked).map(c => c.value);
-        persistState();
-        validateAndUpdateStep5();
+        const value = button.dataset.availabilityTime;
+        const current = Array.isArray(state.landingDraft.timesSelected) ? state.landingDraft.timesSelected.filter((time) => supportedTimeOptions.includes(time)) : [];
+        state.landingDraft.timesSelected = current.includes(value)
+          ? current.filter((time) => time !== value)
+          : [...current, value];
+        commitAvailabilityState();
       });
     });
+
+    if (saturdayToggle) {
+      saturdayToggle.addEventListener("click", () => {
+        if (isCompletedStepEditBlocked(5)) {
+          showSetupSignUpPopup();
+          renderAvailabilityState();
+          return;
+        }
+        const current = Array.isArray(state.landingDraft.daysSelected) ? state.landingDraft.daysSelected.filter((day) => supportedDayOptions.includes(day)) : [];
+        const weekdays = current.filter((day) => weekdayOptions.includes(day));
+        const saturdayOn = current.includes("Sa");
+        state.landingDraft.daysSelected = saturdayOn ? weekdays : [...weekdays, "Sa"];
+        commitAvailabilityState();
+      });
+    }
+
+    renderAvailabilityState();
   }
 
   // Populate step 6: Interests
@@ -4659,9 +4855,120 @@ function initializeLandingSetupFlow() {
   const totalBudgetInput = $("setupTotalBudget");
   const employeeCountInput = $("setupEmployeeCount");
   const perEmployeeInput = $("setupPerEmployee");
+  const modeTotalBtn = $("setupModeTotal");
+  const modePerEmployeeBtn = $("setupModePerEmployee");
+  const totalBudgetPanel = $("setupTotalBudgetPanel");
+  const perEmployeePanel = $("setupPerEmployeePanel");
+  const budgetInputLabel = $("setupBudgetInputLabel");
+  const budgetHelper = $("setupBudgetHelper");
+  const annualTotalEl = $("setupAnnualTotal");
   const budgetGuidanceToggle = $("setupBudgetGuidanceToggle");
   const budgetGuidanceOptions = $("setupBudgetGuidanceOptions");
   const magicBudgetDefaults = getMagicLinkSetupDefaultsForCurrentPath();
+  let budgetMode = ["total", "perEmployee"].includes(String(state.landingDraft?.budgetMode || ""))
+    ? String(state.landingDraft.budgetMode)
+    : (["total", "perEmployee"].includes(String(state.programSettings?.budgetMode || ""))
+      ? String(state.programSettings.budgetMode)
+      : "total");
+
+  const fmtWholeMoney = (value) => {
+    const n = Math.round(Number(value || 0));
+    return `$${n.toLocaleString("en-US")}`;
+  };
+
+  const hasEnteredTeamSize = () => Number(employeeCountInput?.value || 0) > 0;
+
+  const applyFundingGateState = () => {
+    const unlocked = hasEnteredTeamSize();
+
+    if (modeTotalBtn) {
+      modeTotalBtn.disabled = !unlocked;
+      modeTotalBtn.classList.toggle("opacity-50", !unlocked);
+      modeTotalBtn.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (modePerEmployeeBtn) {
+      modePerEmployeeBtn.disabled = !unlocked;
+      modePerEmployeeBtn.classList.toggle("opacity-50", !unlocked);
+      modePerEmployeeBtn.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (totalBudgetInput) {
+      totalBudgetInput.disabled = !unlocked;
+      totalBudgetInput.classList.toggle("opacity-60", !unlocked);
+      totalBudgetInput.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (perEmployeeInput) {
+      perEmployeeInput.disabled = !unlocked;
+      perEmployeeInput.classList.toggle("opacity-60", !unlocked);
+      perEmployeeInput.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (budgetGuidanceToggle) {
+      budgetGuidanceToggle.disabled = !unlocked;
+      budgetGuidanceToggle.classList.toggle("opacity-50", !unlocked);
+      budgetGuidanceToggle.classList.toggle("cursor-not-allowed", !unlocked);
+      if (!unlocked && budgetGuidanceOptions) {
+        budgetGuidanceOptions.classList.add("hidden");
+      }
+    }
+  };
+
+  const updateBudgetSummary = () => {
+    const totalValue = Number(totalBudgetInput?.value || 0);
+    const employeeValue = Number(employeeCountInput?.value || 0);
+    const perEmployeeValue = Number(perEmployeeInput?.value || 0);
+    const computedTotal = totalValue > 0 ? totalValue : Math.round(employeeValue * perEmployeeValue);
+    const computedPerEmployee = employeeValue > 0
+      ? Math.round((computedTotal > 0 ? computedTotal : employeeValue * perEmployeeValue) / employeeValue)
+      : 0;
+    const annualTotal = Math.round(computedTotal * 12);
+
+    if (budgetHelper) {
+      if (budgetMode === "total") {
+        budgetHelper.textContent = `Investment: ${fmtWholeMoney(computedPerEmployee)} / employee`;
+      } else {
+        budgetHelper.textContent = `Monthly total: ${fmtWholeMoney(computedTotal)}`;
+      }
+    }
+    if (annualTotalEl) {
+      annualTotalEl.textContent = fmtWholeMoney(annualTotal);
+    }
+  };
+
+  const renderBudgetModeUI = () => {
+    const totalActiveClass = ["bg-white", "text-blue-700", "shadow-sm"];
+    const totalIdleClass = ["text-slate-600", "hover:text-slate-800"];
+    const perActiveClass = ["bg-white", "text-blue-700", "shadow-sm"];
+    const perIdleClass = ["text-slate-600", "hover:text-slate-800"];
+
+    if (modeTotalBtn) {
+      modeTotalBtn.classList.remove(...totalActiveClass, ...totalIdleClass);
+      modeTotalBtn.classList.add(...(budgetMode === "total" ? totalActiveClass : totalIdleClass));
+    }
+    if (modePerEmployeeBtn) {
+      modePerEmployeeBtn.classList.remove(...perActiveClass, ...perIdleClass);
+      modePerEmployeeBtn.classList.add(...(budgetMode === "perEmployee" ? perActiveClass : perIdleClass));
+    }
+
+    if (totalBudgetPanel) totalBudgetPanel.classList.toggle("hidden", budgetMode !== "total");
+    if (perEmployeePanel) perEmployeePanel.classList.toggle("hidden", budgetMode !== "perEmployee");
+    if (budgetInputLabel) {
+      budgetInputLabel.textContent = budgetMode === "total"
+        ? "Current Monthly Allocation"
+        : "Current Investment Per Employee";
+    }
+
+    applyFundingGateState();
+    updateBudgetSummary();
+  };
+
+  const setBudgetMode = (nextMode, options = {}) => {
+    const resolvedMode = nextMode === "perEmployee" ? "perEmployee" : "total";
+    const shouldPersist = options.persist !== false;
+    budgetMode = resolvedMode;
+    state.landingDraft.budgetMode = resolvedMode;
+    state.programSettings.budgetMode = resolvedMode;
+    renderBudgetModeUI();
+    if (shouldPersist) persistState();
+  };
 
   if (totalBudgetInput && magicBudgetDefaults && Number(magicBudgetDefaults.totalBudget || 0) > 0) {
     totalBudgetInput.placeholder = `e.g. ${Number(magicBudgetDefaults.totalBudget || 0)}`;
@@ -4681,11 +4988,15 @@ function initializeLandingSetupFlow() {
     totalBudgetInput.value = shouldShowConfiguredTotal ? String(currentTotal) : "";
   }
   if (employeeCountInput) {
-    employeeCountInput.value = "";
+    const currentEmployees = Number(state.landingDraft.employeeCount || 0);
+    employeeCountInput.value = currentEmployees > 0 ? String(currentEmployees) : "";
   }
   if (perEmployeeInput) {
-    perEmployeeInput.value = "";
+    const currentPerEmployee = Number(state.landingDraft.perEmployee || 0);
+    perEmployeeInput.value = currentPerEmployee > 0 ? String(currentPerEmployee) : "";
   }
+
+  renderBudgetModeUI();
   
   const saveBudgetState = () => {
     if (isCompletedStepEditBlocked(2)) {
@@ -4699,7 +5010,8 @@ function initializeLandingSetupFlow() {
     const prevEmployee = Number(state.landingDraft.employeeCount || 0);
     const prevPerEmployee = Number(state.landingDraft.perEmployee || 0);
 
-    const totalValue = Number(totalBudgetInput?.value || 0);
+    const totalRaw = String(totalBudgetInput?.value || "").trim();
+    const totalValue = Number(totalRaw || 0);
     const employeeValue = Number(employeeCountInput?.value || 0);
     const perEmployeeValue = Number(perEmployeeInput?.value || 0);
     const computedTotal = totalValue > 0 ? totalValue : Math.round(employeeValue * perEmployeeValue);
@@ -4708,13 +5020,15 @@ function initializeLandingSetupFlow() {
     state.landingDraft.totalBudget = computedTotal;
     state.landingDraft.employeeCount = employeeValue;
     state.landingDraft.perEmployee = perEmployeeValue;
+    state.landingDraft.budgetMode = budgetMode;
     state.landingDraft.budgetConfigured = computedTotal > 0 || employeeValue > 0 || perEmployeeValue > 0;
     state.programSettings.totalBudget = computedTotal;
     state.programSettings.employeeCount = employeeValue;
     state.programSettings.perEmployeeBudget = perEmployeeValue;
-    state.programSettings.budgetMode = "total";
+    state.programSettings.budgetMode = budgetMode;
 
-    if (totalBudgetInput && computedTotal > 0) {
+    // Preserve empty state while the user clears the total field so placeholder can return.
+    if (totalBudgetInput && computedTotal > 0 && totalRaw !== "") {
       totalBudgetInput.value = String(computedTotal);
     }
     persistState();
@@ -4726,6 +5040,7 @@ function initializeLandingSetupFlow() {
     if ($("budgetTotalLabel")) $("budgetTotalLabel").textContent = `Total: ${fmtMoney(sidebarTotal)}`;
     if ($("budgetSpentLabel")) $("budgetSpentLabel").textContent = `Spent: ${fmtMoney(sidebarSpent)}`;
     if ($("budgetRemainingLabel")) $("budgetRemainingLabel").textContent = `Remaining: ${fmtMoney(sidebarRemaining)}`;
+    updateBudgetSummary();
     validateAndUpdateStep2(budgetChanged);
   };
   
@@ -4748,19 +5063,58 @@ function initializeLandingSetupFlow() {
       perEmployee = 0;
     }
     
-    // Auto-calculate based on which field just changed
+    // Auto-calculate counterpart field using whole-dollar rounding.
+    // Priority rule: when employee count changes and both fields exist, total budget wins.
     if (sourceField === "totalBudget" && employeeCount > 0) {
-      // User edited total budget and employees exist → calculate per-employee
-      const calculated = employeeCount > 0 ? Math.round((totalBudget / employeeCount) * 100) / 100 : 0;
-      perEmployeeInput.value = calculated;
-    } else if ((sourceField === "employeeCount" || sourceField === "perEmployee") && employeeCount > 0 && perEmployee > 0) {
-      // User edited employees or per-employee and both have values → calculate total
-      const calculated = Math.round(employeeCount * perEmployee);
-      totalBudgetInput.value = calculated;
+      const calculatedPerEmployee = Math.round(totalBudget / employeeCount);
+      if (perEmployeeInput) perEmployeeInput.value = calculatedPerEmployee > 0 ? String(calculatedPerEmployee) : "";
+    } else if (sourceField === "perEmployee" && employeeCount > 0) {
+      const calculatedTotal = Math.round(employeeCount * perEmployee);
+      if (totalBudgetInput) totalBudgetInput.value = calculatedTotal > 0 ? String(calculatedTotal) : "";
+    } else if (sourceField === "employeeCount" && employeeCount > 0) {
+      const hasTotalBudget = totalBudget > 0;
+      const hasPerEmployee = perEmployee > 0;
+      if (hasTotalBudget) {
+        const calculatedPerEmployee = Math.round(totalBudget / employeeCount);
+        if (perEmployeeInput) perEmployeeInput.value = calculatedPerEmployee > 0 ? String(calculatedPerEmployee) : "";
+      } else if (hasPerEmployee) {
+        const calculatedTotal = Math.round(employeeCount * perEmployee);
+        if (totalBudgetInput) totalBudgetInput.value = calculatedTotal > 0 ? String(calculatedTotal) : "";
+      }
     }
     
     saveBudgetState();
   };
+
+  if (modeTotalBtn) {
+    modeTotalBtn.addEventListener("click", () => {
+      if (!hasEnteredTeamSize()) {
+        if (employeeCountInput) employeeCountInput.focus();
+        return;
+      }
+      if (isCompletedStepEditBlocked(2)) {
+        showSetupSignUpPopup();
+        return;
+      }
+      setBudgetMode("total");
+      validateAndUpdateStep2(true);
+    });
+  }
+
+  if (modePerEmployeeBtn) {
+    modePerEmployeeBtn.addEventListener("click", () => {
+      if (!hasEnteredTeamSize()) {
+        if (employeeCountInput) employeeCountInput.focus();
+        return;
+      }
+      if (isCompletedStepEditBlocked(2)) {
+        showSetupSignUpPopup();
+        return;
+      }
+      setBudgetMode("perEmployee");
+      validateAndUpdateStep2(true);
+    });
+  }
   
   // Event listeners
   if (totalBudgetInput) {
@@ -4773,13 +5127,19 @@ function initializeLandingSetupFlow() {
     });
     
     totalBudgetInput.addEventListener("blur", () => {
+      if (!hasEnteredTeamSize()) return;
       handleBudgetCalculation("totalBudget");
     });
     
     totalBudgetInput.addEventListener("input", (e) => {
+      if (!hasEnteredTeamSize()) {
+        e.target.value = "";
+        return;
+      }
       if (Number(e.target.value) < 0) {
         e.target.value = 0;
       }
+      updateBudgetSummary();
       validateAndUpdateStep2(true);
       saveBudgetState();
     });
@@ -4802,6 +5162,8 @@ function initializeLandingSetupFlow() {
       if (Number(e.target.value) < 0) {
         e.target.value = 0;
       }
+      applyFundingGateState();
+      updateBudgetSummary();
       validateAndUpdateStep2(true);
       saveBudgetState();
     });
@@ -4817,13 +5179,19 @@ function initializeLandingSetupFlow() {
     });
     
     perEmployeeInput.addEventListener("blur", () => {
+      if (!hasEnteredTeamSize()) return;
       handleBudgetCalculation("perEmployee");
     });
     
     perEmployeeInput.addEventListener("input", (e) => {
+      if (!hasEnteredTeamSize()) {
+        e.target.value = "";
+        return;
+      }
       if (Number(e.target.value) < 0) {
         e.target.value = 0;
       }
+      updateBudgetSummary();
       validateAndUpdateStep2(true);
       saveBudgetState();
     });
@@ -4831,6 +5199,10 @@ function initializeLandingSetupFlow() {
 
   if (budgetGuidanceToggle && budgetGuidanceOptions) {
     budgetGuidanceToggle.addEventListener("click", () => {
+      if (!hasEnteredTeamSize()) {
+        if (employeeCountInput) employeeCountInput.focus();
+        return;
+      }
       if (isCompletedStepEditBlocked(2)) {
         showSetupSignUpPopup();
         return;
@@ -5055,8 +5427,8 @@ function isSetupStepValid(step) {
       const totalBudget = Number(state.landingDraft.totalBudget || 0);
       const employees = Number(state.landingDraft.employeeCount || 0);
       const perEmp = Number(state.landingDraft.perEmployee || 0);
-      // Valid if: total budget entered OR (employees AND per-employee entered)
-      return totalBudget > 0 || (employees > 0 && perEmp > 0);
+      // Employee count is required and the resulting monthly total must be at least $300.
+      return employees > 0 && (totalBudget >= 300) && (totalBudget > 0 || perEmp > 0);
     
     case 3: // Cadence
       return state.landingDraft.cadence && state.landingDraft.cadence.length > 0;
@@ -5080,6 +5452,9 @@ function isSetupStepValid(step) {
     
     case 5: // Availability
       if (!state.landingDraft.daysSelected || state.landingDraft.daysSelected.length === 0) {
+        return false;
+      }
+      if (!state.landingDraft.daysSelected.some((day) => ["M", "T", "W", "Th", "F"].includes(day))) {
         return false;
       }
       if (!state.landingDraft.timesSelected || state.landingDraft.timesSelected.length === 0) {
