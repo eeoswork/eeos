@@ -763,6 +763,12 @@ function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
   }
 }
 
+function getMagicLinkSetupDefaultsForCurrentPath() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return null;
+  return MAGIC_LINK_SETUP_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
+}
+
 async function applyLandingIdentityFromMagicLinkHostPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return;
@@ -4643,6 +4649,14 @@ function initializeLandingSetupFlow() {
   const perEmployeeInput = $("setupPerEmployee");
   const budgetGuidanceToggle = $("setupBudgetGuidanceToggle");
   const budgetGuidanceOptions = $("setupBudgetGuidanceOptions");
+  const magicBudgetDefaults = getMagicLinkSetupDefaultsForCurrentPath();
+
+  if (employeeCountInput && magicBudgetDefaults && Number(magicBudgetDefaults.employeeCount || 0) > 0) {
+    employeeCountInput.placeholder = `e.g. ${Number(magicBudgetDefaults.employeeCount || 0)}`;
+  }
+  if (perEmployeeInput && magicBudgetDefaults && Number(magicBudgetDefaults.perEmployee || 0) > 0) {
+    perEmployeeInput.placeholder = `e.g. ${Number(magicBudgetDefaults.perEmployee || 0)}`;
+  }
   
   // Initialize values from state
   if (totalBudgetInput && state.landingDraft.totalBudget) {
