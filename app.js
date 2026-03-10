@@ -741,15 +741,10 @@ function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
   const currentPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
   const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
 
-  const shouldSetBudget = !currentTotalBudget || currentTotalBudget === 3000;
   const shouldSetEmployees = !currentEmployeeCount;
   const shouldSetPerEmployee = !currentPerEmployee;
   const shouldSetCity = !currentLocalCity;
 
-  if (shouldSetBudget) {
-    state.landingDraft.totalBudget = Number(defaults.totalBudget || 0);
-    state.programSettings.totalBudget = state.landingDraft.totalBudget;
-  }
   if (shouldSetEmployees) {
     state.landingDraft.employeeCount = Number(defaults.employeeCount || 0);
     state.programSettings.employeeCount = state.landingDraft.employeeCount;
@@ -4651,6 +4646,10 @@ function initializeLandingSetupFlow() {
   const budgetGuidanceOptions = $("setupBudgetGuidanceOptions");
   const magicBudgetDefaults = getMagicLinkSetupDefaultsForCurrentPath();
 
+  if (totalBudgetInput && magicBudgetDefaults && Number(magicBudgetDefaults.totalBudget || 0) > 0) {
+    totalBudgetInput.placeholder = `e.g. ${Number(magicBudgetDefaults.totalBudget || 0)}`;
+  }
+
   if (employeeCountInput && magicBudgetDefaults && Number(magicBudgetDefaults.employeeCount || 0) > 0) {
     employeeCountInput.placeholder = `e.g. ${Number(magicBudgetDefaults.employeeCount || 0)}`;
   }
@@ -4659,8 +4658,11 @@ function initializeLandingSetupFlow() {
   }
   
   // Initialize values from state
-  if (totalBudgetInput && state.landingDraft.totalBudget) {
-    totalBudgetInput.value = state.landingDraft.totalBudget;
+  if (totalBudgetInput) {
+    const currentTotal = Number(state.landingDraft.totalBudget || 0);
+    const magicTotal = Number(magicBudgetDefaults?.totalBudget || 0);
+    const shouldHideMagicDefaultTotal = Boolean(magicBudgetDefaults) && currentTotal === magicTotal;
+    totalBudgetInput.value = (!shouldHideMagicDefaultTotal && currentTotal > 0) ? String(currentTotal) : "";
   }
   if (employeeCountInput) {
     employeeCountInput.value = "";
