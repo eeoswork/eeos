@@ -326,6 +326,9 @@ const MAGIC_LINK_AUTH_DEFAULTS = {
     email: "jennifer.baldwin@revelry.co"
   }
 };
+const MAGIC_LINK_PAGE_TITLES = {
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": "EEOS | Revelry Labs"
+};
 
 const SETUP_MENU_ITEM_TO_STEP = {
   cadence: 3,
@@ -808,6 +811,16 @@ function getMagicLinkAuthDefaultsForCurrentPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return null;
   return MAGIC_LINK_AUTH_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
+}
+
+function applyMagicLinkPageTitleFromCurrentPath() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) {
+    document.title = "EEOS";
+    return;
+  }
+  const key = `${parsed.host}/${parsed.tokenId}`;
+  document.title = MAGIC_LINK_PAGE_TITLES[key] || "EEOS";
 }
 
 async function applyLandingIdentityFromMagicLinkHostPath() {
@@ -6154,6 +6167,7 @@ if (window.electronAPI?.onCreateTabFromPopup) {
 
 async function bootstrap() {
   state.sidebarSetupExpanded = false;
+  applyMagicLinkPageTitleFromCurrentPath();
   bindSidebarSetupEditPrefs();
   bindMainSetupEditPrefs();
   logIdentityDebug("bootstrap:start");
