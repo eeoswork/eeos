@@ -494,6 +494,7 @@ promoteEvent: {
 },
 setupStepDirty: {},
 landingDraft: {
+  budgetConfigured: false,
   budgetMode: "total",
   totalBudget: 3000,
   employeeCount: 0,
@@ -1763,6 +1764,13 @@ try {
   }
   if (!Array.isArray(state.landingDraft?.teamPreferenceEstimate)) {
     state.landingDraft.teamPreferenceEstimate = [];
+  }
+  if (typeof state.landingDraft?.budgetConfigured !== "boolean") {
+    const draftTotal = Number(state.landingDraft?.totalBudget || 0);
+    const draftEmployeeCount = Number(state.landingDraft?.employeeCount || 0);
+    const draftPerEmployee = Number(state.landingDraft?.perEmployee || 0);
+    const step2Completed = Array.isArray(state.completedSetupSteps) && state.completedSetupSteps.includes(2);
+    state.landingDraft.budgetConfigured = Boolean(step2Completed && (draftTotal > 0 || draftEmployeeCount > 0 || draftPerEmployee > 0));
   }
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
     state.pollBuilder = {
@@ -3063,9 +3071,12 @@ if (pastListEl) {
 
 const landingView = $("landingView");
 const isLandingActive = landingView && !landingView.classList.contains("hidden");
+const sidebarBudgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
 const setupTotal = Number(state.landingDraft?.totalBudget || 0);
-const sidebarTotal = isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal();
-const sidebarSpent = getTotalSpent();
+const sidebarTotal = sidebarBudgetEnabled
+  ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
+  : 0;
+const sidebarSpent = sidebarBudgetEnabled ? getTotalSpent() : 0;
 const sidebarRemaining = sidebarTotal - sidebarSpent;
 
 $("budgetTotalLabel").textContent = `Total: ${fmtMoney(sidebarTotal)}`;
@@ -4697,6 +4708,7 @@ function initializeLandingSetupFlow() {
     state.landingDraft.totalBudget = computedTotal;
     state.landingDraft.employeeCount = employeeValue;
     state.landingDraft.perEmployee = perEmployeeValue;
+    state.landingDraft.budgetConfigured = computedTotal > 0 || employeeValue > 0 || perEmployeeValue > 0;
     state.programSettings.totalBudget = computedTotal;
     state.programSettings.employeeCount = employeeValue;
     state.programSettings.perEmployeeBudget = perEmployeeValue;
@@ -4707,9 +4719,13 @@ function initializeLandingSetupFlow() {
     }
     persistState();
     renderSidebar();
-    if ($("budgetTotalLabel")) $("budgetTotalLabel").textContent = `Total: ${fmtMoney(computedTotal)}`;
-    if ($("budgetSpentLabel")) $("budgetSpentLabel").textContent = `Spent: ${fmtMoney(getTotalSpent())}`;
-    if ($("budgetRemainingLabel")) $("budgetRemainingLabel").textContent = `Remaining: ${fmtMoney(computedTotal - getTotalSpent())}`;
+    const sidebarBudgetEnabled = Boolean(state.landingDraft.budgetConfigured);
+    const sidebarTotal = sidebarBudgetEnabled ? computedTotal : 0;
+    const sidebarSpent = sidebarBudgetEnabled ? getTotalSpent() : 0;
+    const sidebarRemaining = sidebarTotal - sidebarSpent;
+    if ($("budgetTotalLabel")) $("budgetTotalLabel").textContent = `Total: ${fmtMoney(sidebarTotal)}`;
+    if ($("budgetSpentLabel")) $("budgetSpentLabel").textContent = `Spent: ${fmtMoney(sidebarSpent)}`;
+    if ($("budgetRemainingLabel")) $("budgetRemainingLabel").textContent = `Remaining: ${fmtMoney(sidebarRemaining)}`;
     validateAndUpdateStep2(budgetChanged);
   };
   
