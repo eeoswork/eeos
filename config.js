@@ -24,7 +24,20 @@
  */
 
 window.__EEOS_CONFIG__ = {
-  // Supabase configuration (fill in when ready to enable multi-user cloud sync)
+  // Cloudflare API configuration
+  apiBaseUrl: 'https://api.eeos.work/api',
+
+  // Launch magic-link host defaults
+  magicLinks: {
+    hostDefaults: {
+      'revelrylabs.eeos.work': {
+        companyName: 'Revelry Labs',
+        adminName: 'Jennifer Baldwin'
+      }
+    }
+  },
+
+  // Legacy Supabase configuration (unused in Cloudflare mode)
   supabaseUrl: '',
   supabaseAnonKey: '',
   

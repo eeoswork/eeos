@@ -302,8 +302,16 @@ const WORKFLOW_STEPS = [
 const FORCE_POLL_CLOSED_ADMIN_VIEW = true;
 const FORCE_POLL_OPEN_ADMIN_VIEW = false;
 const FORCE_POLL_PRE_SHARE_VIEW = false;
-const POLL_API_BASE = "https://esos-polls.ajolly2.workers.dev/api";
+const APP_CONFIG = window.__EEOS_CONFIG__ || {};
+const POLL_API_BASE = String(APP_CONFIG.apiBaseUrl || "https://esos-polls.ajolly2.workers.dev/api").replace(/\/+$/, "");
 const POLL_PUBLIC_BASE_URL = "https://eeoswork.github.io/eeos";
+const MAGIC_LINK_HOST_DEFAULTS = {
+  "revelrylabs.eeos.work": {
+    companyName: "Revelry Labs",
+    adminName: "Jennifer Baldwin"
+  },
+  ...((APP_CONFIG.magicLinks && APP_CONFIG.magicLinks.hostDefaults) || {})
+};
 
 const SETUP_MENU_ITEM_TO_STEP = {
   cadence: 3,
@@ -649,10 +657,18 @@ async function apiRequest(path, { method = "GET", body } = {}) {
   return data;
 }
 
-async function authSignup(email, password, companyName) {
+async function authSignup(email, password, companyName, magicLink = null) {
   return apiRequest("/auth/signup", {
     method: "POST",
-    body: { email, password, companyName }
+    body: {
+      email,
+      password,
+      companyName,
+      magicLink: magicLink && typeof magicLink === "object" ? {
+        host: String(magicLink.host || "").trim().toLowerCase(),
+        tokenId: String(magicLink.tokenId || "").trim()
+      } : null
+    }
   });
 }
 
@@ -672,6 +688,262 @@ async function saveCloudState(stateBlob) {
     method: "POST",
     body: { stateBlob }
   });
+}
+
+function parseMagicLinkFromHostPath() {
+  const host = String(window.location.hostname || "").trim().toLowerCase();
+  const path = String(window.location.pathname || "").trim();
+  if (!host || host === "eeos.work" || host === "www.eeos.work" || host === "localhost") {
+    return null;
+  }
+
+  const firstSegment = path.replace(/^\/+/, "").split("/")[0] || "";
+  const tokenId = String(firstSegment || "").trim();
+  if (!tokenId || !/^[A-Za-z0-9_-]{8,128}$/.test(tokenId)) {
+    return null;
+  }
+
+  return { host, tokenId };
+}
+
+function applyResolvedMagicIdentity(identity = {}) {
+  const company = String(identity.companyNameDefault || identity.companyName || "").trim();
+  const admin = String(identity.adminNameDefault || identity.adminName || "").trim();
+  if (!company && !admin) return;
+
+  state.landingIdentityMode = "magic";
+  if (company && !String(state.companyName || "").trim()) {
+    state.companyName = company;
+  }
+  if (admin && !String(state.adminName || "").trim()) {
+    state.adminName = admin;
+  }
+}
+
+async function applyLandingIdentityFromMagicLinkHostPath() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return;
+
+  const fallbackIdentity = MAGIC_LINK_HOST_DEFAULTS[parsed.host] || {};
+  try {
+    const response = await apiRequest("/magic-links/resolve", {
+      method: "POST",
+      body: {
+        host: parsed.host,
+        tokenId: parsed.tokenId,
+        client: {
+          appVersion: "web-2026.03",
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+        }
+      }
+    });
+    const root = (response?.data && typeof response.data === "object") ? response.data : response;
+    applyResolvedMagicIdentity(root?.workspace || fallbackIdentity);
+  } catch (error) {
+    const message = String(error?.message || "").toLowerCase();
+    const isInvalidLink = message.includes("not found")
+      || message.includes("invalid")
+      || message.includes("expired")
+      || message.includes("inactive")
+      || message.includes("magic link");
+
+    // Invalid links should fall back to generic mode; network failures may still use safe host defaults.
+    if (isInvalidLink) {
+      state.landingIdentityMode = "generic";
+    } else {
+      applyResolvedMagicIdentity(fallbackIdentity);
+    }
+    console.warn("Magic link resolve failed", error?.message || error);
+  }
+
+  applyPinnedIdentity();
+}
+
+function readStoredStateByAccountId(accountId = "") {
+  try {
+    const raw = localStorage.getItem(getStorageKey(accountId));
+    return raw ? JSON.parse(raw) : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function buildDraftPayload(sourceState = null) {
+  if (!sourceState || typeof sourceState !== "object") return null;
+  const landingDraft = sourceState.landingDraft && typeof sourceState.landingDraft === "object"
+    ? clone(sourceState.landingDraft)
+    : null;
+  const programSettings = sourceState.programSettings && typeof sourceState.programSettings === "object"
+    ? clone(sourceState.programSettings)
+    : null;
+  if (!landingDraft && !programSettings) return null;
+
+  return {
+    landingDraft,
+    programSettings,
+    completedSetupSteps: Array.isArray(sourceState.completedSetupSteps) ? [...sourceState.completedSetupSteps] : [],
+    setupCompleted: Boolean(sourceState.setupCompleted),
+    clientDraftUpdatedAt: String(sourceState?.meta?.lastUpdated || "").trim() || new Date().toISOString()
+  };
+}
+
+function getAnonymousDraftPayload() {
+  const storedAnon = buildDraftPayload(readStoredStateByAccountId("anon"));
+  if (storedAnon) return storedAnon;
+  if (getEffectiveStorageAccountId() === "anon") {
+    return buildDraftPayload(state);
+  }
+  return null;
+}
+
+function applyDraftPayloadToState(draftPayload) {
+  if (!draftPayload || typeof draftPayload !== "object") return;
+  if (draftPayload.landingDraft && typeof draftPayload.landingDraft === "object") {
+    state.landingDraft = {
+      ...state.landingDraft,
+      ...clone(draftPayload.landingDraft)
+    };
+  }
+  if (draftPayload.programSettings && typeof draftPayload.programSettings === "object") {
+    state.programSettings = {
+      ...state.programSettings,
+      ...clone(draftPayload.programSettings)
+    };
+  }
+  if (Array.isArray(draftPayload.completedSetupSteps)) {
+    state.completedSetupSteps = [...new Set(draftPayload.completedSetupSteps.map((step) => Number(step || 0)).filter(Boolean))];
+  }
+  if (typeof draftPayload.setupCompleted === "boolean") {
+    state.setupCompleted = draftPayload.setupCompleted;
+  }
+}
+
+function clearAnonymousDraftStorage() {
+  try {
+    localStorage.removeItem(getStorageKey("anon"));
+    localStorage.removeItem(getSidebarSnapshotKey("anon"));
+    localStorage.removeItem(getGlobalToAccountMigrationKey("anon"));
+  } catch (error) {
+    console.warn("Failed to clear anonymous draft storage", error);
+  }
+}
+
+async function syncSignupDraftToCloud(companyId, draftPayload, identity = {}) {
+  const resolvedCompanyId = String(companyId || "").trim();
+  if (!resolvedCompanyId) return false;
+
+  const normalizedIdentity = {
+    companyName: String(identity.companyName || state.companyName || "").trim(),
+    adminName: String(identity.adminName || state.adminName || "").trim()
+  };
+
+  try {
+    if (draftPayload) {
+      const response = await apiRequest("/onboarding/migrate-draft", {
+        method: "POST",
+        body: {
+          companyId: resolvedCompanyId,
+          identity: normalizedIdentity,
+          draft: {
+            ...draftPayload,
+            mergeMode: "if-empty-or-newer"
+          },
+          mergeMode: "if-empty-or-newer",
+          clientDraftUpdatedAt: draftPayload.clientDraftUpdatedAt || new Date().toISOString()
+        }
+      });
+      const root = (response?.data && typeof response.data === "object") ? response.data : response;
+      if (root?.stateBlob && typeof root.stateBlob === "object") {
+        const mergedState = mergeServerStateIntoLocal(clone(state), root.stateBlob, "");
+        Object.keys(state).forEach((key) => delete state[key]);
+        Object.assign(state, mergedState);
+      } else {
+        applyDraftPayloadToState(draftPayload);
+      }
+    }
+
+    if (!String(state.companyName || "").trim() && normalizedIdentity.companyName) {
+      state.companyName = normalizedIdentity.companyName;
+    }
+    if (!String(state.adminName || "").trim() && normalizedIdentity.adminName) {
+      state.adminName = normalizedIdentity.adminName;
+    }
+
+    await saveCloudState(clone(state));
+    clearAnonymousDraftStorage();
+    persistState();
+    return true;
+  } catch (error) {
+    console.warn("Signup draft migration API failed", error?.message || error);
+  }
+
+  try {
+    if (draftPayload) {
+      applyDraftPayloadToState(draftPayload);
+    }
+    if (!String(state.companyName || "").trim() && normalizedIdentity.companyName) {
+      state.companyName = normalizedIdentity.companyName;
+    }
+    if (!String(state.adminName || "").trim() && normalizedIdentity.adminName) {
+      state.adminName = normalizedIdentity.adminName;
+    }
+    await saveCloudState(clone(state));
+    clearAnonymousDraftStorage();
+    persistState();
+    return true;
+  } catch (error) {
+    console.warn("Signup draft fallback sync failed", error?.message || error);
+    return false;
+  }
+}
+
+function normalizeRecommendedEvent(rawEvent, index = 0) {
+  if (!rawEvent || typeof rawEvent !== "object") return null;
+  return {
+    id: String(rawEvent.id || rawEvent.event_id || `evt-${index + 1}`).trim(),
+    name: String(rawEvent.name || rawEvent.event_name || `Event ${index + 1}`).trim(),
+    description: String(rawEvent.description || "").trim(),
+    url: String(rawEvent.url || "").trim(),
+    cost_per_person: Number(rawEvent.cost_per_person ?? rawEvent.costPerPerson ?? 0),
+    goals: Array.isArray(rawEvent.goals) ? [...rawEvent.goals] : [],
+    schedules: Array.isArray(rawEvent.schedules) ? [...rawEvent.schedules] : [],
+    type: String(rawEvent.type || "paid").trim(),
+    score: Number(rawEvent.score || 0),
+    rank: Number(rawEvent.rank || (index + 1))
+  };
+}
+
+async function syncCloudRecommendations(companyId) {
+  const resolvedCompanyId = String(companyId || state.accountId || "").trim();
+  if (!resolvedCompanyId) return false;
+
+  try {
+    const response = await apiRequest("/recommendations/generate", {
+      method: "POST",
+      body: {
+        companyId: resolvedCompanyId,
+        context: {
+          trigger: "post-signup-setup",
+          cycleId: "current-cycle"
+        },
+        inputOverride: {
+          programSettings: null
+        }
+      }
+    });
+    const root = (response?.data && typeof response.data === "object") ? response.data : response;
+    const normalized = Array.isArray(root?.recommendations)
+      ? root.recommendations.map((item, index) => normalizeRecommendedEvent(item, index)).filter(Boolean)
+      : [];
+    if (!normalized.length) return false;
+    state.eventsRecommended = normalized;
+    state.setupEventsGenerated = true;
+    persistState();
+    return true;
+  } catch (error) {
+    console.warn("Cloud recommendations unavailable", error?.message || error);
+    return false;
+  }
 }
 
 function showAuthGate() {
@@ -1571,7 +1843,11 @@ try {
   const admin = (params.get("admin") || "").trim();
 
 
- state.landingIdentityMode = company || admin ? "magic" : "generic";
+ if (company || admin) {
+   state.landingIdentityMode = "magic";
+ } else if (state.landingIdentityMode !== "magic") {
+   state.landingIdentityMode = "generic";
+ }
 
 
   const hasCompany = Boolean((state.companyName || "").trim());
@@ -3502,6 +3778,47 @@ try {
 }
 }
 
+function showMiniToast(message = "") {
+  const text = String(message || "").trim();
+  if (!text) return;
+
+  let toast = document.getElementById("miniToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "miniToast";
+    toast.style.position = "fixed";
+    toast.style.right = "16px";
+    toast.style.bottom = "16px";
+    toast.style.zIndex = "9999";
+    toast.style.maxWidth = "320px";
+    toast.style.padding = "10px 12px";
+    toast.style.borderRadius = "10px";
+    toast.style.background = "rgba(15, 23, 42, 0.92)";
+    toast.style.color = "#f8fafc";
+    toast.style.fontSize = "13px";
+    toast.style.lineHeight = "1.35";
+    toast.style.boxShadow = "0 8px 22px rgba(15, 23, 42, 0.25)";
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(8px)";
+    toast.style.transition = "opacity 160ms ease, transform 160ms ease";
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = text;
+  toast.style.opacity = "1";
+  toast.style.transform = "translateY(0)";
+
+  if (showMiniToast._timer) {
+    clearTimeout(showMiniToast._timer);
+  }
+  showMiniToast._timer = setTimeout(() => {
+    const current = document.getElementById("miniToast");
+    if (!current) return;
+    current.style.opacity = "0";
+    current.style.transform = "translateY(8px)";
+  }, 2200);
+}
+
 
 
 
@@ -3811,13 +4128,15 @@ function bindAuthGateActions() {
     }
 
     authRequestBusy = true;
+    const anonymousDraftPayload = mode === "signup" ? getAnonymousDraftPayload() : null;
     signupButton.disabled = true;
     signinButton.disabled = true;
     setAuthStatus(mode === "signup" ? "Creating account..." : "Signing in...");
 
     try {
+      const magicLinkContext = mode === "signup" ? parseMagicLinkFromHostPath() : null;
       const response = mode === "signup"
-        ? await authSignup(email, password, companyName)
+        ? await authSignup(email, password, companyName, magicLinkContext)
         : await authLogin(email, password);
       const root = (response?.data && typeof response.data === "object") ? response.data : response;
       const token = String(root?.token || "").trim();
@@ -3832,12 +4151,28 @@ function bindAuthGateActions() {
         state.companyName = companyName;
       }
       await hydrateCloudStateForSession(companyId);
+
+      if (mode === "signup") {
+        const synced = await syncSignupDraftToCloud(companyId, anonymousDraftPayload, {
+          companyName: companyName || state.companyName,
+          adminName: state.adminName
+        });
+        if (!synced) {
+          throw new Error("Account created, but setup sync failed. Please try saving again.");
+        }
+
+        const recommendedFromCloud = await syncCloudRecommendations(companyId);
+        if (!recommendedFromCloud) {
+          generateRecommendedEvents();
+          await saveCloudState(clone(state));
+        }
+      }
+
       hideAuthGate();
       showLanding();
       renderAll();
       setAuthStatus("");
       if (mode === "signup") {
-        await saveCloudState(clone(state));
         showMiniToast("Account created — progress saved.");
       } else {
         await saveCloudState(clone(state));
@@ -5369,6 +5704,7 @@ async function bootstrap() {
   const storedCompanyId = getAuthCompanyId();
   loadLocalState(storedCompanyId || "anon", { strictAccount: Boolean(storedCompanyId) });
   applyPinnedIdentity();
+  await applyLandingIdentityFromMagicLinkHostPath();
   applyLandingIdentityFromQuery();
   applyPinnedIdentity();
   logIdentityDebug("bootstrap:afterIdentityHydration");

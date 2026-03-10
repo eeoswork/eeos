@@ -1,0 +1,33 @@
+{
+"name": "jolly-hr",
+"version": "1.0.0",
+"description": "EEOS MVP (Landing + Web + Electron)",
+"main": "main.js",
+"scripts": {
+ "start": "electron .",
+ "start:web": "python3 -m http.server 5173",
+ "cf:dev": "wrangler dev",
+ "cf:deploy": "wrangler deploy",
+	"cf:d1:apply": "wrangler d1 execute eeos --remote --file cloudflare/schema.sql",
+	"cf:d1:seed": "wrangler d1 execute eeos --remote --file cloudflare/seed.sql",
+	"cf:d1:apply:local": "wrangler d1 execute eeos --file cloudflare/schema.sql",
+	"cf:d1:seed:local": "wrangler d1 execute eeos --file cloudflare/seed.sql"
+},
+"devDependencies": {
+ "electron": "^26.2.0",
+ "wrangler": "^4.7.1"
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

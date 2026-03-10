@@ -1,0 +1,18 @@
+name = "eeos-api"
+main = "cloudflare/worker.js"
+compatibility_date = "2026-03-09"
+
+routes = [
+	{ pattern = "api.eeos.work/api/*", zone_name = "eeos.work" },
+	{ pattern = "api.eeos.work/*", zone_name = "eeos.work" },
+	{ pattern = "revelrylabs.eeos.work/api/*", zone_name = "eeos.work" },
+	{ pattern = "revelrylabs.eeos.work/*", zone_name = "eeos.work" }
+]
+
+[vars]
+POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eeos"
+database_id = "b2aae14e-2569-41c3-b670-84e2029e1a7e"

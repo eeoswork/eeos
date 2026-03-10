@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.wrangler/
+.restore-backup-2026-02-19/
+.DS_Store
