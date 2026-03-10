@@ -4520,6 +4520,7 @@ function initializeLandingSetupFlow() {
 
     const localCityRow = $("setupLocalCityRow");
     const localCityInput = $("setupLocalCity");
+    const magicSetupDefaults = getMagicLinkSetupDefaultsForCurrentPath();
     const localCityTriggers = new Set([
       "In-person (outside the office)",
       "In-office events",
@@ -4548,6 +4549,10 @@ function initializeLandingSetupFlow() {
     });
 
     if (localCityInput) {
+      const magicLocalCity = String(magicSetupDefaults?.localCity || "").trim();
+      localCityInput.placeholder = magicLocalCity
+        ? `e.g. ${magicLocalCity}`
+        : "e.g. New Orleans, Minneapolis, Boston";
       localCityInput.addEventListener("input", (e) => {
         if (isCompletedStepEditBlocked(4)) {
           e.target.value = state.landingDraft.localCity || "";
