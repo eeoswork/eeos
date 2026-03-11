@@ -1462,6 +1462,7 @@ function normalizePromoteEventState() {
   ensureStepStatus("announcement");
   ensureStepStatus("reminderWeek");
   ensureStepStatus("reminderDayOf");
+  ensureStepStatus("finalWinner");
 
   if (!promote.messages || typeof promote.messages !== "object") {
     promote.messages = {};
@@ -9293,6 +9294,7 @@ function renderPromoteEventStep() {
     if (stepKey === "calendar") return promote.calendar;
     if (stepKey === "announcement") return promote.announcement;
     if (stepKey === "reminder_week") return promote.reminderWeek;
+    if (stepKey === "final_winner") return promote.finalWinner;
     return promote.reminderDayOf;
   };
 
@@ -9370,20 +9372,29 @@ function renderPromoteEventStep() {
     ].join("\r\n");
   };
 
-  const processSteps = [
-    { key: "calendar", label: "Calendar invite", title: "Calendar invite" },
-    { key: "announcement", label: "Announcement", title: "Announcement" },
-    { key: "reminder_week", label: "Reminder (1 week out)", title: "Reminder (1 week out)" },
-    { key: "reminder_dayof", label: "Reminder (day of)", title: "Reminder (day of)" }
-  ];
+  const processSteps = (isMagicLinkContext && isMarchMadnessEvent)
+    ? [
+        { key: "announcement", label: "Launch Announcement", title: "Launch Announcement" },
+        { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" },
+        { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
+        { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
+      ]
+    : [
+        { key: "calendar", label: "Calendar invite", title: "Calendar invite" },
+        { key: "announcement", label: "Announcement", title: "Announcement" },
+        { key: "reminder_week", label: "Reminder (1 week out)", title: "Reminder (1 week out)" },
+        { key: "reminder_dayof", label: "Reminder (day of)", title: "Reminder (day of)" }
+      ];
   const doneFlags = {
     calendar: Boolean(promote.calendar.done),
     announcement: Boolean(promote.announcement.done),
     reminder_week: Boolean(promote.reminderWeek.done),
-    reminder_dayof: Boolean(promote.reminderDayOf.done)
+    reminder_dayof: Boolean(promote.reminderDayOf.done),
+    final_winner: Boolean(promote.finalWinner?.done)
   };
-  const isPromoteCompleted = doneFlags.calendar && doneFlags.announcement && doneFlags.reminder_week && doneFlags.reminder_dayof;
-  const activeStep = PROMOTE_STEP_ORDER.includes(promote.activeStep) ? promote.activeStep : "calendar";
+  const isPromoteCompleted = processSteps.every((step) => doneFlags[step.key]);
+  const validStepKeys = processSteps.map((s) => s.key);
+  const activeStep = validStepKeys.includes(promote.activeStep) ? promote.activeStep : (validStepKeys[0] || "calendar");
   const activeIndex = processSteps.findIndex((item) => item.key === activeStep);
   const promoteProgressStages = processSteps.map((step) => step.label);
   const promoteCompletedIndexes = processSteps
@@ -9456,7 +9467,7 @@ function renderPromoteEventStep() {
 
     if (stepKey === "announcement") {
       return `
-        ${!doneFlags.calendar ? `<div class="mt-2 text-xs text-slate-500">Calendar invite not marked as sent yet (recommended before announcing).</div>` : ""}
+        ${!doneFlags.calendar && !(isMagicLinkContext && isMarchMadnessEvent) ? `<div class="mt-2 text-xs text-slate-500">Calendar invite not marked as sent yet (recommended before announcing).</div>` : ""}
         ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
         <div class="mt-3 text-sm text-slate-600">Post the announcement to your team channel.</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(announcementMessage)}</div>
@@ -9491,6 +9502,25 @@ function renderPromoteEventStep() {
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" data-promote-complete="reminder_week" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_week ? "checked" : ""} />
             <span>1-week reminder sent</span>
+          </label>
+        </div>
+      `;
+    }
+
+    if (stepKey === "final_winner") {
+      return `
+        <div class="mt-3 text-sm text-slate-600">Send this announcement when the final winner is decided.</div>
+        <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy message</button>
+          <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+        </div>
+        <div class="mt-4 flex items-center justify-end gap-3">
+          ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" data-promote-complete="final_winner" class="h-4 w-4 rounded border-slate-300" ${doneFlags.final_winner ? "checked" : ""} />
+            <span>Final winner announcement sent</span>
           </label>
         </div>
       `;
@@ -9544,7 +9574,7 @@ function renderPromoteEventStep() {
           <p class="mt-1 text-sm text-slate-600" style="${promoteHeaderDescriptionStyle}">Let Revelers know the bracket challenge is live, and keep the excitement going throughout the tournament with weekly leaderboard updates.</p>
           <p class="mt-2 text-xs text-slate-500">${escapeHtml(promoteHeaderSummary)}</p>
         </div>
-        <span class="inline-flex h-7 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600">${isPromoteCompleted ? "✓ Completed" : "● In progress"}</span>
+        <span class="inline-flex h-7 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600 whitespace-nowrap">${isPromoteCompleted ? "✓ Completed" : "● In progress"}</span>
       </div>
     </div>
 
@@ -9568,7 +9598,7 @@ function renderPromoteEventStep() {
 
   const setActiveStep = (stepKey) => {
     normalizePromoteEventState();
-    if (!PROMOTE_STEP_ORDER.includes(stepKey)) return;
+    if (!processSteps.some((s) => s.key === stepKey)) return;
     state.promoteEvent.activeStep = stepKey;
     state.promoteEvent.collapsedStep = "";
     persistState();
@@ -9604,10 +9634,13 @@ function renderPromoteEventStep() {
     } else if (stepKey === "reminder_dayof") {
       state.promoteEvent.reminderDayOf.done = done;
       state.promoteEvent.reminderDayOf.doneAt = stamp;
+    } else if (stepKey === "final_winner") {
+      state.promoteEvent.finalWinner.done = done;
+      state.promoteEvent.finalWinner.doneAt = stamp;
     }
     if (done) {
-      const currentIndex = PROMOTE_STEP_ORDER.indexOf(stepKey);
-      const nextStep = PROMOTE_STEP_ORDER[currentIndex + 1];
+      const currentIndex = processSteps.findIndex((s) => s.key === stepKey);
+      const nextStep = processSteps[currentIndex + 1]?.key;
       if (nextStep) {
         state.promoteEvent.activeStep = nextStep;
         state.promoteEvent.collapsedStep = "";
