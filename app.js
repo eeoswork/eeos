@@ -9341,21 +9341,30 @@ function renderPromoteEventStep() {
     "",
     "Create your bracket and compete with fellow Revelers to see who predicts the tournament best.",
     "",
-    "Join the women\u2019s challenge here: https://shorturl.at/tleLy",
+    "Join the challenges:",
     "",
-    "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ",
+    "Women\u2019s bracket here (url: https://shorturl.at/tleLy)",
     "",
-    "Password for both is Revelry2026",
+    "Men\u2019s bracket here (url: https://shorturl.at/Jv9yZ)",
     "",
+    "Password for both: Revelry2026",
     "",
-    "Make sure your bracket is submitted before the first tournament games begin...",
+    "Bracket submission deadlines:",
     "",
-    "- Thursday, March 19 @ 12:15p ET for the men\u2019s",
-    "- Friday, March 20 @ 11:30a ET for the women\u2019s",
+    "Men\u2019s tournament: Thursday, March 19 @ 12:15 PM ET",
+    "Women\u2019s tournament: Friday, March 20 @ 11:30 AM ET",
     "",
-    "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your co-workers!",
+    "Make sure your bracket is submitted before the first games begin.",
     "",
-    "How to Join a Tournament Challenge Group: https://shorturl.at/RH6Jk",
+    "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your coworkers.",
+    "",
+    "How to Join",
+    "\t1.\tClick the link for the men\u2019s or women\u2019s challenge.",
+    "\t2.\tEnter the password above.",
+    "\t3.\tFill out your bracket by predicting the winner of each game.",
+    "\t4.\tSubmit your bracket before the tournament begins.",
+    "",
+    "Good luck\u2014and enjoy the madness!",
   ].join("\n");
 
   const parseDateFromContext = () => {
@@ -9509,23 +9518,16 @@ function renderPromoteEventStep() {
               const simpleBoldLines = new Set([
                 "\ud83c\udfc0 March Madness Bracket Challenge is back!",
               ]);
-              const italicPrefixes = ["How to Join a Tournament Challenge Group:"];
-              const linkedBoldLines = {
-                "Join the women\u2019s challenge here: https://shorturl.at/tleLy": { prefix: "Join the women\u2019s challenge ", url: "https://shorturl.at/tleLy" },
-                "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ": { prefix: "Join the men\u2019s challenge ", url: "https://shorturl.at/Jv9yZ" },
+              const linkedLines = {
+                "Women\u2019s bracket here (url: https://shorturl.at/tleLy)": { prefix: "Women\u2019s bracket ", url: "https://shorturl.at/tleLy" },
+                "Men\u2019s bracket here (url: https://shorturl.at/Jv9yZ)": { prefix: "Men\u2019s bracket ", url: "https://shorturl.at/Jv9yZ" },
               };
               return marchMadnessAnnouncementSlackMessage.split("\n").map(line => {
                 const escaped = escapeHtml(line);
                 if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
-                if (linkedBoldLines[line]) {
-                  const { prefix, url } = linkedBoldLines[line];
+                if (linkedLines[line]) {
+                  const { prefix, url } = linkedLines[line];
                   return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">here</a>`;
-                }
-                if (italicPrefixes.some(p => line.startsWith(p))) {
-                  const colonIdx = line.indexOf(": ");
-                  const label = escapeHtml(line.slice(0, colonIdx + 2));
-                  const url = escapeHtml(line.slice(colonIdx + 2).trim());
-                  return `<em>${label}<a href="${line.slice(colonIdx + 2).trim()}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">${url}</a></em>`;
                 }
                 return escaped;
               }).join("\n");
