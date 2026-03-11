@@ -3868,8 +3868,8 @@ function getMagicLinkFourMonthOverride() {
         {
           month: 1,
           templateId: "march-madness",
-          title: "March Madness Brackets Challenge",
-          description: "Team-based competition with interactive bracket predictions and live leaderboard tracking.",
+          title: "Sports competition",
+          description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights and a prize.",
           type: "poll",
           estimatedCost: 0,
           goals: ["Team Connection & Culture"],
