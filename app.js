@@ -9274,7 +9274,7 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const isMarchMadnessEvent = String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
+  const isMarchMadnessEvent = isRevelryLabsReadOnlyMagicLink() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
     ? "Promote the Bracket Challenge"
     : "Promote Event";
@@ -9355,8 +9355,6 @@ function renderPromoteEventStep() {
     "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your co-workers!",
     "",
     "How to Join a Tournament Challenge Group: https://shorturl.at/RH6Jk",
-    "",
-    "If not, do it now!!!!!!",
   ].join("\n");
 
   const parseDateFromContext = () => {
@@ -9506,7 +9504,20 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
-            <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : escapeHtml(marchMadnessAnnouncementSlackMessage)}</div>
+            <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : (() => {
+              const boldLines = new Set([
+                "\ud83c\udfc0 March Madness Bracket Challenge is back!",
+                "Join the women\u2019s challenge here: https://shorturl.at/tleLy",
+                "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ",
+              ]);
+              const italicPrefixes = ["How to Join a Tournament Challenge Group:"];
+              return marchMadnessAnnouncementSlackMessage.split("\n").map(line => {
+                const escaped = escapeHtml(line);
+                if (boldLines.has(line)) return `<strong>${escaped}</strong>`;
+                if (italicPrefixes.some(p => line.startsWith(p))) return `<em>${escaped}</em>`;
+                return escaped;
+              }).join("\n");
+            })()}</div>
           </div>
           <div class="${rowBase}">
             <button type="button" data-promote-action="copy-announcement" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy message</button>
