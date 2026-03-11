@@ -7809,7 +7809,8 @@ const feedbackUiState = {
 };
 
 const promoteUiState = {
-  announcementChannel: "slack"
+  announcementChannel: "slack",
+  copiedAction: null
 };
 
 function getPollCloseCountdownStatus(deadlineValue) {
@@ -9505,22 +9506,34 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
             <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : (() => {
-              const boldLines = new Set([
+              const simpleBoldLines = new Set([
                 "\ud83c\udfc0 March Madness Bracket Challenge is back!",
-                "Join the women\u2019s challenge here: https://shorturl.at/tleLy",
-                "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ",
               ]);
               const italicPrefixes = ["How to Join a Tournament Challenge Group:"];
+              const linkedBoldLines = {
+                "Join the women\u2019s challenge here: https://shorturl.at/tleLy": { prefix: "Join the women\u2019s challenge ", url: "https://shorturl.at/tleLy" },
+                "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ": { prefix: "Join the men\u2019s challenge ", url: "https://shorturl.at/Jv9yZ" },
+              };
               return marchMadnessAnnouncementSlackMessage.split("\n").map(line => {
                 const escaped = escapeHtml(line);
-                if (boldLines.has(line)) return `<strong>${escaped}</strong>`;
-                if (italicPrefixes.some(p => line.startsWith(p))) return `<em>${escaped}</em>`;
+                if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
+                if (linkedBoldLines[line]) {
+                  const { prefix, url } = linkedBoldLines[line];
+                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">here</a>`;
+                }
+                if (italicPrefixes.some(p => line.startsWith(p))) {
+                  const colonIdx = line.indexOf(": ");
+                  const label = escapeHtml(line.slice(0, colonIdx + 2));
+                  const url = escapeHtml(line.slice(colonIdx + 2).trim());
+                  return `<em>${label}<a href="${line.slice(colonIdx + 2).trim()}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">${url}</a></em>`;
+                }
                 return escaped;
               }).join("\n");
             })()}</div>
           </div>
           <div class="${rowBase}">
-            <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">Copy message</button>
+            <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-announcement" ? "✓ Copied" : "Copy message"}</button>
+            ${promoteUiState.copiedAction === "copy-announcement" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
             ${useEmail
               ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>`
               : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>`
@@ -9562,7 +9575,8 @@ function renderPromoteEventStep() {
         <div class="mt-2 text-xs text-slate-500">When: 1 week before</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderWeekMessage)}</div>
         <div class="${rowBase}">
-          <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">Copy message</button>
+          <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
+          ${promoteUiState.copiedAction === "copy-reminder-week" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
           <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
         </div>
@@ -9581,7 +9595,8 @@ function renderPromoteEventStep() {
         <div class="mt-3 text-sm text-slate-600">Send this announcement when the final winner is decided.</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
         <div class="mt-4 flex flex-wrap items-center gap-2">
-          <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">Copy message</button>
+          <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+          ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
           <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
         </div>
@@ -9601,7 +9616,8 @@ function renderPromoteEventStep() {
       <div class="mt-2 text-xs text-slate-500">When: day of (morning)</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
       <div class="mt-4 flex flex-wrap items-center gap-2">
-        <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">Copy message</button>
+        <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+        ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
         <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
         <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
       </div>
@@ -9778,14 +9794,23 @@ function renderPromoteEventStep() {
         } else {
           copyToClipboard(announcementMessage);
         }
+        promoteUiState.copiedAction = "copy-announcement";
+        renderPromoteEventStep();
+        setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
         return;
       }
       if (action === "copy-reminder-week") {
         copyToClipboard(reminderWeekMessage);
+        promoteUiState.copiedAction = "copy-reminder-week";
+        renderPromoteEventStep();
+        setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
         return;
       }
       if (action === "copy-reminder-dayof") {
         copyToClipboard(reminderDayOfMessage);
+        promoteUiState.copiedAction = "copy-reminder-dayof";
+        renderPromoteEventStep();
+        setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
         return;
       }
       if (action === "open-slack") {
