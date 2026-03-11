@@ -9546,7 +9546,7 @@ function renderPromoteEventStep() {
       if (isMagicLinkContext && isMarchMadnessEvent) {
         const useEmail = promoteUiState.announcementChannel === "email";
         return `
-          <div class="mt-3 text-sm text-slate-600">Send this message to your team via either Slack or Gmail to invite everyone to join the bracket challenge.</div>
+          <div class="mt-3 text-sm text-slate-600">Send this message to your team via Slack or email to invite everyone to join the bracket challenge.</div>
           <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700" style="min-height: 80px;">
             <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
@@ -9620,11 +9620,12 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
             }
           </div>
           ${promoteUiState.copiedAction === "copy-announcement" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
+          <div class="mt-3 text-sm text-slate-500">After sharing the announcement with the team, come back here to complete this step.</div>
           <div class="mt-4 flex items-center justify-end gap-3">
             ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
             <label class="inline-flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
-              <span>Announcement posted</span>
+              <span>I posted the announcement to my team</span>
             </label>
           </div>
         `;
