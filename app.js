@@ -151,7 +151,7 @@ const INTEREST_DESCRIPTIONS = {
 
 
 
-const CADENCE_OPTIONS = ["Weekly", "Biweekly", "Monthly", "Quarterly"];
+const CADENCE_OPTIONS = ["Monthly", "Every 2 months", "Quarterly"];
 const SCHEDULE_OPTIONS = [
   "Remote / virtual",
   "In-person (outside the office)",
@@ -517,7 +517,8 @@ landingDraft: {
   timesSelected: ["After 5p"],
   localCity: "",
   surveyAnswers: {}
-}
+},
+fourMonthProgram: null
 };
 
 
@@ -1281,6 +1282,87 @@ return transactions.reduce((sum, tx) => {
 
 function getRemainingBudget() {
 return getBudgetTotal() - getTotalSpent();
+}
+
+function getDateWithinCurrentQuarter(rawValue) {
+  const value = String(rawValue || "").trim();
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const now = new Date();
+  const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+  const quarterStart = new Date(now.getFullYear(), quarterStartMonth, 1);
+  const quarterEnd = new Date(now.getFullYear(), quarterStartMonth + 3, 1);
+  return parsed >= quarterStart && parsed < quarterEnd ? parsed : null;
+}
+
+function getIdentityKeyFromRow(row, prefix, index) {
+  const fingerprint = String(row?.fingerprint || row?.voter_fingerprint || row?.voterFingerprint || "").trim().toLowerCase();
+  if (fingerprint) return `fp:${fingerprint}`;
+  const email = String(row?.email || "").trim().toLowerCase();
+  if (email) return `email:${email}`;
+  const name = String(row?.name || row?.voterName || "").trim().toLowerCase();
+  if (name) return `name:${name}`;
+  return `${prefix}:${index}`;
+}
+
+function calculateEngagementMetrics() {
+  const employeeCount = Math.max(0, Number(state.programSettings?.employeeCount || state.landingDraft?.employeeCount || 0));
+  const pollResponses = Array.isArray(state.pollBuilder?.responses) ? state.pollBuilder.responses : [];
+  const pollParticipants = new Set();
+  pollResponses.forEach((row, index) => {
+    pollParticipants.add(getIdentityKeyFromRow(row, "poll", index));
+  });
+
+  const rsvpResults = state.pollBuilder?.rsvpResults && typeof state.pollBuilder.rsvpResults === "object"
+    ? state.pollBuilder.rsvpResults
+    : null;
+  const rsvpRows = Array.isArray(rsvpResults?.responses) ? rsvpResults.responses : [];
+  const rsvpParticipants = new Set();
+  rsvpRows.forEach((row, index) => {
+    rsvpParticipants.add(getIdentityKeyFromRow(row, "rsvp", index));
+  });
+
+  const yesFromRows = rsvpRows.filter((row) => String(row?.answer || "").trim().toLowerCase() === "yes").length;
+  const yesCount = Number.isFinite(Number(rsvpResults?.yesCount))
+    ? Math.max(0, Number(rsvpResults.yesCount))
+    : yesFromRows;
+
+  const bookedEvents = Array.isArray(state.eventsBooked) ? state.eventsBooked : [];
+  const bookedThisQuarter = bookedEvents.filter((eventItem) => {
+    const parsed = getDateWithinCurrentQuarter(eventItem?.date);
+    // Include undated entries in MVP so we do not hide valid legacy records.
+    if (!String(eventItem?.date || "").trim()) return true;
+    return Boolean(parsed);
+  });
+  const fallbackRsvpCount = bookedThisQuarter.reduce((sum, eventItem) => sum + Math.max(0, Number(eventItem?.rsvps || 0)), 0);
+  const pollParticipantCount = pollParticipants.size;
+  const rsvpParticipantCount = rsvpParticipants.size || fallbackRsvpCount;
+  const expectedAttendanceCount = yesCount || fallbackRsvpCount;
+  const eventsRunCount = bookedThisQuarter.filter((eventItem) => Number(eventItem?.attendance || 0) > 0).length;
+
+  const pollParticipationPercent = employeeCount > 0
+    ? Math.max(0, Math.min(100, Math.round((pollParticipantCount / employeeCount) * 100)))
+    : 0;
+  const rsvpParticipationPercent = employeeCount > 0
+    ? Math.max(0, Math.min(100, Math.round((rsvpParticipantCount / employeeCount) * 100)))
+    : 0;
+
+  const pollsCreated = String(state.pollBuilder?.pollId || "").trim() ? 1 : 0;
+  const rsvpsCreated = String(state.pollBuilder?.rsvpId || "").trim() ? 1 : 0;
+
+  return {
+    employeeCount,
+    pollParticipantCount,
+    rsvpParticipantCount,
+    expectedAttendanceCount,
+    eventsRunCount,
+    pollParticipationPercent,
+    rsvpParticipationPercent,
+    pollsCreated,
+    rsvpsCreated,
+    planningActivityCount: pollsCreated + rsvpsCreated
+  };
 }
 
 
@@ -3717,8 +3799,279 @@ $("impactSatisfaction").textContent = `${avgSat.toFixed(1)}/5`;
 $("impactCostPerParticipant").textContent = fmtMoney(cpp);
 }
 
+function renderEngagementCard() {
+  const card = $("teamEngagementCard");
+  if (!card) return;
+  const metrics = calculateEngagementMetrics();
+  const usingPercentages = metrics.employeeCount > 0;
+  const pollValue = usingPercentages
+    ? `${metrics.pollParticipationPercent}%`
+    : `${metrics.pollParticipantCount}`;
+  const rsvpValue = usingPercentages
+    ? `${metrics.rsvpParticipationPercent}%`
+    : `${metrics.rsvpParticipantCount}`;
+  const pollDetail = usingPercentages
+    ? `${metrics.pollParticipantCount} of ${metrics.employeeCount} employees`
+    : "Responders";
+  const rsvpDetail = usingPercentages
+    ? `${metrics.rsvpParticipantCount} of ${metrics.employeeCount} employees`
+    : "Responders";
+
+  card.innerHTML = `
+    <h2 class="text-base font-semibold mb-3">Team Engagement</h2>
+    <div class="space-y-2 text-sm">
+      <div class="metric-row"><span>Poll participation</span><strong>${pollValue}</strong></div>
+      <div class="text-[11px] text-slate-500 -mt-1">${pollDetail}</div>
+      <div class="metric-row"><span>RSVP participation</span><strong>${rsvpValue}</strong></div>
+      <div class="text-[11px] text-slate-500 -mt-1">${rsvpDetail}</div>
+      <div class="metric-row"><span>Expected attendance</span><strong>${metrics.expectedAttendanceCount} employees</strong></div>
+      <div class="metric-row"><span>Events run this quarter</span><strong>${metrics.eventsRunCount}</strong></div>
+    </div>
+    <p class="mt-3 text-[11px] text-slate-500">Engagement improves when teams participate in events.</p>
+    <p class="mt-1 text-[11px] text-slate-500">Planning activity: ${metrics.planningActivityCount} (${metrics.pollsCreated} poll${metrics.pollsCreated === 1 ? "" : "s"}, ${metrics.rsvpsCreated} RSVP${metrics.rsvpsCreated === 1 ? "" : "s"})</p>
+  `;
+}
 
 
+
+
+function getFourMonthCategoryPills() {
+  // Magic link specific overrides
+  const parsedMagicLink = parseMagicLinkFromHostPath();
+  if (parsedMagicLink?.host === "revelrylabs.eeos.work" && parsedMagicLink?.tokenId === "rlabs2026a1b2c3d4") {
+    return [
+      "Budget-friendly team engagement",
+      "Premium virtual experience",
+      "Quick and easy team bonding",
+      "Morale-boosting group outing"
+    ];
+  }
+  // Default generic pills
+  return [
+    "Budget-friendly team event",
+    "Celebration moment",
+    "Easy team bonding",
+    "Team building activity"
+  ];
+}
+
+function getMagicLinkFourMonthOverride() {
+  const parsedMagicLink = parseMagicLinkFromHostPath();
+  if (!parsedMagicLink) return null;
+  
+  const magicKey = `${parsedMagicLink.host}/${parsedMagicLink.tokenId}`;
+  
+  // Override for revelrylabs.eeos.work
+  if (magicKey === "revelrylabs.eeos.work/rlabs2026a1b2c3d4") {
+    return {
+      events: [
+        {
+          month: 1,
+          templateId: "march-madness",
+          title: "March Madness Brackets Challenge",
+          description: "Team-based competition with interactive bracket predictions and live leaderboard tracking.",
+          type: "poll",
+          estimatedCost: 0,
+          goals: ["Team Connection & Culture"],
+          score: 1.0
+        },
+        {
+          month: 2,
+          isConfettiMonth: true,
+          confettiOptions: [
+            {
+              templateId: "confetti-large-group",
+              title: "Large Group Event",
+              description: "Premium virtual or in-person experience for high-engagement celebration.",
+              type: "rsvp",
+              estimatedCost: 0,
+              goals: ["Team Connection & Culture"],
+              score: 1.0
+            }
+          ],
+          estimatedCost: 0
+        },
+        {
+          month: 3,
+          templateId: "coffee-meetup",
+          title: "Coffee Meetup",
+          description: "Casual, quick team connection over coffee locally or virtually.",
+          type: "rsvp",
+          estimatedCost: 0,
+          goals: ["Team Connection & Culture"],
+          score: 1.0
+        },
+        {
+          month: 4,
+          templateId: "volunteering-lower9",
+          title: "Volunteering: Lower 9th Ward Food Pantry",
+          description: "Team volunteering opportunity supporting community at food pantry.",
+          type: "rsvp",
+          estimatedCost: 0,
+          goals: ["Volunteering"],
+          score: 1.0
+        }
+      ],
+      totalBudget: 0,
+      totalEstimatedCost: 0,
+      remainingBudget: 0
+    };
+  }
+  
+  return null;
+}
+
+function applyMagicLinkFourMonthOverride(program) {
+  const override = getMagicLinkFourMonthOverride();
+  if (!override) return program;
+  
+  // Merge override events into program, preserving budget calcs from original
+  return {
+    ...program,
+    events: override.events,
+    totalEstimatedCost: override.totalEstimatedCost,
+    remainingBudget: program.remainingBudget || 0
+  };
+}
+
+function renderFourMonthProgram() {
+  const container = $("monthlyEvents");
+  const budgetSummary = $("fourMonthBudgetSummary");
+  if (!container || !state.fourMonthProgram) return;
+
+  const program = state.fourMonthProgram;
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  // Get current month (0-11)
+  const currentMonth = new Date().getMonth();
+  const categoryPills = getFourMonthCategoryPills();
+  const nextEventIndex = (program.events || []).findIndex((eventItem) => !eventItem?.completed && !eventItem?.created);
+  const highlightedIndex = nextEventIndex >= 0 ? nextEventIndex : 0;
+
+  // Update budget summary
+  if (budgetSummary) {
+    $("progBudgetTotal").textContent = fmtMoney(program.totalBudget || 0);
+    $("progBudgetEstimated").textContent = fmtMoney(program.totalEstimatedCost || 0);
+    $("progBudgetRemaining").textContent = fmtMoney(program.remainingBudget || 0);
+  }
+
+  // Render 4 months (stacked vertically, collapsed by default)
+  container.innerHTML = (program.events || []).map((monthEvent, index) => {
+    const monthIndex = (currentMonth + index) % 12;
+    const monthName = monthNames[monthIndex];
+    const cardId = `month-card-${index + 1}`;
+    const categoryPill = categoryPills[index] || "Event";
+    const isNextEvent = index === highlightedIndex;
+    const nextEventBadge = isNextEvent
+      ? '<span style="display: inline-block; background: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; white-space: nowrap;">Next event</span>'
+      : "";
+    const cardBorderStyle = "1px solid #e2e8f0";
+    const cardShadowStyle = isNextEvent ? "0 6px 18px rgba(15, 23, 42, 0.10)" : "0 1px 2px rgba(15, 23, 42, 0.04)";
+    const headerBackgroundStyle = isNextEvent ? "#f1f5f9" : "#f8fafc";
+
+    // Month 2: Confetti options
+    if (monthEvent.isConfettiMonth && Array.isArray(monthEvent.confettiOptions)) {
+      const options = monthEvent.confettiOptions || [];
+      return `
+        <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="false" ${isNextEvent ? 'aria-label="Next event"' : ""}>
+          <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="display: inline-flex; align-items: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 text-slate-500" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 2.25v2.25m7.5-2.25v2.25M3.75 8.25h16.5M4.5 4.5h15a.75.75 0 01.75.75v14.25a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V5.25A.75.75 0 014.5 4.5z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12h.008v.008H8.25V12zm3.75 0h.008v.008H12V12zm3.75 0h.008v.008h-.008V12zM8.25 15h.008v.008H8.25V15zm3.75 0h.008v.008H12V15zm3.75 0h.008v.008h-.008V15z" />
+                    </svg>
+                    <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
+                  </div>
+                  <span style="display: inline-block; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">🎉 ${escapeHtml(categoryPill)}</span>
+                  ${nextEventBadge}
+                </div>
+                <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
+              </div>
+            </div>
+            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">▸</span>
+          </div>
+          <div class="four-month-content" style="display: none; padding: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+              ${options.map((option, idx) => `
+                <div style="padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;">
+                  <h5 class="font-medium text-sm text-slate-900">${escapeHtml(option.title || "")}</h5>
+                  <p class="text-xs text-slate-600 mt-1">${escapeHtml(option.description || "")}</p>
+                  <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="text-xs text-slate-500">Est. cost: <strong>${fmtMoney(option.estimatedCost || 0)}</strong></span>
+                    <button class="rounded px-2 py-1 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="select-confetti" data-template-id="${escapeHtml(option.templateId || "")}">Select</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Regular months with single event
+    const event = monthEvent;
+    const typeLabel = event.type === "poll" ? "📊 Poll" : event.type === "rsvp" ? "✓ RSVP" : "🔗 External";
+    return `
+      <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="false" ${isNextEvent ? 'aria-label="Next event"' : ""}>
+        <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 text-slate-500" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 2.25v2.25m7.5-2.25v2.25M3.75 8.25h16.5M4.5 4.5h15a.75.75 0 01.75.75v14.25a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V5.25A.75.75 0 014.5 4.5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12h.008v.008H8.25V12zm3.75 0h.008v.008H12V12zm3.75 0h.008v.008h-.008V12zM8.25 15h.008v.008H8.25V15zm3.75 0h.008v.008H12V15zm3.75 0h.008v.008h-.008V15z" />
+                  </svg>
+                  <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
+                </div>
+                <span style="display: inline-block; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+                ${nextEventBadge}
+              </div>
+              <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
+            </div>
+          </div>
+          <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">▸</span>
+        </div>
+        <div class="four-month-content" style="display: none; padding: 16px; border-top: 1px solid #e2e8f0;">
+          <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(event.title || "")}</h4>
+          <p class="text-sm text-slate-600 mt-2">${escapeHtml(event.description || "")}</p>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px; color: #64748b;">
+              <div>${typeLabel}</div>
+              <div style="margin-top: 4px; font-weight: 600; color: #0f172a;">Est. cost: ${fmtMoney(event.estimatedCost || 0)}</div>
+            </div>
+            <button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Create This Event</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Add click handlers for expand/collapse
+  setTimeout(() => {
+    document.querySelectorAll(".four-month-header").forEach((header) => {
+      header.addEventListener("click", () => {
+        const card = header.closest(".four-month-card");
+        const content = card.querySelector(".four-month-content");
+        const arrow = header.querySelector(".four-month-arrow");
+        const isExpanded = card.dataset.expanded === "true";
+
+        if (isExpanded) {
+          content.style.display = "none";
+          arrow.textContent = "▸";
+          card.dataset.expanded = "false";
+        } else {
+          content.style.display = "block";
+          arrow.textContent = "▾";
+          card.dataset.expanded = "true";
+        }
+      });
+    });
+  }, 0);
+}
 
 function renderBrowserPanel() {
 const panel = $("browserPanel");
@@ -4109,6 +4462,62 @@ if (action === "close-browser-tab") {
 
 
 
+if (action === "select-confetti") {
+  const templateId = actionTarget.dataset.templateId;
+  if (window.updateConfettiSelection && typeof window.updateConfettiSelection === "function" && state.fourMonthProgram) {
+    state.fourMonthProgram = window.updateConfettiSelection(state.fourMonthProgram, templateId);
+    persistState();
+    renderFourMonthProgram();
+  }
+  return;
+}
+
+
+
+
+if (action === "create-event") {
+  const templateId = actionTarget.dataset.templateId;
+  const month = Number(actionTarget.dataset.month || 0);
+  
+  // Look up template from EVENT_TEMPLATES
+  if (!window.EVENT_TEMPLATES || !Array.isArray(window.EVENT_TEMPLATES)) {
+    showMiniToast("Event templates not loaded");
+    return;
+  }
+  
+  const template = window.EVENT_TEMPLATES.find(t => String(t.id) === String(templateId));
+  if (!template) {
+    showMiniToast("Event template not found");
+    return;
+  }
+  
+  // Route based on event type
+  if (template.type === "poll") {
+    // Pre-populate poll builder with this event
+    state.pollBuilder.selectedEventIds = [templateId];
+    state.pollBuilder.eventLabelOverrides[templateId] = template.title;
+    // TODO: Navigate to poll builder UI or trigger poll generation
+    showMiniToast("Poll event selected — poll builder coming soon");
+  } else if (template.type === "rsvp") {
+    // Pre-populate RSVP builder with this event
+    state.pollBuilder.selectedEventIds = [templateId];
+    state.pollBuilder.eventLabelOverrides[templateId] = template.title;
+    // TODO: Navigate to RSVP builder UI or trigger RSVP generation
+    showMiniToast("RSVP event selected — RSVP builder coming soon");
+  } else if (template.type === "external") {
+    // Open the vendor URL
+    if (template.url) {
+      openVendorUrl(template.url, template.title);
+    }
+  }
+  
+  persistState();
+  return;
+}
+
+
+
+
 if (action === "complete-step") {
   const step = Number(actionTarget.dataset.step || 0);
   if (step === 1 && state.eventsSelected.length !== 3) {
@@ -4129,6 +4538,8 @@ renderProgramSetupForm();
 renderSidebar();
 renderWorkflowStepper();
 renderImpact();
+renderEngagementCard();
+renderFourMonthProgram();
 renderBrowserPanel();
 
 
@@ -5395,6 +5806,15 @@ function attachSetupStepHandlers() {
       // Generate recommended events when advancing from final setup step
       if (step === 6) {
         generateRecommendedEvents();
+        
+        // Generate 4-month Employee Experience Program
+        if (window.generateFourMonthProgram && typeof window.generateFourMonthProgram === "function") {
+          state.fourMonthProgram = window.generateFourMonthProgram(state.programSettings);
+          
+          // Apply magic link overrides if applicable
+          state.fourMonthProgram = applyMagicLinkFourMonthOverride(state.fourMonthProgram);
+        }
+        
         // One-time auto-collapse after final setup step is completed
         if (!state.sidebarSetupAutoCollapsed) {
           state.sidebarSetupExpanded = false;
@@ -5406,6 +5826,20 @@ function attachSetupStepHandlers() {
       // Advance to next step if exists (book mode intentionally skips poll step and jumps to Book Event)
       if (step < 13 && !(step === 7 && state.setupShortlistMode === "book")) {
         state.currentSetupStep = step + 1;
+      }
+      
+      // After setup completes (step 6), navigate to Shortlist Events (step 7) with expanded view
+      if (step === 6) {
+        persistState();
+        renderSetupStepStates();
+        renderSidebarStepMenus();
+        updateSetupStepButtonStates();
+        renderFourMonthProgram();
+        // Scroll to step 7 and ensure it's visible
+        setTimeout(() => {
+          scrollSetupStepIntoView(7, "smooth");
+        }, 100);
+        return; // Skip rest of handler to avoid extra rendering
       }
 
       if (step === 7 && state.setupShortlistMode === "book") {
@@ -9279,6 +9713,21 @@ function renderReviewImpactStep() {
   const panel = document.getElementById("reviewImpactPanel");
   if (!panel) return;
 
+  const engagement = calculateEngagementMetrics();
+  const usingEngagementPercents = engagement.employeeCount > 0;
+  const pollEngagementValue = usingEngagementPercents
+    ? `${engagement.pollParticipationPercent}%`
+    : `${engagement.pollParticipantCount} responders`;
+  const rsvpEngagementValue = usingEngagementPercents
+    ? `${engagement.rsvpParticipationPercent}%`
+    : `${engagement.rsvpParticipantCount} responders`;
+  const pollEngagementDetail = usingEngagementPercents
+    ? `${engagement.pollParticipantCount} of ${engagement.employeeCount} employees`
+    : "Employee count not set";
+  const rsvpEngagementDetail = usingEngagementPercents
+    ? `${engagement.rsvpParticipantCount} of ${engagement.employeeCount} employees`
+    : "Employee count not set";
+
   const bookedEvents = Array.isArray(state.eventsBooked) ? [...state.eventsBooked] : [];
   const totalBudget = Number(getBudgetTotal() || 0);
   const spent = Number(getTotalSpent() || 0);
@@ -9449,6 +9898,20 @@ function renderReviewImpactStep() {
           </table>
         </div>
       </div>
+    </article>
+
+    <article class="rounded-xl border border-slate-200 bg-white p-5">
+      <h4 class="text-base font-semibold text-slate-900">Team Engagement</h4>
+      <div class="mt-3 space-y-2 text-sm">
+        <div class="metric-row"><span>Poll participation</span><strong>${pollEngagementValue}</strong></div>
+        <div class="text-[11px] text-slate-500 -mt-1">${pollEngagementDetail}</div>
+        <div class="metric-row"><span>RSVP participation</span><strong>${rsvpEngagementValue}</strong></div>
+        <div class="text-[11px] text-slate-500 -mt-1">${rsvpEngagementDetail}</div>
+        <div class="metric-row"><span>Expected attendance</span><strong>${engagement.expectedAttendanceCount} employees</strong></div>
+        <div class="metric-row"><span>Events run this quarter</span><strong>${engagement.eventsRunCount}</strong></div>
+      </div>
+      <p class="mt-3 text-[11px] text-slate-500">Engagement improves when teams participate in events.</p>
+      <p class="mt-1 text-[11px] text-slate-500">Planning activity: ${engagement.planningActivityCount} (${engagement.pollsCreated} poll${engagement.pollsCreated === 1 ? "" : "s"}, ${engagement.rsvpsCreated} RSVP${engagement.rsvpsCreated === 1 ? "" : "s"})</p>
     </article>
 
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
@@ -12183,7 +12646,7 @@ function generateRecommendedEvents() {
     container.classList.remove("events-locked");
   }
   
-  // Populate placeholder events
+  // Populate event cards with recommended events
   const eventCards = document.querySelectorAll(".event-card");
   eventCards.forEach((card, index) => {
     const eventNumber = index + 1;
@@ -12192,16 +12655,27 @@ function generateRecommendedEvents() {
     const eventDescription = card.querySelector(".event-description");
     const eventFooter = card.querySelector(".event-footer");
     
+    const recommendedEvent = state.eventsRecommended[index];
+    
     if (eventTitle) {
-      eventTitle.textContent = `Event ${eventNumber}`;
+      eventTitle.textContent = recommendedEvent ? recommendedEvent.name : `Event ${eventNumber}`;
     }
     if (eventWhy) {
-      eventWhy.textContent = "";
+      eventWhy.textContent = recommendedEvent ? (recommendedEvent.type === "free" ? "Free event option" : "Team bonding opportunity") : "";
     }
     if (eventDescription) {
-      eventDescription.textContent = "";
+      eventDescription.textContent = recommendedEvent ? recommendedEvent.description : "";
     }
-    if (eventFooter) {
+    if (eventFooter && recommendedEvent) {
+      const costText = recommendedEvent.cost_per_person === 0 
+        ? "Free" 
+        : `$${recommendedEvent.cost_per_person} per person`;
+      const viewUrl = recommendedEvent.url || "#";
+      eventFooter.innerHTML = `
+        <span>${costText}</span>
+        <a href="${viewUrl}" target="_blank" rel="noopener noreferrer">View Event</a>
+      `;
+    } else if (eventFooter) {
       eventFooter.innerHTML = "";
     }
   });

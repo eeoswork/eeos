@@ -19,6 +19,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="assets/styles.css" />
 <script src="config.js"></script>
+<script src="eventTemplates.js"></script>
+<script src="programGenerator.js"></script>
 <script src="app.js" defer></script>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -460,116 +462,48 @@
                 <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▾</span>
               </div>
               <div class="setup-step-content" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px; position: relative;">
-                <div id="eventsSelectionHint" class="hidden" style="margin: 0 0 12px 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
-                  <div style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 20px;">
-                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                      <span id="eventsSelectionHintIcon" style="font-size: 28px; line-height: 1;">📈</span>
-                      <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
-                        <span id="eventsSelectionHintPrimary" style="font-weight: 400;">Teams that vote on events usually see higher attendance and engagement.</span><br id="eventsSelectionHintBreak" />
-                        <span id="eventsSelectionHintSecondary" style="font-weight: 700;">Choose up to 3 events for your team to vote on.</span>
-                      </p>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; margin-right: 15px;">
-                      <p id="eventsModePromptText" style="margin: 0; font-size: 12px; font-weight: 400; color: #334155;">Prefer to choose the event yourself?</p>
-                      <button id="eventsModeToggleButton" type="button" style="height: 32px; padding: 4px 20px; border-radius: 10px; border: 2px solid #c9d5ea; background: #f8fafc; color: #0f172a; font-size: 13px; font-weight: 700;">Skip poll → Book now</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="events-shortlist-overlay" id="eventsShortlistOverlay">
+                <!-- 4-Month Program Overlay (shown during generation) -->
+                <div class="events-shortlist-overlay" id="fourMonthProgramOverlay" style="display: none;">
                   <div class="events-overlay-card">
-                    <p class="events-overlay-title">Complete setup to unlock your personalized event recommendations</p>
-                    <p class="events-overlay-subtitle">Takes about 60 seconds.</p>
+                    <p class="events-overlay-title">Generating your 4-month Employee Experience Program</p>
+                    <p class="events-overlay-subtitle">Based on your team's goals, budget, and preferences.</p>
                   </div>
                 </div>
-                <div class="flex gap-[15px] mb-4 events-locked" id="eventsShortlistCards" style="position: relative;">
-                  <!-- Event 1: Virtual Mixology Class -->
-                  <div class="event-card selected">
-                    <div class="event-circle selected"></div>
-                    <div class="event-title">Virtual Craft Cocktail Class</div>
-                    <div class="event-preview-wrap">
-                      <div class="event-preview">
-                        <p class="event-why">Fun, social, easy win for team bonding</p>
-                        <p class="event-description">A guided cocktail/mocktail class led by a mixologist. Learn drink basics, flavor pairing, and techniques you can reuse at home.</p>
-                        <div class="event-footer">
-                          <span>$45 per person</span>
-                          <span>60 minutes</span>
-                          <a href="#">View Event</a>
-                        </div>
+
+                <!-- 4-Month Program Display -->
+                <div id="fourMonthProgram">
+                  <div style="margin-bottom: 20px;">
+                    <h4 class="text-base font-semibold text-slate-900">Your 4-Month Employee Experience Program</h4>
+                    <p class="text-sm text-slate-600 mt-1">Designed to match your team's goals and budget</p>
+                  </div>
+
+                  <!-- Budget Summary -->
+                  <div id="fourMonthBudgetSummary" style="margin-bottom: 20px; padding: 12px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; text-sm;">
+                      <div>
+                        <div style="color: #64748b; font-size: 12px;">Total Budget</div>
+                        <div id="progBudgetTotal" style="font-weight: 600; color: #0f172a;">-</div>
+                      </div>
+                      <div>
+                        <div style="color: #64748b; font-size: 12px;">Estimated Cost</div>
+                        <div id="progBudgetEstimated" style="font-weight: 600; color: #0f172a;">-</div>
+                      </div>
+                      <div>
+                        <div style="color: #64748b; font-size: 12px;">Remaining</div>
+                        <div id="progBudgetRemaining" style="font-weight: 600; color: #0f172a;">-</div>
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- Event 2: Workplace Communication Skills Workshop -->
-                  <div class="event-card selected">
-                    <div class="event-circle selected"></div>
-                    <div class="event-title">Communication Skills Workshop</div>
-                    <div class="event-preview-wrap">
-                      <div class="event-preview">
-                        <p class="event-why">Improve teamwork and everyday collaboration</p>
-                        <p class="event-description">An interactive session where your team learns practical focus strategies, distraction-control techniques, and more.</p>
-                        <div class="event-footer">
-                          <span>$60 per person</span>
-                          <span>60 minutes</span>
-                          <a href="#">View Event</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Event 3: Escape Room Experience -->
-                  <div class="event-card selected">
-                    <div class="event-circle selected"></div>
-                    <div class="event-title">Escape Room Experience</div>
-                    <div class="event-preview-wrap">
-                      <div class="event-preview">
-                        <p class="event-why">Strong team bonding through shared challenge</p>
-                        <p class="event-description">A collaborative puzzle-solving experience (virtual or in-person) where teams work together to solve clues and "escape" within a time limit.</p>
-                        <div class="event-footer">
-                          <span>$50 per person</span>
-                          <span>60 minutes</span>
-                          <a href="#">View Event</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Event 4: Sourdough Baking Class -->
-                  <div class="event-card">
-                    <div class="event-circle empty">○</div>
-                    <div class="event-title">Sourdough Baking Class</div>
-                    <div class="event-preview-wrap">
-                      <div class="event-preview">
-                        <p class="event-why">Relaxing, hands-on, and rewarding</p>
-                        <p class="event-description">Learn sourdough basics—from starter care to baking technique—plus tips to continue baking confidently at home.</p>
-                        <div class="event-footer">
-                          <span>$40 per person</span>
-                          <span>60 minutes</span>
-                          <a href="#">View Event</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Event 5: Intro to Bodyweight Workouts -->
-                  <div class="event-card">
-                    <div class="event-circle empty">○</div>
-                    <div class="event-title">Intro to Bodyweight Workouts</div>
-                    <div class="event-preview-wrap">
-                      <div class="event-preview">
-                        <p class="event-why">Learn at-home exercise principles via guided workout</p>
-                        <p class="event-description">Beginner-friendly session covering core bodyweight exercises, proper form, and how to build quick, sustainable home workouts.</p>
-                        <div class="event-footer">
-                          <span>$35 per person</span>
-                          <span>60 minutes</span>
-                          <a href="#">View Event</a>
-                        </div>
-                      </div>
-                    </div>
+
+                  <!-- Monthly Events Display -->
+                  <div id="monthlyEvents" style="display: grid; gap: 20px;">
+                    <!-- Dynamically populated -->
                   </div>
                 </div>
-                <div id="eventsPollButtonContainer" class="hidden" style="padding-top: 16px;">
-                  <button id="eventsPollButton" type="button" class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="7">Let your team choose — Generate poll</button>
-                  <p id="eventsPrimaryHelperText" class="hidden" style="margin: 8px 0 0 0; font-size: 12px; color: #64748b; text-align: center;">You'll be redirected to the event page to pick a date/time and complete booking.</p>
+
+                <!-- Action Button -->
+                <div id="fourMonthActionContainer" style="padding-top: 16px;">
+                  <button id="fourMonthNextButton" type="button" class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="7">Continue to Next Step</button>
                 </div>
               </div>
             </div>
@@ -863,15 +797,24 @@
 
 
 
-        <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="impactSummary">
-          <h2 class="text-base font-semibold mb-3">Program Impact (ROI)</h2>
-          <div class="space-y-2 text-sm">
-            <div class="metric-row"><span>Total Spend</span><strong id="impactSpend">$0</strong></div>
-            <div class="metric-row"><span>Participation Trend</span><strong id="impactParticipation">0%</strong></div>
-            <div class="metric-row"><span>Avg Satisfaction</span><strong id="impactSatisfaction">0/5</strong></div>
-            <div class="metric-row"><span>Cost / Participant</span><strong id="impactCostPerParticipant">$0</strong></div>
-          </div>
-        </section>
+        <div class="space-y-4">
+          <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="impactSummary">
+            <h2 class="text-base font-semibold mb-3">Program Impact (ROI)</h2>
+            <div class="space-y-2 text-sm">
+              <div class="metric-row"><span>Total Spend</span><strong id="impactSpend">$0</strong></div>
+              <div class="metric-row"><span>Participation Trend</span><strong id="impactParticipation">0%</strong></div>
+              <div class="metric-row"><span>Avg Satisfaction</span><strong id="impactSatisfaction">0/5</strong></div>
+              <div class="metric-row"><span>Cost / Participant</span><strong id="impactCostPerParticipant">$0</strong></div>
+            </div>
+          </section>
+
+          <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="teamEngagementCard">
+            <h2 class="text-base font-semibold mb-3">Team Engagement</h2>
+            <div class="space-y-2 text-sm text-slate-500">
+              <div>Loading engagement metrics...</div>
+            </div>
+          </section>
+        </div>
       </div>
 
 
