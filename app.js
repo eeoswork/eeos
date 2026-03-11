@@ -9268,6 +9268,11 @@ function renderPromoteEventStep() {
       ? "Hybrid"
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
+  const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
+  const isMarchMadnessEvent = String(eventName || "").trim().toLowerCase() === "march madness brackets challenge";
+  const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
+    ? "Promote the Brackets Challenge"
+    : "Promote Event";
   const attendeeCount = Number(bookingConfirmation?.bookedHeadcount || bookedEvent?.headcount || bookedEvent?.rsvps || 63);
 
   const rsvpRows = Array.isArray(state.pollBuilder?.responses) ? state.pollBuilder.responses : [];
@@ -9529,7 +9534,7 @@ function renderPromoteEventStep() {
     <div class="mt-3 rounded-xl border border-slate-200 bg-white p-5 md:p-6">
       <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 class="text-2xl font-semibold text-slate-900 md:text-3xl">Promote Event</h2>
+          <h2 class="text-2xl font-semibold text-slate-900 md:text-3xl">${escapeHtml(promoteHeaderTitle)}</h2>
           <p class="mt-1 text-sm text-slate-600">Send the calendar invite and initial announcement for the event, and schedule reminders.</p>
           <p class="mt-2 text-xs text-slate-500">${escapeHtml(eventSummary)}</p>
         </div>
