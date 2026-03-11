@@ -9378,7 +9378,7 @@ function renderPromoteEventStep() {
 
   const processSteps = (isMagicLinkContext && isMarchMadnessEvent)
     ? [
-        { key: "announcement", label: "Announce the Bracket Challenge", title: "Announce the Bracket Challenge" },
+        { key: "announcement", label: "Announcement", title: "Announcement" },
         { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" },
         { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
         { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
@@ -9399,6 +9399,14 @@ function renderPromoteEventStep() {
   const isPromoteCompleted = processSteps.every((step) => doneFlags[step.key]);
   const validStepKeys = processSteps.map((s) => s.key);
   const activeStep = validStepKeys.includes(promote.activeStep) ? promote.activeStep : (validStepKeys[0] || "calendar");
+  const isRevelryBracketsPromoteFlow = isMagicLinkContext && isMarchMadnessEvent;
+  const isAnnouncementGateActive = isRevelryBracketsPromoteFlow && !doneFlags.announcement;
+  const isStepLocked = (stepKey) => isAnnouncementGateActive && stepKey !== "announcement";
+  if (isAnnouncementGateActive && (activeStep !== "announcement" || promote.collapsedStep === "announcement")) {
+    state.promoteEvent.activeStep = "announcement";
+    state.promoteEvent.collapsedStep = "";
+    persistState();
+  }
   const activeIndex = processSteps.findIndex((item) => item.key === activeStep);
   const promoteProgressStages = processSteps.map((step) => step.label);
   const promoteCompletedIndexes = processSteps
@@ -9425,6 +9433,7 @@ function renderPromoteEventStep() {
   };
 
   const getCardActionLabel = (stepKey) => {
+    if (isStepLocked(stepKey)) return "Locked";
     const isDone = doneFlags[stepKey];
     const isActive = activeStep === stepKey;
     const isCollapsed = promote.collapsedStep === stepKey;
@@ -9474,11 +9483,13 @@ function renderPromoteEventStep() {
         const useEmail = promoteUiState.announcementChannel === "email";
         return `
           <div class="mt-3 text-sm text-slate-600">Send this message to your team to invite everyone to join the bracket challenge.</div>
-          <div class="mt-3 flex items-center gap-2">
-            <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
-            <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
+          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700" style="min-height: 80px;">
+            <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
+              <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
+              <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
+            </div>
+            <div class="p-3" style="white-space: pre-line;"></div>
           </div>
-          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line; min-height: 80px;"></div>
           <div class="${rowBase}">
             <button type="button" data-promote-action="copy-announcement" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy message</button>
             ${useEmail
@@ -9577,6 +9588,7 @@ function renderPromoteEventStep() {
 
   const cardsHtml = processSteps.map((step) => {
     const expanded = isCardExpanded(step.key);
+    const locked = isStepLocked(step.key);
     return `
       <article id="promote-card-${step.key}" class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
         <div class="flex items-center justify-between gap-3">
@@ -9584,7 +9596,7 @@ function renderPromoteEventStep() {
             <h4 class="truncate text-base font-semibold text-slate-900">${escapeHtml(step.title)}</h4>
             <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span>
           </div>
-          <button type="button" data-promote-toggle="${step.key}" data-allow-locked="true" class="promote-card-toggle rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">${getCardActionLabel(step.key)}</button>
+          <button type="button" data-promote-toggle="${step.key}" data-allow-locked="true" ${locked ? "disabled" : ""} class="promote-card-toggle rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 ${locked ? "cursor-not-allowed opacity-50" : "hover:bg-slate-50 hover:text-slate-900"}">${getCardActionLabel(step.key)}</button>
         </div>
         ${expanded ? `<div class="mt-4 border-t border-slate-200 pt-4">${renderStepBody(step.key)}</div>` : ""}
       </article>
@@ -9628,6 +9640,7 @@ function renderPromoteEventStep() {
   const setActiveStep = (stepKey) => {
     normalizePromoteEventState();
     if (!processSteps.some((s) => s.key === stepKey)) return;
+    if (isStepLocked(stepKey)) return;
     state.promoteEvent.activeStep = stepKey;
     state.promoteEvent.collapsedStep = "";
     persistState();
@@ -9636,6 +9649,7 @@ function renderPromoteEventStep() {
 
   const toggleCard = (stepKey) => {
     normalizePromoteEventState();
+    if (isStepLocked(stepKey)) return;
     const isActive = state.promoteEvent.activeStep === stepKey;
     const isCollapsed = state.promoteEvent.collapsedStep === stepKey;
     if (isActive && !isCollapsed) {
@@ -9687,6 +9701,7 @@ function renderPromoteEventStep() {
       const stageIndex = Number(item.getAttribute("data-process-index"));
       const stepKey = processSteps[stageIndex]?.key;
       if (!stepKey) return;
+      if (isStepLocked(stepKey)) return;
       setActiveStep(stepKey);
       setTimeout(() => {
         const card = document.getElementById(`promote-card-${stepKey}`);
