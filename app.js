@@ -4002,8 +4002,12 @@ function renderFourMonthProgram() {
   const budgetSummary = $("fourMonthBudgetSummary");
   if (!container || !state.fourMonthProgram) return;
 
+  const existingCards = Array.from(container.querySelectorAll(".four-month-card"));
+  const isInitialRender = existingCards.length === 0;
   const expandedCardIds = new Set(
-    Array.from(container.querySelectorAll(".four-month-card[data-expanded='true']")).map((card) => card.id)
+    existingCards
+      .filter((card) => card.dataset.expanded === "true")
+      .map((card) => card.id)
   );
 
   const program = state.fourMonthProgram;
@@ -4027,9 +4031,17 @@ function renderFourMonthProgram() {
     const monthIndex = (currentMonth + index) % 12;
     const monthName = monthNames[monthIndex];
     const cardId = `month-card-${index + 1}`;
-    const isExpanded = expandedCardIds.has(cardId);
+    const isExpanded = isInitialRender ? index === highlightedIndex : expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
     const isNextEvent = index === highlightedIndex;
+    const _sectionLabels = ["YOUR FIRST EVENT", "UPCOMING", null, "LATER"];
+    const _sectionLabel = _sectionLabels[index] || null;
+    const sectionHeaderHtml = _sectionLabel
+      ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;${index > 0 ? ' margin-top: 8px;' : ''}">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #94a3b8; white-space: nowrap;">${_sectionLabel}</span>
+          <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+        </div>`
+      : "";
     const nextEventBadge = isNextEvent
       ? '<span style="display: inline-block; background: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; white-space: nowrap;">Next event</span>'
       : "";
@@ -4062,7 +4074,7 @@ function renderFourMonthProgram() {
         : "Prefer to choose the event yourself?";
       const modeToggleLabel = isBookMode ? "Generate a poll" : "Skip poll → Book now";
       const primaryLabel = isBookMode ? "Book this event ↗" : "Let your team choose — Generate poll";
-      return `
+      return sectionHeaderHtml + `
         <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
           <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
             <div style="flex: 1; min-width: 0;">
@@ -4127,7 +4139,7 @@ function renderFourMonthProgram() {
     // Regular months with single event
     const event = monthEvent;
     const typeLabel = event.type === "poll" ? "📊 Poll" : event.type === "rsvp" ? "✓ RSVP" : "🔗 External";
-    return `
+    return sectionHeaderHtml + `
       <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
         <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
           <div style="flex: 1; min-width: 0;">
