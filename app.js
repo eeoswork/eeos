@@ -7050,15 +7050,18 @@ if (sidebarEventWorkflowHeading) {
     setSidebarActiveSection("event-workflow");
     const workflowType = getActiveWorkflowType();
     const workflowSteps = getEventWorkflowStepSequence(workflowType);
-    const currentWorkflowStep = getEventWorkflowProcessStep();
-    if (workflowSteps.includes(currentWorkflowStep)) {
-      collapseSetupViewsForWorkflowStep();
-      state.currentSetupStep = currentWorkflowStep;
+    const workflowComplete = workflowSteps.length > 0 && workflowSteps.every((stepNum) => state.completedSetupSteps.includes(stepNum));
+    if (!workflowComplete) {
+      const currentWorkflowStep = getEventWorkflowProcessStep();
+      if (workflowSteps.includes(currentWorkflowStep)) {
+        collapseSetupViewsForWorkflowStep();
+        state.currentSetupStep = currentWorkflowStep;
+      }
     }
     persistState();
     renderSidebarStepMenus();
     renderSetupStepStates();
-    if (workflowSteps.includes(state.currentSetupStep)) {
+    if (!workflowComplete) {
       scrollSetupStepIntoView(state.currentSetupStep, "smooth", true);
     }
   });
