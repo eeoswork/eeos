@@ -716,6 +716,7 @@ pollBuilder: {
 promoteEvent: {
   activeStep: "calendar",
   announcementLockedAfterContinue: false,
+  reminderWeekLockedAfterContinue: false,
   calendar: { done: false, doneAt: "" },
   announcement: { done: false, doneAt: "" },
   reminderWeek: { done: false, doneAt: "" },
@@ -1452,6 +1453,9 @@ function normalizePromoteEventState() {
   }
   if (typeof promote.announcementLockedAfterContinue !== "boolean") {
     promote.announcementLockedAfterContinue = false;
+  }
+  if (typeof promote.reminderWeekLockedAfterContinue !== "boolean") {
+    promote.reminderWeekLockedAfterContinue = false;
   }
 
   const ensureStepStatus = (key) => {
@@ -9513,6 +9517,20 @@ function renderPromoteEventStep() {
     state.promoteEvent.collapsedStep = "";
     persistState();
   }
+  const reminderDayOfIndex = processSteps.findIndex((item) => item.key === "reminder_dayof");
+  const activeStepIndexAfterReminderResume = processSteps.findIndex((item) => item.key === activeStep);
+  const shouldResumeReminderDayOf = isRevelryBracketsPromoteFlow
+    && Boolean(promote.reminderWeekLockedAfterContinue)
+    && doneFlags.reminder_week
+    && reminderDayOfIndex >= 0
+    && activeStepIndexAfterReminderResume >= 0
+    && activeStepIndexAfterReminderResume < reminderDayOfIndex;
+  if (shouldResumeReminderDayOf) {
+    activeStep = "reminder_dayof";
+    state.promoteEvent.activeStep = "reminder_dayof";
+    state.promoteEvent.collapsedStep = "";
+    persistState();
+  }
   const isAnnouncementGateActive = isRevelryBracketsPromoteFlow && !doneFlags.announcement;
   const isStepLocked = (stepKey) => isAnnouncementGateActive && stepKey !== "announcement";
   if (isAnnouncementGateActive && (activeStep !== "announcement" || promote.collapsedStep === "announcement")) {
@@ -9690,6 +9708,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
     if (stepKey === "reminder_week") {
       if (isRevelryBracketsPromoteFlow) {
+        const isReminderWeekReadOnly = isRevelryBracketsPromoteFlow && Boolean(promote.reminderWeekLockedAfterContinue);
         const formattedSignupReminderHtml = marchMadnessSignupReminderMessage.split("\n").map((line) => {
           const escapedLine = escapeHtml(line);
           if (line === "📈 My professional investment advice for the week:") {
@@ -9721,19 +9740,19 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
         return `
           <div class="mt-3 text-sm text-slate-600">Schedule this reminder in Slack for Wednesday, March 18</div>
-          <div class="mt-2 text-xs text-slate-500">When: 1 week before</div>
-          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${formattedSignupReminderHtml}</div>
+          <div class="mt-4 rounded-lg border border-slate-200 ${isReminderWeekReadOnly ? "bg-slate-100" : "bg-slate-50"} p-3 text-sm text-slate-700" style="white-space: pre-line;">${formattedSignupReminderHtml}</div>
           <div class="${rowBase}">
-            <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
-            <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-            <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
+            <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${isReminderWeekReadOnly ? "cursor-not-allowed opacity-60" : ""}" style="background-color: #546373;" ${isReminderWeekReadOnly ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
+            <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isReminderWeekReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isReminderWeekReadOnly ? "disabled" : ""}>Open Slack</button>
           </div>
           ${promoteUiState.copiedAction === "copy-reminder-week" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
-          <div class="mt-4 flex items-center justify-end gap-3">
-            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" data-promote-complete="reminder_week" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_week ? "checked" : ""} />
-              <span>1-week reminder sent</span>
+          <div class="mt-3 text-sm text-slate-500">After scheduling the reminder, come back here to mark this step complete.</div>
+          <div class="mt-12 flex flex-col items-start gap-3">
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700 ${isReminderWeekReadOnly ? "opacity-70" : ""}">
+              <input type="checkbox" data-promote-complete="reminder_week" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_week ? "checked" : ""} ${isReminderWeekReadOnly ? "disabled" : ""} />
+              <span>I scheduled the reminder</span>
             </label>
+            <button type="button" data-promote-action="complete-reminder-week-and-continue" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${(doneFlags.reminder_week && !isReminderWeekReadOnly) ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${(doneFlags.reminder_week && !isReminderWeekReadOnly) ? "" : "disabled"}>Complete step and continue</button>
           </div>
         `;
       }
@@ -9876,8 +9895,9 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       state.promoteEvent.finalWinner.doneAt = stamp;
     }
     const shouldGateAnnouncementAdvance = isRevelryBracketsPromoteFlow && stepKey === "announcement";
+    const shouldGateReminderWeekAdvance = isRevelryBracketsPromoteFlow && stepKey === "reminder_week";
     if (done) {
-      if (!shouldGateAnnouncementAdvance) {
+      if (!shouldGateAnnouncementAdvance && !shouldGateReminderWeekAdvance) {
         const currentIndex = processSteps.findIndex((s) => s.key === stepKey);
         const nextStep = processSteps[currentIndex + 1]?.key;
         if (nextStep) {
@@ -9990,6 +10010,17 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         setActiveStep("reminder_week");
         setTimeout(() => {
           const card = document.getElementById("promote-card-reminder_week");
+          if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+        return;
+      }
+      if (action === "complete-reminder-week-and-continue") {
+        if (!doneFlags.reminder_week) return;
+        state.promoteEvent.reminderWeekLockedAfterContinue = true;
+        persistState();
+        setActiveStep("reminder_dayof");
+        setTimeout(() => {
+          const card = document.getElementById("promote-card-reminder_dayof");
           if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 0);
         return;
