@@ -533,6 +533,9 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
     localCity: "New Orleans"
   }
 };
+const MAGIC_LINK_WORKFLOW_DEFAULTS = {
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE
+};
 const MAGIC_LINK_AUTH_DEFAULTS = {
   "revelrylabs.eeos.work/rlabs2026a1b2c3d4": {
     companyName: "Revelry Labs",
@@ -1022,6 +1025,16 @@ function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
   }
   if (shouldSetCity) {
     state.landingDraft.localCity = String(defaults.localCity || "").trim();
+  }
+
+  const workflowDefault = MAGIC_LINK_WORKFLOW_DEFAULTS[`${host}/${tokenId}`];
+  if (workflowDefault) {
+    normalizeEventLaunchContext();
+    const hasExplicitLaunchContext = String(state.eventLaunchContext?.templateId || "").trim().length > 0;
+    const preLaunchPhase = Number(state.currentSetupStep || 1) <= EVENT_WORKFLOW_STEPS.SHORTLIST;
+    if (!hasExplicitLaunchContext || preLaunchPhase) {
+      state.eventLaunchContext.workflowType = workflowDefault;
+    }
   }
 }
 
