@@ -9515,9 +9515,10 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
             <div class="p-3" style="white-space: pre-line;">${useEmail ? `
-              <div class="font-medium text-slate-900 mb-3">
+              <div class="rounded-lg border border-slate-200 bg-slate-100 p-3 mb-3">
+                <div class="text-xs font-semibold text-slate-600 mb-1">Subject:</div>
                 <div class="flex items-center justify-between gap-2">
-                  <span>Join the Revelry March Madness Bracket Challenge 🏀</span>
+                  <span class="font-medium text-slate-900">Join the Revelry March Madness Bracket Challenge 🏀</span>
                   <button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button>
                 </div>
               </div>
