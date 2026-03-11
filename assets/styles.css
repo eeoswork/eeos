@@ -53,6 +53,43 @@ padding: 10px;
 margin-bottom: 10px;
 }
 
+.sidebar-section-heading {
+display: flex;
+align-items: center;
+gap: 0;
+padding-left: 0;
+margin-bottom: 0;
+color: #1e293b;
+}
+
+.sidebar-section-heading--spacious {
+margin-bottom: 24px;
+}
+
+.sidebar-section-icon {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 18px;
+height: 18px;
+margin-left: 4px;
+margin-right: 8px;
+flex-shrink: 0;
+color: currentColor;
+}
+
+.sidebar-section-icon svg {
+width: 18px;
+height: 18px;
+}
+
+.sidebar-section-label {
+font-size: 15px;
+line-height: 1.25;
+font-weight: 600;
+color: inherit;
+}
+
 
 [data-setup-menu-item],
 [data-workflow-menu-step],
@@ -65,14 +102,14 @@ cursor: pointer;
 [data-setup-menu-item],
 [data-event-workflow-menu-item] {
 position: relative;
-padding-left: 17px;
+padding-left: 30px;
 }
 
 [data-setup-menu-item]::before,
 [data-event-workflow-menu-item]::before {
 content: "";
 position: absolute;
-left: 4px;
+left: 10px;
 top: 50%;
 width: 6.7px;
 height: 6.7px;
@@ -98,7 +135,7 @@ content: none;
 [data-event-workflow-menu-item].sidebar-step-completed::after {
 content: "";
 position: absolute;
-left: 4px;
+left: 10px;
 top: 50%;
 width: 6px;
 height: 3.3px;

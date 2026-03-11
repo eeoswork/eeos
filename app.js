@@ -5,7 +5,6 @@ function updateSidebarSetupCollapseUI() {
   const editPrefs = document.getElementById("sidebarSetupEditPrefs");
   const collapseWrap = document.getElementById("sidebarSetupMenuCollapse");
   const headingText = document.getElementById("sidebarSetupLabel");
-  const allStepsComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
   const expanded = !!state.sidebarSetupExpanded;
   const headingLabel = headingText || (heading ? heading.querySelector("div > span") : null);
   const headingColor = headingLabel
@@ -19,13 +18,8 @@ function updateSidebarSetupCollapseUI() {
     editPrefs.style.display = "none";
   }
   if (collapseWrap) {
-    if (allStepsComplete && !expanded) {
-      collapseWrap.style.maxHeight = "0px";
-      collapseWrap.style.overflow = "hidden";
-    } else {
-      collapseWrap.style.maxHeight = "500px";
-      collapseWrap.style.overflow = "visible";
-    }
+    collapseWrap.style.maxHeight = expanded ? "500px" : "0px";
+    collapseWrap.style.overflow = expanded ? "visible" : "hidden";
   }
 }
 
@@ -37,9 +31,13 @@ function bindSidebarSetupEditPrefs() {
     e.stopPropagation();
     const nextExpanded = !state.sidebarSetupExpanded;
     setSetupExpansionState(nextExpanded, { headersOnly: true });
+    if (nextExpanded) {
+      setSidebarActiveSection("setup");
+    }
     persistState();
     renderSetupMenuState();
     updateSidebarSetupCollapseUI();
+    updateSidebarEventWorkflowCollapseUI();
     renderSetupStepStates();
     renderSidebarStepMenus();
   });
@@ -70,6 +68,31 @@ function setSetupExpansionState(expanded, options = {}) {
 
   // Preserve the currently active step. Navigation is sidebar-driven.
   void headersOnly;
+}
+
+function normalizeSidebarAccordionState() {
+  const allowedSections = new Set(["dashboard", "setup", "event-workflow"]);
+  if (!allowedSections.has(state.sidebarActiveSection)) {
+    state.sidebarActiveSection = "setup";
+  }
+  state.sidebarSetupExpanded = state.sidebarActiveSection === "setup";
+  state.setupMenuExpanded = state.sidebarSetupExpanded;
+  state.sidebarEventWorkflowExpanded = state.sidebarActiveSection === "event-workflow";
+}
+
+function setSidebarActiveSection(section) {
+  const targetSection = String(section || "").trim();
+  if (!["dashboard", "setup", "event-workflow"].includes(targetSection)) return;
+  state.sidebarActiveSection = targetSection;
+  normalizeSidebarAccordionState();
+}
+
+function updateSidebarEventWorkflowCollapseUI() {
+  const collapseWrap = document.getElementById("sidebarEventWorkflowMenuCollapse");
+  if (!collapseWrap) return;
+  const expanded = !!state.sidebarEventWorkflowExpanded;
+  collapseWrap.style.maxHeight = expanded ? "500px" : "0px";
+  collapseWrap.style.overflow = expanded ? "visible" : "hidden";
 }
 /*
  * JOLLY HR - Employee Experience OS
@@ -619,6 +642,8 @@ appIdentityCommitted: false,
 setupCompleted: true,
 setupMenuExpanded: false,
 sidebarSetupAutoCollapsed: false, // triggers one-time auto-collapse after final setup step
+sidebarActiveSection: "setup",
+sidebarEventWorkflowExpanded: false,
 devBypassSetupEditAuth: true,
 debugModeOn: false,
 currentSetupStep: 1,
@@ -3556,7 +3581,9 @@ function forceExpandSetupStep(stepNum) {
 
 
 function renderSidebarStepMenus() {
+  normalizeSidebarAccordionState();
   updateSidebarSetupCollapseUI();
+  updateSidebarEventWorkflowCollapseUI();
 const setupItems = document.querySelectorAll("[data-setup-menu-item]");
 const workflowItems = document.querySelectorAll("[data-workflow-menu-step]");
 const eventWorkflowItems = document.querySelectorAll("[data-event-workflow-menu-item]");
@@ -3601,6 +3628,7 @@ setupItems.forEach((item) => {
   item.onclick = () => {
     if (isFutureStep) return;
     if (stepNum) {
+      setSidebarActiveSection("setup");
       state.currentSetupStep = stepNum;
       state.setupMenuExpanded = true;
       state.sidebarSetupExpanded = true;
@@ -3663,6 +3691,7 @@ eventWorkflowItems.forEach((item) => {
   item.onclick = () => {
     if (!allCoreSetupComplete || !stepNum) return;
     if (isLocked) return;
+    setSidebarActiveSection("event-workflow");
     collapseSetupViewsForWorkflowStep();
     state.currentSetupStep = stepNum;
     persistState();
@@ -6953,10 +6982,30 @@ const sidebarSetupHeading = $("sidebarSetupHeading");
 if (sidebarSetupHeading) {
   sidebarSetupHeading.style.cursor = "pointer";
   sidebarSetupHeading.addEventListener("click", () => {
-    state.setupMenuExpanded = !state.setupMenuExpanded;
-    state.sidebarSetupExpanded = state.setupMenuExpanded;
+    setSidebarActiveSection("setup");
     persistState();
     renderSetupMenuState();
+    renderSidebarStepMenus();
+    renderSetupStepStates();
+  });
+}
+
+const sidebarDashboardSection = $("sidebarDashboardSection");
+if (sidebarDashboardSection) {
+  sidebarDashboardSection.style.cursor = "pointer";
+  sidebarDashboardSection.addEventListener("click", () => {
+    setSidebarActiveSection("dashboard");
+    persistState();
+    renderSidebarStepMenus();
+  });
+}
+
+const sidebarEventWorkflowHeading = $("sidebarEventWorkflowHeading");
+if (sidebarEventWorkflowHeading) {
+  sidebarEventWorkflowHeading.style.cursor = "pointer";
+  sidebarEventWorkflowHeading.addEventListener("click", () => {
+    setSidebarActiveSection("event-workflow");
+    persistState();
     renderSidebarStepMenus();
     renderSetupStepStates();
   });
