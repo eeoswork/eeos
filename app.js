@@ -9810,9 +9810,17 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   };
 
   panel.querySelectorAll("#promoteProcessBar [data-process-index]").forEach((item) => {
+    const stageIndex = Number(item.getAttribute("data-process-index"));
+    const isFutureStep = Number.isFinite(stageIndex) && stageIndex > activeIndex;
+    if (isFutureStep) {
+      item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+      item.setAttribute("aria-disabled", "true");
+    }
     item.addEventListener("click", () => {
-      const stageIndex = Number(item.getAttribute("data-process-index"));
-      const stepKey = processSteps[stageIndex]?.key;
+      const clickedIndex = Number(item.getAttribute("data-process-index"));
+      if (!Number.isFinite(clickedIndex)) return;
+      if (clickedIndex > activeIndex) return;
+      const stepKey = processSteps[clickedIndex]?.key;
       if (!stepKey) return;
       if (isStepLocked(stepKey)) return;
       setActiveStep(stepKey);
