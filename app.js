@@ -9831,12 +9831,12 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       ? marchMadnessWeeklyLeaderboardMessage
       : reminderDayOfMessage;
     const reminderDayOfIntroMessage = isRevelryBracketsPromoteFlow
-      ? "Your work is done for now. Expect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack."
+      ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
       : "Send this reminder the day of the event.";
 
     return `
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
-      <div class="mt-3 text-sm text-slate-600">${escapeHtml(reminderDayOfIntroMessage)}</div>
+      <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfCardMessage)}</div>
       <div class="mt-4 flex flex-wrap items-center gap-2">
         <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" style="background-color: #546373;" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
