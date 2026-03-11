@@ -9341,7 +9341,7 @@ function renderPromoteEventStep() {
     "",
     "Create your bracket and compete with fellow Revelers to see who predicts the tournament best.",
     "",
-    "Join the challenges:",
+    "Join the challenge:",
     "",
     "Women\u2019s bracket here (url: https://shorturl.at/tleLy)",
     "",
@@ -9517,6 +9517,8 @@ function renderPromoteEventStep() {
             <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : (() => {
               const simpleBoldLines = new Set([
                 "\ud83c\udfc0 March Madness Bracket Challenge is back!",
+                "Join the challenge:",
+                "How to Join",
               ]);
               const linkedLines = {
                 "Women\u2019s bracket here (url: https://shorturl.at/tleLy)": { prefix: "Women\u2019s bracket ", url: "https://shorturl.at/tleLy" },
@@ -9527,7 +9529,10 @@ function renderPromoteEventStep() {
                 if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
                 if (linkedLines[line]) {
                   const { prefix, url } = linkedLines[line];
-                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">here</a>`;
+                  return `<strong>${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">here</a></strong>`;
+                }
+                if (line.includes("Revelry2026")) {
+                  return line.replace("Revelry2026", "<strong>Revelry2026</strong>");
                 }
                 return escaped;
               }).join("\n");
@@ -9535,12 +9540,12 @@ function renderPromoteEventStep() {
           </div>
           <div class="${rowBase}">
             <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-announcement" ? "✓ Copied" : "Copy message"}</button>
-            ${promoteUiState.copiedAction === "copy-announcement" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
             ${useEmail
               ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>`
               : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>`
             }
           </div>
+          ${promoteUiState.copiedAction === "copy-announcement" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
           <div class="mt-4 flex items-center justify-end gap-3">
             ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
             <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -9578,10 +9583,10 @@ function renderPromoteEventStep() {
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderWeekMessage)}</div>
         <div class="${rowBase}">
           <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
-          ${promoteUiState.copiedAction === "copy-reminder-week" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
           <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
         </div>
+        ${promoteUiState.copiedAction === "copy-reminder-week" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
           ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -9598,10 +9603,10 @@ function renderPromoteEventStep() {
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
         <div class="mt-4 flex flex-wrap items-center gap-2">
           <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
-          ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
           <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
         </div>
+        ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
           ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -9619,10 +9624,10 @@ function renderPromoteEventStep() {
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
       <div class="mt-4 flex flex-wrap items-center gap-2">
         <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
-        ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<span class="text-sm font-medium" style="color: #16a34a;">Copied to clipboard</span>` : ""}
         <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
         <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
       </div>
+      ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
       <div class="mt-4 flex items-center justify-end gap-3">
         ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
