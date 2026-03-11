@@ -7808,6 +7808,10 @@ const feedbackUiState = {
   feedbackSentScrollPending: false
 };
 
+const promoteUiState = {
+  announcementChannel: "slack"
+};
+
 function getPollCloseCountdownStatus(deadlineValue) {
   const deadlineRaw = String(deadlineValue || "").trim();
   const deadlineDate = deadlineRaw ? new Date(deadlineRaw) : null;
@@ -9374,7 +9378,7 @@ function renderPromoteEventStep() {
 
   const processSteps = (isMagicLinkContext && isMarchMadnessEvent)
     ? [
-        { key: "announcement", label: "Launch Announcement", title: "Launch Announcement" },
+        { key: "announcement", label: "Announce the Bracket Challenge", title: "Announce the Bracket Challenge" },
         { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" },
         { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
         { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
@@ -9466,8 +9470,33 @@ function renderPromoteEventStep() {
     }
 
     if (stepKey === "announcement") {
+      if (isMagicLinkContext && isMarchMadnessEvent) {
+        const useEmail = promoteUiState.announcementChannel === "email";
+        return `
+          <div class="mt-3 text-sm text-slate-600">Send this message to your team to invite everyone to join the bracket challenge.</div>
+          <div class="mt-3 flex items-center gap-2">
+            <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
+            <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
+          </div>
+          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line; min-height: 80px;"></div>
+          <div class="${rowBase}">
+            <button type="button" data-promote-action="copy-announcement" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy message</button>
+            ${useEmail
+              ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>`
+              : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>`
+            }
+          </div>
+          <div class="mt-4 flex items-center justify-end gap-3">
+            ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
+              <span>Announcement posted</span>
+            </label>
+          </div>
+        `;
+      }
       return `
-        ${!doneFlags.calendar && !(isMagicLinkContext && isMarchMadnessEvent) ? `<div class="mt-2 text-xs text-slate-500">Calendar invite not marked as sent yet (recommended before announcing).</div>` : ""}
+        ${!doneFlags.calendar ? `<div class="mt-2 text-xs text-slate-500">Calendar invite not marked as sent yet (recommended before announcing).</div>` : ""}
         ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
         <div class="mt-3 text-sm text-slate-600">Post the announcement to your team channel.</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(announcementMessage)}</div>
@@ -9672,6 +9701,21 @@ function renderPromoteEventStep() {
       toggleCard(stepKey);
     });
   });
+
+  const announcementSlackBtn = document.getElementById("promoteAnnouncementChannelSlack");
+  if (announcementSlackBtn) {
+    announcementSlackBtn.addEventListener("click", () => {
+      promoteUiState.announcementChannel = "slack";
+      renderPromoteEventStep();
+    });
+  }
+  const announcementEmailBtn = document.getElementById("promoteAnnouncementChannelEmail");
+  if (announcementEmailBtn) {
+    announcementEmailBtn.addEventListener("click", () => {
+      promoteUiState.announcementChannel = "email";
+      renderPromoteEventStep();
+    });
+  }
 
   panel.querySelectorAll("[data-promote-complete]").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
