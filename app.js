@@ -7049,13 +7049,11 @@ if (sidebarEventWorkflowHeading) {
     setSidebarActiveSection("event-workflow");
     const workflowType = getActiveWorkflowType();
     const workflowSteps = getEventWorkflowStepSequence(workflowType);
-    const existingStep = Number(state.currentSetupStep || 0);
-    const processStep = getEventWorkflowProcessStep();
+    const processStep = deriveEventWorkflowProcessStep();
     const fallbackStep = workflowSteps[workflowSteps.length - 1] || EVENT_WORKFLOW_STEPS.REVIEW;
-    const targetStep = workflowSteps.includes(existingStep)
-      ? existingStep
-      : (workflowSteps.includes(processStep) ? processStep : fallbackStep);
+    const targetStep = workflowSteps.includes(processStep) ? processStep : fallbackStep;
     collapseSetupViewsForWorkflowStep();
+    state.eventWorkflowProcessStep = processStep;
     state.currentSetupStep = targetStep;
     persistState();
     renderSidebarStepMenus();
