@@ -9434,6 +9434,27 @@ function renderPromoteEventStep() {
     "Make sure your picks are in before tip-off!"
   ].join("\n");
 
+  const marchMadnessWeeklyLeaderboardMessage = [
+    "🏀 March Madness Bracket Challenge Update",
+    "",
+    "Here are the current standings after the latest round:",
+    "",
+    "Men's Tournament",
+    "🥇 1st — [NAME] — [POINTS]",
+    "🥈 2nd — [NAME] — [POINTS]",
+    "🥉 3rd — [NAME] — [POINTS]",
+    "",
+    "Women's Tournament",
+    "🥇 1st — [NAME] — [POINTS]",
+    "🥈 2nd — [NAME] — [POINTS]",
+    "🥉 3rd — [NAME] — [POINTS]",
+    "",
+    "Plenty of basketball left — the leaderboard can still change.",
+    "",
+    "Follow the standings here:",
+    "[BRACKET LINKS]"
+  ].join("\n");
+
   const parseDateFromContext = () => {
     const raw = String(bookedEvent?.startDateTime || state.pollBuilder?.chosenDateTime || "").trim();
     if (raw) {
@@ -9806,15 +9827,20 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       `;
     }
 
+    const reminderDayOfCardMessage = isRevelryBracketsPromoteFlow
+      ? marchMadnessWeeklyLeaderboardMessage
+      : reminderDayOfMessage;
+    const reminderDayOfIntroMessage = isRevelryBracketsPromoteFlow
+      ? "Your work is done for now. Expect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack."
+      : "Send this reminder the day of the event.";
+
     return `
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
-      <div class="mt-3 text-sm text-slate-600">Send this reminder the day of the event.</div>
-      <div class="mt-2 text-xs text-slate-500">When: day of (morning)</div>
-      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfMessage)}</div>
+      <div class="mt-3 text-sm text-slate-600">${escapeHtml(reminderDayOfIntroMessage)}</div>
+      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfCardMessage)}</div>
       <div class="mt-4 flex flex-wrap items-center gap-2">
-        <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
-        <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-        <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
+        <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" style="background-color: #546373;" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+        <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>Open Slack</button>
       </div>
       ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
       <div class="mt-4 flex items-center justify-end gap-3">
@@ -10047,7 +10073,11 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         return;
       }
       if (action === "copy-reminder-dayof") {
-        copyToClipboard(reminderDayOfMessage);
+        if (isRevelryBracketsPromoteFlow) {
+          copyToClipboard(marchMadnessWeeklyLeaderboardMessage);
+        } else {
+          copyToClipboard(reminderDayOfMessage);
+        }
         promoteUiState.copiedAction = "copy-reminder-dayof";
         renderPromoteEventStep();
         setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
