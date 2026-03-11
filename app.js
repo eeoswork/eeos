@@ -71,13 +71,10 @@ function setSetupExpansionState(expanded, options = {}) {
 }
 
 function normalizeSidebarAccordionState() {
-  const allowedSections = new Set(["dashboard", "setup", "event-workflow"]);
-  const preferredSection = Number(state.currentSetupStep || 1) >= EVENT_WORKFLOW_STEPS.SHORTLIST
+  const currentStep = Number(state.currentSetupStep || 1);
+  state.sidebarActiveSection = currentStep >= EVENT_WORKFLOW_STEPS.SHORTLIST
     ? "event-workflow"
     : "setup";
-  if (!allowedSections.has(state.sidebarActiveSection) || state.sidebarActiveSection === "dashboard") {
-    state.sidebarActiveSection = preferredSection;
-  }
   state.sidebarSetupExpanded = state.sidebarActiveSection === "setup";
   state.setupMenuExpanded = state.sidebarSetupExpanded;
   state.sidebarEventWorkflowExpanded = state.sidebarActiveSection === "event-workflow";
