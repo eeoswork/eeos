@@ -9528,7 +9528,7 @@ function renderPromoteEventStep() {
         <div class="${rowBase}">
           <button type="button" data-promote-action="download-ics" class="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700">Download .ics</button>
           <button type="button" data-promote-action="copy-invite" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy invite message</button>
-          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
         </div>
         <div class="mt-2 text-xs text-slate-500">If you’re using Slack only, attendees can still add the event using the .ics file.</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(inviteMessage)}</div>
@@ -9550,7 +9550,7 @@ function renderPromoteEventStep() {
           <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700" style="min-height: 80px;">
             <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
-              <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
+              <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Email</button>
             </div>
             <div class="p-3" style="${useEmail ? "" : "white-space: pre-line;"}">${useEmail ? `<div class="rounded-lg border border-slate-200 bg-slate-100 mb-2" style="padding: 5px 8px;"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span><span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span><button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button></div></div><div class="text-sm text-slate-700 mt-2" style="white-space: pre-line;">
 Hi everyone,
@@ -9615,17 +9615,17 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           <div class="${rowBase}">
             <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-announcement" ? "✓ Copied" : "Copy message"}</button>
             ${useEmail
-              ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>`
+              ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>`
               : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>`
             }
           </div>
           ${promoteUiState.copiedAction === "copy-announcement" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
-          <div class="mt-3 text-sm text-slate-500">After sharing the announcement with the team, come back here to complete this step.</div>
+          <div class="mt-3 text-sm text-slate-500">After sending the message, come back here to complete this step.</div>
           <div class="mt-4 flex items-center justify-end gap-3">
             ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
             <label class="inline-flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
-              <span>I posted the announcement to my team</span>
+              <span>I shared the announcement with the team</span>
             </label>
           </div>
         `;
@@ -9659,7 +9659,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         <div class="${rowBase}">
           <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
         </div>
         ${promoteUiState.copiedAction === "copy-reminder-week" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
@@ -9679,7 +9679,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         <div class="mt-4 flex flex-wrap items-center gap-2">
           <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
           <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+          <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
         </div>
         ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
@@ -9700,7 +9700,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       <div class="mt-4 flex flex-wrap items-center gap-2">
         <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
         <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-        <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+        <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
       </div>
       ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
       <div class="mt-4 flex items-center justify-end gap-3">
