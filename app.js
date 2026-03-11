@@ -3691,7 +3691,24 @@ if (eventWorkflowSection) {
   if (sidebarNavWorkflowEventSubtitle) {
     const _navEventName = getSidebarWorkflowEventName();
     sidebarNavWorkflowEventSubtitle.textContent = _navEventName;
-    sidebarNavWorkflowEventSubtitle.style.display = allCoreSetupComplete && _navEventName ? "block" : "none";
+      const shouldShowNavEventName = allCoreSetupComplete && _navEventName;
+      sidebarNavWorkflowEventSubtitle.style.display = shouldShowNavEventName ? "inline-block" : "none";
+      if (shouldShowNavEventName) {
+        sidebarNavWorkflowEventSubtitle.style.alignItems = "";
+        sidebarNavWorkflowEventSubtitle.style.maxWidth = "100%";
+        sidebarNavWorkflowEventSubtitle.style.padding = "2px 10px";
+        sidebarNavWorkflowEventSubtitle.style.borderRadius = "9999px";
+        sidebarNavWorkflowEventSubtitle.style.border = "1px solid #cbd5e1";
+        sidebarNavWorkflowEventSubtitle.style.background = "#f8fafc";
+        sidebarNavWorkflowEventSubtitle.style.fontSize = "11px";
+        sidebarNavWorkflowEventSubtitle.style.fontWeight = "600";
+        sidebarNavWorkflowEventSubtitle.style.lineHeight = "1.35";
+        sidebarNavWorkflowEventSubtitle.style.color = "#0f172a";
+        sidebarNavWorkflowEventSubtitle.style.whiteSpace = "normal";
+        sidebarNavWorkflowEventSubtitle.style.overflow = "visible";
+        sidebarNavWorkflowEventSubtitle.style.textOverflow = "clip";
+        sidebarNavWorkflowEventSubtitle.style.overflowWrap = "anywhere";
+      }
   }
 }
 
@@ -6660,7 +6677,25 @@ function renderSetupStepStates() {
   if (sidebarWorkflowEventSubtitle) {
     const _wfEventName = getSidebarWorkflowEventName();
     sidebarWorkflowEventSubtitle.textContent = _wfEventName;
-    sidebarWorkflowEventSubtitle.style.display = allCoreSetupComplete && _wfEventName ? "block" : "none";
+    const shouldShowWorkflowEventName = allCoreSetupComplete && _wfEventName;
+    sidebarWorkflowEventSubtitle.style.display = shouldShowWorkflowEventName ? "inline-block" : "none";
+    if (shouldShowWorkflowEventName) {
+      sidebarWorkflowEventSubtitle.style.alignItems = "";
+      sidebarWorkflowEventSubtitle.style.maxWidth = "calc(100% - 72px)";
+      sidebarWorkflowEventSubtitle.style.padding = "2px 10px";
+      sidebarWorkflowEventSubtitle.style.borderRadius = "9999px";
+      sidebarWorkflowEventSubtitle.style.border = "1px solid #cbd5e1";
+      sidebarWorkflowEventSubtitle.style.background = "#f8fafc";
+      sidebarWorkflowEventSubtitle.style.fontSize = "11px";
+      sidebarWorkflowEventSubtitle.style.fontWeight = "600";
+      sidebarWorkflowEventSubtitle.style.lineHeight = "1.35";
+      sidebarWorkflowEventSubtitle.style.color = "#0f172a";
+      sidebarWorkflowEventSubtitle.style.paddingRight = "10px";
+      sidebarWorkflowEventSubtitle.style.whiteSpace = "normal";
+      sidebarWorkflowEventSubtitle.style.overflow = "visible";
+      sidebarWorkflowEventSubtitle.style.textOverflow = "clip";
+      sidebarWorkflowEventSubtitle.style.overflowWrap = "anywhere";
+    }
   }
 
   if (setupHeadingMain) {
