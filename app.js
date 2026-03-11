@@ -294,6 +294,15 @@ function getActiveWorkflowType() {
   const explicit = String(state.eventLaunchContext?.workflowType || "").trim().toLowerCase();
   if (explicit === EVENT_WORKFLOW_TYPES.RSVP) return EVENT_WORKFLOW_TYPES.RSVP;
   if (explicit === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) return EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE;
+  const programEvents = Array.isArray(state.fourMonthProgram?.events) ? state.fourMonthProgram.events : [];
+  const firstConcreteEvent = programEvents.find((eventItem) =>
+    eventItem && typeof eventItem === "object" && !eventItem.isConfettiMonth
+  );
+  if (firstConcreteEvent) {
+    const fallbackConfig = getEventWorkflowConfig(firstConcreteEvent);
+    if (fallbackConfig.workflowType === EVENT_WORKFLOW_TYPES.RSVP) return EVENT_WORKFLOW_TYPES.RSVP;
+    if (fallbackConfig.workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) return EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE;
+  }
   return EVENT_WORKFLOW_TYPES.POLL;
 }
 
@@ -5015,11 +5024,18 @@ if (action === "create-event") {
     resetPollBuilderDraftFields();
     state.setupShortlistMode = "poll";
     goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.POLL, { renderPoll: true });
-  } else {
+  } else if (workflowConfig.workflowType === EVENT_WORKFLOW_TYPES.RSVP) {
     ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.POLL);
     state.setupShortlistMode = "rsvp";
     state.pollBuilder.showResultsPage = false;
     goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.RSVP, { renderRsvp: true });
+  } else {
+    ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.POLL);
+    ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.RSVP);
+    ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.BOOK);
+    state.setupShortlistMode = "rsvp";
+    state.pollBuilder.showResultsPage = false;
+    goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.PROMOTE);
   }
 
   persistState();
