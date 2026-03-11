@@ -169,7 +169,7 @@ const EVENT_WORKFLOW_STEP_SEQUENCE = [
 function getEventWorkflowConfig(eventLike = {}) {
   const templateId = String(eventLike?.templateId || eventLike?.id || "").trim().toLowerCase();
   const title = String(eventLike?.title || eventLike?.name || "").trim().toLowerCase();
-  if (isRevelryLabsReadOnlyMagicLink() && (templateId === "march-madness" || title === "march madness brackets challenge")) {
+  if (isRevelryLabsReadOnlyMagicLink() && (templateId === "march-madness" || title === "march madness bracket challenge")) {
     return {
       workflowType: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
       allowDirectBookOverride: Boolean(eventLike?.allowDirectBookOverride),
@@ -9274,9 +9274,9 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const isMarchMadnessEvent = String(eventName || "").trim().toLowerCase() === "march madness brackets challenge";
+  const isMarchMadnessEvent = String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
-    ? "Promote the Brackets Challenge"
+    ? "Promote the Bracket Challenge"
     : "Promote Event";
   const promoteHeaderSummary = isMagicLinkContext && isMarchMadnessEvent
     ? "March 19 - April 6"
@@ -9330,6 +9330,34 @@ function renderPromoteEventStep() {
   const announcementMessage = (promote.messages.announcementOverride || getDefaultAnnouncementMessage()).trim();
   const reminderWeekMessage = (promote.messages.reminderWeekOverride || getDefaultReminderWeekMessage()).trim();
   const reminderDayOfMessage = (promote.messages.reminderDayOfOverride || getDefaultReminderDayOfMessage()).trim();
+
+  const marchMadnessAnnouncementSlackMessage = [
+    "\ud83c\udfc0 March Madness Bracket Challenge is back!",
+    "",
+    "We\u2019re running a Revelry bracket competition for the NCAA men\u2019s and women\u2019s basketball tournaments.",
+    "",
+    "In a bracket challenge, you predict which teams will win each game throughout the tournament. As the games are played, your bracket earns points for every correct pick.",
+    "",
+    "Create your bracket and compete with fellow Revelers to see who predicts the tournament best.",
+    "",
+    "Join the women\u2019s challenge here: https://shorturl.at/tleLy",
+    "",
+    "Join the men\u2019s challenge here: https://shorturl.at/Jv9yZ",
+    "",
+    "Password for both is Revelry2026",
+    "",
+    "",
+    "Make sure your bracket is submitted before the first tournament games begin...",
+    "",
+    "- Thursday, March 19 @ 12:15p ET for the men\u2019s",
+    "- Friday, March 20 @ 11:30a ET for the women\u2019s",
+    "",
+    "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your co-workers!",
+    "",
+    "How to Join a Tournament Challenge Group: https://shorturl.at/RH6Jk",
+    "",
+    "If not, do it now!!!!!!",
+  ].join("\n");
 
   const parseDateFromContext = () => {
     const raw = String(bookedEvent?.startDateTime || state.pollBuilder?.chosenDateTime || "").trim();
@@ -9432,17 +9460,7 @@ function renderPromoteEventStep() {
     return "○ Not started";
   };
 
-  const getCardActionLabel = (stepKey) => {
-    if (isStepLocked(stepKey)) return "Locked";
-    const isDone = doneFlags[stepKey];
-    const isActive = activeStep === stepKey;
-    const isCollapsed = promote.collapsedStep === stepKey;
-    if (isActive && !isCollapsed) return "Collapse";
-    if (isDone) return "Edit";
-    return "Start";
-  };
-
-  const isCardExpanded = (stepKey) => activeStep === stepKey && promote.collapsedStep !== stepKey;
+  const isCardExpanded = () => true;
 
   const renderStepBody = (stepKey) => {
     const stepState = getStepObject(stepKey);
@@ -9488,7 +9506,7 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
-            <div class="p-3" style="white-space: pre-line;"></div>
+            <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : escapeHtml(marchMadnessAnnouncementSlackMessage)}</div>
           </div>
           <div class="${rowBase}">
             <button type="button" data-promote-action="copy-announcement" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy message</button>
@@ -9588,15 +9606,13 @@ function renderPromoteEventStep() {
 
   const cardsHtml = processSteps.map((step) => {
     const expanded = isCardExpanded(step.key);
-    const locked = isStepLocked(step.key);
     return `
       <article id="promote-card-${step.key}" class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
         <div class="flex items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">
             <h4 class="truncate text-base font-semibold text-slate-900">${escapeHtml(step.title)}</h4>
-            <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span>
           </div>
-          <button type="button" data-promote-toggle="${step.key}" data-allow-locked="true" ${locked ? "disabled" : ""} class="promote-card-toggle rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 ${locked ? "cursor-not-allowed opacity-50" : "hover:bg-slate-50 hover:text-slate-900"}">${getCardActionLabel(step.key)}</button>
+          <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span>
         </div>
         ${expanded ? `<div class="mt-4 border-t border-slate-200 pt-4">${renderStepBody(step.key)}</div>` : ""}
       </article>
@@ -9647,21 +9663,6 @@ function renderPromoteEventStep() {
     renderPromoteEventStep();
   };
 
-  const toggleCard = (stepKey) => {
-    normalizePromoteEventState();
-    if (isStepLocked(stepKey)) return;
-    const isActive = state.promoteEvent.activeStep === stepKey;
-    const isCollapsed = state.promoteEvent.collapsedStep === stepKey;
-    if (isActive && !isCollapsed) {
-      state.promoteEvent.collapsedStep = stepKey;
-    } else {
-      state.promoteEvent.activeStep = stepKey;
-      state.promoteEvent.collapsedStep = "";
-    }
-    persistState();
-    renderPromoteEventStep();
-  };
-
   const setStepDone = (stepKey, done) => {
     normalizePromoteEventState();
     const stamp = done ? new Date().toISOString() : "";
@@ -9707,13 +9708,6 @@ function renderPromoteEventStep() {
         const card = document.getElementById(`promote-card-${stepKey}`);
         if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 0);
-    });
-  });
-
-  panel.querySelectorAll("[data-promote-toggle]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const stepKey = String(button.getAttribute("data-promote-toggle") || "");
-      toggleCard(stepKey);
     });
   });
 
@@ -9767,7 +9761,12 @@ function renderPromoteEventStep() {
         return;
       }
       if (action === "copy-announcement") {
-        copyToClipboard(announcementMessage);
+        if (isMagicLinkContext && isMarchMadnessEvent) {
+          const useEmail = promoteUiState.announcementChannel === "email";
+          copyToClipboard(useEmail ? "" : marchMadnessAnnouncementSlackMessage);
+        } else {
+          copyToClipboard(announcementMessage);
+        }
         return;
       }
       if (action === "copy-reminder-week") {
