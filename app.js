@@ -9332,6 +9332,41 @@ function renderPromoteEventStep() {
   const reminderWeekMessage = (promote.messages.reminderWeekOverride || getDefaultReminderWeekMessage()).trim();
   const reminderDayOfMessage = (promote.messages.reminderDayOfOverride || getDefaultReminderDayOfMessage()).trim();
 
+  const marchMadnessAnnouncementEmailMessage = [
+    "Hi everyone,",
+    "",
+    "We\u2019re running a Revelry bracket competition for the NCAA men\u2019s and women\u2019s basketball tournaments.",
+    "",
+    "In a bracket challenge, you predict which teams will win each game throughout the tournament. As the games are played, your bracket earns points for every correct pick. The person with the most points at the end wins.",
+    "",
+    "Create your bracket and compete with fellow Revelers to see who predicts the tournament best.",
+    "",
+    "Join the challenge:",
+    "",
+    "Women\u2019s bracket here (url: https://shorturl.at/tleLy)",
+    "",
+    "Men\u2019s bracket here (url: https://shorturl.at/Jv9yZ)",
+    "",
+    "Password for both: Revelry2026",
+    "",
+    "Bracket submission deadlines:",
+    "",
+    "Men\u2019s tournament: Thursday, March 19 @ 12:15 PM ET",
+    "Women\u2019s tournament: Friday, March 20 @ 11:30 AM ET",
+    "",
+    "Make sure your bracket is submitted before the first games begin.",
+    "",
+    "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your coworkers.",
+    "",
+    "How to Join",
+    "1. Click the links for the men\u2019s and women\u2019s challenge.",
+    "2. Enter the password above.",
+    "3. Fill out your bracket by predicting the winner of each game.",
+    "4. Submit your bracket before the tournaments begin.",
+    "",
+    "Good luck\u2014and enjoy the madness!",
+  ].join("\n");
+
   const marchMadnessAnnouncementSlackMessage = [
     "\ud83c\udfc0 March Madness Bracket Challenge is back!",
     "",
@@ -9508,7 +9543,7 @@ function renderPromoteEventStep() {
       if (isMagicLinkContext && isMarchMadnessEvent) {
         const useEmail = promoteUiState.announcementChannel === "email";
         return `
-          <div class="mt-3 text-sm text-slate-600">Send this message to your team to invite everyone to join the bracket challenge.</div>
+          <div class="mt-3 text-sm text-slate-600">Send this message to your team via either Slack or Gmail to invite everyone to join the bracket challenge.</div>
           <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700" style="min-height: 80px;">
             <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
@@ -9516,10 +9551,10 @@ function renderPromoteEventStep() {
             </div>
             <div class="p-3" style="white-space: pre-line;">${useEmail ? `
               <div class="rounded-lg border border-slate-200 bg-slate-100 p-2 mb-2">
-                <div class="text-xs font-semibold text-slate-600 mb-0.5">Subject:</div>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="font-medium text-slate-900">Join the Revelry March Madness Bracket Challenge 🏀</span>
-                  <button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span>
+                  <span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span>
+                  <button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button>
                 </div>
               </div>
               <div class="text-sm text-slate-700 mt-2">Hi everyone,
@@ -9837,7 +9872,7 @@ Good luck—and enjoy the madness!</div>
       if (action === "copy-announcement") {
         if (isMagicLinkContext && isMarchMadnessEvent) {
           const useEmail = promoteUiState.announcementChannel === "email";
-          copyToClipboard(useEmail ? "" : marchMadnessAnnouncementSlackMessage);
+          copyToClipboard(useEmail ? marchMadnessAnnouncementEmailMessage : marchMadnessAnnouncementSlackMessage);
         } else {
           copyToClipboard(announcementMessage);
         }
