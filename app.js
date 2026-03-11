@@ -4064,7 +4064,7 @@ function renderFourMonthProgram() {
       const primaryLabel = isBookMode ? "Book this event ↗" : "Let your team choose — Generate poll";
       return `
         <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
-          <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
+          <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
             <div style="flex: 1; min-width: 0;">
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -4077,13 +4077,13 @@ function renderFourMonthProgram() {
                   </div>
                   <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                  <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
-                  ${nextEventBadge}
-                </div>
+                <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
               </div>
             </div>
-            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+              ${nextEventBadge}
+              <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; line-height: 1;">${isExpanded ? "▾" : "▸"}</span>
+            </div>
           </div>
           <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px;">
             <div style="margin-bottom: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
@@ -4129,7 +4129,7 @@ function renderFourMonthProgram() {
     const typeLabel = event.type === "poll" ? "📊 Poll" : event.type === "rsvp" ? "✓ RSVP" : "🔗 External";
     return `
       <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
-        <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
+        <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -4142,13 +4142,13 @@ function renderFourMonthProgram() {
                 </div>
                 <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
-                ${nextEventBadge}
-              </div>
+              <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
             </div>
           </div>
-          <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+            ${nextEventBadge}
+            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; line-height: 1;">${isExpanded ? "▾" : "▸"}</span>
+          </div>
         </div>
         <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
           <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(event.title || "")}</h4>
