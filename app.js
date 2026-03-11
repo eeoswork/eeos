@@ -9409,6 +9409,27 @@ function renderPromoteEventStep() {
     "Good luck\u2014and enjoy the madness!",
   ].join("\n");
 
+  const marchMadnessSignupReminderMessage = [
+    "📈 My professional investment advice for the week:",
+    "",
+    "Listen, I'm not a financial advisor, but I've crunched the numbers:",
+    "",
+    "Cost to enter: $0",
+    "",
+    "Effort required: 5 minutes of clicking names you recognize (or have the coolest colors).",
+    "",
+    "Potential ROI: 12 months of looking your manager in the eye and saying, \"Actually, I believe I'm the Revelry Bracket Champion, so you're muted.\"",
+    "",
+    "The math checks out. Get in there before the window slams shut! 🏀",
+    "",
+    "Password for both: Revelry2026",
+    "",
+    "Men's Tournament (deadline Thurs @ 12:15 PM ET): Join here [URL]",
+    "Women's Tournament (deadline Fri @ 11:30 AM ET): Join here [URL]",
+    "",
+    "Make sure your picks are in before tip-off!"
+  ].join("\n");
+
   const parseDateFromContext = () => {
     const raw = String(bookedEvent?.startDateTime || state.pollBuilder?.chosenDateTime || "").trim();
     if (raw) {
@@ -9668,9 +9689,58 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     }
 
     if (stepKey === "reminder_week") {
+      if (isRevelryBracketsPromoteFlow) {
+        const formattedSignupReminderHtml = marchMadnessSignupReminderMessage.split("\n").map((line) => {
+          const escapedLine = escapeHtml(line);
+          if (line === "📈 My professional investment advice for the week:") {
+            return `<strong>${escapedLine}</strong>`;
+          }
+          if (line.startsWith("Cost to enter:")) {
+            return `<strong>Cost to enter:</strong>${escapeHtml(line.slice("Cost to enter:".length))}`;
+          }
+          if (line.startsWith("Effort required:")) {
+            return `<strong>Effort required:</strong>${escapeHtml(line.slice("Effort required:".length))}`;
+          }
+          if (line.startsWith("Potential ROI:")) {
+            return `<strong>Potential ROI:</strong>${escapeHtml(line.slice("Potential ROI:".length))}`;
+          }
+          if (line.startsWith("Password for both:")) {
+            return `<strong>Password for both:</strong>${escapeHtml(line.slice("Password for both:".length))}`;
+          }
+          if (line.startsWith("Men's Tournament")) {
+            return `<strong>Men's Tournament:</strong>${escapeHtml(line.slice("Men's Tournament".length))}`;
+          }
+          if (line.startsWith("Women's Tournament")) {
+            return `<strong>Women's Tournament:</strong>${escapeHtml(line.slice("Women's Tournament".length))}`;
+          }
+          if (line === "Make sure your picks are in before tip-off!") {
+            return `<em>${escapedLine}</em>`;
+          }
+          return escapedLine;
+        }).join("\n");
+
+        return `
+          <div class="mt-3 text-sm text-slate-600">Schedule this reminder in Slack for Wednesday, March 18</div>
+          <div class="mt-2 text-xs text-slate-500">When: 1 week before</div>
+          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${formattedSignupReminderHtml}</div>
+          <div class="${rowBase}">
+            <button type="button" data-promote-action="copy-reminder-week" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-week" ? "✓ Copied" : "Copy message"}</button>
+            <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+            <button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
+          </div>
+          ${promoteUiState.copiedAction === "copy-reminder-week" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
+          <div class="mt-4 flex items-center justify-end gap-3">
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" data-promote-complete="reminder_week" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_week ? "checked" : ""} />
+              <span>1-week reminder sent</span>
+            </label>
+          </div>
+        `;
+      }
+
       return `
         ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
-        <div class="mt-3 text-sm text-slate-600">Send this reminder about a week before the event.</div>
+        <div class="mt-3 text-sm text-slate-600">Schedule this reminder in Slack for Wednesday, March </div>
         <div class="mt-2 text-xs text-slate-500">When: 1 week before</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderWeekMessage)}</div>
         <div class="${rowBase}">
@@ -9925,7 +9995,11 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         return;
       }
       if (action === "copy-reminder-week") {
-        copyToClipboard(reminderWeekMessage);
+        if (isRevelryBracketsPromoteFlow) {
+          copyToClipboard(marchMadnessSignupReminderMessage);
+        } else {
+          copyToClipboard(reminderWeekMessage);
+        }
         promoteUiState.copiedAction = "copy-reminder-week";
         renderPromoteEventStep();
         setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
