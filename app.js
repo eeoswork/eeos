@@ -9420,16 +9420,16 @@ function renderPromoteEventStep() {
     "",
     "Cost to enter: $0",
     "",
-    "Effort required: 5 minutes of clicking names you recognize (or have the coolest colors).",
+    "Effort required: 5 minutes of clicking teams you recognize (or have the coolest colors).",
     "",
     "Potential ROI: 12 months of looking your manager in the eye and saying, \"Actually, I believe I'm the Revelry Bracket Champion, so you're muted.\"",
     "",
-    "The math checks out. Get in there before the window slams shut! 🏀",
+    "The math checks out, so get in there before the deadline divides your chances by zero! 🏀",
     "",
     "Password for both: Revelry2026",
     "",
-    "Men's Tournament (deadline Thurs @ 12:15 PM ET): Join here [URL]",
-    "Women's Tournament (deadline Fri @ 11:30 AM ET): Join here [URL]",
+    "Men's Tournament (deadline Thurs @ 12:15 PM ET): Join here (url: https://shorturl.at/Jv9yZ)",
+    "Women's Tournament (deadline Fri @ 11:30 AM ET): Join here (url: https://shorturl.at/tleLy)",
     "",
     "Make sure your picks are in before tip-off!"
   ].join("\n");
@@ -9711,6 +9711,18 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         const isReminderWeekReadOnly = isRevelryBracketsPromoteFlow && Boolean(promote.reminderWeekLockedAfterContinue);
         const formattedSignupReminderHtml = marchMadnessSignupReminderMessage.split("\n").map((line) => {
           const escapedLine = escapeHtml(line);
+          const signupLinkedLines = {
+            "Men's Tournament (deadline Thurs @ 12:15 PM ET): Join here (url: https://shorturl.at/Jv9yZ)": {
+              label: "Men's Tournament",
+              suffix: " (deadline Thurs @ 12:15 PM ET): Join ",
+              url: "https://shorturl.at/Jv9yZ"
+            },
+            "Women's Tournament (deadline Fri @ 11:30 AM ET): Join here (url: https://shorturl.at/tleLy)": {
+              label: "Women's Tournament",
+              suffix: " (deadline Fri @ 11:30 AM ET): Join ",
+              url: "https://shorturl.at/tleLy"
+            }
+          };
           if (line === "📈 My professional investment advice for the week:") {
             return `<strong>${escapedLine}</strong>`;
           }
@@ -9726,11 +9738,9 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           if (line.startsWith("Password for both:")) {
             return `<strong>Password for both:</strong>${escapeHtml(line.slice("Password for both:".length))}`;
           }
-          if (line.startsWith("Men's Tournament")) {
-            return `<strong>Men's Tournament:</strong>${escapeHtml(line.slice("Men's Tournament".length))}`;
-          }
-          if (line.startsWith("Women's Tournament")) {
-            return `<strong>Women's Tournament:</strong>${escapeHtml(line.slice("Women's Tournament".length))}`;
+          if (signupLinkedLines[line]) {
+            const { label, suffix, url } = signupLinkedLines[line];
+            return `<strong>${escapeHtml(label)}:</strong>${escapeHtml(suffix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a>`;
           }
           if (line === "Make sure your picks are in before tip-off!") {
             return `<em>${escapedLine}</em>`;
