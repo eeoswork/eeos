@@ -151,7 +151,9 @@ function getEventWorkflowConfig(eventLike = {}) {
     : EVENT_WORKFLOW_TYPES.RSVP);
   const workflowType = requestedWorkflowType === EVENT_WORKFLOW_TYPES.POLL
     ? EVENT_WORKFLOW_TYPES.POLL
-    : EVENT_WORKFLOW_TYPES.RSVP;
+    : (requestedWorkflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE
+        ? EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE
+        : EVENT_WORKFLOW_TYPES.RSVP);
   const allowDirectBookOverride = Boolean(eventLike?.allowDirectBookOverride);
   const pollVariant = String(eventLike?.pollVariant || "event-and-datetime").trim() || "event-and-datetime";
   const hasPoll = workflowType === EVENT_WORKFLOW_TYPES.POLL;
@@ -162,6 +164,7 @@ function getEventWorkflowConfig(eventLike = {}) {
 function getWorkflowTypeLabel(eventLike = {}) {
   const config = getEventWorkflowConfig(eventLike);
   if (config.workflowType === EVENT_WORKFLOW_TYPES.RSVP) return "RSVP";
+  if (config.workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) return "Promote";
   return "Poll → RSVP";
 }
 
