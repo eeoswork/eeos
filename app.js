@@ -9365,6 +9365,9 @@ function renderPromoteEventStep() {
     "4. Submit your bracket before the tournaments begin.",
     "",
     "Good luck\u2014and enjoy the madness!",
+    "",
+    "",
+    "P.S. Extra bragging rights to the Reveler with the best bracket name."
   ].join("\n");
 
   const marchMadnessAnnouncementSlackMessage = [
@@ -9549,7 +9552,8 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
-            <div class="p-3" style="${useEmail ? "" : "white-space: pre-line;"}">${useEmail ? `<div class="rounded-lg border border-slate-200 bg-slate-100 mb-2" style="padding: 5px 8px;"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span><span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span><button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button></div></div><div class="text-sm text-slate-700 mt-2" style="white-space: pre-line;">Hi everyone,
+            <div class="p-3" style="${useEmail ? "" : "white-space: pre-line;"}">${useEmail ? `<div class="rounded-lg border border-slate-200 bg-slate-100 mb-2" style="padding: 5px 8px;"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span><span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span><button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button></div></div><div class="text-sm text-slate-700 mt-2" style="white-space: pre-line;">
+Hi everyone,
 
 We're running a Revelry bracket competition for the NCAA men's and women's basketball tournaments.
 
@@ -9580,7 +9584,10 @@ The person with the most points at the end takes the Revelry Bracket Champion cr
 3. Fill out your bracket by predicting the winner of each game.
 4. Submit your bracket before the tournaments begin.
 
-Good luck—and enjoy the madness!</div>
+Good luck—and enjoy the madness!
+
+
+P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
             ` : (() => {
               const simpleBoldLines = new Set([
                 "\ud83c\udfc0 March Madness Bracket Challenge is back!",
