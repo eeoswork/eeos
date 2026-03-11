@@ -117,7 +117,8 @@ const GOALS = [
 
 const EVENT_WORKFLOW_TYPES = {
   POLL: "poll",
-  RSVP: "rsvp"
+  RSVP: "rsvp",
+  STRAIGHT_TO_PROMOTE: "straight-to-promote"
 };
 
 const EVENT_WORKFLOW_STEPS = {
@@ -167,6 +168,9 @@ function getWorkflowTypeLabel(eventLike = {}) {
 function getEventWorkflowStepSequence(workflowType = getActiveWorkflowType()) {
   if (workflowType === EVENT_WORKFLOW_TYPES.RSVP) {
     return EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+  }
+  if (workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) {
+    return EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.RSVP && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
   }
   return [...EVENT_WORKFLOW_STEP_SEQUENCE];
 }
@@ -260,6 +264,7 @@ function goToEventWorkflowStep(stepNum, options = {}) {
 function getActiveWorkflowType() {
   const explicit = String(state.eventLaunchContext?.workflowType || "").trim().toLowerCase();
   if (explicit === EVENT_WORKFLOW_TYPES.RSVP) return EVENT_WORKFLOW_TYPES.RSVP;
+  if (explicit === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) return EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE;
   return EVENT_WORKFLOW_TYPES.POLL;
 }
 
@@ -4069,7 +4074,7 @@ function getMagicLinkFourMonthOverride() {
           title: "Sports competition",
           description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights and a prize.",
           type: "poll",
-          workflowType: "rsvp",
+          workflowType: "straight-to-promote",
           estimatedCost: 0,
           goals: ["Team Connection & Culture"],
           score: 1.0
