@@ -9752,12 +9752,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
     <div class="mt-4 space-y-3">${cardsHtml}</div>
 
-    <div class="mt-4 flex justify-end">
-      <div class="w-full md:w-auto">
-        <button id="promoteFinishContinue" class="setup-step-next w-full rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300" data-step="10" ${canContinue ? "" : "disabled"}>Finish Promote Step → Continue</button>
-        <p class="mt-2 text-right text-xs text-slate-500">You can come back anytime to send reminders.</p>
-      </div>
-    </div>
   `;
 
   const copyToClipboard = async (text) => {
@@ -9932,29 +9926,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     });
   });
 
-  const promoteFinishContinueButton = document.getElementById("promoteFinishContinue");
-  if (promoteFinishContinueButton) {
-    promoteFinishContinueButton.addEventListener("click", () => {
-      if (promoteFinishContinueButton.disabled) return;
-      if (!Array.isArray(state.completedSetupSteps)) {
-        state.completedSetupSteps = [];
-      }
-      if (!state.completedSetupSteps.includes(11)) {
-        state.completedSetupSteps.push(11);
-      }
-      if (!state.setupStepDirty || typeof state.setupStepDirty !== "object") {
-        state.setupStepDirty = {};
-      }
-      state.setupStepDirty[11] = false;
-      state.currentSetupStep = 12;
-      state.eventWorkflowProcessStep = 12;
-      persistState();
-      renderSetupStepStates();
-      renderSidebarStepMenus();
-      updateSetupStepButtonStates();
-      scrollSetupStepIntoView(12);
-    });
-  }
 }
 
 function renderRunEventStep() {
