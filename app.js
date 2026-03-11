@@ -9843,12 +9843,14 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>Open Slack</button>
       </div>
       ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
+      ${isRevelryBracketsPromoteFlow ? "" : `
       <div class="mt-4 flex items-center justify-end gap-3">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" data-promote-complete="reminder_dayof" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_dayof ? "checked" : ""} />
           <span>Day-of reminder sent</span>
         </label>
       </div>
+      `}
     `;
   };
 
