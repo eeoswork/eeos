@@ -7014,11 +7014,22 @@ const sidebarSetupHeading = $("sidebarSetupHeading");
 if (sidebarSetupHeading) {
   sidebarSetupHeading.style.cursor = "pointer";
   sidebarSetupHeading.addEventListener("click", () => {
+    const allCoreSetupComplete = [1,2,3,4,5,6].every((stepNum) => state.completedSetupSteps.includes(stepNum));
     setSidebarActiveSection("setup");
+    if (allCoreSetupComplete) {
+      state.currentSetupStep = 1;
+      state.setupMenuExpanded = true;
+      state.sidebarSetupExpanded = true;
+      collapseSetupViewsForWorkflowStep();
+    }
     persistState();
     renderSetupMenuState();
     renderSidebarStepMenus();
     renderSetupStepStates();
+    if (allCoreSetupComplete) {
+      forceExpandSetupStep(1);
+      scrollSetupStepIntoView(1, "smooth", true);
+    }
   });
 }
 
@@ -7037,9 +7048,22 @@ if (sidebarEventWorkflowHeading) {
   sidebarEventWorkflowHeading.style.cursor = "pointer";
   sidebarEventWorkflowHeading.addEventListener("click", () => {
     setSidebarActiveSection("event-workflow");
+    const workflowType = getActiveWorkflowType();
+    const workflowSteps = getEventWorkflowStepSequence(workflowType);
+    const workflowComplete = workflowSteps.length > 0 && workflowSteps.every((stepNum) => state.completedSetupSteps.includes(stepNum));
+    if (!workflowComplete) {
+      const currentWorkflowStep = getEventWorkflowProcessStep();
+      if (workflowSteps.includes(currentWorkflowStep)) {
+        collapseSetupViewsForWorkflowStep();
+        state.currentSetupStep = currentWorkflowStep;
+      }
+    }
     persistState();
     renderSidebarStepMenus();
     renderSetupStepStates();
+    if (!workflowComplete) {
+      scrollSetupStepIntoView(state.currentSetupStep, "smooth", true);
+    }
   });
 }
 
