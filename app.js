@@ -72,9 +72,8 @@ function setSetupExpansionState(expanded, options = {}) {
   state.setupMenuExpanded = Boolean(expanded);
   state.sidebarSetupAutoCollapsed = true;
 
-  if (headersOnly && Number.isInteger(state.currentSetupStep) && state.currentSetupStep >= 1 && state.currentSetupStep <= 6) {
-    state.currentSetupStep = null;
-  }
+  // Preserve the currently active step. Navigation is sidebar-driven.
+  void headersOnly;
 }
 /*
  * JOLLY HR - Employee Experience OS
@@ -119,6 +118,181 @@ const GOALS = [
 "Employer Brand & Recruiting",
 "Inclusion & Belonging"
 ];
+
+const EVENT_WORKFLOW_TYPES = {
+  POLL: "poll",
+  RSVP: "rsvp"
+};
+
+const EVENT_WORKFLOW_STEPS = {
+  SHORTLIST: 7,
+  POLL: 8,
+  RSVP: 9,
+  BOOK: 10,
+  PROMOTE: 11,
+  RUN: 12,
+  FEEDBACK: 13,
+  REVIEW: 14
+};
+
+const EVENT_WORKFLOW_STEP_SEQUENCE = [
+  EVENT_WORKFLOW_STEPS.SHORTLIST,
+  EVENT_WORKFLOW_STEPS.POLL,
+  EVENT_WORKFLOW_STEPS.RSVP,
+  EVENT_WORKFLOW_STEPS.BOOK,
+  EVENT_WORKFLOW_STEPS.PROMOTE,
+  EVENT_WORKFLOW_STEPS.RUN,
+  EVENT_WORKFLOW_STEPS.FEEDBACK,
+  EVENT_WORKFLOW_STEPS.REVIEW
+];
+
+function getEventWorkflowConfig(eventLike = {}) {
+  const explicitWorkflowType = String(eventLike?.workflowType || "").trim().toLowerCase();
+  const legacyType = String(eventLike?.type || "").trim().toLowerCase();
+  const requestedWorkflowType = explicitWorkflowType || (legacyType === "poll"
+    ? EVENT_WORKFLOW_TYPES.POLL
+    : EVENT_WORKFLOW_TYPES.RSVP);
+  const workflowType = requestedWorkflowType === EVENT_WORKFLOW_TYPES.POLL
+    ? EVENT_WORKFLOW_TYPES.POLL
+    : EVENT_WORKFLOW_TYPES.RSVP;
+  const allowDirectBookOverride = Boolean(eventLike?.allowDirectBookOverride);
+  const pollVariant = String(eventLike?.pollVariant || "event-and-datetime").trim() || "event-and-datetime";
+  const hasPoll = workflowType === EVENT_WORKFLOW_TYPES.POLL;
+  const hasRsvp = true;
+  return { workflowType, allowDirectBookOverride, pollVariant, hasPoll, hasRsvp };
+}
+
+function getWorkflowTypeLabel(eventLike = {}) {
+  const config = getEventWorkflowConfig(eventLike);
+  if (config.workflowType === EVENT_WORKFLOW_TYPES.RSVP) return "RSVP";
+  return "Poll → RSVP";
+}
+
+function getEventWorkflowStepSequence(workflowType = getActiveWorkflowType()) {
+  if (workflowType === EVENT_WORKFLOW_TYPES.RSVP) {
+    return EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+  }
+  return [...EVENT_WORKFLOW_STEP_SEQUENCE];
+}
+
+function isWorkflowStepSkipped(stepNum, workflowType = getActiveWorkflowType()) {
+  return !getEventWorkflowStepSequence(workflowType).includes(stepNum);
+}
+
+function getPreviousWorkflowStep(stepNum, workflowType = getActiveWorkflowType()) {
+  const sequence = getEventWorkflowStepSequence(workflowType);
+  const stepIndex = sequence.indexOf(stepNum);
+  if (stepIndex <= 0) return null;
+  return sequence[stepIndex - 1];
+}
+
+function getNextWorkflowStep(stepNum, workflowType = getActiveWorkflowType()) {
+  const sequence = getEventWorkflowStepSequence(workflowType);
+  const stepIndex = sequence.indexOf(stepNum);
+  if (stepIndex < 0 || stepIndex >= sequence.length - 1) return null;
+  return sequence[stepIndex + 1];
+}
+
+function createEmptyEventLaunchContext() {
+  return {
+    templateId: "",
+    title: "",
+    workflowType: "",
+    pollVariant: "",
+    allowDirectBookOverride: false,
+    url: "",
+    costPerPerson: 0,
+    locationType: "virtual"
+  };
+}
+
+function normalizeEventLaunchContext() {
+  if (!state.eventLaunchContext || typeof state.eventLaunchContext !== "object") {
+    state.eventLaunchContext = createEmptyEventLaunchContext();
+  }
+  const next = state.eventLaunchContext;
+  if (typeof next.templateId !== "string") next.templateId = "";
+  if (typeof next.title !== "string") next.title = "";
+  if (typeof next.workflowType !== "string") next.workflowType = "";
+  if (typeof next.pollVariant !== "string") next.pollVariant = "";
+  if (typeof next.allowDirectBookOverride !== "boolean") next.allowDirectBookOverride = false;
+  if (typeof next.url !== "string") next.url = "";
+  if (typeof next.costPerPerson !== "number") next.costPerPerson = 0;
+  if (typeof next.locationType !== "string") next.locationType = "virtual";
+}
+
+function setEventLaunchContextFromTemplate(template = {}) {
+  const config = getEventWorkflowConfig(template);
+  state.eventLaunchContext = {
+    templateId: String(template?.id || template?.templateId || "").trim(),
+    title: String(template?.title || template?.name || "").trim(),
+    workflowType: config.workflowType,
+    pollVariant: config.pollVariant,
+    allowDirectBookOverride: config.allowDirectBookOverride,
+    url: String(template?.url || "").trim(),
+    costPerPerson: Number(template?.costPerPerson ?? template?.estimatedCost ?? 0),
+    locationType: String(template?.eventLocationType || template?.locationType || "virtual").trim() || "virtual"
+  };
+}
+
+function ensureCompletedSetupStep(stepNum) {
+  if (!Array.isArray(state.completedSetupSteps)) {
+    state.completedSetupSteps = [];
+  }
+  if (!state.completedSetupSteps.includes(stepNum)) {
+    state.completedSetupSteps.push(stepNum);
+  }
+}
+
+function goToEventWorkflowStep(stepNum, options = {}) {
+  const processStep = Number.isInteger(options.processStep) ? options.processStep : stepNum;
+  const shouldRenderPoll = options.renderPoll === true;
+  const shouldRenderRsvp = options.renderRsvp === true;
+  collapseSetupViewsForWorkflowStep();
+  state.currentSetupStep = stepNum;
+  state.eventWorkflowProcessStep = processStep;
+  persistState();
+  renderSetupStepStates();
+  renderSidebarStepMenus();
+  updateSetupStepButtonStates();
+  renderFourMonthProgram();
+  if (shouldRenderPoll) renderPollBuilderStep();
+  if (shouldRenderRsvp) renderRsvpStep();
+  setTimeout(() => scrollSetupStepIntoView(stepNum, "smooth"), 100);
+}
+
+function getActiveWorkflowType() {
+  const explicit = String(state.eventLaunchContext?.workflowType || "").trim().toLowerCase();
+  if (explicit === EVENT_WORKFLOW_TYPES.RSVP) return EVENT_WORKFLOW_TYPES.RSVP;
+  return EVENT_WORKFLOW_TYPES.POLL;
+}
+
+function migrateEventWorkflowStepsIfNeeded() {
+  if (state.meta?.eventWorkflowSchemaVersion === 2) return;
+  const shiftStep = (stepNum) => {
+    if (!Number.isInteger(stepNum)) return stepNum;
+    if (stepNum >= 9 && stepNum <= 13) return stepNum + 1;
+    return stepNum;
+  };
+  state.currentSetupStep = shiftStep(Number.isInteger(state.currentSetupStep) ? state.currentSetupStep : state.currentSetupStep);
+  state.eventWorkflowProcessStep = shiftStep(Number.isInteger(state.eventWorkflowProcessStep) ? state.eventWorkflowProcessStep : state.eventWorkflowProcessStep);
+  if (Array.isArray(state.completedSetupSteps)) {
+    state.completedSetupSteps = Array.from(new Set(state.completedSetupSteps.map((stepNum) => shiftStep(stepNum))));
+  }
+  if (state.workflowStates && typeof state.workflowStates === "object") {
+    Object.values(state.workflowStates).forEach((workflowState) => {
+      if (!workflowState || typeof workflowState !== "object") return;
+      if (Number.isInteger(workflowState.currentStep)) {
+        workflowState.currentStep = workflowState.currentStep >= 3 ? workflowState.currentStep + 1 : workflowState.currentStep;
+      }
+      if (Array.isArray(workflowState.completed)) {
+        workflowState.completed = Array.from(new Set(workflowState.completed.map((stepNum) => (stepNum >= 3 ? stepNum + 1 : stepNum))));
+      }
+    });
+  }
+  if (!state.meta || typeof state.meta !== "object") state.meta = { lastUpdated: null };
+  state.meta.eventWorkflowSchemaVersion = 2;
+}
 
 
 const GOAL_DESCRIPTIONS = {
@@ -449,6 +623,7 @@ setupEventsGenerated: false,
 setupShortlistMode: "poll",
 mainSetupExpandAll: false,
 eventWorkflowProcessStep: 7,
+eventLaunchContext: createEmptyEventLaunchContext(),
 timeZone: "",
 setupPollSelectedEventIndexes: [0, 1, 2],
 setupBookSelectedEventIndex: 0,
@@ -478,6 +653,7 @@ pollBuilder: {
   voteDeadlineTimeZone: "",
   chosenEventId: "",
   chosenDateTime: "",
+  chosenEventLabel: "",
   eventLocationType: "virtual",
   costPerPerson: 50,
   rsvpDeadlineDateTime: "",
@@ -724,6 +900,12 @@ function parseMagicLinkFromHostPath() {
   }
 
   return { host, tokenId };
+}
+
+function isRevelryLabsReadOnlyMagicLink() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return false;
+  return parsed.host === "revelrylabs.eeos.work" && parsed.tokenId === "rlabs2026a1b2c3d4";
 }
 
 function getMagicLinkAuthStageKey(parsedMagicLink = null) {
@@ -1385,18 +1567,18 @@ return state.workflowStates[key];
 
 function deriveEventWorkflowProcessStep() {
   const completed = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
-  const isBookPath = state.setupShortlistMode === "book" && completed.includes(7);
-  for (let step = 7; step <= 13; step += 1) {
-    const treatAsCompleted = completed.includes(step) || (step === 8 && isBookPath);
+  const workflowType = getActiveWorkflowType();
+  for (const step of getEventWorkflowStepSequence(workflowType)) {
+    const treatAsCompleted = completed.includes(step);
     if (!treatAsCompleted) {
       return step;
     }
   }
-  return 13;
+  return EVENT_WORKFLOW_STEPS.REVIEW;
 }
 
 function getEventWorkflowProcessStep() {
-  if (Number.isInteger(state.eventWorkflowProcessStep) && state.eventWorkflowProcessStep >= 7 && state.eventWorkflowProcessStep <= 13) {
+  if (Number.isInteger(state.eventWorkflowProcessStep) && state.eventWorkflowProcessStep >= EVENT_WORKFLOW_STEPS.SHORTLIST && state.eventWorkflowProcessStep <= EVENT_WORKFLOW_STEPS.REVIEW) {
     return state.eventWorkflowProcessStep;
   }
   state.eventWorkflowProcessStep = deriveEventWorkflowProcessStep();
@@ -1443,8 +1625,7 @@ function getRunEventContext() {
 
 function canShowRunEventStep() {
   if (state.debugModeOn === true) return true;
-  const context = getRunEventContext();
-  return Boolean(context.hasBookedSignal && context.hasDateTime);
+  return !isWorkflowStepSkipped(EVENT_WORKFLOW_STEPS.RUN);
 }
 
 function getCollectFeedbackContext() {
@@ -1841,6 +2022,8 @@ try {
   if (typeof state.setupCompleted !== "boolean") {
     state.setupCompleted = true;
   }
+  normalizeEventLaunchContext();
+  migrateEventWorkflowStepsIfNeeded();
   if (typeof state.setupMenuExpanded !== "boolean") {
     state.setupMenuExpanded = false;
   }
@@ -1985,6 +2168,7 @@ try {
   if (typeof state.pollBuilder.voteDeadlineTimeZone !== "string") state.pollBuilder.voteDeadlineTimeZone = "";
   if (typeof state.pollBuilder.chosenEventId !== "string") state.pollBuilder.chosenEventId = "";
   if (typeof state.pollBuilder.chosenDateTime !== "string") state.pollBuilder.chosenDateTime = "";
+  if (typeof state.pollBuilder.chosenEventLabel !== "string") state.pollBuilder.chosenEventLabel = "";
   if (typeof state.pollBuilder.eventLocationType !== "string") state.pollBuilder.eventLocationType = "virtual";
   if (typeof state.pollBuilder.costPerPerson !== "number") state.pollBuilder.costPerPerson = 50;
   if (typeof state.pollBuilder.rsvpDeadlineDateTime !== "string") state.pollBuilder.rsvpDeadlineDateTime = "";
@@ -3378,7 +3562,7 @@ const isLandingActive = landingView && !landingView.classList.contains("hidden")
 const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
 const activeSidebarStepBg = "#E0E7FF";
 const activeSidebarStepText = "#1F2937";
-const runEventVisible = canShowRunEventStep();
+const activeWorkflowType = getActiveWorkflowType();
 const activeSetupKey = isLandingActive ? SETUP_STEP_TO_MENU_ITEM[state.currentSetupStep] : null;
 const wf = getWorkflowState();
 const rawStep = Number(wf?.currentStep || 1);
@@ -3399,14 +3583,19 @@ setupItems.forEach((item) => {
   const isActive = state.currentSetupStep === stepNum;
   const isProcessCurrent = stepNum === setupProcessCurrentStep;
   const isCompleted = state.completedSetupSteps.includes(stepNum);
+  const isFutureStep = !isCompleted && Number.isInteger(setupProcessCurrentStep) && stepNum > setupProcessCurrentStep;
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
   item.classList.toggle("sidebar-step-process-current", isProcessCurrent);
+  item.classList.toggle("sidebar-step-locked", isFutureStep && !isActive);
   item.style.background = isActive ? activeSidebarStepBg : "transparent";
   item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
   item.style.color = isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b");
+  item.style.opacity = isFutureStep && !isActive ? "0.72" : "1";
+  item.style.cursor = isFutureStep ? "not-allowed" : "pointer";
   item.onclick = () => {
+    if (isFutureStep) return;
     if (stepNum) {
       state.currentSetupStep = stepNum;
       state.setupMenuExpanded = true;
@@ -3423,30 +3612,40 @@ setupItems.forEach((item) => {
 
 if (eventWorkflowSection) {
   eventWorkflowSection.style.display = allCoreSetupComplete ? "block" : "none";
+
+  const sidebarNavWorkflowEventSubtitle = document.getElementById("sidebarNavWorkflowEventSubtitle");
+  if (sidebarNavWorkflowEventSubtitle) {
+    const _navEventName = getSidebarWorkflowEventName();
+    sidebarNavWorkflowEventSubtitle.textContent = _navEventName;
+    sidebarNavWorkflowEventSubtitle.style.display = allCoreSetupComplete && _navEventName ? "block" : "none";
+  }
 }
 
 eventWorkflowItems.forEach((item) => {
-  if (item.dataset.eventWorkflowMenuItem === "run-event" && !runEventVisible) {
+  const stepKeyToNum = {
+    "events-shortlist": 7,
+    poll: 8,
+    rsvp: 9,
+    "book-event": 10,
+    "tell-team": 11,
+    "run-event": 12,
+    "track-results": 13,
+    "review-impact": 14
+  };
+  const stepNum = stepKeyToNum[item.dataset.eventWorkflowMenuItem];
+  if (isWorkflowStepSkipped(stepNum, activeWorkflowType)) {
     item.style.display = "none";
     return;
   }
   item.style.display = "";
   const processCurrentStep = getEventWorkflowProcessStep();
   const isBookEventDebugOverride = Boolean(state.debugMode) && item.dataset.eventWorkflowMenuItem === "book-event";
-  const stepKeyToNum = {
-    "events-shortlist": 7,
-    poll: 8,
-    "book-event": 9,
-    "tell-team": 10,
-    "run-event": 11,
-    "track-results": 12,
-    "review-impact": 13
-  };
-  const stepNum = stepKeyToNum[item.dataset.eventWorkflowMenuItem];
   const isActive = state.currentSetupStep === stepNum;
   const isProcessCurrent = stepNum === processCurrentStep;
   const isCompleted = state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
-  const isLocked = !isBookEventDebugOverride && !isCompleted && (stepNum > 7) && !state.completedSetupSteps.includes(stepNum - 1);
+  const isFutureStep = !isCompleted && stepNum > processCurrentStep;
+  const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
+  const isLocked = !isBookEventDebugOverride && (isFutureStep || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep)));
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
@@ -3455,8 +3654,11 @@ eventWorkflowItems.forEach((item) => {
   item.style.background = isActive ? activeSidebarStepBg : "transparent";
   item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
   item.style.color = isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b");
+  item.style.opacity = isLocked && !isActive ? "0.72" : "1";
+  item.style.cursor = isLocked ? "not-allowed" : "pointer";
   item.onclick = () => {
     if (!allCoreSetupComplete || !stepNum) return;
+    if (isLocked) return;
     collapseSetupViewsForWorkflowStep();
     state.currentSetupStep = stepNum;
     persistState();
@@ -3871,6 +4073,7 @@ function getMagicLinkFourMonthOverride() {
           title: "Sports competition",
           description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights and a prize.",
           type: "poll",
+          workflowType: "rsvp",
           estimatedCost: 0,
           goals: ["Team Connection & Culture"],
           score: 1.0
@@ -3884,6 +4087,7 @@ function getMagicLinkFourMonthOverride() {
               title: "Large Group Event",
               description: "Premium virtual or in-person experience for high-engagement celebration.",
               type: "rsvp",
+              workflowType: "rsvp",
               estimatedCost: 0,
               goals: ["Team Connection & Culture"],
               score: 1.0
@@ -3897,6 +4101,7 @@ function getMagicLinkFourMonthOverride() {
           title: "Coffee Meetup",
           description: "Casual, quick team connection over coffee locally or virtually.",
           type: "rsvp",
+          workflowType: "rsvp",
           estimatedCost: 0,
           goals: ["Team Connection & Culture"],
           score: 1.0
@@ -3907,6 +4112,7 @@ function getMagicLinkFourMonthOverride() {
           title: "Volunteering: Lower 9th Ward Food Pantry",
           description: "Team volunteering opportunity supporting community at food pantry.",
           type: "rsvp",
+          workflowType: "rsvp",
           estimatedCost: 0,
           goals: ["Volunteering"],
           score: 1.0
@@ -3932,6 +4138,30 @@ function applyMagicLinkFourMonthOverride(program) {
     totalEstimatedCost: override.totalEstimatedCost,
     remainingBudget: program.remainingBudget || 0
   };
+}
+
+function getSidebarWorkflowEventName() {
+  // Only show after the event has been launched (step 7 completed)
+  if (!state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.SHORTLIST)) return "";
+  if (String(state.eventLaunchContext?.title || "").trim()) {
+    return String(state.eventLaunchContext.title || "").trim();
+  }
+  if (!state.fourMonthProgram || !Array.isArray(state.fourMonthProgram.events)) return "";
+  const events = state.fourMonthProgram.events;
+  const nextIndex = events.findIndex((e) => !e?.completed && !e?.created);
+  const monthIndex = nextIndex >= 0 ? nextIndex : 0;
+  const event = events[monthIndex];
+  if (!event) return "";
+  if (event.isConfettiMonth) {
+    const selectedIds = Array.isArray(state.pollBuilder?.selectedEventIds) ? state.pollBuilder.selectedEventIds : [];
+    const overrides = state.pollBuilder?.eventLabelOverrides || {};
+    if (selectedIds.length === 1 && overrides[selectedIds[0]]) return overrides[selectedIds[0]];
+    const booking = state.pollBuilder?.bookingConfirmation;
+    if (booking?.eventName) return booking.eventName;
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return monthNames[(new Date().getMonth() + monthIndex) % 12] + " Event";
+  }
+  return event.title || "";
 }
 
 function getFourMonthShortlistState() {
@@ -4141,7 +4371,7 @@ function renderFourMonthProgram() {
 
     // Regular months with single event
     const event = monthEvent;
-    const typeLabel = event.type === "poll" ? "📊 Poll" : event.type === "rsvp" ? "✓ RSVP" : "🔗 External";
+    const typeLabel = getWorkflowTypeLabel(event);
     return sectionHeaderHtml + `
       <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
         <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
@@ -4722,40 +4952,40 @@ if (action === "select-confetti") {
 
 if (action === "create-event") {
   const templateId = actionTarget.dataset.templateId;
-  const month = Number(actionTarget.dataset.month || 0);
-  
-  // Look up template from EVENT_TEMPLATES
-  if (!window.EVENT_TEMPLATES || !Array.isArray(window.EVENT_TEMPLATES)) {
-    showMiniToast("Event templates not loaded");
-    return;
-  }
-  
-  const template = window.EVENT_TEMPLATES.find(t => String(t.id) === String(templateId));
+  const template = (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId))
+    || (state.fourMonthProgram?.events || []).find((e) => String(e.templateId) === String(templateId));
+
   if (!template) {
     showMiniToast("Event template not found");
     return;
   }
-  
-  // Route based on event type
-  if (template.type === "poll") {
-    // Pre-populate poll builder with this event
-    state.pollBuilder.selectedEventIds = [templateId];
-    state.pollBuilder.eventLabelOverrides[templateId] = template.title;
-    // TODO: Navigate to poll builder UI or trigger poll generation
-    showMiniToast("Poll event selected — poll builder coming soon");
-  } else if (template.type === "rsvp") {
-    // Pre-populate RSVP builder with this event
-    state.pollBuilder.selectedEventIds = [templateId];
-    state.pollBuilder.eventLabelOverrides[templateId] = template.title;
-    // TODO: Navigate to RSVP builder UI or trigger RSVP generation
-    showMiniToast("RSVP event selected — RSVP builder coming soon");
-  } else if (template.type === "external") {
-    // Open the vendor URL
-    if (template.url) {
-      openVendorUrl(template.url, template.title);
-    }
+
+  const workflowConfig = getEventWorkflowConfig(template);
+  setEventLaunchContextFromTemplate(template);
+
+  if (!state.pollBuilder || typeof state.pollBuilder !== "object") state.pollBuilder = {};
+  if (!state.pollBuilder.eventLabelOverrides) state.pollBuilder.eventLabelOverrides = {};
+  state.pollBuilder.selectedEventIds = [templateId];
+  state.pollBuilder.eventLabelOverrides[templateId] = template.title || templateId;
+  state.pollBuilder.chosenEventId = String(templateId || "");
+  state.pollBuilder.chosenEventLabel = String(template.title || templateId || "");
+  state.pollBuilder.vendorBookingUrl = String(template.url || "").trim();
+  state.pollBuilder.costPerPerson = Number(template.costPerPerson ?? template.estimatedCost ?? 0);
+  state.pollBuilder.eventLocationType = String(template.eventLocationType || template.locationType || "virtual").trim() || "virtual";
+
+  ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.SHORTLIST);
+
+  if (workflowConfig.workflowType === EVENT_WORKFLOW_TYPES.POLL) {
+    resetPollBuilderDraftFields();
+    state.setupShortlistMode = "poll";
+    goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.POLL, { renderPoll: true });
+  } else {
+    ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.POLL);
+    state.setupShortlistMode = "rsvp";
+    state.pollBuilder.showResultsPage = false;
+    goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.RSVP, { renderRsvp: true });
   }
-  
+
   persistState();
   return;
 }
@@ -5935,42 +6165,8 @@ function initializeLandingSetupFlow() {
 function attachSetupStepHandlers() {
   document.querySelectorAll(".setup-step-header").forEach(header => {
     header.onclick = () => {
-      const step = header.closest(".setup-step").dataset.step;
-      const stepNum = parseInt(step);
-      const isSetupStep = stepNum >= 1 && stepNum <= 6;
-      const isEventWorkflowStep = stepNum >= 7 && stepNum <= 13;
-
-      if (isSetupStep) {
-        if (stepNum === state.currentSetupStep) {
-          state.currentSetupStep = null;
-        } else {
-          state.currentSetupStep = stepNum;
-        }
-        persistState();
-        renderSetupMenuState();
-        renderSetupStepStates();
-        renderSidebarStepMenus();
-        return;
-      }
-
-      // Event workflow steps: toggle open/closed for any visible step
-      if (isEventWorkflowStep && stepNum === state.currentSetupStep) {
-        state.currentSetupStep = null;
-        persistState();
-        renderSetupMenuState();
-        renderSetupStepStates();
-        renderSidebarStepMenus();
-        return;
-      }
-
-      if (isEventWorkflowStep) {
-        collapseSetupViewsForWorkflowStep();
-        state.currentSetupStep = stepNum;
-        persistState();
-        renderSetupMenuState();
-        renderSetupStepStates();
-        renderSidebarStepMenus();
-      }
+      // Main-step headers no longer control navigation.
+      // Only sidebar selections can change the active step.
     };
   });
 
@@ -6002,8 +6198,6 @@ function attachSetupStepHandlers() {
           generateRecommendedEvents();
         }
 
-        // Collapse the edited step after save
-        state.currentSetupStep = null;
         persistState();
         renderSetupStepStates();
         renderSidebarStepMenus();
@@ -6067,7 +6261,7 @@ function attachSetupStepHandlers() {
           persistState();
         }
       }
-      
+
       // Advance to next step if exists (book mode intentionally skips poll step and jumps to Book Event)
       if (step < 13 && !(step === 7 && state.setupShortlistMode === "book")) {
         state.currentSetupStep = step + 1;
@@ -6080,7 +6274,6 @@ function attachSetupStepHandlers() {
         renderSidebarStepMenus();
         updateSetupStepButtonStates();
         renderFourMonthProgram();
-        // Scroll to step 7 and ensure it's visible
         setTimeout(() => {
           scrollSetupStepIntoView(7, "smooth");
         }, 100);
@@ -6316,6 +6509,8 @@ function reorderMainSetupCards() {
 
 function renderSetupStepStates() {
   reorderMainSetupCards();
+  const singleStepMainView = true;
+  const revelryReadOnlyCompletedSteps = isRevelryLabsReadOnlyMagicLink();
   const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
   const setupProcessCurrentStep = (() => {
     for (let step = 1; step <= 6; step += 1) {
@@ -6324,7 +6519,30 @@ function renderSetupStepStates() {
     return null;
   })();
   const eventWorkflowProcessCurrentStep = getEventWorkflowProcessStep();
-  const runEventVisible = canShowRunEventStep();
+  const activeWorkflowType = getActiveWorkflowType();
+  const visibleEventWorkflowSteps = EVENT_WORKFLOW_STEP_SEQUENCE.filter(
+    (stepNum) => !isWorkflowStepSkipped(stepNum, activeWorkflowType)
+  );
+  const isRenderableStep = (stepNum) => {
+    if (!Number.isInteger(stepNum)) return false;
+    if (stepNum >= 1 && stepNum <= 6) return true;
+    if (stepNum >= EVENT_WORKFLOW_STEPS.SHORTLIST && stepNum <= EVENT_WORKFLOW_STEPS.REVIEW) {
+      return allCoreSetupComplete && visibleEventWorkflowSteps.includes(stepNum);
+    }
+    return false;
+  };
+  let activeSetupStep = Number.isInteger(state.currentSetupStep) ? state.currentSetupStep : null;
+  if (!isRenderableStep(activeSetupStep)) {
+    if (!allCoreSetupComplete) {
+      activeSetupStep = setupProcessCurrentStep || 1;
+    } else {
+      const processStep = Number.isInteger(eventWorkflowProcessCurrentStep) ? eventWorkflowProcessCurrentStep : null;
+      activeSetupStep = visibleEventWorkflowSteps.includes(processStep)
+        ? processStep
+        : (visibleEventWorkflowSteps[0] || 1);
+    }
+    state.currentSetupStep = activeSetupStep;
+  }
   const expandMainSetupAll = allCoreSetupComplete && Boolean(state.mainSetupExpandAll);
   const collapseMainSetupCards = allCoreSetupComplete && !state.sidebarSetupExpanded && !expandMainSetupAll;
   const setupHeadingMain = document.getElementById("setupHeadingMain");
@@ -6332,6 +6550,7 @@ function renderSetupStepStates() {
   const setupHeadingMainEdit = document.getElementById("setupHeadingMainEdit");
   const eventWorkflowHeadingMain = document.getElementById("eventWorkflowHeadingMain");
   const eventWorkflowHeadingMainLabel = document.getElementById("eventWorkflowHeadingMainLabel");
+  const landingHeroCopy = document.getElementById("landingHeroCopy");
   const setupSectionActive = !collapseMainSetupCards;
   const eventWorkflowSectionActive = allCoreSetupComplete && !setupSectionActive;
 
@@ -6348,6 +6567,13 @@ function renderSetupStepStates() {
 
   if (eventWorkflowHeadingMainLabel) {
     eventWorkflowHeadingMainLabel.textContent = eventWorkflowSectionActive ? "Event Workflow" : "EVENT WORKFLOW";
+  }
+
+  const sidebarWorkflowEventSubtitle = document.getElementById("sidebarWorkflowEventSubtitle");
+  if (sidebarWorkflowEventSubtitle) {
+    const _wfEventName = getSidebarWorkflowEventName();
+    sidebarWorkflowEventSubtitle.textContent = _wfEventName;
+    sidebarWorkflowEventSubtitle.style.display = allCoreSetupComplete && _wfEventName ? "block" : "none";
   }
 
   if (setupHeadingMain) {
@@ -6389,6 +6615,15 @@ function renderSetupStepStates() {
       }
     }
   }
+
+  if (singleStepMainView) {
+    if (landingHeroCopy) landingHeroCopy.style.display = "none";
+    if (setupHeadingMain) setupHeadingMain.style.display = "none";
+    if (setupHeadingMainEdit) setupHeadingMainEdit.style.display = "none";
+    if (eventWorkflowHeadingMain) eventWorkflowHeadingMain.style.display = "none";
+    if (sidebarWorkflowEventSubtitle) sidebarWorkflowEventSubtitle.style.display = "none";
+  }
+
   const setupSectionIcon = document.getElementById("setupSectionIcon");
   if (setupSectionIcon) {
     if (allCoreSetupComplete) {
@@ -6411,20 +6646,26 @@ function renderSetupStepStates() {
   document.querySelectorAll(".setup-step").forEach(stepEl => {
     const stepNum = parseInt(stepEl.dataset.step);
     const isCompletedStep = state.completedSetupSteps.includes(stepNum);
+    const isActiveStep = stepNum === activeSetupStep;
     const isCoreSetupStep = stepNum >= 1 && stepNum <= 6;
-    const isEventWorkflowStep = stepNum >= 7 && stepNum <= 13;
+    const isEventWorkflowStep = stepNum >= EVENT_WORKFLOW_STEPS.SHORTLIST && stepNum <= EVENT_WORKFLOW_STEPS.REVIEW;
+    const isSkippedWorkflowStep = isEventWorkflowStep && isWorkflowStepSkipped(stepNum, activeWorkflowType);
+    const previousWorkflowStep = isEventWorkflowStep ? getPreviousWorkflowStep(stepNum, activeWorkflowType) : null;
     const isEventWorkflowStepLocked = isEventWorkflowStep
-      && !(Boolean(state.debugMode) && stepNum === 9)
+      && !(Boolean(state.debugMode) && stepNum === EVENT_WORKFLOW_STEPS.BOOK)
+      && !isSkippedWorkflowStep
       && !state.completedSetupSteps.includes(stepNum)
-      && stepNum > 7
-      && !state.completedSetupSteps.includes(stepNum - 1);
-    stepEl.classList.toggle("setup-step-locked", isEventWorkflowStepLocked);
-    if (!allCoreSetupComplete && isEventWorkflowStep) {
+      && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST
+      && previousWorkflowStep !== null
+      && !state.completedSetupSteps.includes(previousWorkflowStep);
+    const isRevelrySetupReadOnly = revelryReadOnlyCompletedSteps
+      && allCoreSetupComplete
+      && isCoreSetupStep;
+    stepEl.classList.toggle("setup-step-locked", isEventWorkflowStepLocked || isRevelrySetupReadOnly);
+    if ((!allCoreSetupComplete && isEventWorkflowStep) || isSkippedWorkflowStep) {
       stepEl.style.display = "none";
     } else {
-      const hideForCollapsedSetup = collapseMainSetupCards && isCoreSetupStep;
-      const hideRunEventByGate = stepNum === 11 && !runEventVisible;
-      stepEl.style.display = (hideForCollapsedSetup || hideRunEventByGate) ? "none" : "";
+      stepEl.style.display = isActiveStep ? "" : "none";
     }
     const header = stepEl.querySelector(".setup-step-header");
     const content = stepEl.querySelector(".setup-step-content");
@@ -6435,6 +6676,16 @@ function renderSetupStepStates() {
       const controls = content.querySelectorAll("button, input, select, textarea, a");
       controls.forEach((control) => {
         const allowWhenLocked = String(control?.dataset?.allowLocked || "") === "true";
+        if (isRevelrySetupReadOnly) {
+          if (control.tagName === "A") {
+            control.setAttribute("aria-disabled", "true");
+            control.setAttribute("tabindex", "-1");
+            control.style.pointerEvents = "none";
+          } else {
+            control.disabled = true;
+          }
+          return;
+        }
         if (isEventWorkflowStepLocked) {
           if (allowWhenLocked) {
             if (control.tagName === "A") {
@@ -6464,7 +6715,7 @@ function renderSetupStepStates() {
         }
       });
     }
-    if (stepNum === state.currentSetupStep) {
+    if (isActiveStep) {
       // Active step: white background, dark circle, expand content
       header.style.background = "#ffffff";
       header.style.borderColor = "#e2e8f0";
@@ -6533,29 +6784,36 @@ function renderSetupStepStates() {
       numberCircle.style.color = "#0f172a";
       numberCircle.style.border = "1px solid #e2e8f0";
       numberCircle.style.fontSize = "16px";
-      numberCircle.textContent = "↗";
+      numberCircle.textContent = "✓";
     } else if (stepNum === 10) {
       numberCircle.style.visibility = "visible";
       numberCircle.style.background = "#ffffff";
       numberCircle.style.color = "#0f172a";
       numberCircle.style.border = "1px solid #e2e8f0";
       numberCircle.style.fontSize = "16px";
-      numberCircle.textContent = "✉️";
+      numberCircle.textContent = "↗";
     } else if (stepNum === 11) {
       numberCircle.style.visibility = "visible";
       numberCircle.style.background = "#ffffff";
       numberCircle.style.color = "#0f172a";
       numberCircle.style.border = "1px solid #e2e8f0";
       numberCircle.style.fontSize = "16px";
-      numberCircle.textContent = "🏁";
+      numberCircle.textContent = "✉️";
     } else if (stepNum === 12) {
       numberCircle.style.visibility = "visible";
       numberCircle.style.background = "#ffffff";
       numberCircle.style.color = "#0f172a";
       numberCircle.style.border = "1px solid #e2e8f0";
       numberCircle.style.fontSize = "16px";
-      numberCircle.textContent = "📊";
+      numberCircle.textContent = "🏁";
     } else if (stepNum === 13) {
+      numberCircle.style.visibility = "visible";
+      numberCircle.style.background = "#ffffff";
+      numberCircle.style.color = "#0f172a";
+      numberCircle.style.border = "1px solid #e2e8f0";
+      numberCircle.style.fontSize = "16px";
+      numberCircle.textContent = "📊";
+    } else if (stepNum === 14) {
       numberCircle.style.visibility = "visible";
       numberCircle.style.background = "#ffffff";
       numberCircle.style.color = "#0f172a";
@@ -6569,6 +6827,7 @@ function renderSetupStepStates() {
   });
 
   renderPollBuilderStep();
+  renderRsvpStep();
   renderPromoteEventStep();
   renderBookEventStep();
   renderRunEventStep();
@@ -7389,6 +7648,7 @@ async function refreshRsvpResultsFromBackend(rsvpId, options = {}) {
   persistState();
   if (options.render !== false) {
     renderPollBuilderStep();
+    renderRsvpStep();
   }
   return results;
 }
@@ -7407,11 +7667,13 @@ function startRsvpResultsPolling(rsvpId) {
   refreshRsvpResultsFromBackend(normalizedId, { render: true }).catch((error) => {
     pollUiState.rsvpResultsError = String(error?.message || "Couldn’t refresh RSVP results.").trim();
     renderPollBuilderStep();
+    renderRsvpStep();
   });
   pollRsvpResultsIntervalId = setInterval(() => {
     refreshRsvpResultsFromBackend(normalizedId, { render: true }).catch((error) => {
       pollUiState.rsvpResultsError = String(error?.message || "Couldn’t refresh RSVP results.").trim();
       renderPollBuilderStep();
+      renderRsvpStep();
     });
   }, 10000);
 }
@@ -9135,7 +9397,7 @@ function renderPromoteEventStep() {
             <h4 class="truncate text-base font-semibold text-slate-900">${escapeHtml(step.title)}</h4>
             <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span>
           </div>
-          <button type="button" data-promote-toggle="${step.key}" class="promote-card-toggle rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">${getCardActionLabel(step.key)}</button>
+          <button type="button" data-promote-toggle="${step.key}" data-allow-locked="true" class="promote-card-toggle rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">${getCardActionLabel(step.key)}</button>
         </div>
         ${expanded ? `<div class="mt-4 border-t border-slate-200 pt-4">${renderStepBody(step.key)}</div>` : ""}
       </article>
@@ -9315,20 +9577,20 @@ function renderPromoteEventStep() {
       if (!Array.isArray(state.completedSetupSteps)) {
         state.completedSetupSteps = [];
       }
-      if (!state.completedSetupSteps.includes(10)) {
-        state.completedSetupSteps.push(10);
+      if (!state.completedSetupSteps.includes(11)) {
+        state.completedSetupSteps.push(11);
       }
       if (!state.setupStepDirty || typeof state.setupStepDirty !== "object") {
         state.setupStepDirty = {};
       }
-      state.setupStepDirty[10] = false;
-      state.currentSetupStep = 11;
-      state.eventWorkflowProcessStep = 11;
+      state.setupStepDirty[11] = false;
+      state.currentSetupStep = 12;
+      state.eventWorkflowProcessStep = 12;
       persistState();
       renderSetupStepStates();
       renderSidebarStepMenus();
       updateSetupStepButtonStates();
-      scrollSetupStepIntoView(11);
+      scrollSetupStepIntoView(12);
     });
   }
 }
@@ -9344,15 +9606,8 @@ function renderRunEventStep() {
     bookingConfirmation,
     eventDate,
     eventTime,
-    chosenDateTime,
-    hasDateTime,
-    hasBookedSignal
+    chosenDateTime
   } = context;
-
-  if (!debugPreview && !(hasBookedSignal && hasDateTime)) {
-    panel.innerHTML = "";
-    return;
-  }
 
   const eventName = String(
     bookedEvent?.name
@@ -9446,10 +9701,14 @@ function renderRunEventStep() {
   const runState = ensureRunEventState();
   const checklist = runState.runEventChecklist;
   const checkedCount = Number(Boolean(checklist.vendorConfirmed)) + Number(Boolean(checklist.teamPrepared)) + Number(Boolean(checklist.readyToRun));
+  const hasEnoughSchedulingContext = Boolean(eventDateTime || vendorUrl || confirmedHeadcount > 0);
 
   panel.innerHTML = `
     ${debugPreview ? `
       <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">Debug preview (event details may be missing).</div>
+    ` : ""}
+    ${!debugPreview && !hasEnoughSchedulingContext ? `
+      <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Run Event is visible now so the workflow stays intact. Final event details can still be filled in upstream.</div>
     ` : ""}
 
     <div class="rounded-xl border border-slate-200 bg-white p-5">
@@ -9550,16 +9809,16 @@ function renderRunEventStep() {
     if (!Array.isArray(state.completedSetupSteps)) {
       state.completedSetupSteps = [];
     }
-    if (!state.completedSetupSteps.includes(11)) {
-      state.completedSetupSteps.push(11);
+    if (!state.completedSetupSteps.includes(12)) {
+      state.completedSetupSteps.push(12);
     }
-    state.currentSetupStep = 12;
-    state.eventWorkflowProcessStep = 12;
+    state.currentSetupStep = 13;
+    state.eventWorkflowProcessStep = 13;
     persistState();
     renderSetupStepStates();
     renderSidebarStepMenus();
     updateSetupStepButtonStates();
-    scrollSetupStepIntoView(12);
+    scrollSetupStepIntoView(13);
   };
 
   const vendorButton = document.getElementById("runEventOpenVendor");
@@ -9639,27 +9898,7 @@ function renderCollectFeedbackStep() {
   if (!panel) return;
 
   const context = getCollectFeedbackContext();
-  if (!context.canAccess) {
-    panel.innerHTML = `
-      <article class="rounded-xl border border-slate-200 bg-white p-5">
-        <h4 class="text-base font-semibold text-slate-900">Feedback unlocks after the event is completed.</h4>
-        <div class="mt-3">
-          <button id="feedbackGoToRunEvent" data-allow-locked="true" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Go to Run Event</button>
-        </div>
-      </article>
-    `;
-    const goButton = document.getElementById("feedbackGoToRunEvent");
-    if (goButton) {
-      goButton.addEventListener("click", () => {
-        state.currentSetupStep = 11;
-        persistState();
-        renderSetupStepStates();
-        renderSidebarStepMenus();
-        scrollSetupStepIntoView(11);
-      });
-    }
-    return;
-  }
+  const isPreviewMode = !context.canAccess;
 
   const bookedEvent = context.bookedEvent;
   const feedbackTarget = bookedEvent && typeof bookedEvent === "object"
@@ -9781,6 +10020,16 @@ function renderCollectFeedbackStep() {
     : `<div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-4 text-sm text-slate-500">No responses yet.</div>`;
 
   panel.innerHTML = `
+    ${isPreviewMode ? `
+      <article class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <h4 class="text-sm font-semibold text-slate-900">Preview</h4>
+        <p class="mt-1 text-sm text-slate-600">Feedback unlocks after Run Event is completed. You can preview this step now.</p>
+        <div class="mt-3">
+          <button id="feedbackGoToRunEvent" data-allow-locked="true" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Go to Run Event</button>
+        </div>
+      </article>
+    ` : ""}
+
     <div class="rounded-xl border border-slate-200 bg-white p-5">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
@@ -9944,16 +10193,27 @@ function renderCollectFeedbackStep() {
   if (completeButton) {
     completeButton.addEventListener("click", () => {
       if (!Array.isArray(state.completedSetupSteps)) state.completedSetupSteps = [];
-      if (!state.completedSetupSteps.includes(12)) {
-        state.completedSetupSteps.push(12);
+      if (!state.completedSetupSteps.includes(13)) {
+        state.completedSetupSteps.push(13);
       }
-      state.currentSetupStep = 13;
-      state.eventWorkflowProcessStep = 13;
+      state.currentSetupStep = 14;
+      state.eventWorkflowProcessStep = 14;
       persistState();
       renderSetupStepStates();
       renderSidebarStepMenus();
       updateSetupStepButtonStates();
-      scrollSetupStepIntoView(13);
+      scrollSetupStepIntoView(14);
+    });
+  }
+
+  const goButton = document.getElementById("feedbackGoToRunEvent");
+  if (goButton) {
+    goButton.addEventListener("click", () => {
+      state.currentSetupStep = 12;
+      persistState();
+      renderSetupStepStates();
+      renderSidebarStepMenus();
+      scrollSetupStepIntoView(12);
     });
   }
 }
@@ -10195,9 +10455,394 @@ function renderReviewImpactStep() {
   `;
 }
 
+function getPollWorkflowSnapshot() {
+  const selectedEvents = getPollSelectedEvents();
+  const pollOptionLabels = selectedEvents.length
+    ? selectedEvents.slice(0, 3).map((eventItem, index) => (eventItem.defaultLabel || "").trim() || `Event ${index + 1}`)
+    : ["Event 1", "Event 2", "Event 3"];
+  const proposedDateTimes = Array.isArray(state.pollBuilder?.proposedDateTimes)
+    ? state.pollBuilder.proposedDateTimes.filter((value) => String(value || "").trim().length > 0).slice(0, 3)
+    : [];
+  const proposedTimeLabels = proposedDateTimes.map((value) => formatPollDateTime(value) || "").filter(Boolean);
+  const deadlineLabel = String(formatPollDateTime(String(state.pollBuilder?.voteDeadlineDateTime || "").trim()) || String(state.pollBuilder?.voteDeadlineDateTime || "").trim() || "");
+  const deadlineTimeZone = String(state.pollBuilder?.voteDeadlineTimeZone || "").trim();
+  const fullShareLink = resolvePollShareLinkUrl(state.pollBuilder?.shareLink);
+  const effectiveView = getEffectivePollViewModel({
+    eventLabels: pollOptionLabels,
+    timeLabels: proposedTimeLabels,
+    rawTimeValues: proposedDateTimes,
+    baseDeadlineValue: state.pollBuilder?.voteDeadlineDateTime || "",
+    baseDeadlineText: `${deadlineLabel}${deadlineTimeZone ? ` (${deadlineTimeZone})` : ""}`,
+    timeZoneLabel: deadlineTimeZone,
+    shareLink: fullShareLink
+  });
+  const resultsModel = effectiveView.model;
+  const topEventLabel = String(resultsModel?.topEvent?.label || selectedEvents[0]?.defaultLabel || state.pollBuilder?.chosenEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
+  const topTimeLabel = String(resultsModel?.topTime?.label || proposedTimeLabels[0] || "").trim();
+  const topTimeIndex = proposedTimeLabels.findIndex((label) => label === topTimeLabel);
+  const topTimeRaw = topTimeIndex >= 0
+    ? String(proposedDateTimes[topTimeIndex] || "").trim()
+    : String(proposedDateTimes[0] || "").trim();
+  return {
+    selectedEvents,
+    resultsModel,
+    topEventLabel,
+    topTimeLabel,
+    topTimeRaw
+  };
+}
+
+function renderRsvpStep() {
+  const panel = document.getElementById("rsvpStepPanel");
+  if (!panel) return;
+
+  const workflowType = getActiveWorkflowType();
+  if (isWorkflowStepSkipped(EVENT_WORKFLOW_STEPS.RSVP, workflowType)) {
+    panel.innerHTML = "";
+    return;
+  }
+
+  const pollSnapshot = getPollWorkflowSnapshot();
+  const pollReadyForRsvp = workflowType !== EVENT_WORKFLOW_TYPES.POLL
+    || Boolean(state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.POLL))
+    || Boolean(state.pollBuilder?.showResultsPage)
+    || Boolean(String(state.pollBuilder?.shareLink || "").trim());
+
+  if (!pollReadyForRsvp) {
+    panel.innerHTML = `
+      <div class="rounded-lg border border-slate-200 bg-white p-4">
+        <h4 class="text-sm font-semibold text-slate-900">RSVP</h4>
+        <p class="mt-2 text-sm text-slate-600">Complete Poll Team first, then continue here to create and share the RSVP.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const eventName = String(state.pollBuilder?.chosenEventLabel || pollSnapshot.topEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
+  const eventDateTimeValue = String(state.pollBuilder?.chosenDateTime || pollSnapshot.topTimeRaw || "").trim();
+  const eventDateTimeDisplay = eventDateTimeValue ? (formatPollDateTime(eventDateTimeValue) || eventDateTimeValue) : "Date/time required before sending RSVP";
+  const savedDeadlineIso = String(state.pollBuilder?.rsvpDeadlineDateTime || "").trim();
+  const parseIsoToFields = (isoValue) => {
+    const parsed = isoValue ? new Date(isoValue) : null;
+    if (!parsed || Number.isNaN(parsed.getTime())) {
+      return { date: "", hour: "12", minute: "00", period: "PM" };
+    }
+    const hour24 = parsed.getHours();
+    return {
+      date: `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`,
+      hour: String(hour24 % 12 || 12),
+      minute: String(parsed.getMinutes()).padStart(2, "0"),
+      period: hour24 >= 12 ? "PM" : "AM"
+    };
+  };
+  const savedDeadlineFields = parseIsoToFields(savedDeadlineIso);
+  if (!pollUiState.rsvpDeadlineDate) pollUiState.rsvpDeadlineDate = savedDeadlineFields.date || getLocalIsoDatePlusBusinessDays(2);
+  if (!pollUiState.rsvpDeadlineHour) pollUiState.rsvpDeadlineHour = savedDeadlineFields.hour || "12";
+  if (!pollUiState.rsvpDeadlineMinute) pollUiState.rsvpDeadlineMinute = savedDeadlineFields.minute || "00";
+  if (!pollUiState.rsvpDeadlinePeriod) pollUiState.rsvpDeadlinePeriod = savedDeadlineFields.period || "PM";
+
+  const hasDeadlineDraft = Boolean(
+    String(pollUiState.rsvpDeadlineDate || "").trim()
+    && String(pollUiState.rsvpDeadlineHour || "").trim()
+    && String(pollUiState.rsvpDeadlineMinute || "").trim()
+    && String(pollUiState.rsvpDeadlinePeriod || "").trim()
+  );
+  const activeDeadlineIso = hasDeadlineDraft
+    ? buildPollDateTimeValue(
+      pollUiState.rsvpDeadlineDate,
+      pollUiState.rsvpDeadlineHour,
+      pollUiState.rsvpDeadlineMinute,
+      pollUiState.rsvpDeadlinePeriod
+    )
+    : "";
+  const deadlineDisplayText = savedDeadlineIso ? (formatPollDateTime(savedDeadlineIso) || savedDeadlineIso) : "Date/Time";
+
+  const rsvpId = String(state.pollBuilder?.rsvpId || "").trim();
+  const rsvpShareUrl = String(state.pollBuilder?.rsvpShareUrl || "").trim();
+  const rsvpResults = state.pollBuilder?.rsvpResults && typeof state.pollBuilder.rsvpResults === "object"
+    ? state.pollBuilder.rsvpResults
+    : { yesCount: 0, noCount: 0, totalResponses: 0, responses: [] };
+  const responses = Array.isArray(rsvpResults.responses) ? rsvpResults.responses : [];
+  const attendingNames = responses
+    .filter((row) => String(row?.answer || "").trim().toLowerCase() === "yes")
+    .map((row) => String(row?.name || "").trim())
+    .filter(Boolean);
+  const previewLimit = 9;
+  const expanded = Boolean(state.pollBuilder?.rsvpAttendeesExpanded);
+  const visibleAttendees = expanded ? attendingNames : attendingNames.slice(0, previewLimit);
+  const hasMoreAttendees = attendingNames.length > previewLimit;
+  const subject = `Confirm your spot — ${eventName}`;
+  const eventLine = eventDateTimeValue ? (formatPollDateTime(eventDateTimeValue) || eventDateTimeValue) : "the scheduled event time";
+  const messageBody = savedDeadlineIso
+    ? `We’re planning ${eventName} on ${eventLine}.\nPlease confirm if you’ll attend so we can finalize the headcount.\nRSVP by ${deadlineDisplayText}.\nRSVP here: ${rsvpShareUrl || "[RSVP link]"}`
+    : `We’re planning ${eventName} on ${eventLine}.\nPlease confirm if you’ll attend so we can finalize the headcount.\nRSVP here: ${rsvpShareUrl || "[RSVP link]"}`;
+
+  if (rsvpId) {
+    startRsvpResultsPolling(rsvpId);
+  } else {
+    stopRsvpResultsPolling();
+  }
+
+  panel.innerHTML = `
+    <div class="space-y-5">
+      <article class="rounded-xl border border-slate-200 bg-white p-5">
+        <h4 class="text-base font-semibold text-slate-900">Create RSVP</h4>
+        <p class="mt-1 text-sm text-slate-600">Collect final attendance before moving the workflow forward.</p>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Event</div>
+            <div class="mt-1 text-lg font-semibold text-slate-900">${escapeHtml(eventName)}</div>
+            <div class="mt-3">
+              <label class="block text-xs font-medium text-slate-600" for="rsvpStepEventDateTime">Event date & time</label>
+              <input id="rsvpStepEventDateTime" type="datetime-local" value="${escapeHtml(eventDateTimeValue)}" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" />
+              <div class="mt-1 text-xs text-slate-500">${escapeHtml(eventDateTimeDisplay)}</div>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">RSVP deadline</div>
+            ${savedDeadlineIso ? `
+              <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-700">
+                <span class="font-medium text-slate-900">${escapeHtml(deadlineDisplayText)}</span>
+                <button id="rsvpStepDeadlineEdit" type="button" class="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Edit</button>
+              </div>
+            ` : `
+              <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-700">
+                <input id="rsvpStepDeadlineDate" type="date" value="${escapeHtml(pollUiState.rsvpDeadlineDate || "")}" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" />
+                <select id="rsvpStepDeadlineHour" class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900">${Array.from({ length: 12 }, (_, index) => String(index + 1)).map((hour) => `<option value="${hour}" ${hour === String(pollUiState.rsvpDeadlineHour || "12") ? "selected" : ""}>${hour}</option>`).join("")}</select>
+                <select id="rsvpStepDeadlineMinute" class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900">${["00", "15", "30", "45"].map((minute) => `<option value="${minute}" ${minute === String(pollUiState.rsvpDeadlineMinute || "00") ? "selected" : ""}>${minute}</option>`).join("")}</select>
+                <select id="rsvpStepDeadlinePeriod" class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900"><option value="AM" ${String(pollUiState.rsvpDeadlinePeriod || "PM") === "AM" ? "selected" : ""}>AM</option><option value="PM" ${String(pollUiState.rsvpDeadlinePeriod || "PM") === "PM" ? "selected" : ""}>PM</option></select>
+                <button id="rsvpStepDeadlineSubmit" type="button" class="rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-medium text-white hover:bg-slate-700">Submit</button>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div class="text-sm font-semibold text-slate-900">Preview</div>
+          <div class="mt-2 text-sm text-slate-800">${escapeHtml(subject)}</div>
+          <div class="mt-2 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(messageBody)}</div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button id="rsvpStepCreateLink" type="button" ${pollUiState.rsvpCreateBusy ? "disabled" : ""} class="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300">${pollUiState.rsvpCreateBusy ? "Creating…" : (rsvpId ? "Recreate RSVP link" : "Generate RSVP link")}</button>
+          ${pollUiState.rsvpCreateError ? `<div class="text-xs text-amber-700">${escapeHtml(pollUiState.rsvpCreateError)}</div>` : ""}
+        </div>
+      </article>
+
+      ${rsvpShareUrl ? `
+        <article class="rounded-xl border border-slate-200 bg-white p-5">
+          <div class="text-base font-semibold text-slate-900">Share RSVP</div>
+          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div class="text-xs font-medium text-slate-500">Share link</div>
+            <div class="mt-2 flex items-center gap-2">
+              <input id="rsvpStepShareUrl" readonly value="${escapeHtml(rsvpShareUrl)}" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" />
+              <button id="rsvpStepCopyLink" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Copy</button>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-col gap-3 md:flex-row">
+            <button id="rsvpStepCopyMessage" type="button" class="rounded-lg bg-slate-600 px-6 py-3 text-sm font-medium text-white hover:bg-slate-700">Copy message</button>
+            <button id="rsvpStepOpenSlack" type="button" class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+            <button id="rsvpStepOpenGmail" type="button" class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Gmail</button>
+          </div>
+          ${pollUiState.rsvpShareStatus ? `<div class="mt-2 text-xs font-medium text-emerald-600">${escapeHtml(pollUiState.rsvpShareStatus)}</div>` : ""}
+
+          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div class="text-sm font-semibold text-slate-900">RSVP status</div>
+            <div class="mt-2 space-y-1 text-sm text-slate-700">
+              <div>✔ Attending: ${Number(rsvpResults?.yesCount || 0)}</div>
+              <div>✖ Can’t make it: ${Number(rsvpResults?.noCount || 0)}</div>
+              <div>⏳ Responses: ${Number(rsvpResults?.totalResponses || 0)}</div>
+            </div>
+            <div class="mt-3 border-t border-slate-200 pt-3">
+              <div class="text-sm font-semibold text-slate-900">Attending so far</div>
+              ${visibleAttendees.length ? `<div class="mt-2 flex flex-wrap gap-2">${visibleAttendees.map((name) => `<span class="inline-flex rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-700">${escapeHtml(name)}</span>`).join("")}</div>` : '<div class="mt-2 text-sm text-slate-500">No attendees yet</div>'}
+              ${hasMoreAttendees ? `<button id="rsvpStepToggleAttendees" type="button" class="mt-2 text-xs font-medium text-slate-600 underline decoration-slate-400 underline-offset-2 hover:text-slate-900">${expanded ? "Show less" : `+${attendingNames.length - previewLimit} more`}</button>` : ""}
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-col gap-2 md:items-end">
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input id="rsvpStepSharedConfirmed" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400" ${state.pollBuilder?.rsvpSharedConfirmed ? "checked" : ""}>
+              <span>I shared the RSVP with my team</span>
+            </label>
+            <button id="rsvpStepContinue" type="button" ${state.pollBuilder?.rsvpSharedConfirmed ? "" : "disabled"} class="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Continue →</button>
+          </div>
+        </article>
+      ` : ""}
+    </div>
+  `;
+
+  const eventDateTimeInput = document.getElementById("rsvpStepEventDateTime");
+  if (eventDateTimeInput) {
+    eventDateTimeInput.addEventListener("change", () => {
+      state.pollBuilder.chosenDateTime = String(eventDateTimeInput.value || "").trim();
+      persistState();
+      renderRsvpStep();
+    });
+  }
+
+  const bindDeadlineField = (id, key) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("change", () => {
+      pollUiState[key] = String(input.value || "").trim();
+      renderRsvpStep();
+    });
+  };
+  bindDeadlineField("rsvpStepDeadlineDate", "rsvpDeadlineDate");
+  bindDeadlineField("rsvpStepDeadlineHour", "rsvpDeadlineHour");
+  bindDeadlineField("rsvpStepDeadlineMinute", "rsvpDeadlineMinute");
+  bindDeadlineField("rsvpStepDeadlinePeriod", "rsvpDeadlinePeriod");
+
+  const deadlineSubmitButton = document.getElementById("rsvpStepDeadlineSubmit");
+  if (deadlineSubmitButton) {
+    deadlineSubmitButton.onclick = () => {
+      if (!activeDeadlineIso) {
+        showMiniToast("Set a valid RSVP deadline first.");
+        return;
+      }
+      state.pollBuilder.rsvpDeadlineDateTime = activeDeadlineIso;
+      persistState();
+      renderRsvpStep();
+    };
+  }
+
+  const deadlineEditButton = document.getElementById("rsvpStepDeadlineEdit");
+  if (deadlineEditButton) {
+    deadlineEditButton.onclick = () => {
+      state.pollBuilder.rsvpDeadlineDateTime = "";
+      persistState();
+      renderRsvpStep();
+    };
+  }
+
+  const createLinkButton = document.getElementById("rsvpStepCreateLink");
+  if (createLinkButton) {
+    createLinkButton.onclick = async () => {
+      const chosenDateTime = String(state.pollBuilder?.chosenDateTime || "").trim();
+      if (!chosenDateTime) {
+        showMiniToast("Add the event date and time first.");
+        return;
+      }
+      if (!state.pollBuilder?.rsvpDeadlineDateTime) {
+        showMiniToast("Submit the RSVP deadline first.");
+        return;
+      }
+      if (pollUiState.rsvpCreateBusy) return;
+      pollUiState.rsvpCreateBusy = true;
+      pollUiState.rsvpCreateError = "";
+      renderRsvpStep();
+
+      const locationType = String(state.pollBuilder?.eventLocationType || "").trim().toLowerCase();
+      const locationLabel = locationType === "virtual"
+        ? "Virtual"
+        : (locationType === "in_person" || locationType === "in-person" ? "In-person" : null);
+
+      try {
+        const created = await createRsvpInBackend({
+          companyId: String(state.accountId || "anon").trim() || "anon",
+          publicBaseUrl: "https://eeoswork.github.io/eeos",
+          eventName,
+          eventDate: formatPollDateTime(chosenDateTime) || chosenDateTime,
+          eventTime: formatPollDateTime(chosenDateTime) || chosenDateTime,
+          deadlineIso: String(state.pollBuilder?.rsvpDeadlineDateTime || "").trim(),
+          locationLabel,
+          vendorUrl: state.pollBuilder?.vendorBookingUrl,
+          costPerPerson: state.pollBuilder?.costPerPerson
+        });
+        state.pollBuilder.rsvpId = created.rsvpId;
+        state.pollBuilder.rsvpShareUrl = created.shareUrl;
+        state.pollBuilder.rsvpSharedConfirmed = false;
+        state.pollBuilder.rsvpAttendeesExpanded = false;
+        await refreshRsvpResultsFromBackend(created.rsvpId, { render: false });
+        persistState();
+      } catch (error) {
+        pollUiState.rsvpCreateError = String(error?.message || "Couldn’t create RSVP.").trim();
+        showMiniToast(pollUiState.rsvpCreateError || "Couldn’t create RSVP.");
+      } finally {
+        pollUiState.rsvpCreateBusy = false;
+        renderRsvpStep();
+      }
+    };
+  }
+
+  const copyLinkButton = document.getElementById("rsvpStepCopyLink");
+  if (copyLinkButton) {
+    copyLinkButton.onclick = async () => {
+      if (!rsvpShareUrl) return;
+      await navigator.clipboard.writeText(rsvpShareUrl);
+      pollUiState.rsvpShareStatus = "Copied RSVP link.";
+      renderRsvpStep();
+    };
+  }
+
+  const copyMessageButton = document.getElementById("rsvpStepCopyMessage");
+  if (copyMessageButton) {
+    copyMessageButton.onclick = async () => {
+      await navigator.clipboard.writeText(`${subject}\n\n${messageBody}`);
+      pollUiState.rsvpShareStatus = "Copied RSVP message.";
+      renderRsvpStep();
+    };
+  }
+
+  const slackButton = document.getElementById("rsvpStepOpenSlack");
+  if (slackButton) {
+    slackButton.onclick = () => {
+      window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+    };
+  }
+
+  const gmailButton = document.getElementById("rsvpStepOpenGmail");
+  if (gmailButton) {
+    gmailButton.onclick = () => {
+      const subjectEncoded = encodeURIComponent(subject);
+      const bodyEncoded = encodeURIComponent(messageBody);
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subjectEncoded}&body=${bodyEncoded}`, "_blank", "noopener,noreferrer");
+    };
+  }
+
+  const sharedConfirmedInput = document.getElementById("rsvpStepSharedConfirmed");
+  if (sharedConfirmedInput) {
+    sharedConfirmedInput.onchange = () => {
+      state.pollBuilder.rsvpSharedConfirmed = Boolean(sharedConfirmedInput.checked);
+      persistState();
+      renderRsvpStep();
+    };
+  }
+
+  const toggleAttendeesButton = document.getElementById("rsvpStepToggleAttendees");
+  if (toggleAttendeesButton) {
+    toggleAttendeesButton.onclick = () => {
+      state.pollBuilder.rsvpAttendeesExpanded = !Boolean(state.pollBuilder?.rsvpAttendeesExpanded);
+      persistState();
+      renderRsvpStep();
+    };
+  }
+
+  const continueButton = document.getElementById("rsvpStepContinue");
+  if (continueButton) {
+    continueButton.onclick = () => {
+      if (!state.pollBuilder?.rsvpSharedConfirmed) {
+        showMiniToast("Confirm you shared the RSVP first.");
+        return;
+      }
+      ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.RSVP);
+      state.pollBuilder.rsvpSent = true;
+      const nextStep = workflowType === EVENT_WORKFLOW_TYPES.POLL ? EVENT_WORKFLOW_STEPS.BOOK : EVENT_WORKFLOW_STEPS.PROMOTE;
+      goToEventWorkflowStep(nextStep);
+    };
+  }
+}
+
 function renderBookEventStep() {
   const panel = document.getElementById("bookEventPanel");
   if (!panel) return;
+
+  if (isWorkflowStepSkipped(EVENT_WORKFLOW_STEPS.BOOK)) {
+    panel.innerHTML = "";
+    return;
+  }
 
   const isDebugOverride = Boolean(state.debugMode) || isPollResponsesDebugMode();
   const isPollFinalized = Boolean(String(state.pollBuilder?.shareLink || "").trim());
@@ -11036,13 +11681,13 @@ function renderBookEventStep() {
         pollUiState.bookConfirmTotalCost = fmtMoney(bookedTotalCost);
         pollUiState.bookConfirmErrorMessage = "";
 
-        if (!state.completedSetupSteps.includes(9)) {
-          state.completedSetupSteps.push(9);
+        if (!state.completedSetupSteps.includes(10)) {
+          state.completedSetupSteps.push(10);
         }
-        state.eventWorkflowProcessStep = Math.max(10, state.eventWorkflowProcessStep || 10);
+        state.eventWorkflowProcessStep = Math.max(11, state.eventWorkflowProcessStep || 11);
         collapseSetupViewsForWorkflowStep();
-        state.currentSetupStep = 10;
-        scrollSetupStepIntoView(10, "smooth");
+        state.currentSetupStep = 11;
+        scrollSetupStepIntoView(11, "smooth");
 
         persistState();
         didSaveAtomically = true;
@@ -11080,17 +11725,17 @@ function renderBookEventStep() {
   const continueWorkflowButton = document.getElementById("bookEventContinueWorkflow");
   if (continueWorkflowButton) {
     continueWorkflowButton.onclick = () => {
-      if (!state.completedSetupSteps.includes(9)) {
-        state.completedSetupSteps.push(9);
+      if (!state.completedSetupSteps.includes(10)) {
+        state.completedSetupSteps.push(10);
       }
-      state.eventWorkflowProcessStep = Math.max(10, state.eventWorkflowProcessStep || 10);
+      state.eventWorkflowProcessStep = Math.max(11, state.eventWorkflowProcessStep || 11);
       collapseSetupViewsForWorkflowStep();
-      state.currentSetupStep = 10;
+      state.currentSetupStep = 11;
       persistState();
       renderSetupMenuState();
       renderSetupStepStates();
       renderSidebarStepMenus();
-      scrollSetupStepIntoView(10, "smooth");
+      scrollSetupStepIntoView(11, "smooth");
     };
   }
 
@@ -11946,62 +12591,34 @@ function renderPollBuilderStep() {
 
       const openRsvpSetupButton = document.getElementById("pollClosedGetRsvpLink");
       if (openRsvpSetupButton) {
-        openRsvpSetupButton.onclick = async () => {
-          if (pollUiState.rsvpCreateBusy) return;
-          pollUiState.rsvpCreateBusy = true;
-          pollUiState.rsvpCreateError = "";
-          renderPollBuilderStep();
-
+        openRsvpSetupButton.onclick = () => {
+          const topTimeLabel = String(resultsModel?.topTime?.label || "").trim();
+          const topTimeIndex = proposedTimeLabels.findIndex((label) => label === topTimeLabel);
+          const selectedTopTimeRaw = topTimeIndex >= 0
+            ? String(proposedDateTimes[topTimeIndex] || "").trim()
+            : String(state.pollBuilder?.chosenDateTime || proposedDateTimes[0] || "").trim();
+          state.pollBuilder.chosenEventLabel = String(resultsModel?.topEvent?.label || state.pollBuilder?.chosenEventLabel || topEventLabel || "").trim();
+          if (selectedTopTimeRaw) {
+            state.pollBuilder.chosenDateTime = selectedTopTimeRaw;
+          }
           if (!pollUiState.rsvpDeadlineDate) {
             pollUiState.rsvpDeadlineDate = defaultRsvpFields.date;
             pollUiState.rsvpDeadlineHour = defaultRsvpFields.hour;
             pollUiState.rsvpDeadlineMinute = defaultRsvpFields.minute;
             pollUiState.rsvpDeadlinePeriod = defaultRsvpFields.period;
           }
-
-          const locationType = String(state.pollBuilder?.eventLocationType || "").trim().toLowerCase();
-          const locationLabel = locationType === "virtual"
-            ? "Virtual"
-            : (locationType === "in_person" || locationType === "in-person" ? "In-person" : null);
-
-          try {
-            const created = await createRsvpInBackend({
-              companyId: String(state.accountId || "anon").trim() || "anon",
-              publicBaseUrl: "https://eeoswork.github.io/eeos",
-              eventName: topEventLabel,
-              eventDate: bookingDateLabel,
-              eventTime: bookingTimeLabel,
-              deadlineIso: activeRsvpDeadlineIso,
-              locationLabel,
-              vendorUrl: state.pollBuilder?.vendorBookingUrl,
-              costPerPerson: state.pollBuilder?.costPerPerson
-            });
-            state.pollBuilder.rsvpId = created.rsvpId;
-            state.pollBuilder.rsvpShareUrl = created.shareUrl;
-            state.pollBuilder.rsvpSharedConfirmed = false;
-            state.pollBuilder.rsvpAttendeesExpanded = false;
-            await refreshRsvpResultsFromBackend(created.rsvpId, { render: false });
-            persistState();
-          } catch (error) {
-            pollUiState.rsvpCreateError = String(error?.message || "Couldn’t create RSVP.").trim();
-            pollUiState.rsvpCreateBusy = false;
-            renderPollBuilderStep();
-            showMiniToast(pollUiState.rsvpCreateError || "Couldn’t create RSVP.");
-            return;
-          }
-
-          pollUiState.rsvpCreateBusy = false;
+          ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.POLL);
           pollUiState.rsvpDeadlineEditing = true;
-          pollUiState.rsvpSetupOpen = true;
           pollUiState.rsvpCollectionStarted = false;
+          pollUiState.rsvpSetupOpen = false;
           state.pollBuilder.rsvpSent = false;
           state.pollBuilder.vendorLinkOpened = false;
           state.pollBuilder.markedBooked = false;
-          pollUiState.rsvpScrollPending = true;
           pollUiState.rsvpShareStatus = "";
           pollUiState.rsvpResultsError = "";
+          state.pollBuilder.showResultsPage = true;
           persistState();
-          renderPollBuilderStep();
+          goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.RSVP, { renderRsvp: true });
         };
       }
 
