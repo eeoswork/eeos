@@ -9899,9 +9899,7 @@ Good luck—and enjoy the madness!</div>
         return;
       }
       if (action === "open-gmail") {
-        const subjectEncoded = encodeURIComponent(`Event message: ${eventName}`);
-        const bodyEncoded = encodeURIComponent(inviteMessage);
-        window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subjectEncoded}&body=${bodyEncoded}`, "_blank", "noopener,noreferrer");
+        window.open("https://gmail.com", "_blank", "noopener,noreferrer");
       }
     });
   });
