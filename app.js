@@ -4051,11 +4051,17 @@ function renderFourMonthProgram() {
       const canContinue = isBookMode
         ? selectedIds.length === 1
         : selectedIds.length >= 2 && selectedIds.length <= 3;
-      const helperText = isBookMode
-        ? "Select 1 event to skip voting and go directly to booking."
-        : "Select 2-3 events and generate a poll for your team vote.";
-      const primaryLabel = isBookMode ? "Book selected event" : "Generate poll with selected events";
-      const modeToggleLabel = isBookMode ? "Switch to team vote" : "Skip poll and book directly";
+      const helperPrimaryText = isBookMode
+        ? "Choose an event to book."
+        : "Teams that vote on events usually see higher attendance and engagement.";
+      const helperSecondaryText = isBookMode
+        ? ""
+        : "Choose up to 3 events for your team to vote on.";
+      const modePromptText = isBookMode
+        ? "Prefer a team vote?"
+        : "Prefer to choose the event yourself?";
+      const modeToggleLabel = isBookMode ? "Generate a poll" : "Skip poll → Book now";
+      const primaryLabel = isBookMode ? "Book this event ↗" : "Let your team choose — Generate poll";
       return `
         <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
           <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
@@ -4070,17 +4076,25 @@ function renderFourMonthProgram() {
                     <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                   </div>
                   <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
                   ${nextEventBadge}
                 </div>
-                <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
               </div>
             </div>
             <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
           </div>
           <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-              <p class="text-xs text-slate-600" style="margin: 0;">${escapeHtml(helperText)}</p>
-              <button class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-action="four-month-shortlist-toggle-mode">${escapeHtml(modeToggleLabel)}</button>
+            <div style="margin-bottom: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+              <div style="font-size: 12px; color: #475569; line-height: 1.4;">
+                <div style="font-weight: ${isBookMode ? "700" : "400"}; color: #1e293b;">${escapeHtml(helperPrimaryText)}</div>
+                ${helperSecondaryText ? `<div>${escapeHtml(helperSecondaryText)}</div>` : ""}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                <span style="font-size: 12px; color: #64748b;">${escapeHtml(modePromptText)}</span>
+                <button class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-action="four-month-shortlist-toggle-mode">${escapeHtml(modeToggleLabel)}</button>
+              </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
               ${candidates.map((candidate) => {
@@ -4127,9 +4141,11 @@ function renderFourMonthProgram() {
                   <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                 </div>
                 <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
                 ${nextEventBadge}
               </div>
-              <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
             </div>
           </div>
           <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
