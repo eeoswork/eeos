@@ -9359,10 +9359,10 @@ function renderPromoteEventStep() {
     "The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all\u2014a year\u2019s worth of bragging rights over your coworkers.",
     "",
     "How to Join",
-    "\t1.\tClick the link for the men\u2019s or women\u2019s challenge.",
+    "\t1.\tClick the links for the men\u2019s and women\u2019s challenge.",
     "\t2.\tEnter the password above.",
     "\t3.\tFill out your bracket by predicting the winner of each game.",
-    "\t4.\tSubmit your bracket before the tournament begins.",
+    "\t4.\tSubmit your bracket before the tournaments begin.",
     "",
     "Good luck\u2014and enjoy the madness!",
   ].join("\n");
@@ -9514,7 +9514,49 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
-            <div class="p-3" style="white-space: pre-line;">${useEmail ? "" : (() => {
+            <div class="p-3" style="white-space: pre-line;">${useEmail ? `
+              <div class="font-medium text-slate-900 mb-3">
+                <div class="flex items-center justify-between gap-2">
+                  <span>Join the Revelry March Madness Bracket Challenge 🏀</span>
+                  <button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button>
+                </div>
+              </div>
+              <div class="text-sm text-slate-700 mt-3">Hi everyone,
+
+We're running a Revelry bracket competition for the NCAA men's and women's basketball tournaments.
+
+In a bracket challenge, you predict which teams will win each game throughout the tournament. As the games are played, your bracket earns points for every correct pick. The person with the most points at the end wins.
+
+Create your bracket and compete with fellow Revelers to see who predicts the tournament best.
+
+<strong>Join the challenge:</strong>
+
+Women's bracket <strong>here</strong> (url:
+https://shorturl.at/tleLy)
+
+Men's bracket <strong>here</strong> (url:
+https://shorturl.at/Jv9yZ)
+
+Password for both: <strong>Revelry2026</strong>
+
+Bracket submission deadlines:
+
+Men's tournament: Thursday, March 19 @ 12:15 PM ET
+Women's tournament: Friday, March 20 @ 11:30 AM ET
+
+Make sure your bracket is submitted before the first games begin.
+
+The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all—a year's worth of bragging rights over your coworkers.
+
+<strong>How to Join</strong>
+
+1. Click the links for the men's and women's challenge.
+2. Enter the password above.
+3. Fill out your bracket by predicting the winner of each game.
+4. Submit your bracket before the tournaments begin.
+
+Good luck—and enjoy the madness!</div>
+            ` : (() => {
               const simpleBoldLines = new Set([
                 "\ud83c\udfc0 March Madness Bracket Challenge is back!",
                 "Join the challenge:",
@@ -9529,7 +9571,7 @@ function renderPromoteEventStep() {
                 if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
                 if (linkedLines[line]) {
                   const { prefix, url } = linkedLines[line];
-                  return `<strong>${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">here</a></strong>`;
+                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url: ${url})`;
                 }
                 if (line.includes("Revelry2026")) {
                   return line.replace("Revelry2026", "<strong>Revelry2026</strong>");
@@ -9802,6 +9844,13 @@ function renderPromoteEventStep() {
           copyToClipboard(announcementMessage);
         }
         promoteUiState.copiedAction = "copy-announcement";
+        renderPromoteEventStep();
+        setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
+        return;
+      }
+      if (action === "copy-announcement-subject") {
+        copyToClipboard("Join the Revelry March Madness Bracket Challenge 🏀");
+        promoteUiState.copiedAction = "copy-announcement-subject";
         renderPromoteEventStep();
         setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
         return;
