@@ -9273,6 +9273,9 @@ function renderPromoteEventStep() {
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
     ? "Promote the Brackets Challenge"
     : "Promote Event";
+  const promoteHeaderSummary = isMagicLinkContext && isMarchMadnessEvent
+    ? "March 19 - April 6"
+    : eventSummary;
   const attendeeCount = Number(bookingConfirmation?.bookedHeadcount || bookedEvent?.headcount || bookedEvent?.rsvps || 63);
 
   const rsvpRows = Array.isArray(state.pollBuilder?.responses) ? state.pollBuilder.responses : [];
@@ -9536,7 +9539,7 @@ function renderPromoteEventStep() {
         <div>
           <h2 class="text-2xl font-semibold text-slate-900 md:text-3xl">${escapeHtml(promoteHeaderTitle)}</h2>
           <p class="mt-1 text-sm text-slate-600">Let Revelers know the bracket challenge is live, and keep the excitement going throughout the tournament with weekly leaderboard updates.</p>
-          <p class="mt-2 text-xs text-slate-500">${escapeHtml(eventSummary)}</p>
+          <p class="mt-2 text-xs text-slate-500">${escapeHtml(promoteHeaderSummary)}</p>
         </div>
         <span class="inline-flex h-7 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600">${isPromoteCompleted ? "✓ Completed" : "● In progress"}</span>
       </div>
