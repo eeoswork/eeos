@@ -3934,10 +3934,77 @@ function applyMagicLinkFourMonthOverride(program) {
   };
 }
 
+function getFourMonthShortlistState() {
+  if (!state.fourMonthProgram || typeof state.fourMonthProgram !== "object") {
+    return { mode: "poll", selectedTemplateIds: [] };
+  }
+  if (!state.fourMonthProgram.shortlist || typeof state.fourMonthProgram.shortlist !== "object") {
+    state.fourMonthProgram.shortlist = { mode: "poll", selectedTemplateIds: [] };
+  }
+  const shortlist = state.fourMonthProgram.shortlist;
+  const mode = shortlist.mode === "book" ? "book" : "poll";
+  const selectedTemplateIds = Array.isArray(shortlist.selectedTemplateIds)
+    ? shortlist.selectedTemplateIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  shortlist.mode = mode;
+  shortlist.selectedTemplateIds = selectedTemplateIds;
+  return shortlist;
+}
+
+function getFourMonthShortlistCandidates(monthEvent = {}) {
+  const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
+  const byId = new Map(templates.map((template) => [String(template.id || ""), template]));
+  const picked = [];
+  const seen = new Set();
+
+  const confettiOptions = Array.isArray(monthEvent.confettiOptions) ? monthEvent.confettiOptions : [];
+  confettiOptions.forEach((option) => {
+    const templateId = String(option?.templateId || option?.id || "").trim();
+    if (!templateId || seen.has(templateId)) return;
+    const template = byId.get(templateId);
+    picked.push({
+      templateId,
+      title: String(option?.title || template?.title || "").trim(),
+      description: String(option?.description || template?.description || "").trim(),
+      estimatedCost: Number(option?.estimatedCost ?? template?.estimatedCost ?? 0),
+      url: String(template?.url || option?.url || "").trim(),
+      type: String(template?.type || option?.type || "poll").trim().toLowerCase()
+    });
+    seen.add(templateId);
+  });
+
+  const fallbackTemplates = templates.filter((template) => {
+    const templateId = String(template?.id || "").trim();
+    if (!templateId || seen.has(templateId)) return false;
+    const type = String(template?.type || "").trim().toLowerCase();
+    return type === "poll" || type === "rsvp" || type === "external";
+  });
+
+  fallbackTemplates.forEach((template) => {
+    if (picked.length >= 4) return;
+    const templateId = String(template.id || "").trim();
+    picked.push({
+      templateId,
+      title: String(template.title || "").trim(),
+      description: String(template.description || "").trim(),
+      estimatedCost: Number(template.estimatedCost || 0),
+      url: String(template.url || "").trim(),
+      type: String(template.type || "").trim().toLowerCase()
+    });
+    seen.add(templateId);
+  });
+
+  return picked.slice(0, 4);
+}
+
 function renderFourMonthProgram() {
   const container = $("monthlyEvents");
   const budgetSummary = $("fourMonthBudgetSummary");
   if (!container || !state.fourMonthProgram) return;
+
+  const expandedCardIds = new Set(
+    Array.from(container.querySelectorAll(".four-month-card[data-expanded='true']")).map((card) => card.id)
+  );
 
   const program = state.fourMonthProgram;
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -3960,6 +4027,7 @@ function renderFourMonthProgram() {
     const monthIndex = (currentMonth + index) % 12;
     const monthName = monthNames[monthIndex];
     const cardId = `month-card-${index + 1}`;
+    const isExpanded = expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
     const isNextEvent = index === highlightedIndex;
     const nextEventBadge = isNextEvent
@@ -3971,9 +4039,25 @@ function renderFourMonthProgram() {
 
     // Month 2: Confetti options
     if (monthEvent.isConfettiMonth && Array.isArray(monthEvent.confettiOptions)) {
-      const options = monthEvent.confettiOptions || [];
+      const shortlistState = getFourMonthShortlistState();
+      const candidates = getFourMonthShortlistCandidates(monthEvent);
+      const candidateIds = new Set(candidates.map((item) => item.templateId));
+      const selectedIds = Array.isArray(shortlistState.selectedTemplateIds)
+        ? shortlistState.selectedTemplateIds.filter((id) => candidateIds.has(id))
+        : [];
+      shortlistState.selectedTemplateIds = selectedIds;
+      const selectedSet = new Set(selectedIds);
+      const isBookMode = shortlistState.mode === "book";
+      const canContinue = isBookMode
+        ? selectedIds.length === 1
+        : selectedIds.length >= 2 && selectedIds.length <= 3;
+      const helperText = isBookMode
+        ? "Select 1 event to skip voting and go directly to booking."
+        : "Select 2-3 events and generate a poll for your team vote.";
+      const primaryLabel = isBookMode ? "Book selected event" : "Generate poll with selected events";
+      const modeToggleLabel = isBookMode ? "Switch to team vote" : "Skip poll and book directly";
       return `
-        <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="false" ${isNextEvent ? 'aria-label="Next event"' : ""}>
+        <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
           <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
             <div style="flex: 1; min-width: 0;">
               <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -3991,20 +4075,35 @@ function renderFourMonthProgram() {
                 <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
               </div>
             </div>
-            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">▸</span>
+            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
           </div>
-          <div class="four-month-content" style="display: none; padding: 16px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
-              ${options.map((option, idx) => `
-                <div style="padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;">
-                  <h5 class="font-medium text-sm text-slate-900">${escapeHtml(option.title || "")}</h5>
-                  <p class="text-xs text-slate-600 mt-1">${escapeHtml(option.description || "")}</p>
-                  <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="text-xs text-slate-500">Est. cost: <strong>${fmtMoney(option.estimatedCost || 0)}</strong></span>
-                    <button class="rounded px-2 py-1 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="select-confetti" data-template-id="${escapeHtml(option.templateId || "")}">Select</button>
+          <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+              <p class="text-xs text-slate-600" style="margin: 0;">${escapeHtml(helperText)}</p>
+              <button class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-action="four-month-shortlist-toggle-mode">${escapeHtml(modeToggleLabel)}</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+              ${candidates.map((candidate) => {
+                const isSelected = selectedSet.has(candidate.templateId);
+                return `
+                <article class="event-card ${isSelected ? "selected" : ""}" data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}" style="cursor: pointer;">
+                  <span class="event-circle ${isSelected ? "selected" : "empty"}">${isSelected ? "" : "○"}</span>
+                  <div class="event-preview">
+                    <h4 class="event-title">${escapeHtml(candidate.title || "")}</h4>
+                    <p class="event-why">${candidate.type === "free" ? "Free event option" : "Team bonding opportunity"}</p>
+                    <p class="event-description">${escapeHtml(candidate.description || "")}</p>
+                    <div class="event-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto;">
+                      <span>Est. cost: <strong>${fmtMoney(candidate.estimatedCost || 0)}</strong></span>
+                      <a href="${escapeHtml(candidate.url || "#")}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #334155;">View Event</a>
+                    </div>
                   </div>
-                </div>
-              `).join("")}
+                </article>
+              `;
+              }).join("")}
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+              <span class="text-xs text-slate-500">Selected: <strong>${selectedIds.length}</strong> ${isBookMode ? "(choose exactly 1)" : "(choose 2-3)"}</span>
+              <button class="rounded-lg px-4 py-2 text-xs font-medium ${canContinue ? "bg-slate-800 text-white hover:bg-slate-700" : "bg-slate-300 text-slate-600 cursor-not-allowed"}" ${canContinue ? "" : "disabled"} data-action="four-month-shortlist-primary" data-month="${index + 1}">${escapeHtml(primaryLabel)}</button>
             </div>
           </div>
         </div>
@@ -4015,7 +4114,7 @@ function renderFourMonthProgram() {
     const event = monthEvent;
     const typeLabel = event.type === "poll" ? "📊 Poll" : event.type === "rsvp" ? "✓ RSVP" : "🔗 External";
     return `
-      <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="false" ${isNextEvent ? 'aria-label="Next event"' : ""}>
+      <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
         <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;" class="four-month-header">
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -4033,9 +4132,9 @@ function renderFourMonthProgram() {
               <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
             </div>
           </div>
-          <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">▸</span>
+          <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; margin-top: 2px;">${isExpanded ? "▾" : "▸"}</span>
         </div>
-        <div class="four-month-content" style="display: none; padding: 16px; border-top: 1px solid #e2e8f0;">
+        <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
           <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(event.title || "")}</h4>
           <p class="text-sm text-slate-600 mt-2">${escapeHtml(event.description || "")}</p>
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
@@ -4432,6 +4531,121 @@ if (action === "save-attendance") {
 
 if (action === "save-feedback") {
   saveFeedback();
+  return;
+}
+
+if (action === "four-month-shortlist-toggle-mode") {
+  if (!state.fourMonthProgram || typeof state.fourMonthProgram !== "object") {
+    showMiniToast("Program not available yet");
+    return;
+  }
+  const shortlist = getFourMonthShortlistState();
+  shortlist.mode = shortlist.mode === "book" ? "poll" : "book";
+  if (shortlist.mode === "book" && shortlist.selectedTemplateIds.length > 1) {
+    shortlist.selectedTemplateIds = [shortlist.selectedTemplateIds[0]];
+  }
+  persistState();
+  renderFourMonthProgram();
+  return;
+}
+
+if (action === "four-month-shortlist-toggle") {
+  if (event.target && typeof event.target.closest === "function" && event.target.closest("a")) {
+    return;
+  }
+  const templateId = String(actionTarget.dataset.templateId || "").trim();
+  if (!templateId) return;
+  if (!state.fourMonthProgram || typeof state.fourMonthProgram !== "object") {
+    showMiniToast("Program not available yet");
+    return;
+  }
+  const shortlist = getFourMonthShortlistState();
+  const selected = new Set(Array.isArray(shortlist.selectedTemplateIds) ? shortlist.selectedTemplateIds : []);
+  if (shortlist.mode === "book") {
+    shortlist.selectedTemplateIds = selected.has(templateId) ? [] : [templateId];
+  } else {
+    if (selected.has(templateId)) {
+      selected.delete(templateId);
+    } else if (selected.size < 3) {
+      selected.add(templateId);
+    }
+    shortlist.selectedTemplateIds = Array.from(selected);
+  }
+  persistState();
+  renderFourMonthProgram();
+  return;
+}
+
+if (action === "four-month-shortlist-primary") {
+  if (!state.fourMonthProgram || typeof state.fourMonthProgram !== "object") {
+    showMiniToast("Program not available yet");
+    return;
+  }
+  const shortlist = getFourMonthShortlistState();
+  const selectedTemplateIds = Array.isArray(shortlist.selectedTemplateIds)
+    ? shortlist.selectedTemplateIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
+  const selectedTemplates = selectedTemplateIds
+    .map((id) => templates.find((template) => String(template.id || "") === id))
+    .filter(Boolean);
+
+  if (shortlist.mode === "book") {
+    if (selectedTemplates.length !== 1) {
+      showMiniToast("Select exactly 1 event to book");
+      return;
+    }
+    const selectedTemplate = selectedTemplates[0];
+    state.setupShortlistMode = "book";
+    state.setupBookSelectedEventIndex = 0;
+    if (!state.completedSetupSteps.includes(7)) state.completedSetupSteps.push(7);
+    if (!state.completedSetupSteps.includes(8)) state.completedSetupSteps.push(8);
+    collapseSetupViewsForWorkflowStep();
+    state.currentSetupStep = 9;
+    state.eventWorkflowProcessStep = 9;
+    persistState();
+    renderSetupStepStates();
+    renderSidebarStepMenus();
+    updateSetupStepButtonStates();
+    renderFourMonthProgram();
+    if (selectedTemplate.url) {
+      openVendorUrl(selectedTemplate.url, selectedTemplate.title || "Book Event");
+    } else {
+      showMiniToast("Selected event has no booking link");
+    }
+    return;
+  }
+
+  if (selectedTemplates.length < 2 || selectedTemplates.length > 3) {
+    showMiniToast("Select 2-3 events to generate poll");
+    return;
+  }
+
+  state.setupShortlistMode = "poll";
+  state.setupPollSelectedEventIndexes = selectedTemplates.map((_, idx) => idx);
+  if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
+    state.pollBuilder = {};
+  }
+  state.pollBuilder.selectedEventIds = selectedTemplates.map((template) => String(template.id || ""));
+  const labelOverrides = {};
+  selectedTemplates.forEach((template) => {
+    const templateId = String(template.id || "");
+    if (!templateId) return;
+    labelOverrides[templateId] = String(template.title || template.name || templateId);
+  });
+  state.pollBuilder.eventLabelOverrides = labelOverrides;
+  resetPollBuilderDraftFields();
+  if (!state.completedSetupSteps.includes(7)) state.completedSetupSteps.push(7);
+  collapseSetupViewsForWorkflowStep();
+  state.currentSetupStep = 8;
+  state.eventWorkflowProcessStep = 8;
+  persistState();
+  renderSetupStepStates();
+  renderSidebarStepMenus();
+  updateSetupStepButtonStates();
+  renderFourMonthProgram();
+  renderPollBuilderStep();
+  showMiniToast("Poll options ready in Step 8");
   return;
 }
 
@@ -6435,6 +6649,10 @@ $("btnSaveProgramSetup").addEventListener("click", () => {
 
 $("workflowStepper").addEventListener("click", handleWorkflowAction);
 $("browserPanel").addEventListener("click", handleWorkflowAction);
+const monthlyEventsContainer = $("monthlyEvents");
+if (monthlyEventsContainer) {
+  monthlyEventsContainer.addEventListener("click", handleWorkflowAction);
+}
 
 
 const sidebarSetupHeading = $("sidebarSetupHeading");
