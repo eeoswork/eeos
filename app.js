@@ -715,6 +715,7 @@ pollBuilder: {
 },
 promoteEvent: {
   activeStep: "calendar",
+  announcementLockedAfterContinue: false,
   calendar: { done: false, doneAt: "" },
   announcement: { done: false, doneAt: "" },
   reminderWeek: { done: false, doneAt: "" },
@@ -1448,6 +1449,9 @@ function normalizePromoteEventState() {
   }
   if (typeof promote.collapsedStep !== "string") {
     promote.collapsedStep = "";
+  }
+  if (typeof promote.announcementLockedAfterContinue !== "boolean") {
+    promote.announcementLockedAfterContinue = false;
   }
 
   const ensureStepStatus = (key) => {
@@ -9533,7 +9537,6 @@ function renderPromoteEventStep() {
         <div class="mt-2 text-xs text-slate-500">If you’re using Slack only, attendees can still add the event using the .ics file.</div>
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(inviteMessage)}</div>
         <div class="mt-4 flex items-center justify-end gap-3">
-          ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" data-promote-complete="calendar" class="h-4 w-4 rounded border-slate-300" ${doneFlags.calendar ? "checked" : ""} />
             <span>Calendar invite sent</span>
@@ -9545,14 +9548,15 @@ function renderPromoteEventStep() {
     if (stepKey === "announcement") {
       if (isMagicLinkContext && isMarchMadnessEvent) {
         const useEmail = promoteUiState.announcementChannel === "email";
+        const isAnnouncementReadOnly = isRevelryBracketsPromoteFlow && Boolean(promote.announcementLockedAfterContinue);
         return `
           <div class="mt-3 text-sm text-slate-600">Send this message to your team via Slack or email to invite everyone to join the bracket challenge.</div>
-          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700" style="min-height: 80px;">
+          <div class="mt-3 rounded-lg border border-slate-200 text-sm text-slate-700 ${isAnnouncementReadOnly ? "bg-slate-100" : "bg-slate-50"}" style="min-height: 80px;">
             <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
-              <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"}">Slack</button>
-              <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Email</button>
+              <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"} ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>Slack</button>
+              <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"} ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>Email</button>
             </div>
-            <div class="p-3" style="${useEmail ? "" : "white-space: pre-line;"}">${useEmail ? `<div class="rounded-lg border border-slate-200 bg-slate-100 mb-2" style="padding: 5px 8px;"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span><span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span><button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button></div></div><div class="text-sm text-slate-700 mt-2" style="white-space: pre-line;">
+            <div class="p-3" style="${useEmail ? "" : "white-space: pre-line;"}">${useEmail ? `<div class="rounded-lg border border-slate-200 bg-slate-100 mb-2" style="padding: 5px 8px;"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-600 whitespace-nowrap">Subject:</span><span class="font-medium text-slate-900 flex-1 min-w-0">Join the Revelry March Madness Bracket Challenge 🏀</span><button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium whitespace-nowrap flex-shrink-0 ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button></div></div><div class="text-sm text-slate-700 mt-2" style="white-space: pre-line;">
 Hi everyone,
 
 We're running a Revelry bracket competition for the NCAA men's and women's basketball tournaments.
@@ -9613,21 +9617,20 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
             })()}</div>
           </div>
           <div class="${rowBase}">
-            <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-announcement" ? "✓ Copied" : "Copy message"}</button>
+            <button type="button" data-promote-action="copy-announcement" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" style="background-color: #546373;" ${isAnnouncementReadOnly ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-announcement" ? "✓ Copied" : "Copy message"}</button>
             ${useEmail
-              ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>`
-              : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>`
+              ? `<button type="button" data-promote-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>Open Email</button>`
+              : `<button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>Open Slack</button>`
             }
           </div>
           ${promoteUiState.copiedAction === "copy-announcement" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
           <div class="mt-3 text-sm text-slate-500">After sending the message, come back here to complete this step.</div>
           <div class="mt-12 flex flex-col items-start gap-3">
-            ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
-            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700 ${isAnnouncementReadOnly ? "opacity-70" : ""}">
+              <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} ${isAnnouncementReadOnly ? "disabled" : ""} />
               <span>I shared the announcement with the team</span>
             </label>
-            <button type="button" data-promote-action="continue-to-signup-reminder" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${doneFlags.announcement ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${doneFlags.announcement ? "" : "disabled"}>Continue → Schedule reminder</button>
+            <button type="button" data-promote-action="continue-to-signup-reminder" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${(doneFlags.announcement && !isAnnouncementReadOnly) ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${(doneFlags.announcement && !isAnnouncementReadOnly) ? "" : "disabled"}>Continue → Schedule reminder</button>
           </div>
         `;
       }
@@ -9642,7 +9645,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           <button type="button" data-promote-action="download-ics" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Download .ics</button>
         </div>
         <div class="mt-4 flex items-center justify-end gap-3">
-          ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
             <span>Announcement posted</span>
@@ -9664,7 +9666,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         </div>
         ${promoteUiState.copiedAction === "copy-reminder-week" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
-          ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" data-promote-complete="reminder_week" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_week ? "checked" : ""} />
             <span>1-week reminder sent</span>
@@ -9684,7 +9685,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         </div>
         ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
         <div class="mt-4 flex items-center justify-end gap-3">
-          ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
           <label class="inline-flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" data-promote-complete="final_winner" class="h-4 w-4 rounded border-slate-300" ${doneFlags.final_winner ? "checked" : ""} />
             <span>Final winner announcement sent</span>
@@ -9705,7 +9705,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       </div>
       ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
       <div class="mt-4 flex items-center justify-end gap-3">
-        ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" data-promote-complete="reminder_dayof" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_dayof ? "checked" : ""} />
           <span>Day-of reminder sent</span>
@@ -9714,7 +9713,13 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     `;
   };
 
-  const cardsHtml = processSteps.map((step) => {
+  const visibleSteps = processSteps.filter((step) => step.key === activeStep);
+  const cardsHtml = visibleSteps.map((step) => {
+    const shouldHideCompletedAnnouncementCard = isRevelryBracketsPromoteFlow
+      && step.key === "announcement"
+      && Boolean(promote.announcementLockedAfterContinue)
+      && activeStep !== "announcement";
+    if (shouldHideCompletedAnnouncementCard) return "";
     const expanded = isCardExpanded(step.key);
     return `
       <article id="promote-card-${step.key}" class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
@@ -9894,6 +9899,8 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       }
       if (action === "continue-to-signup-reminder") {
         if (!doneFlags.announcement) return;
+        state.promoteEvent.announcementLockedAfterContinue = true;
+        persistState();
         setActiveStep("reminder_week");
         setTimeout(() => {
           const card = document.getElementById("promote-card-reminder_week");
