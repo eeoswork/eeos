@@ -9727,7 +9727,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           <div class="flex min-w-0 items-center gap-2">
             <h4 class="truncate text-base font-semibold text-slate-900">${escapeHtml(step.title)}</h4>
           </div>
-          <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span>
+          <!-- <span class="inline-flex h-6 items-center rounded-full border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-600">${escapeHtml(getStatusPill(step.key))}</span> -->
         </div>
         ${expanded ? `<div class="mt-4 border-t border-slate-200 pt-4">${renderStepBody(step.key)}</div>` : ""}
       </article>
