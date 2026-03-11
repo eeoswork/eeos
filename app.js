@@ -4036,10 +4036,13 @@ function renderFourMonthProgram() {
     const isNextEvent = index === highlightedIndex;
     const _sectionLabels = ["YOUR FIRST EVENT", "UPCOMING", null, "LATER"];
     const _sectionLabel = _sectionLabels[index] || null;
+    const _isFirstSection = index === 0;
+    const _sectionColor = _isFirstSection ? "#0074ff" : "#94a3b8";
+    const _lineColor = _isFirstSection ? "#0074ff" : "#e2e8f0";
     const sectionHeaderHtml = _sectionLabel
-      ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;${index > 0 ? ' margin-top: 8px;' : ''}">
-          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #94a3b8; white-space: nowrap;">${_sectionLabel}</span>
-          <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+      ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;${index > 0 ? ' margin-top: 38px;' : ''}">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: ${_sectionColor}; white-space: nowrap;">${_sectionLabel}</span>
+          <div style="flex: 1; height: 1px; background: ${_lineColor};"></div>
         </div>`
       : "";
     const nextEventBadge = isNextEvent
@@ -4170,7 +4173,7 @@ function renderFourMonthProgram() {
               <div>${typeLabel}</div>
               <div style="margin-top: 4px; font-weight: 600; color: #0f172a;">Est. cost: ${fmtMoney(event.estimatedCost || 0)}</div>
             </div>
-            <button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Create This Event</button>
+            <button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Launch ${escapeHtml(monthName)} Event →</button>
           </div>
         </div>
       </div>

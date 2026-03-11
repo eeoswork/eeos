@@ -472,31 +472,33 @@
 
                 <!-- 4-Month Program Display -->
                 <div id="fourMonthProgram">
-                  <div style="margin-bottom: 20px;">
-                    <h4 class="text-base font-semibold text-slate-900">Your 4-Month Employee Experience Program</h4>
-                    <p class="text-sm text-slate-600 mt-1">Designed to match your team's goals and budget</p>
-                  </div>
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 0;">
+                      <h4 class="text-base font-semibold text-slate-900">Your 4-Month Employee Experience Program</h4>
+                      <p class="text-sm text-slate-600 mt-1">Designed to match your team's goals and budget</p>
+                    </div>
 
-                  <!-- Budget Summary -->
-                  <div id="fourMonthBudgetSummary" style="margin-bottom: 20px; padding: 12px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; font-size: 14px; line-height: 1.25rem;">
-                      <div>
-                        <div style="color: #64748b; font-size: 12px;">Total Budget</div>
-                        <div id="progBudgetTotal" style="font-weight: 600; color: #0f172a;">-</div>
-                      </div>
-                      <div>
-                        <div style="color: #64748b; font-size: 12px;">Estimated Cost</div>
-                        <div id="progBudgetEstimated" style="font-weight: 600; color: #0f172a;">-</div>
-                      </div>
-                      <div>
-                        <div style="color: #64748b; font-size: 12px;">Remaining</div>
-                        <div id="progBudgetRemaining" style="font-weight: 600; color: #0f172a;">-</div>
+                    <!-- Budget Summary -->
+                    <div id="fourMonthBudgetSummary" style="flex: 0 0 auto; width: min(35%, 320px); padding: 12px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0;">
+                      <div style="display: flex; gap: 16px; font-size: 14px; line-height: 1.25rem; justify-content: space-between;">
+                        <div>
+                          <div style="color: #64748b; font-size: 12px;">Total Budget</div>
+                          <div id="progBudgetTotal" style="font-weight: 600; color: #0f172a;">-</div>
+                        </div>
+                        <div>
+                          <div style="color: #64748b; font-size: 12px;">Estimated Cost</div>
+                          <div id="progBudgetEstimated" style="font-weight: 600; color: #0f172a;">-</div>
+                        </div>
+                        <div>
+                          <div style="color: #64748b; font-size: 12px;">Remaining</div>
+                          <div id="progBudgetRemaining" style="font-weight: 600; color: #0f172a;">-</div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <!-- Monthly Events Display -->
-                  <div id="monthlyEvents" style="display: grid; gap: 20px;">
+                  <div id="monthlyEvents" style="display: grid; gap: 10px;">
                     <!-- Dynamically populated -->
                   </div>
                 </div>
