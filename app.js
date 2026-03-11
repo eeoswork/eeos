@@ -3709,10 +3709,10 @@ eventWorkflowItems.forEach((item) => {
   const isProcessCurrent = stepNum === processCurrentStep;
   const isCompleted = state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
   const isFutureStep = !isCompleted && stepNum > processCurrentStep;
-  const isLockedCompletedLaunchStep = stepNum === EVENT_WORKFLOW_STEPS.SHORTLIST && processCurrentStep > EVENT_WORKFLOW_STEPS.SHORTLIST;
+  const isLockedCompletedWorkflowStep = isCompleted && stepNum < processCurrentStep;
   const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
   const isLocked = !isBookEventDebugOverride && (
-    isLockedCompletedLaunchStep
+    isLockedCompletedWorkflowStep
     || isFutureStep
     || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
   );
@@ -3723,7 +3723,7 @@ eventWorkflowItems.forEach((item) => {
   item.classList.toggle("sidebar-step-locked", isLocked && !isActive);
   item.style.background = isActive ? activeSidebarStepBg : "transparent";
   item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
-  item.style.color = isActive ? activeSidebarStepText : (isLockedCompletedLaunchStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b"));
+  item.style.color = isActive ? activeSidebarStepText : (isLockedCompletedWorkflowStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b"));
   item.style.opacity = isLocked && !isActive ? "0.58" : "1";
   item.style.cursor = isLocked ? "not-allowed" : "pointer";
   item.onclick = () => {
