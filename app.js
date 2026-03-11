@@ -4069,7 +4069,7 @@ function renderFourMonthProgram() {
                     </svg>
                     <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                   </div>
-                  <span style="display: inline-block; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">🎉 ${escapeHtml(categoryPill)}</span>
+                  <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
                   ${nextEventBadge}
                 </div>
                 <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
@@ -4126,7 +4126,7 @@ function renderFourMonthProgram() {
                   </svg>
                   <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                 </div>
-                <span style="display: inline-block; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+                <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
                 ${nextEventBadge}
               </div>
               <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
