@@ -167,6 +167,17 @@ const EVENT_WORKFLOW_STEP_SEQUENCE = [
 ];
 
 function getEventWorkflowConfig(eventLike = {}) {
+  const templateId = String(eventLike?.templateId || eventLike?.id || "").trim().toLowerCase();
+  const title = String(eventLike?.title || eventLike?.name || "").trim().toLowerCase();
+  if (isRevelryLabsReadOnlyMagicLink() && (templateId === "march-madness" || title === "march madness brackets challenge")) {
+    return {
+      workflowType: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+      allowDirectBookOverride: Boolean(eventLike?.allowDirectBookOverride),
+      pollVariant: String(eventLike?.pollVariant || "event-and-datetime").trim() || "event-and-datetime",
+      hasPoll: false,
+      hasRsvp: true
+    };
+  }
   const explicitWorkflowType = String(eventLike?.workflowType || "").trim().toLowerCase();
   const legacyType = String(eventLike?.type || "").trim().toLowerCase();
   const requestedWorkflowType = explicitWorkflowType || (legacyType === "poll"
@@ -5007,8 +5018,8 @@ if (action === "select-confetti") {
 
 if (action === "create-event") {
   const templateId = actionTarget.dataset.templateId;
-  const template = (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId))
-    || (state.fourMonthProgram?.events || []).find((e) => String(e.templateId) === String(templateId));
+  const template = (state.fourMonthProgram?.events || []).find((e) => String(e.templateId || e.id || "") === String(templateId))
+    || (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId));
 
   if (!template) {
     showMiniToast("Event template not found");
