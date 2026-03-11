@@ -9515,14 +9515,14 @@ function renderPromoteEventStep() {
               <button type="button" id="promoteAnnouncementChannelEmail" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Gmail</button>
             </div>
             <div class="p-3" style="white-space: pre-line;">${useEmail ? `
-              <div class="rounded-lg border border-slate-200 bg-slate-100 p-3 mb-3">
-                <div class="text-xs font-semibold text-slate-600 mb-1">Subject:</div>
+              <div class="rounded-lg border border-slate-200 bg-slate-100 p-2 mb-2">
+                <div class="text-xs font-semibold text-slate-600 mb-0.5">Subject:</div>
                 <div class="flex items-center justify-between gap-2">
                   <span class="font-medium text-slate-900">Join the Revelry March Madness Bracket Challenge 🏀</span>
                   <button type="button" data-promote-action="copy-announcement-subject" class="text-xs px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 font-medium">${promoteUiState.copiedAction === "copy-announcement-subject" ? "✓ Copied" : "Copy"}</button>
                 </div>
               </div>
-              <div class="text-sm text-slate-700 mt-3">Hi everyone,
+              <div class="text-sm text-slate-700 mt-2">Hi everyone,
 
 We're running a Revelry bracket competition for the NCAA men's and women's basketball tournaments.
 
@@ -9532,11 +9532,9 @@ Create your bracket and compete with fellow Revelers to see who predicts the tou
 
 <strong>Join the challenge:</strong>
 
-Women's bracket <a href="https://shorturl.at/tleLy" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:
-https://shorturl.at/tleLy)
+Women's bracket <a href="https://shorturl.at/tleLy" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a>
 
-Men's bracket <a href="https://shorturl.at/Jv9yZ" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:
-https://shorturl.at/Jv9yZ)
+Men's bracket <a href="https://shorturl.at/Jv9yZ" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a>
 
 Password for both: <strong>Revelry2026</strong>
 
@@ -9571,7 +9569,7 @@ Good luck—and enjoy the madness!</div>
                 if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
                 if (linkedLines[line]) {
                   const { prefix, url } = linkedLines[line];
-                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:\n${url})`;
+                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a>`;
                 }
                 if (line.includes("Revelry2026")) {
                   return line.replace("Revelry2026", "<strong>Revelry2026</strong>");
