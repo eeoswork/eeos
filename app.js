@@ -9621,12 +9621,13 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           </div>
           ${promoteUiState.copiedAction === "copy-announcement" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
           <div class="mt-3 text-sm text-slate-500">After sending the message, come back here to complete this step.</div>
-          <div class="mt-4 flex items-center justify-end gap-3">
+          <div class="mt-12 flex flex-col items-start gap-3">
             ${doneAtText ? `<span class="text-xs text-slate-500">${escapeHtml(doneAtText)}</span>` : ""}
             <label class="inline-flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
               <span>I shared the announcement with the team</span>
             </label>
+            <button type="button" data-promote-action="continue-to-signup-reminder" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${doneFlags.announcement ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${doneFlags.announcement ? "" : "disabled"}>Continue --> Schedule reminder</button>
           </div>
         `;
       }
@@ -9791,12 +9792,15 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       state.promoteEvent.finalWinner.done = done;
       state.promoteEvent.finalWinner.doneAt = stamp;
     }
+    const shouldGateAnnouncementAdvance = isRevelryBracketsPromoteFlow && stepKey === "announcement";
     if (done) {
-      const currentIndex = processSteps.findIndex((s) => s.key === stepKey);
-      const nextStep = processSteps[currentIndex + 1]?.key;
-      if (nextStep) {
-        state.promoteEvent.activeStep = nextStep;
-        state.promoteEvent.collapsedStep = "";
+      if (!shouldGateAnnouncementAdvance) {
+        const currentIndex = processSteps.findIndex((s) => s.key === stepKey);
+        const nextStep = processSteps[currentIndex + 1]?.key;
+        if (nextStep) {
+          state.promoteEvent.activeStep = nextStep;
+          state.promoteEvent.collapsedStep = "";
+        }
       }
     } else {
       state.promoteEvent.activeStep = stepKey;
@@ -9886,6 +9890,15 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         promoteUiState.copiedAction = "copy-announcement-subject";
         renderPromoteEventStep();
         setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
+        return;
+      }
+      if (action === "continue-to-signup-reminder") {
+        if (!doneFlags.announcement) return;
+        setActiveStep("reminder_week");
+        setTimeout(() => {
+          const card = document.getElementById("promote-card-reminder_week");
+          if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
         return;
       }
       if (action === "copy-reminder-week") {
