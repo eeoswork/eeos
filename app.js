@@ -13,14 +13,10 @@ function updateSidebarSetupCollapseUI() {
     : (heading ? window.getComputedStyle(heading).color : "");
 
   if (check) {
-    check.style.display = allStepsComplete ? "inline" : "none";
-    if (headingColor) check.style.color = headingColor;
+    check.style.display = "none";
   }
   if (editPrefs) {
-    editPrefs.style.display = allStepsComplete ? "inline" : "none";
-    editPrefs.textContent = expanded ? "Hide" : "Edit";
-    editPrefs.style.textDecoration = "none";
-    editPrefs.style.color = expanded ? "#475569" : "#94a3b8";
+    editPrefs.style.display = "none";
   }
   if (collapseWrap) {
     if (allStepsComplete && !expanded) {
