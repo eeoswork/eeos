@@ -9531,10 +9531,10 @@ Create your bracket and compete with fellow Revelers to see who predicts the tou
 
 <strong>Join the challenge:</strong>
 
-Women's bracket <strong>here</strong> (url:
+Women's bracket <a href="https://shorturl.at/tleLy" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:
 https://shorturl.at/tleLy)
 
-Men's bracket <strong>here</strong> (url:
+Men's bracket <a href="https://shorturl.at/Jv9yZ" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:
 https://shorturl.at/Jv9yZ)
 
 Password for both: <strong>Revelry2026</strong>
@@ -9549,7 +9549,6 @@ Make sure your bracket is submitted before the first games begin.
 The person with the most points at the end takes the Revelry Bracket Champion crown and earns the greatest gift of all—a year's worth of bragging rights over your coworkers.
 
 <strong>How to Join</strong>
-
 1. Click the links for the men's and women's challenge.
 2. Enter the password above.
 3. Fill out your bracket by predicting the winner of each game.
@@ -9571,7 +9570,7 @@ Good luck—and enjoy the madness!</div>
                 if (simpleBoldLines.has(line)) return `<strong>${escaped}</strong>`;
                 if (linkedLines[line]) {
                   const { prefix, url } = linkedLines[line];
-                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url: ${url})`;
+                  return `${escapeHtml(prefix)}<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;"><strong>here</strong></a> (url:\n${url})`;
                 }
                 if (line.includes("Revelry2026")) {
                   return line.replace("Revelry2026", "<strong>Revelry2026</strong>");
