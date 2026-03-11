@@ -3709,8 +3709,13 @@ eventWorkflowItems.forEach((item) => {
   const isProcessCurrent = stepNum === processCurrentStep;
   const isCompleted = state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
   const isFutureStep = !isCompleted && stepNum > processCurrentStep;
+  const isLockedCompletedLaunchStep = stepNum === EVENT_WORKFLOW_STEPS.SHORTLIST && processCurrentStep > EVENT_WORKFLOW_STEPS.SHORTLIST;
   const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
-  const isLocked = !isBookEventDebugOverride && (isFutureStep || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep)));
+  const isLocked = !isBookEventDebugOverride && (
+    isLockedCompletedLaunchStep
+    || isFutureStep
+    || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
+  );
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
@@ -3718,8 +3723,8 @@ eventWorkflowItems.forEach((item) => {
   item.classList.toggle("sidebar-step-locked", isLocked && !isActive);
   item.style.background = isActive ? activeSidebarStepBg : "transparent";
   item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
-  item.style.color = isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b");
-  item.style.opacity = isLocked && !isActive ? "0.72" : "1";
+  item.style.color = isActive ? activeSidebarStepText : (isLockedCompletedLaunchStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b"));
+  item.style.opacity = isLocked && !isActive ? "0.58" : "1";
   item.style.cursor = isLocked ? "not-allowed" : "pointer";
   item.onclick = () => {
     if (!allCoreSetupComplete || !stepNum) return;
