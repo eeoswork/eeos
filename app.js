@@ -9627,7 +9627,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
               <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
               <span>I shared the announcement with the team</span>
             </label>
-            <button type="button" data-promote-action="continue-to-signup-reminder" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${doneFlags.announcement ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${doneFlags.announcement ? "" : "disabled"}>Continue --> Schedule reminder</button>
+            <button type="button" data-promote-action="continue-to-signup-reminder" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${doneFlags.announcement ? "bg-slate-800 hover:bg-slate-700" : "cursor-not-allowed bg-slate-300"}" ${doneFlags.announcement ? "" : "disabled"}>Continue → Schedule reminder</button>
           </div>
         `;
       }
