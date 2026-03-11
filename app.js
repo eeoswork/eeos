@@ -9476,8 +9476,22 @@ function renderPromoteEventStep() {
   };
   const isPromoteCompleted = processSteps.every((step) => doneFlags[step.key]);
   const validStepKeys = processSteps.map((s) => s.key);
-  const activeStep = validStepKeys.includes(promote.activeStep) ? promote.activeStep : (validStepKeys[0] || "calendar");
+  let activeStep = validStepKeys.includes(promote.activeStep) ? promote.activeStep : (validStepKeys[0] || "calendar");
   const isRevelryBracketsPromoteFlow = isMagicLinkContext && isMarchMadnessEvent;
+  const reminderWeekIndex = processSteps.findIndex((item) => item.key === "reminder_week");
+  const activeStepIndex = processSteps.findIndex((item) => item.key === activeStep);
+  const shouldResumeReminderWeek = isRevelryBracketsPromoteFlow
+    && Boolean(promote.announcementLockedAfterContinue)
+    && doneFlags.announcement
+    && reminderWeekIndex >= 0
+    && activeStepIndex >= 0
+    && activeStepIndex < reminderWeekIndex;
+  if (shouldResumeReminderWeek) {
+    activeStep = "reminder_week";
+    state.promoteEvent.activeStep = "reminder_week";
+    state.promoteEvent.collapsedStep = "";
+    persistState();
+  }
   const isAnnouncementGateActive = isRevelryBracketsPromoteFlow && !doneFlags.announcement;
   const isStepLocked = (stepKey) => isAnnouncementGateActive && stepKey !== "announcement";
   if (isAnnouncementGateActive && (activeStep !== "announcement" || promote.collapsedStep === "announcement")) {
