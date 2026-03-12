@@ -4812,6 +4812,7 @@ function getFourMonthShortlistCandidates(monthEvent = {}) {
       description: item.description,
       estimatedCost: Number(item.estimatedCost || 0),
       url: item.url,
+      imageUrl: String(item.imageUrl || "").trim(),
       type: item.type,
       recommendationPills: Array.isArray(item.recommendationPills) ? [...item.recommendationPills] : []
     }));
@@ -5015,8 +5016,9 @@ function renderFourMonthProgram() {
                 const grayPills = Array.isArray(candidate.recommendationPills)
                   ? candidate.recommendationPills.filter(Boolean)
                   : [];
+                const eventCardStyle = `${isRevelryLockedFollowOnMonth ? "default" : "pointer"}; ${isAprilMonth ? "height: auto;" : ""}`;
                 return `
-                <article class="event-card ${isSelected ? "selected" : ""}" ${isRevelryLockedFollowOnMonth ? "" : `data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}"`} style="cursor: ${isRevelryLockedFollowOnMonth ? "default" : "pointer"};">
+                <article class="event-card ${isSelected ? "selected" : ""}" ${isRevelryLockedFollowOnMonth ? "" : `data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}"`} style="cursor: ${eventCardStyle}">
                   <span class="event-circle ${isSelected ? "selected" : "empty"}">${isSelected ? "" : "○"}</span>
                   <div class="event-preview">
                     ${isAprilMonth && candidate.imageUrl ? `<div style="margin-bottom: 10px; text-align: left;"><img src="${escapeHtml(candidate.imageUrl)}" alt="${escapeHtml(candidate.title || "Event image")}" style="width: 75px; height: auto; display: block; border-radius: 8px;" loading="lazy" /></div>` : ""}
