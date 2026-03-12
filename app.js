@@ -226,13 +226,21 @@ function getWorkflowTypeLabel(eventLike = {}) {
 }
 
 function getEventWorkflowStepSequence(workflowType = getActiveWorkflowType()) {
+  let sequence;
   if (workflowType === EVENT_WORKFLOW_TYPES.RSVP) {
-    return EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+    sequence = EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+  } else if (workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) {
+    sequence = EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.RSVP && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+  } else {
+    sequence = [...EVENT_WORKFLOW_STEP_SEQUENCE];
   }
-  if (workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) {
-    return EVENT_WORKFLOW_STEP_SEQUENCE.filter((stepNum) => stepNum !== EVENT_WORKFLOW_STEPS.POLL && stepNum !== EVENT_WORKFLOW_STEPS.RSVP && stepNum !== EVENT_WORKFLOW_STEPS.BOOK);
+
+  // Revelry production magic link is intentionally capped at Promote Event for now.
+  if (isRevelryLabsReadOnlyMagicLink()) {
+    return sequence.filter((stepNum) => stepNum <= EVENT_WORKFLOW_STEPS.PROMOTE);
   }
-  return [...EVENT_WORKFLOW_STEP_SEQUENCE];
+
+  return sequence;
 }
 
 function isWorkflowStepSkipped(stepNum, workflowType = getActiveWorkflowType()) {
@@ -1182,6 +1190,10 @@ function isRevelryLabsReadOnlyMagicLink() {
   return parsed.host === "revelrylabs.eeos.work" && parsed.tokenId === "rlabs2026a1b2c3d4";
 }
 
+function isRevelryLeaderboardLockEnabled() {
+  return isRevelryLabsReadOnlyMagicLink();
+}
+
 function getMagicLinkAuthStageKey(parsedMagicLink = null) {
   const host = String(parsedMagicLink?.host || "").trim().toLowerCase();
   const tokenId = String(parsedMagicLink?.tokenId || "").trim();
@@ -1925,6 +1937,82 @@ function normalizePromoteEventState() {
   if (typeof promote.ics.lastGeneratedAt !== "string") promote.ics.lastGeneratedAt = "";
 }
 
+function enforceRevelryLeaderboardLockState() {
+  if (!isRevelryLeaderboardLockEnabled()) return false;
+
+  const completedSteps = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
+  const promoteState = state.promoteEvent && typeof state.promoteEvent === "object" ? state.promoteEvent : {};
+  const hasReachedPromote = Boolean(state.revelryLeaderboardLockArmed)
+    || Number(state.currentSetupStep || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE
+    || Number(state.eventWorkflowProcessStep || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE
+    || completedSteps.some((stepNum) => Number(stepNum || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE)
+    || ["announcement", "reminder_week", "reminder_dayof", "final_winner"].includes(String(promoteState.activeStep || ""))
+    || Boolean(promoteState.announcement?.done)
+    || Boolean(promoteState.reminderWeek?.done)
+    || Boolean(promoteState.announcementLockedAfterContinue)
+    || Boolean(promoteState.reminderWeekLockedAfterContinue);
+
+  if (!hasReachedPromote) {
+    return false;
+  }
+
+  let changed = false;
+  if (state.revelryLeaderboardLockArmed !== true) {
+    state.revelryLeaderboardLockArmed = true;
+    changed = true;
+  }
+  if (!Array.isArray(state.completedSetupSteps)) {
+    state.completedSetupSteps = [];
+    changed = true;
+  }
+
+  const trimmedCompleted = state.completedSetupSteps.filter((stepNum) => Number(stepNum || 0) <= EVENT_WORKFLOW_STEPS.PROMOTE);
+  if (trimmedCompleted.length !== state.completedSetupSteps.length) {
+    state.completedSetupSteps = trimmedCompleted;
+    changed = true;
+  }
+
+  if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.PROMOTE) {
+    state.currentSetupStep = EVENT_WORKFLOW_STEPS.PROMOTE;
+    changed = true;
+  }
+  if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.PROMOTE) {
+    state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.PROMOTE;
+    changed = true;
+  }
+
+  normalizePromoteEventState();
+  const promote = state.promoteEvent;
+  if (promote.activeStep !== "reminder_dayof") {
+    promote.activeStep = "reminder_dayof";
+    changed = true;
+  }
+  if (promote.collapsedStep !== "") {
+    promote.collapsedStep = "";
+    changed = true;
+  }
+  if (promote.announcement.done !== true) {
+    promote.announcement.done = true;
+    if (!promote.announcement.doneAt) promote.announcement.doneAt = new Date().toISOString();
+    changed = true;
+  }
+  if (promote.reminderWeek.done !== true) {
+    promote.reminderWeek.done = true;
+    if (!promote.reminderWeek.doneAt) promote.reminderWeek.doneAt = new Date().toISOString();
+    changed = true;
+  }
+  if (promote.announcementLockedAfterContinue !== true) {
+    promote.announcementLockedAfterContinue = true;
+    changed = true;
+  }
+  if (promote.reminderWeekLockedAfterContinue !== true) {
+    promote.reminderWeekLockedAfterContinue = true;
+    changed = true;
+  }
+
+  return changed;
+}
+
 function getPromoteStepDone(stepKey) {
   normalizePromoteEventState();
   if (stepKey === "calendar") return Boolean(state.promoteEvent.calendar.done);
@@ -2127,17 +2215,24 @@ return state.workflowStates[key];
 function deriveEventWorkflowProcessStep() {
   const completed = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
   const workflowType = getActiveWorkflowType();
-  for (const step of getEventWorkflowStepSequence(workflowType)) {
+  const sequence = getEventWorkflowStepSequence(workflowType);
+  for (const step of sequence) {
     const treatAsCompleted = completed.includes(step);
     if (!treatAsCompleted) {
       return step;
     }
   }
-  return EVENT_WORKFLOW_STEPS.REVIEW;
+  return sequence[sequence.length - 1] || EVENT_WORKFLOW_STEPS.REVIEW;
 }
 
 function getEventWorkflowProcessStep() {
-  if (Number.isInteger(state.eventWorkflowProcessStep) && state.eventWorkflowProcessStep >= EVENT_WORKFLOW_STEPS.SHORTLIST && state.eventWorkflowProcessStep <= EVENT_WORKFLOW_STEPS.REVIEW) {
+  const sequence = getEventWorkflowStepSequence(getActiveWorkflowType());
+  if (
+    Number.isInteger(state.eventWorkflowProcessStep)
+    && state.eventWorkflowProcessStep >= EVENT_WORKFLOW_STEPS.SHORTLIST
+    && state.eventWorkflowProcessStep <= EVENT_WORKFLOW_STEPS.REVIEW
+    && sequence.includes(state.eventWorkflowProcessStep)
+  ) {
     return state.eventWorkflowProcessStep;
   }
   state.eventWorkflowProcessStep = deriveEventWorkflowProcessStep();
@@ -2552,6 +2647,9 @@ try {
       eventsBookedLength: Array.isArray(state.eventsBooked) ? state.eventsBooked.length : 0,
       budgetTransactionsLength: Array.isArray(state.budgetTransactions) ? state.budgetTransactions.length : 0
     });
+    if (enforceRevelryLeaderboardLockState()) {
+      shouldPersistDetectedTimeZone = true;
+    }
     applyPinnedIdentity();
     if (shouldPersistDetectedTimeZone) persistState();
     return;
@@ -2735,6 +2833,9 @@ try {
   if (!state.pollBuilder.bookingConfirmation || typeof state.pollBuilder.bookingConfirmation !== "object") state.pollBuilder.bookingConfirmation = null;
   if (!Array.isArray(state.pollBuilder.scheduleEntries)) state.pollBuilder.scheduleEntries = [];
   normalizePromoteEventState();
+  if (enforceRevelryLeaderboardLockState()) {
+    shouldPersistDetectedTimeZone = true;
+  }
 
   try {
     const snapshotRaw = localStorage.getItem(getSidebarSnapshotKey(targetAccountId));
@@ -7495,6 +7596,7 @@ function reorderMainSetupCards() {
 
 
 function renderSetupStepStates() {
+  enforceRevelryLeaderboardLockState();
   reorderMainSetupCards();
   const singleStepMainView = true;
   const revelryReadOnlyCompletedSteps = isRevelryLabsReadOnlyMagicLink();
@@ -10264,6 +10366,7 @@ function getPollResponsesPageHtml(model, reminderUi = {}) {
 function renderPromoteEventStep() {
   const panel = document.getElementById("promoteEventPanel");
   if (!panel) return;
+  enforceRevelryLeaderboardLockState();
   normalizePromoteEventState();
   const promote = state.promoteEvent;
 
@@ -10296,6 +10399,7 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
+  const isRevelryLeaderboardLock = isRevelryLeaderboardLockEnabled();
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isMarchMadnessEvent = isRevelryLabsReadOnlyMagicLink() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
@@ -10580,7 +10684,7 @@ function renderPromoteEventStep() {
     .filter((index) => index >= 0);
   const promoteProgressBarHtml = getHorizontalProcessBarHtml(promoteProgressStages, activeIndex, {
     completedIndexes: promoteCompletedIndexes,
-    clickable: true
+    clickable: !isRevelryLeaderboardLock
   });
   const firstIncompleteIndex = processSteps.findIndex((item) => !doneFlags[item.key]);
   const isOutOfOrderActive = firstIncompleteIndex >= 0 && activeIndex > firstIncompleteIndex;
@@ -10852,11 +10956,14 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
       <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfCardMessage)}</div>
-      <div class="mt-4 flex flex-wrap items-center gap-2">
-        <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" style="background-color: #546373;" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
-        <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 ${isRevelryBracketsPromoteFlow ? "cursor-not-allowed opacity-60" : ""}" ${isRevelryBracketsPromoteFlow ? "disabled" : ""}>Open Slack</button>
-      </div>
-      ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
+      ${isRevelryBracketsPromoteFlow
+        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. No action is required right now.</div>`
+        : `<div class="mt-4 flex flex-wrap items-center gap-2">
+            <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+            <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+          </div>
+          ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}`
+      }
       ${isRevelryBracketsPromoteFlow ? "" : `
       <div class="mt-4 flex items-center justify-end gap-3">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -10967,6 +11074,11 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
   panel.querySelectorAll("#promoteProcessBar [data-process-index]").forEach((item) => {
     const stageIndex = Number(item.getAttribute("data-process-index"));
+    if (isRevelryLeaderboardLock) {
+      item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+      item.setAttribute("aria-disabled", "true");
+      return;
+    }
     const isFutureStep = Number.isFinite(stageIndex) && stageIndex > activeIndex;
     if (isFutureStep && !allowTestingStepNavigation) {
       item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
@@ -10990,6 +11102,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   const announcementSlackBtn = document.getElementById("promoteAnnouncementChannelSlack");
   if (announcementSlackBtn) {
     announcementSlackBtn.addEventListener("click", () => {
+      if (isRevelryLeaderboardLock) return;
       promoteUiState.announcementChannel = "slack";
       renderPromoteEventStep();
     });
@@ -10997,12 +11110,17 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   const announcementEmailBtn = document.getElementById("promoteAnnouncementChannelEmail");
   if (announcementEmailBtn) {
     announcementEmailBtn.addEventListener("click", () => {
+      if (isRevelryLeaderboardLock) return;
       promoteUiState.announcementChannel = "email";
       renderPromoteEventStep();
     });
   }
 
   panel.querySelectorAll("[data-promote-complete]").forEach((checkbox) => {
+    if (isRevelryLeaderboardLock) {
+      checkbox.disabled = true;
+      return;
+    }
     checkbox.addEventListener("change", () => {
       const stepKey = String(checkbox.getAttribute("data-promote-complete") || "");
       setStepDone(stepKey, Boolean(checkbox.checked));
@@ -11010,6 +11128,11 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   });
 
   panel.querySelectorAll("[data-promote-action]").forEach((button) => {
+    if (isRevelryLeaderboardLock) {
+      button.disabled = true;
+      button.classList.add("cursor-not-allowed", "opacity-60");
+      return;
+    }
     button.addEventListener("click", () => {
       const action = String(button.getAttribute("data-promote-action") || "");
       if (action === "copy-emails") {
