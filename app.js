@@ -4521,6 +4521,15 @@ function getFourMonthCategoryPills() {
   ];
 }
 
+function getLaunchEventLocationPillByMonth(monthName = "") {
+  const label = String(monthName || "").trim();
+  if (label === "March") return "Remote";
+  if (label === "April") return "Remote";
+  if (label === "May") return "Hybrid";
+  if (label === "June") return "In-person";
+  return "";
+}
+
 function getMagicLinkFourMonthOverride() {
   const parsedMagicLink = parseMagicLinkFromHostPath();
   if (!parsedMagicLink) return null;
@@ -4782,6 +4791,10 @@ function renderFourMonthProgram() {
     const cardId = `month-card-${index + 1}`;
     const isExpanded = isInitialRender ? index === highlightedIndex : expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
+    const locationPill = getLaunchEventLocationPillByMonth(monthName);
+    const locationPillHtml = locationPill
+      ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
+      : "";
     const isNextEvent = index === highlightedIndex;
     const _sectionLabels = ["YOUR FIRST EVENT", "UPCOMING", null, "LATER"];
     const _sectionLabel = _sectionLabels[index] || null;
@@ -4840,6 +4853,7 @@ function renderFourMonthProgram() {
                     <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                   </div>
                   <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+                  ${locationPillHtml}
                 </div>
                 <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
               </div>
@@ -4905,6 +4919,7 @@ function renderFourMonthProgram() {
                   <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
                 </div>
                 <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
+                ${locationPillHtml}
               </div>
               <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(event.title || "")}</p>
             </div>
