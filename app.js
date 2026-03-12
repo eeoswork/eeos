@@ -531,6 +531,10 @@ const MAGIC_LINK_HOST_DEFAULTS = {
     companyName: "Revelry Labs",
     adminName: "Jennifer Baldwin"
   },
+  "testing.eeos.work": {
+    companyName: "Revelry Labs (Testing)",
+    adminName: "Jennifer Baldwin"
+  },
   ...((APP_CONFIG.magicLinks && APP_CONFIG.magicLinks.hostDefaults) || {})
 };
 const MAGIC_LINK_SETUP_DEFAULTS = {
@@ -539,19 +543,49 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
     employeeCount: 39,
     perEmployee: 10,
     localCity: "New Orleans"
+  },
+  "testing.eeos.work/rlabs2026testa1b2c3d4": {
+    totalBudget: 390,
+    employeeCount: 39,
+    perEmployee: 10,
+    localCity: "New Orleans"
   }
 };
 const MAGIC_LINK_WORKFLOW_DEFAULTS = {
-  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+  "testing.eeos.work/rlabs2026testa1b2c3d4": EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE
 };
 const MAGIC_LINK_AUTH_DEFAULTS = {
   "revelrylabs.eeos.work/rlabs2026a1b2c3d4": {
     companyName: "Revelry Labs",
     email: "jennifer.baldwin@revelry.co"
+  },
+  "testing.eeos.work/rlabs2026testa1b2c3d4": {
+    companyName: "Revelry Labs (Testing)",
+    email: "jennifer.baldwin+testing@revelry.co"
   }
 };
 const MAGIC_LINK_PAGE_TITLES = {
-  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": "EEOS | Revelry Labs"
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4": "EEOS | Revelry Labs",
+  "testing.eeos.work/rlabs2026testa1b2c3d4": "EEOS | Revelry Labs (Testing)"
+};
+const TESTING_MAGIC_LINK_KEYS = new Set([
+  "testing.eeos.work/rlabs2026testa1b2c3d4"
+]);
+const TESTING_MAGIC_QUERY_PROFILES = {
+  "revelry-test": {
+    companyName: "Revelry Labs (Testing)",
+    adminName: "Jennifer Baldwin",
+    companyIdHint: "revelry-labs-testing",
+    setupDefaults: {
+      totalBudget: 390,
+      employeeCount: 39,
+      perEmployee: 10,
+      localCity: "New Orleans"
+    },
+    workflowDefault: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+    pageTitle: "EEOS | Revelry Labs (Testing)"
+  }
 };
 
 const SETUP_MENU_ITEM_TO_STEP = {
@@ -830,6 +864,13 @@ function clearAuthSession() {
   localStorage.removeItem(AUTH_COMPANY_ID_KEY);
 }
 
+async function resetTestingWorkspace() {
+  return apiRequest("/testing/reset-workspace", {
+    method: "POST",
+    body: {}
+  });
+}
+
 function hasNonEmptyValue(value) {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
@@ -1063,11 +1104,158 @@ function getMagicLinkAuthDefaultsForCurrentPath() {
 function applyMagicLinkPageTitleFromCurrentPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) {
-    document.title = "EEOS";
+    const params = new URLSearchParams(window.location.search || "");
+    const profileKey = String(params.get("magicProfile") || "").trim().toLowerCase();
+    const profile = TESTING_MAGIC_QUERY_PROFILES[profileKey] || null;
+    document.title = profile?.pageTitle || "EEOS";
     return;
   }
   const key = `${parsed.host}/${parsed.tokenId}`;
   document.title = MAGIC_LINK_PAGE_TITLES[key] || "EEOS";
+}
+
+function getTestingMagicQueryProfile() {
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    const profileKey = String(params.get("magicProfile") || "").trim().toLowerCase();
+    if (!profileKey) return null;
+    const profile = TESTING_MAGIC_QUERY_PROFILES[profileKey] || null;
+    if (!profile) return null;
+    return { profileKey, profile };
+  } catch (_error) {
+    return null;
+  }
+}
+
+function getActiveTestingMagicContext() {
+  const queryProfile = getTestingMagicQueryProfile();
+  if (queryProfile) {
+    return {
+      mode: "query-profile",
+      profileKey: queryProfile.profileKey,
+      profile: queryProfile.profile,
+      companyIdHint: String(queryProfile.profile?.companyIdHint || "").trim()
+    };
+  }
+
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return null;
+  const key = `${parsed.host}/${parsed.tokenId}`;
+  if (!TESTING_MAGIC_LINK_KEYS.has(key)) return null;
+
+  return {
+    mode: "magic-link",
+    profileKey: "",
+    profile: null,
+    companyIdHint: "revelry-labs-testing"
+  };
+}
+
+function clearTestingLocalState(context = null) {
+  const resolvedContext = context || getActiveTestingMagicContext();
+  const profileCompanyIdHint = String(resolvedContext?.companyIdHint || "").trim();
+  const accountIdsToClear = ["anon"];
+  if (profileCompanyIdHint) accountIdsToClear.push(profileCompanyIdHint);
+
+  accountIdsToClear.forEach((accountId) => {
+    localStorage.removeItem(getStorageKey(accountId));
+    localStorage.removeItem(getSidebarSnapshotKey(accountId));
+    localStorage.removeItem(getGlobalToAccountMigrationKey(accountId));
+  });
+
+  const parsed = parseMagicLinkFromHostPath();
+  if (parsed?.host && parsed?.tokenId) {
+    const stageKey = getMagicLinkAuthStageKey(parsed);
+    if (stageKey) localStorage.removeItem(stageKey);
+  }
+
+  if (profileCompanyIdHint && String(getAuthCompanyId() || "").trim() === profileCompanyIdHint) {
+    clearAuthSession();
+  }
+}
+
+async function resetTestingWorkspaceFromUi() {
+  const context = getActiveTestingMagicContext();
+  if (!context) return;
+
+  const confirmed = window.confirm("Reset testing workspace data and reload? This will not affect production Revelry data.");
+  if (!confirmed) return;
+
+  let backendResetAttempted = false;
+  let backendResetSucceeded = false;
+  const authToken = getAuthToken();
+  const authCompanyId = String(getAuthCompanyId() || "").trim();
+  const contextCompanyId = String(context.companyIdHint || "").trim();
+  const shouldAttemptBackendReset = Boolean(authToken) && Boolean(contextCompanyId) && authCompanyId === contextCompanyId;
+
+  if (shouldAttemptBackendReset) {
+    backendResetAttempted = true;
+    try {
+      await resetTestingWorkspace();
+      backendResetSucceeded = true;
+    } catch (error) {
+      console.warn("Testing backend reset failed", error?.message || error);
+    }
+  }
+
+  clearTestingLocalState(context);
+
+  if (backendResetAttempted && !backendResetSucceeded) {
+    window.alert("Local testing data was reset. Backend testing reset did not complete (you can run npm run cf:d1:reset:revelry-test). Reloading now.");
+  }
+
+  window.location.reload();
+}
+
+function applyTestingMagicProfileFromQuery() {
+  const resolved = getTestingMagicQueryProfile();
+  if (!resolved) return;
+
+  const { profile } = resolved;
+  state.landingIdentityMode = "magic";
+  if (!String(state.companyName || "").trim()) state.companyName = String(profile.companyName || "").trim();
+  if (!String(state.adminName || "").trim()) state.adminName = String(profile.adminName || "").trim();
+
+  const defaults = profile.setupDefaults && typeof profile.setupDefaults === "object"
+    ? profile.setupDefaults
+    : null;
+  if (defaults) {
+    const currentEmployeeCount = Number(state?.landingDraft?.employeeCount || 0);
+    const currentPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
+    const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
+
+    if (!currentEmployeeCount) {
+      state.landingDraft.employeeCount = Number(defaults.employeeCount || 0);
+      state.programSettings.employeeCount = state.landingDraft.employeeCount;
+    }
+    if (!currentPerEmployee) {
+      state.landingDraft.perEmployee = Number(defaults.perEmployee || 0);
+      state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee;
+    }
+    if (!currentLocalCity) {
+      state.landingDraft.localCity = String(defaults.localCity || "").trim();
+    }
+  }
+
+  if (profile.workflowDefault) {
+    normalizeEventLaunchContext();
+    const hasExplicitLaunchContext = String(state.eventLaunchContext?.templateId || "").trim().length > 0;
+    const preLaunchPhase = Number(state.currentSetupStep || 1) <= EVENT_WORKFLOW_STEPS.SHORTLIST;
+    if (!hasExplicitLaunchContext || preLaunchPhase) {
+      state.eventLaunchContext.workflowType = profile.workflowDefault;
+    }
+  }
+}
+
+function applyTestingResetFromQueryBeforeLoad() {
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    const shouldReset = String(params.get("resetTestingData") || "").trim() === "1";
+    if (!shouldReset) return;
+    clearTestingLocalState();
+  } catch (error) {
+    console.warn("Failed to apply testing reset from query", error);
+  }
 }
 
 async function applyLandingIdentityFromMagicLinkHostPath() {
@@ -2365,6 +2553,7 @@ adminValue.textContent = admin;
 function renderAppIdentityView() {
 const companyInputWrap = $("appCompanyInputWrap");
 const companyDisplayRow = $("appCompanyDisplayRow");
+const testingResetBtn = $("appTestingReset");
 const adminInputWrap = $("appAdminInputWrap");
 const companyLabel = $("appCompanyLabel");
 const adminLabel = $("appAdminLabel");
@@ -2393,6 +2582,11 @@ adminDisplay.style.display = shouldShowStatic ? "block" : "none";
 
 companyDisplay.textContent = company;
 adminDisplay.textContent = admin;
+
+if (testingResetBtn) {
+  const testingContext = getActiveTestingMagicContext();
+  testingResetBtn.style.display = (shouldShowStatic && testingContext) ? "inline-flex" : "none";
+}
 }
 
 
@@ -4238,10 +4432,19 @@ function applyMagicLinkFourMonthOverride(program) {
 }
 
 function getSidebarWorkflowEventName() {
+  const normalizeWorkflowEventName = (value) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return "";
+    if (isRevelryLabsReadOnlyMagicLink() && trimmed === "March Madness Brackets Challenge") {
+      return "March Madness Bracket Challenge";
+    }
+    return trimmed;
+  };
+
   // Only show after the event has been launched (step 7 completed)
   if (!state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.SHORTLIST)) return "";
   if (String(state.eventLaunchContext?.title || "").trim()) {
-    return String(state.eventLaunchContext.title || "").trim();
+    return normalizeWorkflowEventName(state.eventLaunchContext.title || "");
   }
   if (!state.fourMonthProgram || !Array.isArray(state.fourMonthProgram.events)) return "";
   const events = state.fourMonthProgram.events;
@@ -4252,13 +4455,13 @@ function getSidebarWorkflowEventName() {
   if (event.isConfettiMonth) {
     const selectedIds = Array.isArray(state.pollBuilder?.selectedEventIds) ? state.pollBuilder.selectedEventIds : [];
     const overrides = state.pollBuilder?.eventLabelOverrides || {};
-    if (selectedIds.length === 1 && overrides[selectedIds[0]]) return overrides[selectedIds[0]];
+    if (selectedIds.length === 1 && overrides[selectedIds[0]]) return normalizeWorkflowEventName(overrides[selectedIds[0]]);
     const booking = state.pollBuilder?.bookingConfirmation;
-    if (booking?.eventName) return booking.eventName;
+    if (booking?.eventName) return normalizeWorkflowEventName(booking.eventName);
     const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     return monthNames[(new Date().getMonth() + monthIndex) % 12] + " Event";
   }
-  return event.title || "";
+  return normalizeWorkflowEventName(event.title || "");
 }
 
 function getFourMonthShortlistState() {
@@ -7049,6 +7252,18 @@ if (btnMagicLink) {
   btnMagicLink.addEventListener("click", sendMagicLink);
 }
 
+const appTestingReset = $("appTestingReset");
+if (appTestingReset) {
+  appTestingReset.addEventListener("click", async () => {
+    appTestingReset.disabled = true;
+    try {
+      await resetTestingWorkspaceFromUi();
+    } finally {
+      appTestingReset.disabled = false;
+    }
+  });
+}
+
 
 
 
@@ -7274,6 +7489,7 @@ if (window.electronAPI?.onCreateTabFromPopup) {
 
 async function bootstrap() {
   state.sidebarSetupExpanded = false;
+  applyTestingResetFromQueryBeforeLoad();
   applyMagicLinkPageTitleFromCurrentPath();
   bindSidebarSetupEditPrefs();
   bindMainSetupEditPrefs();
@@ -7284,6 +7500,7 @@ async function bootstrap() {
   applyPinnedIdentity();
   await applyLandingIdentityFromMagicLinkHostPath();
   applyLandingIdentityFromQuery();
+  applyTestingMagicProfileFromQuery();
   applyPinnedIdentity();
   logIdentityDebug("bootstrap:afterIdentityHydration");
   renderLandingIdentityView();

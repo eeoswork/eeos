@@ -91,7 +91,10 @@
           </div>
           <div id="appCompanyDisplayRow" class="hidden items-center justify-between">
             <div id="appCompanyDisplay" class="text-slate-900" style="font-size: 24px; font-weight: 600; line-height: 1;"></div>
-            <button id="appIdentityEdit" type="button" onclick="editAppIdentity()" class="text-xs text-slate-600 hover:text-slate-900">Edit</button>
+            <div class="flex items-center gap-2">
+              <button id="appTestingReset" type="button" class="hidden rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100">Reset Test Data</button>
+              <button id="appIdentityEdit" type="button" onclick="editAppIdentity()" class="text-xs text-slate-600 hover:text-slate-900">Edit</button>
+            </div>
           </div>
         </div>
         <div>

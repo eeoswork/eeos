@@ -5,6 +5,10 @@ window.__EEOS_CONFIG__ = {
       "revelrylabs.eeos.work": {
         companyName: "Revelry Labs",
         adminName: "Jennifer Baldwin"
+      },
+      "testing.eeos.work": {
+        companyName: "Revelry Labs (Testing)",
+        adminName: "Jennifer Baldwin"
       }
     }
   },

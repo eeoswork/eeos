@@ -1,7 +1,10 @@
 const DEFAULT_POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api";
 const SESSION_TTL_DAYS = 30;
 const APP_ORIGIN_BASE = "https://eeoswork.github.io/eeos";
-const MAGIC_LINK_HOST = "revelrylabs.eeos.work";
+const MAGIC_LINK_HOSTS = new Set([
+  "revelrylabs.eeos.work",
+  "testing.eeos.work"
+]);
 
 function shouldProxyAsStaticAsset(pathname) {
   const path = String(pathname || "");
@@ -662,13 +665,39 @@ async function handleRecommendationsGenerate(request, env) {
   });
 }
 
+async function handleTestingResetWorkspace(request, env) {
+  const session = await getSessionFromRequest(request, env);
+  if (!session) {
+    return errorResponse("UNAUTHORIZED", "Authentication required.", 401);
+  }
+
+  const testingCompanyId = "revelry-labs-testing";
+  if (String(session.company_id || "").trim() !== testingCompanyId) {
+    return errorResponse("FORBIDDEN_COMPANY", "Testing reset is only allowed for the testing workspace.", 403);
+  }
+
+  const timestamp = nowIso();
+  await env.DB.prepare(
+    "UPDATE accounts SET state_blob = ?1, state_version = COALESCE(state_version, 0) + 1, updated_at = ?2 WHERE company_id = ?3"
+  ).bind(
+    toJsonString({ companyName: "Revelry Labs (Testing)", adminName: "" }, {}),
+    timestamp,
+    testingCompanyId
+  ).run();
+
+  await env.DB.prepare("DELETE FROM events_recommended WHERE company_id = ?1").bind(testingCompanyId).run();
+  await env.DB.prepare("DELETE FROM sessions WHERE company_id = ?1").bind(testingCompanyId).run();
+
+  return jsonResponse({ companyId: testingCompanyId, reset: true, resetAt: timestamp });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const host = String(url.hostname || "").toLowerCase();
 
     if (!url.pathname.startsWith("/api")) {
-      if (host === MAGIC_LINK_HOST) {
+      if (MAGIC_LINK_HOSTS.has(host)) {
         return withCors(await serveMagicLinkHostRequest(request), request, env);
       }
       return fetch(request);
@@ -692,6 +721,7 @@ export default {
       if (method === "POST" && path === "/magic-links/resolve") return withCors(await handleMagicLinkResolve(request, env), request, env);
       if (method === "POST" && path === "/onboarding/migrate-draft") return withCors(await handleOnboardingMigrateDraft(request, env), request, env);
       if (method === "POST" && path === "/recommendations/generate") return withCors(await handleRecommendationsGenerate(request, env), request, env);
+      if (method === "POST" && path === "/testing/reset-workspace") return withCors(await handleTestingResetWorkspace(request, env), request, env);
 
       const pathAndQuery = `${path}${url.search || ""}`;
       return withCors(await proxyToPollApi(request, env, pathAndQuery), request, env);

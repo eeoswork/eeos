@@ -116,7 +116,8 @@ After deploy, Wrangler outputs a workers.dev URL.
 1. In Cloudflare dashboard: `Workers & Pages` -> your worker -> `Settings` -> `Triggers`.
 2. Add route: `eeos.work/api/*`.
 3. Add route: `revelrylabs.eeos.work/api/*`.
-4. Save triggers.
+4. Optional testing route: `testing.eeos.work/api/*`.
+5. Save triggers.
 
 These routes send API traffic to your worker on both hosts.
 
@@ -130,12 +131,19 @@ These routes send API traffic to your worker on both hosts.
    - Proxy status: `Proxied` (orange cloud ON)
 3. Save.
 
+Optional testing DNS record:
+- Type: `CNAME`
+- Name: `testing`
+- Target: `eeos.work`
+- Proxy status: `Proxied`
+
 ## 12. Confirm app config
 
 Open `config.js` and ensure:
 
 - `apiBaseUrl` points to your API root (recommended: `https://eeos.work/api` in production).
 - `magicLinks.hostDefaults` contains `revelrylabs.eeos.work` with company defaults.
+- Optional: include `testing.eeos.work` defaults for isolated test identity.
 
 ## 13. Test full flow
 
@@ -156,3 +164,4 @@ Open `config.js` and ensure:
 - Rotate/disable old magic links by updating `magic_links.active` or `expires_at`.
 - Monitor worker logs in Cloudflare dashboard for API errors.
 - Back up D1 periodically.
+- Reset only testing workspace data when needed: `npm run cf:d1:reset:revelry-test`.

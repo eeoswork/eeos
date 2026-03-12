@@ -56,6 +56,9 @@ https://revelrylabs.eeos.work/abc123xyz
 Launch seed link (current seed.sql)
 https://revelrylabs.eeos.work/rlabs2026a1b2c3d4
 
+Testing clone link (isolated workspace)
+https://testing.eeos.work/rlabs2026testa1b2c3d4
+
 Use your local host and port, then append query params.
 
 Example 1
@@ -63,6 +66,33 @@ http://localhost:5173/index.html?company=Acme%20Corp&admin=Sarah%20Chen&token=ab
 
 Example 2
 http://localhost:5173/index.html?company=Northwind&admin=Alex%20Lopez
+
+Local production-like testing profile (same current Revelry stage defaults)
+http://localhost:5173/index.html?magicProfile=revelry-test
+
+Local testing profile + clear local testing state before load
+http://localhost:5173/index.html?magicProfile=revelry-test&resetTestingData=1
+
+## Testing Workspace Reset
+
+In-app option:
+- In the test profile context, use the `Reset Test Data` button in the left sidebar (next to `Edit`).
+- This always clears local testing data.
+- If you are signed in to the testing workspace account, it also resets backend testing state.
+
+Reset only the isolated Revelry testing workspace data in D1:
+
+```bash
+npm run cf:d1:reset:revelry-test
+```
+
+Local D1 equivalent:
+
+```bash
+npm run cf:d1:reset:revelry-test:local
+```
+
+This reset does not touch production Revelry data.
 
 ## What to verify
 

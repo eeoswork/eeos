@@ -44,6 +44,50 @@ INSERT OR IGNORE INTO magic_links (
   CURRENT_TIMESTAMP
 );
 
+INSERT OR IGNORE INTO accounts (
+  company_id,
+  email,
+  password_hash,
+  company_name,
+  admin_name,
+  state_blob,
+  state_version,
+  created_at,
+  updated_at
+) VALUES (
+  'revelry-labs-testing',
+  'admin+testing@revelrylabs.example',
+  'seed:replace-this-after-real-signup',
+  'Revelry Labs (Testing)',
+  '',
+  '{"companyName":"Revelry Labs (Testing)","adminName":""}',
+  1,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
+INSERT OR IGNORE INTO magic_links (
+  id,
+  host,
+  token_id,
+  company_id,
+  company_name_default,
+  admin_name_default,
+  active,
+  expires_at,
+  created_at
+) VALUES (
+  'magic-revelry-test-1',
+  'testing.eeos.work',
+  'rlabs2026testa1b2c3d4',
+  'revelry-labs-testing',
+  'Revelry Labs (Testing)',
+  'Jennifer Baldwin',
+  1,
+  NULL,
+  CURRENT_TIMESTAMP
+);
+
 INSERT OR IGNORE INTO events_master (event_id, name, description, url, cost_per_person, goals_json, schedules_json, type, active, created_at, updated_at) VALUES
 ('evt-1','Team Trivia Live','Live-hosted team trivia with custom company rounds.','https://www.withconfetti.com/',35,'["Retention & Engagement","Employer Brand & Recruiting"]','["After 5p","Lunch"]','paid',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
 ('evt-2','Virtual Escape Room','Collaborative puzzle challenge for remote teams.','https://www.theescapegame.com/remote-adventures/',42,'["Retention & Engagement","Performance & Productivity"]','["After 5p","Weekday mornings"]','paid',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),

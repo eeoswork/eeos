@@ -10,8 +10,10 @@
  "cf:deploy": "wrangler deploy",
 	"cf:d1:apply": "wrangler d1 execute eeos --remote --file cloudflare/schema.sql",
 	"cf:d1:seed": "wrangler d1 execute eeos --remote --file cloudflare/seed.sql",
+	"cf:d1:reset:revelry-test": "wrangler d1 execute eeos --remote --file cloudflare/reset_revelry_testing.sql",
 	"cf:d1:apply:local": "wrangler d1 execute eeos --file cloudflare/schema.sql",
-	"cf:d1:seed:local": "wrangler d1 execute eeos --file cloudflare/seed.sql"
+	"cf:d1:seed:local": "wrangler d1 execute eeos --file cloudflare/seed.sql",
+	"cf:d1:reset:revelry-test:local": "wrangler d1 execute eeos --file cloudflare/reset_revelry_testing.sql"
 },
 "devDependencies": {
  "electron": "^26.2.0",
