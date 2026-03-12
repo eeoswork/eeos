@@ -1,6 +1,9 @@
 const DEFAULT_POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api";
 const SESSION_TTL_DAYS = 30;
 const APP_ORIGIN_BASE = "https://eeoswork.github.io/eeos";
+const HOME_PAGE_HOSTS = new Set([
+  "eeos.work"
+]);
 const MAGIC_LINK_HOSTS = new Set([
   "revelrylabs.eeos.work",
   "testing.eeos.work"
@@ -11,13 +14,13 @@ function shouldProxyAsStaticAsset(pathname) {
   if (!path || path === "/") return false;
   if (path.startsWith("/api/")) return false;
   if (path.startsWith("/assets/")) return true;
-  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/poll.html" || path === "/rsvp.html") {
+  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/landing.html" || path === "/poll.html" || path === "/rsvp.html") {
     return true;
   }
   return /\.[a-zA-Z0-9]+$/.test(path);
 }
 
-async function serveMagicLinkHostRequest(request) {
+async function serveStaticHostRequest(request, fallbackPath) {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   if (method !== "GET" && method !== "HEAD") {
@@ -26,13 +29,20 @@ async function serveMagicLinkHostRequest(request) {
 
   const targetPath = shouldProxyAsStaticAsset(url.pathname)
     ? `${url.pathname}${url.search || ""}`
-    : "/index.html";
+    : fallbackPath;
   const upstreamUrl = `${APP_ORIGIN_BASE}${targetPath}`;
-  const upstreamResponse = await fetch(upstreamUrl, {
+  return fetch(upstreamUrl, {
     method,
     headers: request.headers
   });
-  return upstreamResponse;
+}
+
+async function serveMagicLinkHostRequest(request) {
+  return serveStaticHostRequest(request, "/index.html");
+}
+
+async function serveHomePageHostRequest(request) {
+  return serveStaticHostRequest(request, "/landing.html");
 }
 
 function resolveCorsOrigin(request, env) {
@@ -697,6 +707,9 @@ export default {
     const host = String(url.hostname || "").toLowerCase();
 
     if (!url.pathname.startsWith("/api")) {
+      if (HOME_PAGE_HOSTS.has(host)) {
+        return withCors(await serveHomePageHostRequest(request), request, env);
+      }
       if (MAGIC_LINK_HOSTS.has(host)) {
         return withCors(await serveMagicLinkHostRequest(request), request, env);
       }
