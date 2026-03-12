@@ -7362,7 +7362,7 @@ function updateSetupStepButtonStates() {
     if (step <= 6 && isCompleted) {
       btn.textContent = "Save";
     } else if (step === 6) {
-      btn.textContent = "See your employee experience program →";
+      btn.textContent = "Get your program →";
     } else if (step === 7) {
       btn.textContent = state.setupShortlistMode === "book"
         ? "Book this event ↗"
