@@ -4530,6 +4530,15 @@ function getLaunchEventLocationPillByMonth(monthName = "") {
   return "";
 }
 
+function getRevelryMonthFooterText(monthName = "") {
+  if (!isRevelryBracketsMagicContext()) return "";
+  const label = String(monthName || "").trim();
+  if (label === "April") return "Event duration: 60 minutes.  Your admin time for the month: less than 60 minutes.";
+  if (label === "May") return "Event duration: 15-45 minutes.  Your admin time for the month: less than 30 minutes.";
+  if (label === "June") return "Event duration: 9a - 2p.  Your admin time for the month: less than 30 minutes.";
+  return "";
+}
+
 function getMagicLinkFourMonthOverride() {
   const parsedMagicLink = parseMagicLinkFromHostPath();
   if (!parsedMagicLink) return null;
@@ -4777,11 +4786,21 @@ function renderFourMonthProgram() {
   const nextEventIndex = (program.events || []).findIndex((eventItem) => !eventItem?.completed && !eventItem?.created);
   const highlightedIndex = nextEventIndex >= 0 ? nextEventIndex : 0;
 
-  // Update budget summary
+  // Update budget summary using the same source as the fixed sidebar card
   if (budgetSummary) {
-    $("progBudgetTotal").textContent = fmtMoney(program.totalBudget || 0);
-    $("progBudgetEstimated").textContent = fmtMoney(program.totalEstimatedCost || 0);
-    $("progBudgetRemaining").textContent = fmtMoney(program.remainingBudget || 0);
+    const landingView = $("landingView");
+    const isLandingActive = landingView && !landingView.classList.contains("hidden");
+    const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
+    const setupTotal = Number(state.landingDraft?.totalBudget || 0);
+    const liveTotal = budgetEnabled
+      ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
+      : 0;
+    const liveSpent = budgetEnabled ? getTotalSpent() : 0;
+    const liveRemaining = liveTotal - liveSpent;
+
+    $("progBudgetTotal").textContent = fmtMoney(liveTotal);
+    $("progBudgetEstimated").textContent = fmtMoney(liveSpent);
+    $("progBudgetRemaining").textContent = fmtMoney(liveRemaining);
   }
 
   // Render 4 months (stacked vertically, collapsed by default)
@@ -4790,6 +4809,7 @@ function renderFourMonthProgram() {
     const monthName = monthNames[monthIndex];
     const isRevelryLockedFollowOnMonth = isRevelryBracketsMagicContext()
       && (monthName === "April" || monthName === "May" || monthName === "June");
+    const revelryMonthFooterText = getRevelryMonthFooterText(monthName);
     const cardId = `month-card-${index + 1}`;
     const isExpanded = isInitialRender ? index === highlightedIndex : expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
@@ -4902,6 +4922,7 @@ function renderFourMonthProgram() {
               `;
               }).join("")}
             </div>
+            ${revelryMonthFooterText ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">${escapeHtml(revelryMonthFooterText)}</div>` : ""}
             ${isRevelryLockedFollowOnMonth ? "" : `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
               <span class="text-xs text-slate-500">Selected: <strong>${selectedIds.length}</strong> ${isBookMode ? "(choose exactly 1)" : "(choose 2-3)"}</span>
               <button class="rounded-lg px-4 py-2 text-xs font-medium ${canContinue ? "bg-slate-800 text-white hover:bg-slate-700" : "bg-slate-300 text-slate-600 cursor-not-allowed"}" ${canContinue ? "" : "disabled"} data-action="four-month-shortlist-primary" data-month="${index + 1}">${escapeHtml(primaryLabel)}</button>
@@ -4917,6 +4938,7 @@ function renderFourMonthProgram() {
       ? "How it Works"
       : String(event.title || "");
     const typeLabel = getWorkflowTypeLabel(event);
+    const cardFooterText = revelryMonthFooterText || typeLabel;
     const launchButtonHtml = isRevelryLockedFollowOnMonth
       ? ""
       : `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Launch ${escapeHtml(monthName)} Event →</button>`;
@@ -4949,7 +4971,7 @@ function renderFourMonthProgram() {
           <p class="text-sm text-slate-600 mt-2">${escapeHtml(event.description || "")}</p>
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
             <div style="font-size: 12px; color: #64748b;">
-              <div>${typeLabel}</div>
+              <div>${escapeHtml(cardFooterText)}</div>
               <div style="margin-top: 4px; font-weight: 600; color: #0f172a;">Est. cost: ${fmtMoney(event.estimatedCost || 0)}</div>
             </div>
             ${launchButtonHtml}
