@@ -4788,6 +4788,8 @@ function renderFourMonthProgram() {
   container.innerHTML = (program.events || []).map((monthEvent, index) => {
     const monthIndex = (currentMonth + index) % 12;
     const monthName = monthNames[monthIndex];
+    const isRevelryLockedFollowOnMonth = isRevelryBracketsMagicContext()
+      && (monthName === "April" || monthName === "May" || monthName === "June");
     const cardId = `month-card-${index + 1}`;
     const isExpanded = isInitialRender ? index === highlightedIndex : expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
@@ -4829,12 +4831,16 @@ function renderFourMonthProgram() {
       const canContinue = isBookMode
         ? selectedIds.length === 1
         : selectedIds.length >= 2 && selectedIds.length <= 3;
-      const helperPrimaryText = isBookMode
+      const helperPrimaryText = isRevelryLockedFollowOnMonth
+        ? "These event options were chosen from your Setup inputs. We'll create a quick poll that you'll share with your team. We'll manage votes, RSVPs, and setup for the winning event."
+        : (isBookMode
         ? "Choose an event to book."
-        : "Teams that vote on events usually see higher attendance and engagement.";
-      const helperSecondaryText = isBookMode
+        : "Teams that vote on events usually see higher attendance and engagement.");
+      const helperSecondaryText = isRevelryLockedFollowOnMonth
         ? ""
-        : "Choose up to 3 events for your team to vote on.";
+        : (isBookMode
+        ? ""
+        : "Choose up to 3 events for your team to vote on.");
       const modePromptText = isBookMode
         ? "Prefer a team vote?"
         : "Prefer to choose the event yourself?";
@@ -4870,16 +4876,16 @@ function renderFourMonthProgram() {
                 <div style="font-weight: ${isBookMode ? "700" : "400"}; color: #1e293b;">${escapeHtml(helperPrimaryText)}</div>
                 ${helperSecondaryText ? `<div>${escapeHtml(helperSecondaryText)}</div>` : ""}
               </div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+              ${isRevelryLockedFollowOnMonth ? "" : `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
                 <span style="font-size: 12px; color: #64748b;">${escapeHtml(modePromptText)}</span>
                 <button class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-action="four-month-shortlist-toggle-mode">${escapeHtml(modeToggleLabel)}</button>
-              </div>
+              </div>`}
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
               ${candidates.map((candidate) => {
                 const isSelected = selectedSet.has(candidate.templateId);
                 return `
-                <article class="event-card ${isSelected ? "selected" : ""}" data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}" style="cursor: pointer;">
+                <article class="event-card ${isSelected ? "selected" : ""}" ${isRevelryLockedFollowOnMonth ? "" : `data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}"`} style="cursor: ${isRevelryLockedFollowOnMonth ? "default" : "pointer"};">
                   <span class="event-circle ${isSelected ? "selected" : "empty"}">${isSelected ? "" : "○"}</span>
                   <div class="event-preview">
                     <h4 class="event-title">${escapeHtml(candidate.title || "")}</h4>
@@ -4887,17 +4893,19 @@ function renderFourMonthProgram() {
                     <p class="event-description">${escapeHtml(candidate.description || "")}</p>
                     <div class="event-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto;">
                       <span>Est. cost: <strong>${fmtMoney(candidate.estimatedCost || 0)}</strong></span>
-                      <a href="${escapeHtml(candidate.url || "#")}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #334155;">View Event</a>
+                      ${isRevelryLockedFollowOnMonth
+                        ? '<span style="color: #334155;">View Event</span>'
+                        : `<a href="${escapeHtml(candidate.url || "#")}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #334155;">View Event</a>`}
                     </div>
                   </div>
                 </article>
               `;
               }).join("")}
             </div>
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            ${isRevelryLockedFollowOnMonth ? "" : `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
               <span class="text-xs text-slate-500">Selected: <strong>${selectedIds.length}</strong> ${isBookMode ? "(choose exactly 1)" : "(choose 2-3)"}</span>
               <button class="rounded-lg px-4 py-2 text-xs font-medium ${canContinue ? "bg-slate-800 text-white hover:bg-slate-700" : "bg-slate-300 text-slate-600 cursor-not-allowed"}" ${canContinue ? "" : "disabled"} data-action="four-month-shortlist-primary" data-month="${index + 1}">${escapeHtml(primaryLabel)}</button>
-            </div>
+            </div>`}
           </div>
         </div>
       `;
@@ -4909,6 +4917,9 @@ function renderFourMonthProgram() {
       ? "How it Works"
       : String(event.title || "");
     const typeLabel = getWorkflowTypeLabel(event);
+    const launchButtonHtml = isRevelryLockedFollowOnMonth
+      ? ""
+      : `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Launch ${escapeHtml(monthName)} Event →</button>`;
     return sectionHeaderHtml + `
       <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
         <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
@@ -4941,7 +4952,7 @@ function renderFourMonthProgram() {
               <div>${typeLabel}</div>
               <div style="margin-top: 4px; font-weight: 600; color: #0f172a;">Est. cost: ${fmtMoney(event.estimatedCost || 0)}</div>
             </div>
-            <button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Launch ${escapeHtml(monthName)} Event →</button>
+            ${launchButtonHtml}
           </div>
         </div>
       </div>
