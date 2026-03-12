@@ -1987,11 +1987,35 @@ return getBudgetTotal() - getTotalSpent();
 function getLiveBudgetSnapshot() {
 const landingView = $("landingView");
 const isLandingActive = landingView && !landingView.classList.contains("hidden");
-const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
-const setupTotal = Number(state.landingDraft?.totalBudget || 0);
-const total = budgetEnabled
-  ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
-  : 0;
+const draftMode = String(state.landingDraft?.budgetMode || "").trim();
+const draftTotal = Number(state.landingDraft?.totalBudget || 0);
+const draftEmployees = Number(state.landingDraft?.employeeCount || 0);
+const draftPerEmployee = Number(state.landingDraft?.perEmployee || 0);
+const draftComputedTotal = draftMode === "perEmployee"
+  ? Math.round(draftEmployees * draftPerEmployee)
+  : draftTotal;
+const liveDraftTotal = draftComputedTotal > 0 ? draftComputedTotal : draftTotal;
+
+const programMode = String(state.programSettings?.budgetMode || "").trim();
+const programEmployees = Number(state.programSettings?.employeeCount || 0);
+const programPerEmployee = Number(state.programSettings?.perEmployeeBudget || 0);
+const programComputedTotal = programMode === "perEmployee"
+  ? Math.round(programEmployees * programPerEmployee)
+  : getBudgetTotal();
+const liveProgramTotal = programComputedTotal > 0 ? programComputedTotal : getBudgetTotal();
+
+const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured)
+  || liveDraftTotal > 0
+  || draftEmployees > 0
+  || draftPerEmployee > 0
+  || liveProgramTotal > 0
+  || programEmployees > 0
+  || programPerEmployee > 0;
+const total = !budgetEnabled
+  ? 0
+  : (isLandingActive
+      ? (liveDraftTotal > 0 ? liveDraftTotal : liveProgramTotal)
+      : (liveProgramTotal > 0 ? liveProgramTotal : liveDraftTotal));
 const spent = budgetEnabled ? getTotalSpent() : 0;
 const remaining = total - spent;
 return { total, spent, remaining };
