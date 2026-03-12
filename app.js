@@ -552,13 +552,13 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
   "revelrylabs.eeos.work/rlabs2026a1b2c3d4": {
     totalBudget: 390,
     employeeCount: 39,
-    perEmployee: 10,
+    perEmployee: 15,
     localCity: "New Orleans"
   },
   "testing.eeos.work/rlabs2026testa1b2c3d4": {
     totalBudget: 390,
     employeeCount: 39,
-    perEmployee: 10,
+    perEmployee: 15,
     localCity: "New Orleans"
   }
 };
@@ -744,7 +744,7 @@ const TESTING_MAGIC_QUERY_PROFILES = {
     setupDefaults: {
       totalBudget: 390,
       employeeCount: 39,
-      perEmployee: 10,
+      perEmployee: 15,
       localCity: "New Orleans"
     },
     workflowDefault: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
@@ -10337,7 +10337,7 @@ function renderPromoteEventStep() {
         const useEmail = promoteUiState.announcementChannel === "email";
         const isAnnouncementReadOnly = isRevelryBracketsPromoteFlow && Boolean(promote.announcementLockedAfterContinue);
         return `
-          <div class="mt-3 text-sm text-slate-600">Send this message to your team via Slack or email to invite everyone to join the bracket challenge.</div>
+          <div class="mt-3 text-sm text-slate-600">We have already created the Revelry group for you at ESPN. Send this message to your team via Slack or email to invite everyone to join the bracket challenge.</div>
           <div class="mt-3 rounded-lg border border-slate-200 text-sm text-slate-700 ${isAnnouncementReadOnly ? "bg-slate-100" : "bg-slate-50"}" style="min-height: 80px;">
             <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
               <button type="button" id="promoteAnnouncementChannelSlack" class="rounded-full px-3 py-1.5 text-sm font-medium ${useEmail ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50" : "bg-slate-900 text-white"} ${isAnnouncementReadOnly ? "cursor-not-allowed opacity-60" : ""}" ${isAnnouncementReadOnly ? "disabled" : ""}>Slack</button>
