@@ -206,7 +206,7 @@ function getWorkflowTypeLabel(eventLike = {}) {
       || title === "march madness brackets challenge"
       || title === "company-wide march madness challenge";
     if (isRevelryBracketsMagicContext() && isMarchMadness) {
-      return "Runs from March 19 to April 6 - Your admin time: 30 minutes";
+      return "Runs from March 19 to April 6.  Your total admin time during this period: 30 minutes.";
     }
     return "Promote";
   }
