@@ -276,6 +276,26 @@ color: #64748b;
 margin: 0;
 }
 
+.event-gray-pills {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+margin-top: 4px;
+}
+
+.event-gray-pill {
+display: inline-flex;
+align-items: center;
+background: #e5e7eb;
+color: #475569;
+border: none;
+border-radius: 999px;
+padding: 4px 8px;
+font-size: 11px;
+font-weight: 500;
+line-height: 1;
+}
+
 
 
 
