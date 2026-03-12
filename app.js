@@ -572,6 +572,62 @@ const MAGIC_LINK_PAGE_TITLES = {
 const TESTING_MAGIC_LINK_KEYS = new Set([
   "testing.eeos.work/rlabs2026testa1b2c3d4"
 ]);
+const REVELRY_BRACKETS_MAGIC_LINK_KEYS = new Set([
+  "revelrylabs.eeos.work/rlabs2026a1b2c3d4",
+  "testing.eeos.work/rlabs2026testa1b2c3d4"
+]);
+const REVELRY_GOAL_PRIORITY_ORDER = [
+  "Wellbeing, Growth & Recognition",
+  "Team Connection & Culture",
+  "Performance & Productivity",
+  "Retention & Engagement",
+  "Employer Brand & Recruiting",
+  "Inclusion & Belonging"
+];
+const REVELRY_GOAL_EVENT_MAP = {
+  "Wellbeing, Growth & Recognition": {
+    templateId: "revelry-goal-wellbeing",
+    title: "Elixir Making Class",
+    description: "A guided wellness-focused team experience centered on creating restorative elixirs together.",
+    url: "https://www.withconfetti.com/product/virtual-wellness-elixir-making-class",
+    pills: ["Wellbeing, Growth & Recognition", "Wellness / Health focused"]
+  },
+  "Team Connection & Culture": {
+    templateId: "revelry-goal-team-connection",
+    title: "Virtual Funnel Cake Class",
+    description: "A shared food experience designed to spark connection and fun across the team.",
+    url: "https://www.withconfetti.com/product/virtual-funnel-cake-class",
+    pills: ["Team Connection & Culture", "Food / Drinks experience"]
+  },
+  "Performance & Productivity": {
+    templateId: "revelry-goal-performance",
+    title: "Champion Mindset for Professionals",
+    description: "A practical session focused on mindset habits that improve individual and team performance.",
+    url: "https://www.withconfetti.com/product/virtual-champion-mindset-for-professionals",
+    pills: ["Performance & Productivity", "Professional development"]
+  },
+  "Retention & Engagement": {
+    templateId: "revelry-goal-retention",
+    title: "Virtual Murder Mystery Party",
+    description: "A social, high-energy event that drives participation and team engagement.",
+    url: "https://www.withconfetti.com/product/virtual-murder-mystery-party",
+    pills: ["Retention & Engagement", "Fun / Social event"]
+  },
+  "Employer Brand & Recruiting": {
+    templateId: "revelry-goal-employer-brand",
+    title: "Virtual Black History Jeoparty for Good",
+    description: "A purpose-driven team event that supports employer brand storytelling and culture-forward recruiting.",
+    url: "https://www.withconfetti.com/product/virtual-black-history-jeoparty-for-good",
+    pills: ["Employer Brand & Recruiting"]
+  },
+  "Inclusion & Belonging": {
+    templateId: "revelry-goal-inclusion",
+    title: "LGBTQIA Allyship in the Workplace",
+    description: "An interactive workshop focused on inclusive behaviors and building workplace belonging.",
+    url: "https://www.withconfetti.com/product/virtual-lgbtqia-allyship-in-the-workplace",
+    pills: ["Inclusion & Belonging"]
+  }
+};
 const TESTING_MAGIC_QUERY_PROFILES = {
   "revelry-test": {
     companyName: "Revelry Labs (Testing)",
@@ -792,6 +848,7 @@ let supabaseClient = null;
 let identityEditMode = false;
 let isSidebarHydrating = false;
 let cloudSaveDebounceTimer = null;
+let d1WorkflowSyncDebounceTimer = null;
 let isHydratingCloudState = false;
 let pendingPostAuthAction = null;
 
@@ -1127,6 +1184,48 @@ function getTestingMagicQueryProfile() {
   }
 }
 
+function isRevelryBracketsMagicContext() {
+  if (isRevelryLabsReadOnlyMagicLink()) return true;
+
+  const parsed = parseMagicLinkFromHostPath();
+  if (parsed) {
+    const key = `${parsed.host}/${parsed.tokenId}`;
+    if (REVELRY_BRACKETS_MAGIC_LINK_KEYS.has(key)) return true;
+  }
+
+  const queryProfile = getTestingMagicQueryProfile();
+  return String(queryProfile?.profileKey || "") === "revelry-test";
+}
+
+function getRevelryGoalBasedRecommendations(rawGoals = []) {
+  const selectedGoals = Array.isArray(rawGoals)
+    ? rawGoals.map((goal) => String(goal || "").trim()).filter(Boolean)
+    : [];
+  const selectedGoalSet = new Set(selectedGoals);
+
+  return REVELRY_GOAL_PRIORITY_ORDER
+    .filter((goal) => selectedGoalSet.has(goal))
+    .map((goal) => {
+      const mapped = REVELRY_GOAL_EVENT_MAP[goal];
+      if (!mapped) return null;
+      return {
+        id: mapped.templateId,
+        templateId: mapped.templateId,
+        name: mapped.title,
+        title: mapped.title,
+        description: mapped.description,
+        url: mapped.url,
+        type: "external",
+        cost_per_person: 0,
+        estimatedCost: 0,
+        goals: [goal],
+        recommendationPills: Array.isArray(mapped.pills) ? [...mapped.pills] : []
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
 function getActiveTestingMagicContext() {
   const queryProfile = getTestingMagicQueryProfile();
   if (queryProfile) {
@@ -1451,6 +1550,55 @@ function normalizeRecommendedEvent(rawEvent, index = 0) {
     score: Number(rawEvent.score || 0),
     rank: Number(rawEvent.rank || (index + 1))
   };
+}
+
+async function syncWorkflowStateToDraft() {
+  const resolvedCompanyId = String(state.accountId || "").trim();
+  if (!resolvedCompanyId) return false;
+
+  try {
+    const draftPayload = {
+      companyName: String(state.companyName || "").trim(),
+      adminName: String(state.adminName || "").trim(),
+      budgetMode: String(state.programSettings.budgetMode || "").trim(),
+      totalBudget: Number(state.programSettings.totalBudget || 0),
+      perEmployeeBudget: Number(state.programSettings.perEmployeeBudget || 0),
+      employeeCount: Number(state.programSettings.employeeCount || 0),
+      goals: Array.isArray(state.programSettings.goals) ? [...state.programSettings.goals] : [],
+      cadence: String(state.programSettings.cadence || "").trim(),
+      preferredSchedule: String(state.programSettings.preferredSchedule || "").trim(),
+      daysSelected: Array.isArray(state.programSettings.daysSelected) ? [...state.programSettings.daysSelected] : [],
+      timesSelected: Array.isArray(state.programSettings.timesSelected) ? [...state.programSettings.timesSelected] : [],
+      localCity: String(state.programSettings.localCity || "").trim(),
+      surveyAnswers: state.programSettings.surveyAnswers && typeof state.programSettings.surveyAnswers === "object" ? state.programSettings.surveyAnswers : {},
+      setupCompleted: Boolean(state.setupCompleted),
+      setupEventsGenerated: Boolean(state.setupEventsGenerated),
+      currentSetupStep: Number(state.currentSetupStep || 0),
+      completedSetupSteps: Array.isArray(state.completedSetupSteps) ? [...state.completedSetupSteps] : []
+    };
+
+    const response = await apiRequest("/onboarding/migrate-draft", {
+      method: "POST",
+      body: {
+        companyId: resolvedCompanyId,
+        draft: draftPayload,
+        identity: {
+          companyName: String(state.companyName || "").trim(),
+          adminName: String(state.adminName || "").trim()
+        },
+        mergeMode: "if-empty-or-newer"
+      }
+    });
+
+    if (response?.data?.migration?.applied) {
+      console.log("Workflow state synced to D1");
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.warn("Failed to sync workflow state to D1", error?.message || error);
+    return false;
+  }
 }
 
 async function syncCloudRecommendations(companyId) {
@@ -2732,6 +2880,18 @@ cloudSaveDebounceTimer = setTimeout(() => {
     console.warn("Cloud sync skipped", error?.message || error);
   });
 }, 1000);
+
+if (d1WorkflowSyncDebounceTimer) {
+  clearTimeout(d1WorkflowSyncDebounceTimer);
+}
+d1WorkflowSyncDebounceTimer = setTimeout(() => {
+  d1WorkflowSyncDebounceTimer = null;
+  const token = getAuthToken();
+  if (!token || !state.accountId) return;
+  syncWorkflowStateToDraft().catch((error) => {
+    console.warn("D1 workflow sync skipped", error?.message || error);
+  });
+}, 1500);
 }
 
 
@@ -3830,6 +3990,7 @@ const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.
 const activeSidebarStepBg = "#E0E7FF";
 const activeSidebarStepText = "#1F2937";
 const activeWorkflowType = getActiveWorkflowType();
+const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
 const activeSetupKey = isLandingActive ? SETUP_STEP_TO_MENU_ITEM[state.currentSetupStep] : null;
 const wf = getWorkflowState();
 const rawStep = Number(wf?.currentStep || 1);
@@ -3851,18 +4012,19 @@ setupItems.forEach((item) => {
   const isProcessCurrent = stepNum === setupProcessCurrentStep;
   const isCompleted = state.completedSetupSteps.includes(stepNum);
   const isFutureStep = !isCompleted && Number.isInteger(setupProcessCurrentStep) && stepNum > setupProcessCurrentStep;
+  const isLockedFutureStep = isFutureStep && !allowTestingStepNavigation;
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
   item.classList.toggle("sidebar-step-process-current", isProcessCurrent);
-  item.classList.toggle("sidebar-step-locked", isFutureStep && !isActive);
+  item.classList.toggle("sidebar-step-locked", isLockedFutureStep && !isActive);
   item.style.background = isActive ? activeSidebarStepBg : "transparent";
   item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
   item.style.color = isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b");
-  item.style.opacity = isFutureStep && !isActive ? "0.72" : "1";
-  item.style.cursor = isFutureStep ? "not-allowed" : "pointer";
+  item.style.opacity = isLockedFutureStep && !isActive ? "0.72" : "1";
+  item.style.cursor = isLockedFutureStep ? "not-allowed" : "pointer";
   item.onclick = () => {
-    if (isFutureStep) return;
+    if (isLockedFutureStep) return;
     if (stepNum) {
       setSidebarActiveSection("setup");
       state.currentSetupStep = stepNum;
@@ -3931,7 +4093,7 @@ eventWorkflowItems.forEach((item) => {
   const isFutureStep = !isCompleted && stepNum > processCurrentStep;
   const isLockedCompletedWorkflowStep = isCompleted && stepNum < processCurrentStep;
   const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
-  const isLocked = !isBookEventDebugOverride && (
+  const isLocked = !allowTestingStepNavigation && !isBookEventDebugOverride && (
     isLockedCompletedWorkflowStep
     || isFutureStep
     || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
@@ -4482,6 +4644,21 @@ function getFourMonthShortlistState() {
 }
 
 function getFourMonthShortlistCandidates(monthEvent = {}) {
+  if (isRevelryBracketsMagicContext()) {
+    const selectedGoals = Array.isArray(state.landingDraft?.goals) && state.landingDraft.goals.length
+      ? [...state.landingDraft.goals]
+      : (Array.isArray(state.programSettings?.goals) ? [...state.programSettings.goals] : []);
+    return getRevelryGoalBasedRecommendations(selectedGoals).map((item) => ({
+      templateId: item.templateId,
+      title: item.title,
+      description: item.description,
+      estimatedCost: Number(item.estimatedCost || 0),
+      url: item.url,
+      type: item.type,
+      recommendationPills: Array.isArray(item.recommendationPills) ? [...item.recommendationPills] : []
+    }));
+  }
+
   const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
   const byId = new Map(templates.map((template) => [String(template.id || ""), template]));
   const picked = [];
@@ -4802,6 +4979,9 @@ state.programSettings.perEmployeeBudget = Number($("perEmployeeBudget").value ||
 state.programSettings.employeeCount = Number($("employeeCount").value || 0);
 state.setupCompleted = true;
 persistState();
+syncWorkflowStateToDraft().catch((error) => {
+  console.warn("Setup sync to D1 failed", error?.message || error);
+});
 renderAll();
 }
 
@@ -5294,6 +5474,9 @@ if (action === "create-event") {
   }
 
   persistState();
+  syncWorkflowStateToDraft().catch((error) => {
+    console.warn("Launch event sync to D1 failed", error?.message || error);
+  });
   return;
 }
 
@@ -6617,6 +6800,9 @@ function attachSetupStepHandlers() {
 function isSetupStepValid(step) {
   switch (step) {
     case 1: // Set Program Goals
+      if (isRevelryBracketsMagicContext()) {
+        return state.landingDraft.goals.length === 3;
+      }
       return state.landingDraft.goals.length >= 1 && state.landingDraft.goals.length <= 3;
     
     case 2: // Budget
@@ -9535,6 +9721,7 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
+  const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isMarchMadnessEvent = isRevelryLabsReadOnlyMagicLink() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
     ? "Promote the Bracket Challenge"
@@ -10206,17 +10393,17 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   panel.querySelectorAll("#promoteProcessBar [data-process-index]").forEach((item) => {
     const stageIndex = Number(item.getAttribute("data-process-index"));
     const isFutureStep = Number.isFinite(stageIndex) && stageIndex > activeIndex;
-    if (isFutureStep) {
+    if (isFutureStep && !allowTestingStepNavigation) {
       item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
       item.setAttribute("aria-disabled", "true");
     }
     item.addEventListener("click", () => {
       const clickedIndex = Number(item.getAttribute("data-process-index"));
       if (!Number.isFinite(clickedIndex)) return;
-      if (clickedIndex > activeIndex) return;
+      if (clickedIndex > activeIndex && !allowTestingStepNavigation) return;
       const stepKey = processSteps[clickedIndex]?.key;
       if (!stepKey) return;
-      if (isStepLocked(stepKey)) return;
+      if (isStepLocked(stepKey) && !allowTestingStepNavigation) return;
       setActiveStep(stepKey);
       setTimeout(() => {
         const card = document.getElementById(`promote-card-${stepKey}`);
@@ -14252,7 +14439,11 @@ function generateRecommendedEvents() {
     ? [...state.landingDraft.teamPreferenceEstimate]
     : [];
   state.programSettings.admin_preference_weight = state.programSettings.admin_preference_weight || { boost: 0.22, first_cycle_only: true };
-  state.eventsRecommended = generateRecommendations(state.programSettings);
+  if (isRevelryBracketsMagicContext()) {
+    state.eventsRecommended = getRevelryGoalBasedRecommendations(state.programSettings.goals);
+  } else {
+    state.eventsRecommended = generateRecommendations(state.programSettings);
+  }
 
   // Hide the overlay message
   const overlay = document.getElementById("eventsShortlistOverlay");

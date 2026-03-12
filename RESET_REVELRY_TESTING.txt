@@ -1,0 +1,32 @@
+RESET REVELRY LABS INPUT DATA FOR TESTING
+
+Step 1: Clear D1 database (sessions, events_recommended, state_blob)
+========================================================
+
+cd /Users/avery/jolly-hr && npx wrangler d1 execute eeos --remote --command "DELETE FROM sessions WHERE company_id = 'revelry-labs'; DELETE FROM events_recommended WHERE company_id = 'revelry-labs'; UPDATE accounts SET state_blob = '{}' WHERE company_id = 'revelry-labs';"
+
+
+Step 2: Open Revelry magic link and clear browser storage
+========================================================
+
+1. Open: https://revelrylabs.eeos.work/rlabs2026a1b2c3d4
+2. Open DevTools (F12 or Cmd+Option+I)
+3. Paste into Console:
+
+localStorage.clear();
+sessionStorage.clear();
+window.location.reload();
+
+
+What gets reset:
+- Sessions cleared (log out)
+- Events recommended cleared
+- State blob cleared (setup/goals/workflow progress)
+- Browser storage cleared (frontend localStorage/sessionStorage)
+
+What stays intact:
+- Magic link row (can still authenticate)
+- Account row (revelry-labs company)
+- Event templates (master catalog)
+
+You will land on fresh Setup flow.
