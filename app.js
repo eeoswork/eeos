@@ -198,7 +198,18 @@ function getEventWorkflowConfig(eventLike = {}) {
 function getWorkflowTypeLabel(eventLike = {}) {
   const config = getEventWorkflowConfig(eventLike);
   if (config.workflowType === EVENT_WORKFLOW_TYPES.RSVP) return "RSVP";
-  if (config.workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) return "Promote";
+  if (config.workflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) {
+    const templateId = String(eventLike?.templateId || eventLike?.id || "").trim().toLowerCase();
+    const title = String(eventLike?.title || eventLike?.name || "").trim().toLowerCase();
+    const isMarchMadness = templateId === "march-madness"
+      || title === "march madness bracket challenge"
+      || title === "march madness brackets challenge"
+      || title === "company-wide march madness challenge";
+    if (isRevelryBracketsMagicContext() && isMarchMadness) {
+      return "Runs from March 19 to April 6 - Your admin time: 30 minutes";
+    }
+    return "Promote";
+  }
   return "Poll → RSVP";
 }
 
@@ -4523,8 +4534,8 @@ function getMagicLinkFourMonthOverride() {
         {
           month: 1,
           templateId: "march-madness",
-          title: "Sports competition",
-          description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights and a prize.",
+          title: "Company-wide March Madness challenge",
+          description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights.",
           type: "poll",
           workflowType: "straight-to-promote",
           estimatedCost: 0,
