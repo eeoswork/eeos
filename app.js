@@ -1754,13 +1754,13 @@ function openAuthGateWithContext(context = "save") {
   }
   if (subtitleEl) {
     subtitleEl.textContent = mode === "poll_review"
-      ? "You’ve shared this poll with your team. Create a free account so you can come back later and keep your links and results safe."
+      ? "You’ve shared this poll with your team. Create an account so you can come back later and keep your links and results safe."
       : mode === "rsvp_review"
-      ? "You’ve shared this RSVP with your team. Create a free account so your event data and responses stay safe across browsers and devices."
-      : "Create a free account to keep your workspace across browsers and devices.";
+      ? "You’ve shared this RSVP with your team. Create an account so your event data and responses stay safe across browsers and devices."
+      : "Create an account to keep your workspace across browsers and devices.";
   }
   if (createAccountButton) {
-    createAccountButton.textContent = "Create free account";
+    createAccountButton.textContent = "Create account";
     createAccountButton.classList.toggle("hidden", showSignInOnly);
   }
   if (signInButton) {
