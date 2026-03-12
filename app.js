@@ -4604,6 +4604,35 @@ function applyMagicLinkFourMonthOverride(program) {
   };
 }
 
+function normalizeRevelryMarchCardCopy(program) {
+  if (!isRevelryBracketsMagicContext()) return program;
+  if (!program || typeof program !== "object") return program;
+  if (!Array.isArray(program.events)) return program;
+
+  const normalizedEvents = program.events.map((event) => {
+    if (!event || typeof event !== "object") return event;
+    const templateId = String(event.templateId || event.id || "").trim().toLowerCase();
+    const title = String(event.title || "").trim().toLowerCase();
+    const isMarchMadness = templateId === "march-madness"
+      || title === "sports competition"
+      || title === "march madness bracket challenge"
+      || title === "march madness brackets challenge"
+      || title === "company-wide march madness challenge";
+    if (!isMarchMadness) return event;
+
+    return {
+      ...event,
+      title: "Company-wide March Madness challenge",
+      description: "Run a friendly NCAA tournament bracket challenge. Employees submit their picks and compete throughout the tournament for bragging rights."
+    };
+  });
+
+  return {
+    ...program,
+    events: normalizedEvents
+  };
+}
+
 function getSidebarWorkflowEventName() {
   const normalizeWorkflowEventName = (value) => {
     const trimmed = String(value || "").trim();
@@ -4719,6 +4748,8 @@ function renderFourMonthProgram() {
   const container = $("monthlyEvents");
   const budgetSummary = $("fourMonthBudgetSummary");
   if (!container || !state.fourMonthProgram) return;
+
+  state.fourMonthProgram = normalizeRevelryMarchCardCopy(state.fourMonthProgram);
 
   const existingCards = Array.from(container.querySelectorAll(".four-month-card"));
   const isInitialRender = existingCards.length === 0;
