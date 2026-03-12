@@ -7921,6 +7921,9 @@ if (mobileSidebarBackdrop) {
   mobileSidebarBackdrop.addEventListener("click", closeMobileSidebar);
 }
 
+window.addEventListener("resize", updateMobileSidebarToggleOffset);
+requestAnimationFrame(updateMobileSidebarToggleOffset);
+
 
 
 
@@ -8023,6 +8026,39 @@ function closeMobileSidebar() {
   document.body.style.overflow = "";
 }
 
+function updateMobileSidebarToggleOffset() {
+  const toggle = $("mobileSidebarToggle");
+  if (!toggle) return;
+
+  const selectors = [
+    "#landingView .setup-step .setup-step-header",
+    "#landingView .mx-auto",
+    "#appView .eeos-main-header",
+    ".eeos-main"
+  ];
+
+  let anchor = null;
+  for (const selector of selectors) {
+    const candidate = document.querySelector(selector);
+    if (!candidate) continue;
+    const style = window.getComputedStyle(candidate);
+    if (style.display === "none" || style.visibility === "hidden") continue;
+    const rect = candidate.getBoundingClientRect();
+    if (rect.width <= 0) continue;
+    anchor = candidate;
+    break;
+  }
+
+  if (!anchor) {
+    toggle.style.right = "30px";
+    return;
+  }
+
+  const rect = anchor.getBoundingClientRect();
+  const rightOffset = Math.max(12, Math.round(window.innerWidth - rect.right));
+  toggle.style.right = `${rightOffset}px`;
+}
+
 async function bootstrap() {
   state.sidebarSetupExpanded = false;
   applyTestingResetFromQueryBeforeLoad();
@@ -8069,6 +8105,7 @@ async function bootstrap() {
   hideAuthGate();
   showLanding();
   renderAll();
+  updateMobileSidebarToggleOffset();
 }
 
 
