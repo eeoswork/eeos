@@ -595,7 +595,7 @@ const REVELRY_GOAL_PRIORITY_ORDER = [
   "Employer Brand & Recruiting",
   "Inclusion & Belonging"
 ];
-const REVELRY_GOAL_EVENT_MAP = {
+const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
   "Wellbeing, Growth & Recognition": {
     templateId: "revelry-goal-wellbeing",
     title: "Elixir Making Class",
@@ -639,6 +639,91 @@ const REVELRY_GOAL_EVENT_MAP = {
     pills: ["Inclusion & Belonging"]
   }
 };
+const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
+  "Wellbeing, Growth & Recognition": {
+    templateId: "revelry-goal-wellbeing-mid",
+    title: "Virtual Bucket List Workshop",
+    description: "A collaborative workshop designed to spark motivation, reflection, and personal growth across the team.",
+    url: "https://www.withconfetti.com/product/virtual-bucket-list-workshop",
+    pills: ["Wellbeing, Growth & Recognition", "Wellness / Health focused"]
+  },
+  "Team Connection & Culture": {
+    templateId: "revelry-goal-team-connection-mid",
+    title: "Virtual Live City Tours",
+    description: "A shared guided experience that brings teams together through live exploration and conversation.",
+    url: "https://www.withconfetti.com/product/virtual-live-city-tours",
+    pills: ["Team Connection & Culture", "Food / Drinks experience"]
+  },
+  "Performance & Productivity": {
+    templateId: "revelry-goal-performance-mid",
+    title: "Culture Club: Self-Doubt to Confidence",
+    description: "A practical session focused on confidence-building tools that support stronger day-to-day performance.",
+    url: "https://www.withconfetti.com/product/virtual-culture-club-self-doubt-to-confidence",
+    pills: ["Performance & Productivity", "Professional development"]
+  },
+  "Retention & Engagement": {
+    templateId: "revelry-goal-retention-mid",
+    title: "Virtual Office Olympics",
+    description: "A high-energy team activity that encourages participation, connection, and ongoing engagement.",
+    url: "https://www.withconfetti.com/product/virtual-office-olympics",
+    pills: ["Retention & Engagement", "Fun / Social event"]
+  },
+  "Employer Brand & Recruiting": {
+    templateId: "revelry-goal-employer-brand-mid",
+    title: "Virtual Vision Board Workshop",
+    description: "A culture-forward workshop that helps reinforce company values and employer brand narrative.",
+    url: "https://www.withconfetti.com/product/virtual-vision-board-workshop",
+    pills: ["Employer Brand & Recruiting"]
+  },
+  "Inclusion & Belonging": {
+    templateId: "revelry-goal-inclusion-mid",
+    title: "Virtual Diversity and Inclusion Workshop",
+    description: "An interactive workshop designed to strengthen inclusive practices and team belonging.",
+    url: "https://www.withconfetti.com/product/virtual-diversity-and-inclusion-workshop",
+    pills: ["Inclusion & Belonging"]
+  }
+};
+
+function getRevelryMonthlyBudgetInput() {
+  const draftMode = String(state?.landingDraft?.budgetMode || "").trim();
+  const draftTotal = Number(state?.landingDraft?.totalBudget || 0);
+  const draftPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
+  const draftEmployees = Number(state?.landingDraft?.employeeCount || 0);
+  const hasDraftBudget = Boolean(state?.landingDraft?.budgetConfigured);
+
+  if (hasDraftBudget) {
+    if (draftMode === "perEmployee") {
+      const computedDraftTotal = draftPerEmployee * draftEmployees;
+      if (computedDraftTotal > 0) return computedDraftTotal;
+    }
+    if (draftTotal > 0) return draftTotal;
+  }
+
+  const programMode = String(state?.programSettings?.budgetMode || "").trim();
+  const programTotal = Number(state?.programSettings?.totalBudget || 0);
+  const programPerEmployee = Number(state?.programSettings?.perEmployeeBudget || 0);
+  const programEmployees = Number(state?.programSettings?.employeeCount || 0);
+
+  if (programMode === "perEmployee") {
+    const computedProgramTotal = programPerEmployee * programEmployees;
+    if (computedProgramTotal > 0) return computedProgramTotal;
+  }
+  if (programTotal > 0) return programTotal;
+
+  return 0;
+}
+
+function getRevelryGoalEventMapForBudget(monthlyBudget = 0) {
+  const normalizedBudget = Number(monthlyBudget || 0);
+  if (normalizedBudget >= 1170) {
+    return REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET;
+  }
+  if (normalizedBudget >= 585 && normalizedBudget <= 1169) {
+    return REVELRY_GOAL_EVENT_MAP_MID_BUDGET;
+  }
+  // For budgets below the specified ranges, default to the mid-budget set.
+  return REVELRY_GOAL_EVENT_MAP_MID_BUDGET;
+}
 const TESTING_MAGIC_QUERY_PROFILES = {
   "revelry-test": {
     companyName: "Revelry Labs (Testing)",
@@ -1213,11 +1298,13 @@ function getRevelryGoalBasedRecommendations(rawGoals = []) {
     ? rawGoals.map((goal) => String(goal || "").trim()).filter(Boolean)
     : [];
   const selectedGoalSet = new Set(selectedGoals);
+  const monthlyBudget = getRevelryMonthlyBudgetInput();
+  const activeGoalMap = getRevelryGoalEventMapForBudget(monthlyBudget);
 
   return REVELRY_GOAL_PRIORITY_ORDER
     .filter((goal) => selectedGoalSet.has(goal))
     .map((goal) => {
-      const mapped = REVELRY_GOAL_EVENT_MAP[goal];
+      const mapped = activeGoalMap[goal];
       if (!mapped) return null;
       return {
         id: mapped.templateId,
