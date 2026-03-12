@@ -2004,13 +2004,8 @@ const programComputedTotal = programMode === "perEmployee"
   : getBudgetTotal();
 const liveProgramTotal = programComputedTotal > 0 ? programComputedTotal : getBudgetTotal();
 
-const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured)
-  || liveDraftTotal > 0
-  || draftEmployees > 0
-  || draftPerEmployee > 0
-  || liveProgramTotal > 0
-  || programEmployees > 0
-  || programPerEmployee > 0;
+// Gate on the explicit flag set by saveBudgetState; avoids showing placeholder defaults.
+const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
 const total = !budgetEnabled
   ? 0
   : (isLandingActive
@@ -6531,8 +6526,10 @@ function initializeLandingSetupFlow() {
   const enforceRevelryBudgetMinimums = (warnOnly = false) => {
     if (!isRevelryMagicBudgetContext) return;
     const totalRaw = Number(totalBudgetInput?.value || 0);
+    const totalDigits = String(totalBudgetInput?.value || "").replace(/\D/g, "").length;
     const employeeRaw = Number(employeeCountInput?.value || 0);
     const perEmployeeRaw = Number(perEmployeeInput?.value || 0);
+    const perEmployeeDigits = String(perEmployeeInput?.value || "").replace(/\D/g, "").length;
 
     if (budgetMode === "total" && totalRaw > 0 && totalRaw < revelryMinTotalMonthly) {
       if (!warnOnly) {
@@ -6540,6 +6537,10 @@ function initializeLandingSetupFlow() {
         if (employeeRaw > 0 && perEmployeeInput) {
           perEmployeeInput.value = String(Math.round(revelryMinTotalMonthly / employeeRaw));
         }
+      } else if (totalDigits < 3) {
+        // Not enough digits typed yet — suppress warning while editing
+        setBudgetValidationMessage("");
+        return;
       }
       setBudgetValidationMessage("Based on company size, the minimum is $585.");
       return;
@@ -6551,6 +6552,10 @@ function initializeLandingSetupFlow() {
         if (employeeRaw > 0 && totalBudgetInput) {
           totalBudgetInput.value = String(Math.round(employeeRaw * revelryMinPerEmployeeMonthly));
         }
+      } else if (perEmployeeDigits < 2) {
+        // Not enough digits typed yet — suppress warning while editing
+        setBudgetValidationMessage("");
+        return;
       }
       setBudgetValidationMessage("Based on company size, the minimum is $15 per employee per month.");
       return;
