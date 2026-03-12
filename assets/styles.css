@@ -716,6 +716,14 @@ font-size: 11px;
   transition: opacity 0.18s ease;
 }
 
+/* Sidebar nav items locked on the pre-input home page */
+.sidebar-nav--home-locked {
+  opacity: 0.38;
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
+}
+
 #landingView #setupStepsContainer.hidden + * {
   margin-top: 0;
 }

@@ -4264,6 +4264,9 @@ workflowItems.forEach((item) => {
     item.style.borderColor = isActive ? "#e2e8f0" : "transparent";
   }
 });
+
+  // Always apply home lock state last so it overrides any style set above
+  applySidebarLandingHomeLock();
 }
 
 
@@ -6134,6 +6137,41 @@ function shouldShowLandingHome() {
   return !state.landingBuilderStarted && !state.appIdentityCommitted && !hasAuthSession;
 }
 
+function applySidebarLandingHomeLock() {
+  const showHome = shouldShowLandingHome();
+  const dashboardSection = $("sidebarDashboardSection");
+  const setupHeading = $("sidebarSetupHeading");
+  const eventWorkflowSection = $("sidebarEventWorkflowSection");
+  const setupMenuCollapse = $("sidebarSetupMenuCollapse");
+  const eventWorkflowMenuCollapse = $("sidebarEventWorkflowMenuCollapse");
+
+  if (dashboardSection) dashboardSection.classList.toggle("sidebar-nav--home-locked", showHome);
+  if (setupHeading) setupHeading.classList.toggle("sidebar-nav--home-locked", showHome);
+
+  if (showHome) {
+    // Show Event Workflow locked/grayed on home page
+    if (eventWorkflowSection) {
+      eventWorkflowSection.style.display = "block";
+      eventWorkflowSection.classList.add("sidebar-nav--home-locked");
+    }
+    // Collapse sub-menus — no steps visible on home page
+    if (setupMenuCollapse) {
+      setupMenuCollapse.style.maxHeight = "0px";
+      setupMenuCollapse.style.overflow = "hidden";
+    }
+    if (eventWorkflowMenuCollapse) {
+      eventWorkflowMenuCollapse.style.maxHeight = "0px";
+      eventWorkflowMenuCollapse.style.overflow = "hidden";
+    }
+  } else {
+    if (eventWorkflowSection) {
+      eventWorkflowSection.classList.remove("sidebar-nav--home-locked");
+      // display is controlled by renderSidebarStepMenus
+    }
+    // sub-menu max-heights will be restored by updateSidebarSetupCollapseUI / updateSidebarEventWorkflowCollapseUI
+  }
+}
+
 function updateLandingHomeView() {
   const hero = $("landingHeroCopy");
   const setupSteps = $("setupStepsContainer");
@@ -6142,6 +6180,7 @@ function updateLandingHomeView() {
   if (hero) hero.style.display = "";
   if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
   if (startActions) startActions.style.display = showHome ? "block" : "none";
+  applySidebarLandingHomeLock();
 }
 
 function markLandingBuilderStarted() {
