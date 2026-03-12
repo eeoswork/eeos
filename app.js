@@ -4507,7 +4507,7 @@ function getFourMonthCategoryPills() {
   if (parsedMagicLink?.host === "revelrylabs.eeos.work" && parsedMagicLink?.tokenId === "rlabs2026a1b2c3d4") {
     return [
       "Budget-friendly team engagement",
-      "Premium virtual experience",
+      "Premium group experience",
       "Quick and easy team bonding",
       "Morale-boosting group outing"
     ];
