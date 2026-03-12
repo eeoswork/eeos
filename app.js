@@ -6268,6 +6268,7 @@ function initializeLandingSetupFlow() {
       localCityInput.placeholder = magicLocalCity
         ? `e.g. ${magicLocalCity}`
         : "e.g. New Orleans, Minneapolis, Boston";
+      localCityInput.value = String(state.landingDraft.localCity || "").trim();
       localCityInput.addEventListener("input", (e) => {
         if (isCompletedStepEditBlocked(4)) {
           e.target.value = state.landingDraft.localCity || "";
