@@ -708,6 +708,9 @@ export default {
 
     if (!url.pathname.startsWith("/api")) {
       if (HOME_PAGE_HOSTS.has(host)) {
+        if (url.pathname === "/index.html") {
+          return Response.redirect(`${url.origin}/`, 301);
+        }
         return withCors(await serveHomePageHostRequest(request), request, env);
       }
       if (MAGIC_LINK_HOSTS.has(host)) {

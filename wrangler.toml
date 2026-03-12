@@ -3,6 +3,7 @@ main = "cloudflare/worker.js"
 compatibility_date = "2026-03-09"
 
 routes = [
+	{ pattern = "eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "api.eeos.work/api/*", zone_name = "eeos.work" },
 	{ pattern = "api.eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "revelrylabs.eeos.work/api/*", zone_name = "eeos.work" },
