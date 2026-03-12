@@ -6513,6 +6513,7 @@ function initializeLandingSetupFlow() {
   let budgetValidationMessageEl = null;
   if (budgetHelper?.parentElement) {
     budgetValidationMessageEl = document.createElement("div");
+    budgetValidationMessageEl.id = "setupBudgetValidationMessage";
     budgetValidationMessageEl.className = "mt-2 hidden text-xs text-rose-600";
     budgetHelper.parentElement.appendChild(budgetValidationMessageEl);
   }
@@ -6978,6 +6979,21 @@ function attachSetupStepHandlers() {
       
       // Validate step before allowing advance
       if (!isSetupStepValid(step)) {
+        if (step === 2 && isRevelryLabsReadOnlyMagicLink()) {
+          const messageEl = $("setupBudgetValidationMessage");
+          const mode = String(state.landingDraft?.budgetMode || "total").trim();
+          const total = Number(state.landingDraft?.totalBudget || 0);
+          const perEmployee = Number(state.landingDraft?.perEmployee || 0);
+          if (messageEl) {
+            if (mode === "perEmployee" && perEmployee > 0 && perEmployee < 15) {
+              messageEl.textContent = "Based on company size, the minimum is $15 per employee per month.";
+              messageEl.classList.remove("hidden");
+            } else if (total > 0 && total < 585) {
+              messageEl.textContent = "Based on company size, the minimum is $585.";
+              messageEl.classList.remove("hidden");
+            }
+          }
+        }
         return;
       }
 
@@ -7119,6 +7135,15 @@ function isSetupStepValid(step) {
       const totalBudget = Number(state.landingDraft.totalBudget || 0);
       const employees = Number(state.landingDraft.employeeCount || 0);
       const perEmp = Number(state.landingDraft.perEmployee || 0);
+      const budgetMode = String(state.landingDraft.budgetMode || state.programSettings.budgetMode || "total").trim();
+      if (isRevelryLabsReadOnlyMagicLink()) {
+        const meetsPerEmployeeMin = perEmp >= 15;
+        const meetsTotalMin = totalBudget >= 585;
+        if (budgetMode === "perEmployee") {
+          return employees > 0 && meetsPerEmployeeMin;
+        }
+        return employees > 0 && meetsTotalMin;
+      }
       // Employee count is required and the resulting monthly total must be at least $300.
       return employees > 0 && (totalBudget >= 300) && (totalBudget > 0 || perEmp > 0);
     
