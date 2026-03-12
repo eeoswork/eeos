@@ -6268,7 +6268,6 @@ function startLandingBuilder() {
   persistState();
   renderSetupStepStates();
   updateLandingHomeView();
-  setTimeout(() => scrollSetupStepIntoView(1, "smooth", true), 60);
 }
 
 
