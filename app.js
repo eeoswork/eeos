@@ -2869,11 +2869,6 @@ adminDisplay.style.display = shouldShowStatic ? "block" : "none";
 companyDisplay.textContent = company;
 adminDisplay.textContent = admin;
 
-const mobileCompanyEl = $("mobileCompanyDisplay");
-const mobileAdminEl = $("mobileAdminDisplay");
-if (mobileCompanyEl) mobileCompanyEl.textContent = company;
-if (mobileAdminEl) mobileAdminEl.textContent = admin;
-
 if (testingResetBtn) {
   const testingContext = getActiveTestingMagicContext();
   testingResetBtn.style.display = (shouldShowStatic && testingContext) ? "inline-flex" : "none";
