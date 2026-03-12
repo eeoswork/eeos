@@ -6528,25 +6528,29 @@ function initializeLandingSetupFlow() {
     budgetValidationMessageEl.classList.toggle("hidden", !nextMessage);
   };
 
-  const enforceRevelryBudgetMinimums = () => {
+  const enforceRevelryBudgetMinimums = (warnOnly = false) => {
     if (!isRevelryMagicBudgetContext) return;
     const totalRaw = Number(totalBudgetInput?.value || 0);
     const employeeRaw = Number(employeeCountInput?.value || 0);
     const perEmployeeRaw = Number(perEmployeeInput?.value || 0);
 
     if (budgetMode === "total" && totalRaw > 0 && totalRaw < revelryMinTotalMonthly) {
-      if (totalBudgetInput) totalBudgetInput.value = String(revelryMinTotalMonthly);
-      if (employeeRaw > 0 && perEmployeeInput) {
-        perEmployeeInput.value = String(Math.round(revelryMinTotalMonthly / employeeRaw));
+      if (!warnOnly) {
+        if (totalBudgetInput) totalBudgetInput.value = String(revelryMinTotalMonthly);
+        if (employeeRaw > 0 && perEmployeeInput) {
+          perEmployeeInput.value = String(Math.round(revelryMinTotalMonthly / employeeRaw));
+        }
       }
       setBudgetValidationMessage("Based on company size, the minimum is $585.");
       return;
     }
 
     if (budgetMode === "perEmployee" && perEmployeeRaw > 0 && perEmployeeRaw < revelryMinPerEmployeeMonthly) {
-      if (perEmployeeInput) perEmployeeInput.value = String(revelryMinPerEmployeeMonthly);
-      if (employeeRaw > 0 && totalBudgetInput) {
-        totalBudgetInput.value = String(Math.round(employeeRaw * revelryMinPerEmployeeMonthly));
+      if (!warnOnly) {
+        if (perEmployeeInput) perEmployeeInput.value = String(revelryMinPerEmployeeMonthly);
+        if (employeeRaw > 0 && totalBudgetInput) {
+          totalBudgetInput.value = String(Math.round(employeeRaw * revelryMinPerEmployeeMonthly));
+        }
       }
       setBudgetValidationMessage("Based on company size, the minimum is $15 per employee per month.");
       return;
@@ -6701,7 +6705,7 @@ function initializeLandingSetupFlow() {
       showSetupSignUpPopup();
       return;
     }
-    enforceRevelryBudgetMinimums();
+    enforceRevelryBudgetMinimums(true); // warn only while typing; enforcement happens on blur/enter
 
     const prevTotal = Number(state.landingDraft.totalBudget || 0);
     const prevEmployee = Number(state.landingDraft.employeeCount || 0);
@@ -7184,7 +7188,7 @@ function updateSetupStepButtonStates() {
     if (step <= 6 && isCompleted) {
       btn.textContent = "Save";
     } else if (step === 6) {
-      btn.textContent = "See Your Engagement Plan →";
+      btn.textContent = "See your employee experience program →";
     } else if (step === 7) {
       btn.textContent = state.setupShortlistMode === "book"
         ? "Book this event ↗"
