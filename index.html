@@ -237,6 +237,10 @@
         </div>
       </div>
   </aside>
+  <!-- Sidebar lock overlay for pre-auth landing state -->
+  <div id="sidebarLandingLockBanner" class="hidden px-3 py-3 text-center" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #f8fafc 70%, transparent); padding: 16px 12px 14px;">
+    <p class="text-[11px] text-slate-500 leading-snug">Create your program to<br>unlock these tools</p>
+  </div>
 
 
 
@@ -247,20 +251,47 @@
         <div id="landingSetupFlow">
           <!-- Hero copy placeholder -->
           <div id="landingHeroCopy" class="mb-8 text-center">
-            <h2 class="text-2xl font-semibold mb-3">Hero copy goes here</h2>
-            <p class="text-slate-600">(Placeholder — provided later.)</p>
+            <h1 id="landingHeroHeadline" class="text-3xl font-bold text-slate-900 mb-3 leading-tight">Create your employee experience program in minutes</h1>
+            <p class="text-base text-slate-600 mb-3 max-w-2xl mx-auto">Answer a few quick questions and see the next 4 months of team events tailored to your goals, budget, and team interests.</p>
+            <p class="text-sm text-slate-400">Takes about 2 minutes &nbsp;•&nbsp; No signup required</p>
           </div>
 
 
           <!-- Setup Steps -->
-          <div id="setupStepsContainer" class="space-y-3 mb-8">
-            <div id="setupHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; position: relative; display: flex; align-items: center; justify-content: space-between; width: calc(100% - 60px);">
-              <span id="setupSectionIcon" aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; line-height: 1;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0 .274 1.128 1.514 1.66 2.515 1.168 1.556-.765 3.323 1.002 2.558 2.558-.492 1.001.04 2.241 1.168 2.515 1.756.426 1.756 2.924 0 3.35-1.128.274-1.66 1.514-1.168 2.515.765 1.556-1.002 3.323-2.558 2.558-1.001-.492-2.241.04-2.515 1.168-.426 1.756-2.924 1.756-3.35 0-.274-1.128-1.514-1.66-2.515-1.168-1.556.765-3.323-1.002-2.558-2.558.492-1.001-.04-2.241-1.168-2.515-1.756-.426-1.756-2.924 0-3.35 1.128-.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323 2.558-2.558 1.001.492 2.241-.04 2.515-1.168Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span id="setupHeadingMainLabel">SETUP</span>
-              <a id="setupHeadingMainEdit" href="#" style="display: none; margin-left: auto; font-size: 12px; color: #94a3b8; font-weight: 500; text-decoration: none; text-transform: none;">Edit</a>
+
+          <!-- Builder section: step indicator (left) + question area (right) -->
+          <div id="landingBuilderArea" class="landing-builder-area">
+
+            <!-- Left column: milestone step indicator -->
+            <div id="landingStepIndicator" class="landing-step-indicator">
+              <div class="landing-step-item active" data-milestone="1">
+                <div class="landing-step-dot"></div>
+                <div class="landing-step-connector"></div>
+                <span class="landing-step-label">Tell us about your team</span>
+              </div>
+              <div class="landing-step-item" data-milestone="2">
+                <div class="landing-step-dot"></div>
+                <div class="landing-step-connector"></div>
+                <span class="landing-step-label">Get your engagement plan</span>
+              </div>
+              <div class="landing-step-item" data-milestone="3">
+                <div class="landing-step-dot"></div>
+                <span class="landing-step-label">Launch your first event</span>
+              </div>
             </div>
+
+            <!-- Right column: question flow -->
+            <div id="landingQuestionArea">
+              <div id="landingQuestionCounter" class="landing-question-counter">Question 1 of 6</div>
+
+              <!-- Hidden anchor elements kept for JS compatibility -->
+              <div id="setupHeadingMain" style="display:none;">
+                <span id="setupSectionIcon"></span>
+                <span id="setupHeadingMainLabel"></span>
+                <a id="setupHeadingMainEdit" href="#" style="display:none;"></a>
+              </div>
+
+              <div id="setupStepsContainer" class="landing-steps-container">
             <!-- Step 1: Goals -->
             <div class="setup-step active" data-step="1">
               <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
@@ -491,7 +522,36 @@
 
 
             <!-- Step 7: Events Shortlist -->
-            <div id="eventWorkflowHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; margin-top: 2em; position: relative; display: none;">
+            </div><!-- end #setupStepsContainer -->
+            </div><!-- end #landingQuestionArea -->
+          </div><!-- end #landingBuilderArea -->
+
+          <!-- Program preview: always visible from page load as motivation teaser -->
+          <div id="landingProgramPreview" class="landing-program-preview mt-10">
+            <h2 class="text-lg font-semibold text-slate-900 mb-1">Example Employee Experience Program</h2>
+            <p class="text-sm text-slate-500 mb-5">Monthly cadence &nbsp;•&nbsp; Balanced for engagement and budget</p>
+            <div class="landing-preview-months">
+              <div class="landing-preview-month-card"><span class="landing-preview-month-label">Month 1</span></div>
+              <div class="landing-preview-month-card"><span class="landing-preview-month-label">Month 2</span></div>
+              <div class="landing-preview-month-card"><span class="landing-preview-month-label">Month 3</span></div>
+              <div class="landing-preview-month-card"><span class="landing-preview-month-label">Month 4</span></div>
+            </div>
+          </div>
+
+          <!-- Program result section: hidden until Q6 complete, replaces preview -->
+          <div id="landingProgramResult" class="hidden mt-10">
+            <div id="landingProgramLoading" class="py-12 text-center">
+              <p class="text-base font-medium text-slate-600">Generating your employee experience program…</p>
+              <div class="landing-loading-dots mt-3" aria-hidden="true"><span></span><span></span><span></span></div>
+            </div>
+            <div id="landingProgramContent" class="hidden">
+              <div id="landingProgramContentHeading" class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-1">Your 4-Month Engagement Plan</h2>
+                <p class="text-sm text-slate-500">Tailored to your goals, budget, and team interests.</p>
+              </div>
+
+              <!-- Step 7 and workflow steps live here (moved from question area) -->
+              <div id="eventWorkflowHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; margin-top: 2em; position: relative; display: none;">
               <span aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h16M14 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
@@ -774,10 +834,11 @@
               </div>
             </div>
             -->
-          </div>
-        </div>
-      </div>
-    </section>
+            </div><!-- end #landingProgramContent -->
+          </div><!-- end #landingProgramResult -->
+        </div><!-- end #landingSetupFlow -->
+      </div><!-- end .mx-auto -->
+    </section><!-- end #landingView -->
 
 
     <section id="appView" class="hidden">

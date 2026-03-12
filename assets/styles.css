@@ -709,6 +709,159 @@ font-size: 11px;
 }
 
 .poll-datetime-picker-only {
+
+  /* ===== Landing Builder Layout ===== */
+
+  /* Two-column builder layout */
+  .landing-builder-area {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .landing-builder-area {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  /* Step indicator column */
+  .landing-step-indicator {
+    padding-top: 4px;
+    position: sticky;
+    top: 24px;
+  }
+  .landing-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    color: #cbd5e1;
+    margin-bottom: 32px;
+  }
+  .landing-step-item.active {
+    color: #1e293b;
+  }
+  .landing-step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    flex-shrink: 0;
+    margin-top: 3px;
+    background: transparent;
+  }
+  .landing-step-item.active .landing-step-dot {
+    background: currentColor;
+  }
+  .landing-step-connector {
+    position: absolute;
+    left: 5px;
+    top: 18px;
+    width: 2px;
+    height: 32px;
+    background: currentColor;
+    opacity: 0.25;
+  }
+  .landing-step-label {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: inherit;
+  }
+  .landing-step-item.active .landing-step-label {
+    font-weight: 600;
+  }
+
+  /* Question counter */
+  .landing-question-counter {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* In the question area, hide step accordion headers — show only active content */
+  #landingQuestionArea .setup-step-header {
+    display: none !important;
+  }
+  #landingQuestionArea .setup-step-content.hidden {
+    display: none !important;
+  }
+  #landingQuestionArea .setup-step-content:not(.hidden) {
+    display: block;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  /* Program preview placeholder */
+  .landing-program-preview {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 32px;
+  }
+  .landing-preview-months {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 768px) {
+    .landing-preview-months {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .landing-preview-month-card {
+    height: 100px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px;
+  }
+  .landing-preview-month-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Loading dots */
+  .landing-loading-dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .landing-loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: ldPulse 1.2s ease-in-out infinite;
+  }
+  .landing-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .landing-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes ldPulse {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+
+  /* Sidebar locked state (pre-auth landing) */
+  .eeos-sidebar--landing-locked #sidebarDashboardSection,
+  .eeos-sidebar--landing-locked #sidebarSetupHeading,
+  .eeos-sidebar--landing-locked #sidebarEventWorkflowSection {
+    opacity: 0.35;
+    pointer-events: none;
+    cursor: default;
+  }
+  .eeos-sidebar--landing-locked #sidebarLandingLockBanner {
+    display: block !important;
+  }
   pointer-events: none;
 }
 

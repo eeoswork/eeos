@@ -4113,6 +4113,7 @@ const eventWorkflowSection = $("sidebarEventWorkflowSection");
 const landingView = $("landingView");
 const isLandingActive = landingView && !landingView.classList.contains("hidden");
 const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
+renderSidebarLandingLock();
 const activeSidebarStepBg = "#E0E7FF";
 const activeSidebarStepText = "#1F2937";
 const activeWorkflowType = getActiveWorkflowType();
@@ -7659,6 +7660,7 @@ function renderSetupStepStates() {
   renderRunEventStep();
   renderCollectFeedbackStep();
   renderReviewImpactStep();
+  renderLandingBuilderUI(activeSetupStep || 1);
 }
 
 
@@ -8057,6 +8059,70 @@ function updateMobileSidebarToggleOffset() {
   const rect = anchor.getBoundingClientRect();
   const rightOffset = Math.max(12, Math.round(window.innerWidth - rect.right));
   toggle.style.right = `${rightOffset}px`;
+}
+
+function renderLandingBuilderUI(activeStep) {
+  const landingView = document.getElementById("landingView");
+  if (!landingView || landingView.classList.contains("hidden")) return;
+
+  const counter = document.getElementById("landingQuestionCounter");
+  const milestones = document.querySelectorAll(".landing-step-item");
+  const builderArea = document.getElementById("landingBuilderArea");
+  const programResult = document.getElementById("landingProgramResult");
+
+  const questionNum = Math.min(Math.max(activeStep, 1), 6);
+  if (counter) counter.textContent = `Question ${questionNum} of 6`;
+
+  milestones.forEach((m, i) => {
+    const milestone = i + 1;
+    if (activeStep <= 6) {
+      m.classList.toggle("active", milestone === 1);
+    } else if (activeStep === 7) {
+      m.classList.toggle("active", milestone === 2);
+    } else {
+      m.classList.toggle("active", milestone === 3);
+    }
+  });
+
+  if (activeStep >= 7) {
+    landingTransitionToProgram();
+  } else {
+    if (builderArea) builderArea.style.display = "";
+    if (programResult) programResult.classList.add("hidden");
+  }
+}
+
+function landingTransitionToProgram() {
+  const builderArea = document.getElementById("landingBuilderArea");
+  const programPreview = document.getElementById("landingProgramPreview");
+  const programResult = document.getElementById("landingProgramResult");
+  const programLoading = document.getElementById("landingProgramLoading");
+  const programContent = document.getElementById("landingProgramContent");
+  const heroHeadline = document.getElementById("landingHeroHeadline");
+
+  if (!programResult || programResult._transitioning || !programResult.classList.contains("hidden")) return;
+  programResult._transitioning = true;
+
+  if (builderArea) builderArea.style.display = "none";
+  if (programPreview) programPreview.style.display = "none";
+  programResult.classList.remove("hidden");
+  if (programLoading) programLoading.style.display = "block";
+  if (programContent) programContent.classList.add("hidden");
+  if (heroHeadline) heroHeadline.textContent = "Your 4-Month Engagement Plan";
+
+  setTimeout(() => {
+    if (programLoading) programLoading.style.display = "none";
+    if (programContent) programContent.classList.remove("hidden");
+    programResult._transitioning = false;
+  }, 1200);
+}
+
+function renderSidebarLandingLock() {
+  const sidebar = document.querySelector(".eeos-sidebar");
+  if (!sidebar) return;
+  const allCoreSetupComplete = [1, 2, 3, 4, 5, 6].every(s => state.completedSetupSteps.includes(s));
+  const isLocked = !(state.user && allCoreSetupComplete);
+  sidebar.classList.toggle("eeos-sidebar--landing-locked", isLocked);
 }
 
 async function bootstrap() {
