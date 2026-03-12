@@ -4807,9 +4807,10 @@ function renderFourMonthProgram() {
           <div style="flex: 1; height: 1px; background: ${_lineColor};"></div>
         </div>`
       : "";
-    const nextEventBadge = isNextEvent
-      ? '<span style="display: inline-block; background: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; white-space: nowrap;">Next event</span>'
-      : "";
+    // const nextEventBadge = isNextEvent
+    //   ? '<span style="display: inline-block; background: #dfe8ff; color: #1f2939; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 400; white-space: nowrap;">Next event</span>'
+    //   : "";
+    const nextEventBadge = "";
     const cardBorderStyle = "1px solid #e2e8f0";
     const cardShadowStyle = isNextEvent ? "0 6px 18px rgba(15, 23, 42, 0.10)" : "0 1px 2px rgba(15, 23, 42, 0.04)";
     const headerBackgroundStyle = isNextEvent ? "#f1f5f9" : "#f8fafc";
