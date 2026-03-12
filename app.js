@@ -206,7 +206,7 @@ function getWorkflowTypeLabel(eventLike = {}) {
       || title === "march madness brackets challenge"
       || title === "company-wide march madness challenge";
     if (isRevelryBracketsMagicContext() && isMarchMadness) {
-      return "Runs from March 19 to April 6.  Your total admin time during this period: 30 minutes.";
+      return "Runs from March 19 to April 6.  Your total admin time during the challenge: under 30 minutes.";
     }
     return "Promote";
   }
@@ -4533,9 +4533,9 @@ function getLaunchEventLocationPillByMonth(monthName = "") {
 function getRevelryMonthFooterText(monthName = "") {
   if (!isRevelryBracketsMagicContext()) return "";
   const label = String(monthName || "").trim();
-  if (label === "April") return "Event duration: 60 minutes.  Your admin time for the month: less than 45 minutes.";
-  if (label === "May") return "Event duration: 15-45 minutes.  Your admin time for the month: less than 30 minutes.";
-  if (label === "June") return "Event duration: 9a - 2p.  Your admin time for the month: less than 30 minutes.";
+  if (label === "April") return "Event duration: 60 minutes.  Your admin time for the month: under 45 minutes.";
+  if (label === "May") return "Event duration: 15-45 minutes.  Your admin time for the month: under 30 minutes.";
+  if (label === "June") return "Event duration: 9a - 2p.  Your admin time for the month: under 30 minutes.";
   return "";
 }
 
