@@ -4533,7 +4533,7 @@ function getLaunchEventLocationPillByMonth(monthName = "") {
 function getRevelryMonthFooterText(monthName = "") {
   if (!isRevelryBracketsMagicContext()) return "";
   const label = String(monthName || "").trim();
-  if (label === "April") return "Event duration: 60 minutes.  Your admin time for the month: less than 60 minutes.";
+  if (label === "April") return "Event duration: 60 minutes.  Your admin time for the month: less than 45 minutes.";
   if (label === "May") return "Event duration: 15-45 minutes.  Your admin time for the month: less than 30 minutes.";
   if (label === "June") return "Event duration: 9a - 2p.  Your admin time for the month: less than 30 minutes.";
   return "";
@@ -4866,6 +4866,12 @@ function renderFourMonthProgram() {
         : "Prefer to choose the event yourself?";
       const modeToggleLabel = isBookMode ? "Generate a poll" : "Skip poll → Book now";
       const primaryLabel = isBookMode ? "Book this event ↗" : "Let your team choose — Generate poll";
+      const confettiHeaderTitle = isRevelryBracketsMagicContext() && monthName === "April"
+        ? "Team-Selected Event"
+        : "Choose Event";
+      const confettiHeaderTitleStyle = isRevelryBracketsMagicContext() && monthName === "April"
+        ? "margin: 0; font-style: italic;"
+        : "margin: 0;";
       return sectionHeaderHtml + `
         <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
           <div style="padding: 16px; background: ${headerBackgroundStyle}; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
@@ -4882,7 +4888,7 @@ function renderFourMonthProgram() {
                   <span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(categoryPill)}</span>
                   ${locationPillHtml}
                 </div>
-                <p class="text-base font-semibold text-slate-900" style="margin: 0;">Choose Event</p>
+                <p class="text-base font-semibold text-slate-900" style="${confettiHeaderTitleStyle}">${escapeHtml(confettiHeaderTitle)}</p>
               </div>
             </div>
             <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
