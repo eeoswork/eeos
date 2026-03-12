@@ -70,11 +70,23 @@ function setSetupExpansionState(expanded, options = {}) {
   void headersOnly;
 }
 
+function isAllCoreSetupComplete() {
+  return [1, 2, 3, 4, 5, 6].every((stepNum) => state.completedSetupSteps.includes(stepNum));
+}
+
 function normalizeSidebarAccordionState() {
-  const currentStep = Number(state.currentSetupStep || 1);
-  state.sidebarActiveSection = currentStep >= EVENT_WORKFLOW_STEPS.SHORTLIST
-    ? "event-workflow"
-    : "setup";
+  if (!isAllCoreSetupComplete()) {
+    state.sidebarActiveSection = "setup";
+    state.sidebarSetupExpanded = false;
+    state.setupMenuExpanded = false;
+    state.sidebarEventWorkflowExpanded = false;
+    return;
+  }
+
+  const activeSection = String(state.sidebarActiveSection || "").trim();
+  state.sidebarActiveSection = ["setup", "event-workflow"].includes(activeSection)
+    ? activeSection
+    : "event-workflow";
   state.sidebarSetupExpanded = state.sidebarActiveSection === "setup";
   state.setupMenuExpanded = state.sidebarSetupExpanded;
   state.sidebarEventWorkflowExpanded = state.sidebarActiveSection === "event-workflow";
@@ -82,7 +94,7 @@ function normalizeSidebarAccordionState() {
 
 function setSidebarActiveSection(section) {
   const targetSection = String(section || "").trim();
-  if (!["dashboard", "setup", "event-workflow"].includes(targetSection)) return;
+  if (!["setup", "event-workflow"].includes(targetSection)) return;
   state.sidebarActiveSection = targetSection;
   normalizeSidebarAccordionState();
 }
@@ -4113,7 +4125,7 @@ const eventWorkflowItems = document.querySelectorAll("[data-event-workflow-menu-
 const eventWorkflowSection = $("sidebarEventWorkflowSection");
 const landingView = $("landingView");
 const isLandingActive = landingView && !landingView.classList.contains("hidden");
-const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
+const allCoreSetupComplete = isAllCoreSetupComplete();
 const activeSidebarStepBg = "#E0E7FF";
 const activeSidebarStepText = "#1F2937";
 const activeWorkflowType = getActiveWorkflowType();
@@ -4140,18 +4152,21 @@ setupItems.forEach((item) => {
   const isCompleted = state.completedSetupSteps.includes(stepNum);
   const isFutureStep = !isCompleted && Number.isInteger(setupProcessCurrentStep) && stepNum > setupProcessCurrentStep;
   const isLockedFutureStep = isFutureStep && !allowTestingStepNavigation;
+  const isSetupLocked = !allCoreSetupComplete || isLockedFutureStep;
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
   item.classList.toggle("sidebar-step-process-current", isProcessCurrent);
-  item.classList.toggle("sidebar-step-locked", isLockedFutureStep && !isActive);
-  item.style.background = isActive ? activeSidebarStepBg : "transparent";
-  item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
-  item.style.color = isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b");
-  item.style.opacity = isLockedFutureStep && !isActive ? "0.72" : "1";
-  item.style.cursor = isLockedFutureStep ? "not-allowed" : "pointer";
+  item.classList.toggle("sidebar-step-locked", isSetupLocked && !isActive);
+  item.style.background = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
+  item.style.borderColor = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
+  item.style.color = allCoreSetupComplete
+    ? (isActive ? activeSidebarStepText : (isCompleted ? "#64748b" : "#1e293b"))
+    : "#94a3b8";
+  item.style.opacity = isSetupLocked ? "0.58" : "1";
+  item.style.cursor = isSetupLocked ? "not-allowed" : "pointer";
   item.onclick = () => {
-    if (isLockedFutureStep) return;
+    if (!allCoreSetupComplete || isLockedFutureStep) return;
     if (stepNum) {
       setSidebarActiveSection("setup");
       state.currentSetupStep = stepNum;
@@ -4168,7 +4183,7 @@ setupItems.forEach((item) => {
 });
 
 if (eventWorkflowSection) {
-  eventWorkflowSection.style.display = allCoreSetupComplete ? "block" : "none";
+  eventWorkflowSection.style.display = "block";
 
   const sidebarNavWorkflowEventSubtitle = document.getElementById("sidebarNavWorkflowEventSubtitle");
   if (sidebarNavWorkflowEventSubtitle) {
@@ -4220,19 +4235,21 @@ eventWorkflowItems.forEach((item) => {
   const isFutureStep = !isCompleted && stepNum > processCurrentStep;
   const isLockedCompletedWorkflowStep = isCompleted && stepNum < processCurrentStep;
   const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
-  const isLocked = !allowTestingStepNavigation && !isBookEventDebugOverride && (
+  const isLocked = !allCoreSetupComplete || (!allowTestingStepNavigation && !isBookEventDebugOverride && (
     isLockedCompletedWorkflowStep
     || isFutureStep
     || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
-  );
+  ));
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
   item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
   item.classList.add(iconStateClass);
   item.classList.toggle("sidebar-step-process-current", isProcessCurrent);
   item.classList.toggle("sidebar-step-locked", isLocked && !isActive);
-  item.style.background = isActive ? activeSidebarStepBg : "transparent";
-  item.style.borderColor = isActive ? activeSidebarStepBg : "transparent";
-  item.style.color = isActive ? activeSidebarStepText : (isLockedCompletedWorkflowStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b"));
+  item.style.background = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
+  item.style.borderColor = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
+  item.style.color = allCoreSetupComplete
+    ? (isActive ? activeSidebarStepText : (isLockedCompletedWorkflowStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b")))
+    : "#94a3b8";
   item.style.opacity = isLocked && !isActive ? "0.58" : "1";
   item.style.cursor = isLocked ? "not-allowed" : "pointer";
   item.onclick = () => {
@@ -4265,8 +4282,7 @@ workflowItems.forEach((item) => {
   }
 });
 
-  // Always apply home lock state last so it overrides any style set above
-  applySidebarLandingHomeLock();
+  applySidebarSetupPhaseState();
 }
 
 
@@ -6137,24 +6153,35 @@ function shouldShowLandingHome() {
   return !state.landingBuilderStarted && !state.appIdentityCommitted && !hasAuthSession;
 }
 
-function applySidebarLandingHomeLock() {
-  const showHome = shouldShowLandingHome();
+function applySidebarSetupPhaseState() {
+  const allCoreSetupComplete = isAllCoreSetupComplete();
   const dashboardSection = $("sidebarDashboardSection");
   const setupHeading = $("sidebarSetupHeading");
+  const eventWorkflowHeading = $("sidebarEventWorkflowHeading");
   const eventWorkflowSection = $("sidebarEventWorkflowSection");
   const setupMenuCollapse = $("sidebarSetupMenuCollapse");
   const eventWorkflowMenuCollapse = $("sidebarEventWorkflowMenuCollapse");
 
-  if (dashboardSection) dashboardSection.classList.toggle("sidebar-nav--home-locked", showHome);
-  if (setupHeading) setupHeading.classList.toggle("sidebar-nav--home-locked", showHome);
+  if (dashboardSection) {
+    dashboardSection.classList.add("sidebar-nav--home-locked");
+    dashboardSection.style.cursor = "default";
+  }
 
-  if (showHome) {
-    // Show Event Workflow locked/grayed on home page
-    if (eventWorkflowSection) {
-      eventWorkflowSection.style.display = "block";
-      eventWorkflowSection.classList.add("sidebar-nav--home-locked");
-    }
-    // Collapse sub-menus — no steps visible on home page
+  if (setupHeading) {
+    setupHeading.classList.toggle("sidebar-nav--home-locked", !allCoreSetupComplete);
+    setupHeading.style.cursor = allCoreSetupComplete ? "pointer" : "default";
+  }
+
+  if (eventWorkflowHeading) {
+    eventWorkflowHeading.style.cursor = allCoreSetupComplete ? "pointer" : "default";
+  }
+
+  if (eventWorkflowSection) {
+    eventWorkflowSection.style.display = "block";
+    eventWorkflowSection.classList.toggle("sidebar-nav--home-locked", !allCoreSetupComplete);
+  }
+
+  if (!allCoreSetupComplete) {
     if (setupMenuCollapse) {
       setupMenuCollapse.style.maxHeight = "0px";
       setupMenuCollapse.style.overflow = "hidden";
@@ -6163,12 +6190,6 @@ function applySidebarLandingHomeLock() {
       eventWorkflowMenuCollapse.style.maxHeight = "0px";
       eventWorkflowMenuCollapse.style.overflow = "hidden";
     }
-  } else {
-    if (eventWorkflowSection) {
-      eventWorkflowSection.classList.remove("sidebar-nav--home-locked");
-      // display is controlled by renderSidebarStepMenus
-    }
-    // sub-menu max-heights will be restored by updateSidebarSetupCollapseUI / updateSidebarEventWorkflowCollapseUI
   }
 }
 
@@ -6184,7 +6205,7 @@ function updateLandingHomeView() {
   }
   if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
   if (startActions) startActions.style.display = showHome ? "block" : "none";
-  applySidebarLandingHomeLock();
+  applySidebarSetupPhaseState();
 }
 
 function markLandingBuilderStarted() {
@@ -6227,16 +6248,26 @@ function initializeLandingSetupFlow() {
     }
   });
 
-  const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
+  const allCoreSetupComplete = isAllCoreSetupComplete();
   if (!allCoreSetupComplete && (state.currentSetupStep === null || state.currentSetupStep > 6)) {
     state.currentSetupStep = 1;
   }
   if (allCoreSetupComplete) {
+    const workflowProcessStep = getEventWorkflowProcessStep();
     state.setupMenuExpanded = false;
     state.sidebarSetupExpanded = false;
+    state.sidebarEventWorkflowExpanded = true;
+    state.sidebarActiveSection = "event-workflow";
     state.sidebarSetupAutoCollapsed = true;
+    if (!Number.isInteger(state.currentSetupStep) || state.currentSetupStep <= 6) {
+      state.currentSetupStep = Number.isInteger(workflowProcessStep)
+        ? workflowProcessStep
+        : EVENT_WORKFLOW_STEPS.SHORTLIST;
+    }
   } else {
-    state.setupMenuExpanded = true;
+    state.setupMenuExpanded = false;
+    state.sidebarSetupExpanded = false;
+    state.sidebarEventWorkflowExpanded = false;
   }
   persistState();
   renderSetupMenuState();
@@ -7142,7 +7173,10 @@ function attachSetupStepHandlers() {
         
         // One-time auto-collapse after final setup step is completed
         if (!state.sidebarSetupAutoCollapsed) {
+          state.sidebarActiveSection = "event-workflow";
           state.sidebarSetupExpanded = false;
+          state.setupMenuExpanded = false;
+          state.sidebarEventWorkflowExpanded = true;
           state.sidebarSetupAutoCollapsed = true;
           persistState();
         }
@@ -7890,40 +7924,32 @@ if (monthlyEventsContainer) {
 
 const sidebarSetupHeading = $("sidebarSetupHeading");
 if (sidebarSetupHeading) {
-  sidebarSetupHeading.style.cursor = "pointer";
   sidebarSetupHeading.addEventListener("click", () => {
-    const allCoreSetupComplete = [1,2,3,4,5,6].every((stepNum) => state.completedSetupSteps.includes(stepNum));
+    const allCoreSetupComplete = isAllCoreSetupComplete();
+    if (!allCoreSetupComplete) return;
     setSidebarActiveSection("setup");
-    if (allCoreSetupComplete) {
-      state.currentSetupStep = 1;
-      state.setupMenuExpanded = true;
-      state.sidebarSetupExpanded = true;
-    }
+    state.currentSetupStep = 1;
+    state.setupMenuExpanded = true;
+    state.sidebarSetupExpanded = true;
+    state.sidebarEventWorkflowExpanded = false;
     persistState();
     renderSetupMenuState();
     renderSidebarStepMenus();
     renderSetupStepStates();
-    if (allCoreSetupComplete) {
-      forceExpandSetupStep(1);
-      scrollSetupStepIntoView(1, "smooth", true);
-    }
+    forceExpandSetupStep(1);
+    scrollSetupStepIntoView(1, "smooth", true);
   });
 }
 
 const sidebarDashboardSection = $("sidebarDashboardSection");
 if (sidebarDashboardSection) {
-  sidebarDashboardSection.style.cursor = "pointer";
-  sidebarDashboardSection.addEventListener("click", () => {
-    setSidebarActiveSection("dashboard");
-    persistState();
-    renderSidebarStepMenus();
-  });
+  sidebarDashboardSection.style.cursor = "default";
 }
 
 const sidebarEventWorkflowHeading = $("sidebarEventWorkflowHeading");
 if (sidebarEventWorkflowHeading) {
-  sidebarEventWorkflowHeading.style.cursor = "pointer";
   sidebarEventWorkflowHeading.addEventListener("click", () => {
+    if (!isAllCoreSetupComplete()) return;
     setSidebarActiveSection("event-workflow");
     const workflowType = getActiveWorkflowType();
     const workflowSteps = getEventWorkflowStepSequence(workflowType);
