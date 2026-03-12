@@ -873,6 +873,7 @@ landingIdentityMode: "generic",
 landingIdentityCommitted: false,
 appIdentityCommitted: false,
 landingBuilderStarted: false,
+landingFirstEventLaunched: false,
 setupCompleted: true,
 setupMenuExpanded: false,
 sidebarSetupAutoCollapsed: false, // triggers one-time auto-collapse after final setup step
@@ -5675,6 +5676,7 @@ if (action === "create-event") {
 
   const workflowConfig = getEventWorkflowConfig(template);
   setEventLaunchContextFromTemplate(template);
+  state.landingFirstEventLaunched = true;
 
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") state.pollBuilder = {};
   if (!state.pollBuilder.eventLabelOverrides) state.pollBuilder.eventLabelOverrides = {};
@@ -6153,6 +6155,46 @@ function shouldShowLandingHome() {
   return !state.landingBuilderStarted && !state.appIdentityCommitted && !hasAuthSession;
 }
 
+function hasLandingFirstEventLaunchStarted() {
+  if (state.landingFirstEventLaunched) return true;
+  if (String(state.eventLaunchContext?.templateId || "").trim()) return true;
+  if (Number.isInteger(state.currentSetupStep) && state.currentSetupStep >= EVENT_WORKFLOW_STEPS.POLL) return true;
+  return Array.isArray(state.completedSetupSteps)
+    && state.completedSetupSteps.some((stepNum) => Number(stepNum || 0) >= EVENT_WORKFLOW_STEPS.POLL);
+}
+
+function getLandingProgressStage() {
+  if (shouldShowLandingHome()) return 0;
+  if (hasLandingFirstEventLaunchStarted()) return 3;
+  if (isAllCoreSetupComplete()) return 2;
+  return 1;
+}
+
+function renderLandingProgressBar() {
+  const progressCard = $("landingProgressCard");
+  if (!progressCard) return;
+
+  const stage = getLandingProgressStage();
+  progressCard.classList.toggle("hidden", stage === 0);
+  if (stage === 0) return;
+
+  document.querySelectorAll("[data-landing-progress-step]").forEach((stepEl) => {
+    const stepNum = Number(stepEl.getAttribute("data-landing-progress-step") || 0);
+    let status = "upcoming";
+    if (stepNum < stage) {
+      status = "complete";
+    } else if (stepNum === stage) {
+      status = "current";
+    }
+    stepEl.setAttribute("data-status", status);
+  });
+
+  document.querySelectorAll("[data-landing-progress-connector]").forEach((connectorEl) => {
+    const connectorNum = Number(connectorEl.getAttribute("data-landing-progress-connector") || 0);
+    connectorEl.setAttribute("data-status", connectorNum < stage ? "complete" : "upcoming");
+  });
+}
+
 function applySidebarSetupPhaseState() {
   const allCoreSetupComplete = isAllCoreSetupComplete();
   const dashboardSection = $("sidebarDashboardSection");
@@ -6205,6 +6247,7 @@ function updateLandingHomeView() {
   }
   if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
   if (startActions) startActions.style.display = showHome ? "block" : "none";
+  renderLandingProgressBar();
   applySidebarSetupPhaseState();
 }
 
@@ -7443,7 +7486,7 @@ function renderSetupStepStates() {
   reorderMainSetupCards();
   const singleStepMainView = true;
   const revelryReadOnlyCompletedSteps = isRevelryLabsReadOnlyMagicLink();
-  const allCoreSetupComplete = [1,2,3,4,5,6].every(s => state.completedSetupSteps.includes(s));
+  const allCoreSetupComplete = isAllCoreSetupComplete();
   const setupProcessCurrentStep = (() => {
     for (let step = 1; step <= 6; step += 1) {
       if (!state.completedSetupSteps.includes(step)) return step;
@@ -7570,6 +7613,7 @@ function renderSetupStepStates() {
     if (landingHeroCopy) {
       landingHeroCopy.style.display = shouldShowLandingHome() ? "" : "none";
     }
+    renderLandingProgressBar();
     if (setupHeadingMain) setupHeadingMain.style.display = "none";
     if (setupHeadingMainEdit) setupHeadingMainEdit.style.display = "none";
     if (eventWorkflowHeadingMain) eventWorkflowHeadingMain.style.display = "none";

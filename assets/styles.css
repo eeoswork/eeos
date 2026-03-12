@@ -716,6 +716,91 @@ font-size: 11px;
   transition: opacity 0.18s ease;
 }
 
+.landing-progress-track {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1fr minmax(0, 1fr) 1fr minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.landing-progress-step {
+  min-width: 0;
+}
+
+.landing-progress-step-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.landing-progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  border: 2px solid #cbd5e1;
+  background: transparent;
+  flex: 0 0 auto;
+}
+
+.landing-progress-step-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.landing-progress-step-title {
+  font-size: 0.9375rem;
+  line-height: 1.35rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.landing-progress-connector {
+  align-self: center;
+  height: 2px;
+  margin-top: 5px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}
+
+.landing-progress-step[data-status="current"] .landing-progress-dot,
+.landing-progress-step[data-status="complete"] .landing-progress-dot {
+  border-color: #0f172a;
+  background: #0f172a;
+}
+
+.landing-progress-step[data-status="current"] .landing-progress-step-label,
+.landing-progress-step[data-status="current"] .landing-progress-step-title,
+.landing-progress-step[data-status="complete"] .landing-progress-step-label {
+  color: #0f172a;
+}
+
+.landing-progress-step[data-status="complete"] .landing-progress-step-title {
+  color: #475569;
+}
+
+.landing-progress-connector[data-status="complete"] {
+  background: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .landing-progress-track {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .landing-progress-connector {
+    display: none;
+  }
+
+  .landing-progress-card {
+    padding-top: 1.125rem;
+    padding-bottom: 1.125rem;
+  }
+}
+
 /* Sidebar nav items locked on the pre-input home page */
 .sidebar-nav--home-locked {
   opacity: 0.38;
