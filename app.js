@@ -7236,9 +7236,6 @@ function attachSetupStepHandlers() {
         renderSidebarStepMenus();
         updateSetupStepButtonStates();
         renderFourMonthProgram();
-        setTimeout(() => {
-          scrollSetupStepIntoView(7, "smooth");
-        }, 100);
         return; // Skip rest of handler to avoid extra rendering
       }
 
