@@ -6241,7 +6241,7 @@ function updateLandingHomeView() {
   const setupSteps = $("setupStepsContainer");
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
-  if (hero) hero.style.display = "";
+  if (hero) hero.style.display = showHome ? "" : "none";
   if (heroBrandLogoWrap) {
     heroBrandLogoWrap.classList.toggle("hidden", !(showHome && isRevelryLabsReadOnlyMagicLink()));
   }
