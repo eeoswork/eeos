@@ -6053,6 +6053,12 @@ function initializeLandingSetupFlow() {
     const weekdayOptions = ["M", "T", "W", "Th", "F"];
     const supportedDayOptions = [...weekdayOptions, "Sa"];
     const supportedTimeOptions = ["Before 9a", "12-1p", "After 5p"];
+    const enforceSaturdayAvailability = (days = []) => {
+      const weekdays = Array.isArray(days)
+        ? days.filter((day) => weekdayOptions.includes(day))
+        : [];
+      return [...weekdays, "Sa"];
+    };
     const dayButtons = Array.from(setupStepContent5.querySelectorAll('[data-availability-day]'));
     const timeButtons = Array.from(setupStepContent5.querySelectorAll('[data-availability-time]'));
     const saturdayToggle = $("setupSaturdayToggle");
@@ -6081,8 +6087,10 @@ function initializeLandingSetupFlow() {
     let normalizedDays = selectedDays;
     let normalizedTimes = selectedTimes;
 
-    if (normalizedDays.length === 0 || looksLikeLegacyDefault || looksLikePreviousDefault) {
+    if (selectedDays.length === 0 || looksLikeLegacyDefault || looksLikePreviousDefault) {
       normalizedDays = ["Th", "Sa"];
+    } else {
+      normalizedDays = enforceSaturdayAvailability(selectedDays);
     }
     if (normalizedTimes.length === 0 || looksLikeLegacyDefault || looksLikePreviousDefault) {
       normalizedTimes = ["After 5p"];
@@ -6156,6 +6164,7 @@ function initializeLandingSetupFlow() {
     };
 
     const commitAvailabilityState = () => {
+      state.landingDraft.daysSelected = enforceSaturdayAvailability(state.landingDraft.daysSelected);
       persistState();
       renderAvailabilityState();
       validateAndUpdateStep5();
@@ -6170,11 +6179,10 @@ function initializeLandingSetupFlow() {
         }
         const value = button.dataset.availabilityDay;
         const current = Array.isArray(state.landingDraft.daysSelected) ? state.landingDraft.daysSelected.filter((day) => supportedDayOptions.includes(day)) : [];
-        const saturdaySelected = current.includes("Sa") ? ["Sa"] : [];
         const weekdays = current.filter((day) => weekdayOptions.includes(day));
         state.landingDraft.daysSelected = weekdays.includes(value)
-          ? [...weekdays.filter((day) => day !== value), ...saturdaySelected]
-          : [...weekdays, value, ...saturdaySelected];
+          ? [...weekdays.filter((day) => day !== value), "Sa"]
+          : [...weekdays, value, "Sa"];
         commitAvailabilityState();
       });
     });
@@ -6196,18 +6204,9 @@ function initializeLandingSetupFlow() {
     });
 
     if (saturdayToggle) {
-      saturdayToggle.addEventListener("click", () => {
-        if (isCompletedStepEditBlocked(5)) {
-          showSetupSignUpPopup();
-          renderAvailabilityState();
-          return;
-        }
-        const current = Array.isArray(state.landingDraft.daysSelected) ? state.landingDraft.daysSelected.filter((day) => supportedDayOptions.includes(day)) : [];
-        const weekdays = current.filter((day) => weekdayOptions.includes(day));
-        const saturdayOn = current.includes("Sa");
-        state.landingDraft.daysSelected = saturdayOn ? weekdays : [...weekdays, "Sa"];
-        commitAvailabilityState();
-      });
+      saturdayToggle.disabled = true;
+      saturdayToggle.setAttribute("aria-disabled", "true");
+      saturdayToggle.classList.add("cursor-not-allowed", "opacity-90");
     }
 
     renderAvailabilityState();
