@@ -6467,6 +6467,9 @@ function initializeLandingSetupFlow() {
   const budgetGuidanceToggle = $("setupBudgetGuidanceToggle");
   const budgetGuidanceOptions = $("setupBudgetGuidanceOptions");
   const magicBudgetDefaults = getMagicLinkSetupDefaultsForCurrentPath();
+  const isRevelryMagicBudgetContext = isRevelryLabsReadOnlyMagicLink();
+  const revelryMinTotalMonthly = 585;
+  const revelryMinPerEmployeeMonthly = 15;
   let budgetMode = ["total", "perEmployee"].includes(String(state.landingDraft?.budgetMode || ""))
     ? String(state.landingDraft.budgetMode)
     : (["total", "perEmployee"].includes(String(state.programSettings?.budgetMode || ""))
@@ -6479,6 +6482,47 @@ function initializeLandingSetupFlow() {
   };
 
   const hasEnteredTeamSize = () => Number(employeeCountInput?.value || 0) > 0;
+
+  let budgetValidationMessageEl = null;
+  if (budgetHelper?.parentElement) {
+    budgetValidationMessageEl = document.createElement("div");
+    budgetValidationMessageEl.className = "mt-2 hidden text-xs text-rose-600";
+    budgetHelper.parentElement.appendChild(budgetValidationMessageEl);
+  }
+
+  const setBudgetValidationMessage = (message = "") => {
+    if (!budgetValidationMessageEl) return;
+    const nextMessage = String(message || "").trim();
+    budgetValidationMessageEl.textContent = nextMessage;
+    budgetValidationMessageEl.classList.toggle("hidden", !nextMessage);
+  };
+
+  const enforceRevelryBudgetMinimums = () => {
+    if (!isRevelryMagicBudgetContext) return;
+    const totalRaw = Number(totalBudgetInput?.value || 0);
+    const employeeRaw = Number(employeeCountInput?.value || 0);
+    const perEmployeeRaw = Number(perEmployeeInput?.value || 0);
+
+    if (budgetMode === "total" && totalRaw > 0 && totalRaw < revelryMinTotalMonthly) {
+      if (totalBudgetInput) totalBudgetInput.value = String(revelryMinTotalMonthly);
+      if (employeeRaw > 0 && perEmployeeInput) {
+        perEmployeeInput.value = String(Math.round(revelryMinTotalMonthly / employeeRaw));
+      }
+      setBudgetValidationMessage("Based on company size, the minimum is $585.");
+      return;
+    }
+
+    if (budgetMode === "perEmployee" && perEmployeeRaw > 0 && perEmployeeRaw < revelryMinPerEmployeeMonthly) {
+      if (perEmployeeInput) perEmployeeInput.value = String(revelryMinPerEmployeeMonthly);
+      if (employeeRaw > 0 && totalBudgetInput) {
+        totalBudgetInput.value = String(Math.round(employeeRaw * revelryMinPerEmployeeMonthly));
+      }
+      setBudgetValidationMessage("Based on company size, the minimum is $15 per employee per month.");
+      return;
+    }
+
+    setBudgetValidationMessage("");
+  };
 
   const applyFundingGateState = () => {
     const unlocked = hasEnteredTeamSize();
@@ -6553,9 +6597,13 @@ function initializeLandingSetupFlow() {
     if (totalBudgetPanel) totalBudgetPanel.classList.toggle("hidden", budgetMode !== "total");
     if (perEmployeePanel) perEmployeePanel.classList.toggle("hidden", budgetMode !== "perEmployee");
     if (budgetInputLabel) {
-      budgetInputLabel.textContent = budgetMode === "total"
-        ? "Current Monthly Allocation"
-        : "Current Investment Per Employee";
+      if (isRevelryMagicBudgetContext) {
+        budgetInputLabel.textContent = budgetMode === "total" ? "ALLOCATION FOR THE TEAM" : "PEPM";
+      } else {
+        budgetInputLabel.textContent = budgetMode === "total"
+          ? "Current Monthly Allocation"
+          : "Current Investment Per Employee";
+      }
     }
 
     applyFundingGateState();
@@ -6581,6 +6629,20 @@ function initializeLandingSetupFlow() {
   }
   if (perEmployeeInput && magicBudgetDefaults && Number(magicBudgetDefaults.perEmployee || 0) > 0) {
     perEmployeeInput.placeholder = `e.g. ${Number(magicBudgetDefaults.perEmployee || 0)}`;
+  }
+
+  if (isRevelryMagicBudgetContext) {
+    if (modePerEmployeeBtn) {
+      modePerEmployeeBtn.textContent = "Per Employee Monthly";
+    }
+    if (totalBudgetInput) {
+      totalBudgetInput.min = String(revelryMinTotalMonthly);
+      totalBudgetInput.placeholder = `e.g. ${revelryMinTotalMonthly}`;
+    }
+    if (perEmployeeInput) {
+      perEmployeeInput.min = String(revelryMinPerEmployeeMonthly);
+      perEmployeeInput.placeholder = `e.g. ${revelryMinPerEmployeeMonthly}`;
+    }
   }
   
   // Initialize values from state
@@ -6608,6 +6670,8 @@ function initializeLandingSetupFlow() {
       showSetupSignUpPopup();
       return;
     }
+    enforceRevelryBudgetMinimums();
+
     const prevTotal = Number(state.landingDraft.totalBudget || 0);
     const prevEmployee = Number(state.landingDraft.employeeCount || 0);
     const prevPerEmployee = Number(state.landingDraft.perEmployee || 0);
@@ -6685,6 +6749,7 @@ function initializeLandingSetupFlow() {
       }
     }
     
+    enforceRevelryBudgetMinimums();
     saveBudgetState();
   };
 
