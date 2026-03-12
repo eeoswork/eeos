@@ -4905,6 +4905,9 @@ function renderFourMonthProgram() {
 
     // Regular months with single event
     const event = monthEvent;
+    const inCardHeading = isRevelryBracketsMagicContext()
+      ? "How it Works"
+      : String(event.title || "");
     const typeLabel = getWorkflowTypeLabel(event);
     return sectionHeaderHtml + `
       <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
@@ -4931,7 +4934,7 @@ function renderFourMonthProgram() {
           </div>
         </div>
         <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
-          <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(event.title || "")}</h4>
+          <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(inCardHeading)}</h4>
           <p class="text-sm text-slate-600 mt-2">${escapeHtml(event.description || "")}</p>
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
             <div style="font-size: 12px; color: #64748b;">
