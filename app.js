@@ -1942,17 +1942,15 @@ function enforceRevelryLeaderboardLockState() {
 
   const completedSteps = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
   const promoteState = state.promoteEvent && typeof state.promoteEvent === "object" ? state.promoteEvent : {};
-  const hasReachedPromote = Boolean(state.revelryLeaderboardLockArmed)
-    || Number(state.currentSetupStep || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE
-    || Number(state.eventWorkflowProcessStep || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE
-    || completedSteps.some((stepNum) => Number(stepNum || 0) >= EVENT_WORKFLOW_STEPS.PROMOTE)
-    || ["announcement", "reminder_week", "reminder_dayof", "final_winner"].includes(String(promoteState.activeStep || ""))
-    || Boolean(promoteState.announcement?.done)
-    || Boolean(promoteState.reminderWeek?.done)
-    || Boolean(promoteState.announcementLockedAfterContinue)
-    || Boolean(promoteState.reminderWeekLockedAfterContinue);
+  const hasReachedLeaderboard = Boolean(state.revelryLeaderboardLockArmed)
+    || String(promoteState.activeStep || "") === "reminder_dayof"
+    || Boolean(promoteState.reminderWeekLockedAfterContinue)
+    || Boolean(promoteState.reminderDayOf?.done)
+    || Number(state.currentSetupStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
+    || Number(state.eventWorkflowProcessStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
+    || completedSteps.some((stepNum) => Number(stepNum || 0) > EVENT_WORKFLOW_STEPS.PROMOTE);
 
-  if (!hasReachedPromote) {
+  if (!hasReachedLeaderboard) {
     return false;
   }
 
@@ -10399,7 +10397,7 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const isRevelryLeaderboardLock = isRevelryLeaderboardLockEnabled();
+  const isRevelryLeaderboardLock = isRevelryLeaderboardLockEnabled() && Boolean(state.revelryLeaderboardLockArmed);
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isMarchMadnessEvent = isRevelryLabsReadOnlyMagicLink() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
@@ -10956,7 +10954,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
       <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfCardMessage)}</div>
-      ${isRevelryBracketsPromoteFlow
+      ${isRevelryBracketsPromoteFlow && isRevelryLeaderboardLock
         ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. No action is required right now.</div>`
         : `<div class="mt-4 flex flex-wrap items-center gap-2">
             <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
