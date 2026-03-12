@@ -6174,10 +6174,14 @@ function applySidebarLandingHomeLock() {
 
 function updateLandingHomeView() {
   const hero = $("landingHeroCopy");
+  const heroBrandLogoWrap = $("landingHeroBrandLogoWrap");
   const setupSteps = $("setupStepsContainer");
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
   if (hero) hero.style.display = "";
+  if (heroBrandLogoWrap) {
+    heroBrandLogoWrap.classList.toggle("hidden", !(showHome && isRevelryLabsReadOnlyMagicLink()));
+  }
   if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
   if (startActions) startActions.style.display = showHome ? "block" : "none";
   applySidebarLandingHomeLock();
