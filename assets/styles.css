@@ -712,5 +712,13 @@ font-size: 11px;
   pointer-events: none;
 }
 
+#landingHeroCopy {
+  transition: opacity 0.18s ease;
+}
+
+#landingView #setupStepsContainer.hidden + * {
+  margin-top: 0;
+}
+
 
 

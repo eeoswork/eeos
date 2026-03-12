@@ -860,6 +860,7 @@ activeBrowserTabId: null,
 landingIdentityMode: "generic",
 landingIdentityCommitted: false,
 appIdentityCommitted: false,
+landingBuilderStarted: false,
 setupCompleted: true,
 setupMenuExpanded: false,
 sidebarSetupAutoCollapsed: false, // triggers one-time auto-collapse after final setup step
@@ -6117,6 +6118,52 @@ function isCompletedStepEditBlocked(stepNum) {
   return state.completedSetupSteps.includes(stepNum) && !state.user && !state.devBypassSetupEditAuth;
 }
 
+function inferLandingBuilderStartedState() {
+  if (typeof state.landingBuilderStarted === "boolean") return;
+  const hasProgress =
+    (Array.isArray(state.completedSetupSteps) && state.completedSetupSteps.length > 0)
+    || Boolean(state.setupEventsGenerated)
+    || (Number.isInteger(state.currentSetupStep) && state.currentSetupStep > 1)
+    || (Array.isArray(state.landingDraft?.goals) && state.landingDraft.goals.length > 0)
+    || (Array.isArray(state.landingDraft?.teamPreferenceEstimate) && state.landingDraft.teamPreferenceEstimate.length > 0);
+  state.landingBuilderStarted = hasProgress;
+}
+
+function shouldShowLandingHome() {
+  const hasAuthSession = Boolean(getAuthToken());
+  return !state.landingBuilderStarted && !state.appIdentityCommitted && !hasAuthSession;
+}
+
+function updateLandingHomeView() {
+  const hero = $("landingHeroCopy");
+  const setupSteps = $("setupStepsContainer");
+  const startActions = $("landingStartActions");
+  const showHome = shouldShowLandingHome();
+  if (hero) hero.style.display = "";
+  if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
+  if (startActions) startActions.style.display = showHome ? "block" : "none";
+}
+
+function markLandingBuilderStarted() {
+  if (state.landingBuilderStarted) return;
+  state.landingBuilderStarted = true;
+  persistState();
+  updateLandingHomeView();
+}
+
+function startLandingBuilder() {
+  if (!state.landingBuilderStarted) {
+    state.landingBuilderStarted = true;
+  }
+  if (!Number.isInteger(state.currentSetupStep) || state.currentSetupStep < 1 || state.currentSetupStep > 6) {
+    state.currentSetupStep = 1;
+  }
+  persistState();
+  renderSetupStepStates();
+  updateLandingHomeView();
+  setTimeout(() => scrollSetupStepIntoView(1, "smooth", true), 60);
+}
+
 
 
 
@@ -7443,7 +7490,9 @@ function renderSetupStepStates() {
   }
 
   if (singleStepMainView) {
-    if (landingHeroCopy) landingHeroCopy.style.display = "none";
+    if (landingHeroCopy) {
+      landingHeroCopy.style.display = shouldShowLandingHome() ? "" : "none";
+    }
     if (setupHeadingMain) setupHeadingMain.style.display = "none";
     if (setupHeadingMainEdit) setupHeadingMainEdit.style.display = "none";
     if (eventWorkflowHeadingMain) eventWorkflowHeadingMain.style.display = "none";
@@ -7659,6 +7708,7 @@ function renderSetupStepStates() {
   renderRunEventStep();
   renderCollectFeedbackStep();
   renderReviewImpactStep();
+  updateLandingHomeView();
 }
 
 
@@ -7704,6 +7754,18 @@ try {
 } catch (error) {
   console.warn("initializePollBuilderInteractions failed", error);
 }
+
+const landingStartBuilderBtn = $("landingStartBuilder");
+if (landingStartBuilderBtn) {
+  landingStartBuilderBtn.addEventListener("click", startLandingBuilder);
+}
+
+const setupStepsContainer = $("setupStepsContainer");
+if (setupStepsContainer) {
+  setupStepsContainer.addEventListener("input", markLandingBuilderStarted);
+  setupStepsContainer.addEventListener("change", markLandingBuilderStarted);
+}
+updateLandingHomeView();
 
 const landingCompanyInput = $("landingCompanyName");
 const landingAdminInput = $("landingAdminName");
@@ -8074,6 +8136,7 @@ async function bootstrap() {
   applyLandingIdentityFromQuery();
   applyTestingMagicProfileFromQuery();
   applyPinnedIdentity();
+  inferLandingBuilderStartedState();
   logIdentityDebug("bootstrap:afterIdentityHydration");
   renderLandingIdentityView();
   renderAppIdentityView();
