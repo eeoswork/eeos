@@ -1984,6 +1984,37 @@ function getRemainingBudget() {
 return getBudgetTotal() - getTotalSpent();
 }
 
+function getLiveBudgetSnapshot() {
+const landingView = $("landingView");
+const isLandingActive = landingView && !landingView.classList.contains("hidden");
+const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
+const setupTotal = Number(state.landingDraft?.totalBudget || 0);
+const total = budgetEnabled
+  ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
+  : 0;
+const spent = budgetEnabled ? getTotalSpent() : 0;
+const remaining = total - spent;
+return { total, spent, remaining };
+}
+
+function syncBudgetDisplaySurfaces() {
+const { total, spent, remaining } = getLiveBudgetSnapshot();
+
+const totalLabel = $("budgetTotalLabel");
+const spentLabel = $("budgetSpentLabel");
+const remainingLabel = $("budgetRemainingLabel");
+if (totalLabel) totalLabel.textContent = `Total: ${fmtMoney(total)}`;
+if (spentLabel) spentLabel.textContent = `Spent: ${fmtMoney(spent)}`;
+if (remainingLabel) remainingLabel.textContent = `Remaining: ${fmtMoney(remaining)}`;
+
+const progTotal = $("progBudgetTotal");
+const progEstimated = $("progBudgetEstimated");
+const progRemaining = $("progBudgetRemaining");
+if (progTotal) progTotal.textContent = fmtMoney(total);
+if (progEstimated) progEstimated.textContent = fmtMoney(spent);
+if (progRemaining) progRemaining.textContent = fmtMoney(remaining);
+}
+
 function getDateWithinCurrentQuarter(rawValue) {
   const value = String(rawValue || "").trim();
   if (!value) return null;
@@ -3951,19 +3982,7 @@ if (pastListEl) {
 
 
 
-const landingView = $("landingView");
-const isLandingActive = landingView && !landingView.classList.contains("hidden");
-const sidebarBudgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
-const setupTotal = Number(state.landingDraft?.totalBudget || 0);
-const sidebarTotal = sidebarBudgetEnabled
-  ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
-  : 0;
-const sidebarSpent = sidebarBudgetEnabled ? getTotalSpent() : 0;
-const sidebarRemaining = sidebarTotal - sidebarSpent;
-
-$("budgetTotalLabel").textContent = `Total: ${fmtMoney(sidebarTotal)}`;
-$("budgetSpentLabel").textContent = `Spent: ${fmtMoney(sidebarSpent)}`;
-$("budgetRemainingLabel").textContent = `Remaining: ${fmtMoney(sidebarRemaining)}`;
+syncBudgetDisplaySurfaces();
 
 
 
@@ -4889,19 +4908,7 @@ function renderFourMonthProgram() {
 
   // Update budget summary using the same source as the fixed sidebar card
   if (budgetSummary) {
-    const landingView = $("landingView");
-    const isLandingActive = landingView && !landingView.classList.contains("hidden");
-    const budgetEnabled = Boolean(state.landingDraft?.budgetConfigured);
-    const setupTotal = Number(state.landingDraft?.totalBudget || 0);
-    const liveTotal = budgetEnabled
-      ? (isLandingActive && setupTotal > 0 ? setupTotal : getBudgetTotal())
-      : 0;
-    const liveSpent = budgetEnabled ? getTotalSpent() : 0;
-    const liveRemaining = liveTotal - liveSpent;
-
-    $("progBudgetTotal").textContent = fmtMoney(liveTotal);
-    $("progBudgetEstimated").textContent = fmtMoney(liveSpent);
-    $("progBudgetRemaining").textContent = fmtMoney(liveRemaining);
+    syncBudgetDisplaySurfaces();
   }
 
   // Render 4 months (stacked vertically, collapsed by default)
@@ -6699,13 +6706,8 @@ function initializeLandingSetupFlow() {
     }
     persistState();
     renderSidebar();
-    const sidebarBudgetEnabled = Boolean(state.landingDraft.budgetConfigured);
-    const sidebarTotal = sidebarBudgetEnabled ? computedTotal : 0;
-    const sidebarSpent = sidebarBudgetEnabled ? getTotalSpent() : 0;
-    const sidebarRemaining = sidebarTotal - sidebarSpent;
-    if ($("budgetTotalLabel")) $("budgetTotalLabel").textContent = `Total: ${fmtMoney(sidebarTotal)}`;
-    if ($("budgetSpentLabel")) $("budgetSpentLabel").textContent = `Spent: ${fmtMoney(sidebarSpent)}`;
-    if ($("budgetRemainingLabel")) $("budgetRemainingLabel").textContent = `Remaining: ${fmtMoney(sidebarRemaining)}`;
+    syncBudgetDisplaySurfaces();
+    renderFourMonthProgram();
     updateBudgetSummary();
     validateAndUpdateStep2(budgetChanged);
   };
@@ -7158,7 +7160,7 @@ function updateSetupStepButtonStates() {
     if (step <= 6 && isCompleted) {
       btn.textContent = "Save";
     } else if (step === 6) {
-      btn.textContent = "Submit";
+      btn.textContent = "See Your Engagement Plan →";
     } else if (step === 7) {
       btn.textContent = state.setupShortlistMode === "book"
         ? "Book this event ↗"
