@@ -601,6 +601,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "Elixir Making Class",
     description: "A guided wellness-focused team experience centered on creating restorative elixirs together.",
     url: "https://www.withconfetti.com/product/virtual-wellness-elixir-making-class",
+    imageUrl: "https://ucarecdn.com/6c9ffa95-6119-4a02-8b89-ff6b6b363116/-/preview/580x326/-/quality/lighter/",
     pills: ["Wellbeing", "Creative Skill"]
   },
   "Team Connection & Culture": {
@@ -608,6 +609,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "Virtual Funnel Cake Class",
     description: "A shared food experience designed to spark connection and fun across the team.",
     url: "https://www.withconfetti.com/product/virtual-funnel-cake-class",
+    imageUrl: "https://ucarecdn.com/a5cf1674-5669-4c6a-a1c2-f92054051848/-/preview/580x326/-/quality/lighter/",
     pills: ["Food & Drink", "Creative Skill"]
   },
   "Performance & Productivity": {
@@ -615,6 +617,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "Champion Mindset for Professionals",
     description: "A practical session focused on mindset habits that improve individual and team performance.",
     url: "https://www.withconfetti.com/product/virtual-champion-mindset-for-professionals",
+    imageUrl: "https://ucarecdn.com/f1ceef12-77da-4e6f-a953-9d6acd5ffcc0/-/preview/580x326/-/quality/lighter/",
     pills: ["Productivity", "Pro Dev"]
   },
   "Retention & Engagement": {
@@ -622,6 +625,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "Virtual Murder Mystery Party",
     description: "A social, high-energy event that drives participation and team engagement.",
     url: "https://www.withconfetti.com/product/virtual-murder-mystery-party",
+    imageUrl: "https://ucarecdn.com/f788f0a4-781c-4e6f-b7f7-bb36b78b11b9/-/preview/580x326/-/quality/lighter/",
     pills: ["Fun/Social", "Team Connection"]
   },
   "Employer Brand & Recruiting": {
@@ -629,6 +633,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "Virtual Black History Jeoparty for Good",
     description: "A purpose-driven team event that supports employer brand storytelling and culture-forward recruiting.",
     url: "https://www.withconfetti.com/product/virtual-black-history-jeoparty-for-good",
+    imageUrl: "https://ucarecdn.com/8b9b2fbf-e36c-4113-acdf-9839e6866e0a/-/preview/580x326/-/quality/lighter/",
     pills: ["Inclusion", "Fun/Social"]
   },
   "Inclusion & Belonging": {
@@ -636,6 +641,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     title: "LGBTQIA Allyship in the Workplace",
     description: "An interactive workshop focused on inclusive behaviors and building workplace belonging.",
     url: "https://www.withconfetti.com/product/virtual-lgbtqia-allyship-in-the-workplace",
+    imageUrl: "https://ucarecdn.com/1d1f3705-5bef-43b3-bedd-8fc1bdac81f8/-/preview/580x326/-/quality/lighter/",
     pills: ["Inclusion", "Pro Dev"]
   }
 };
@@ -645,6 +651,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Virtual Bucket List Workshop",
     description: "A collaborative workshop designed to spark motivation, reflection, and personal growth across the team.",
     url: "https://www.withconfetti.com/product/virtual-bucket-list-workshop",
+    imageUrl: "https://ucarecdn.com/5d0ca8d4-e22e-4de3-9295-ae18234d02d3/-/preview/580x326/-/quality/lighter/",
     pills: ["Team Connection", "Wellbeing"]
   },
   "Team Connection & Culture": {
@@ -652,6 +659,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Virtual Live City Tours",
     description: "A shared guided experience that brings teams together through live exploration and conversation.",
     url: "https://www.withconfetti.com/product/virtual-live-city-tours",
+    imageUrl: "https://ucarecdn.com/ca73a96d-5712-4e31-94c6-752e7e64ad73/-/preview/580x326/-/quality/lighter/",
     pills: ["Team Connection", "Engagement"]
   },
   "Performance & Productivity": {
@@ -659,6 +667,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Culture Club: Self-Doubt to Confidence",
     description: "A practical session focused on confidence-building tools that support stronger day-to-day performance.",
     url: "https://www.withconfetti.com/product/virtual-culture-club-self-doubt-to-confidence",
+    imageUrl: "https://ucarecdn.com/80daf2a8-fe7c-41c7-ac4c-3d8d246b6cd9/-/preview/580x326/-/quality/lighter/",
     pills: ["Productivity", "Wellbeing"]
   },
   "Retention & Engagement": {
@@ -666,6 +675,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Virtual Office Olympics",
     description: "A high-energy team activity that encourages participation, connection, and ongoing engagement.",
     url: "https://www.withconfetti.com/product/virtual-office-olympics",
+    imageUrl: "https://ucarecdn.com/0d565892-6577-4379-9826-82cd10798264/-/preview/580x326/-/quality/lighter/",
     pills: ["Engagement", "Fun/Social"]
   },
   "Employer Brand & Recruiting": {
@@ -673,6 +683,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Virtual Vision Board Workshop",
     description: "A culture-forward workshop that helps reinforce company values and employer brand narrative.",
     url: "https://www.withconfetti.com/product/virtual-vision-board-workshop",
+    imageUrl: "https://ucarecdn.com/13973972-7b38-44b8-bc12-a71666d51b4d/-/preview/580x326/-/quality/lighter/",
     pills: ["Fun/Social", "Creative Skill"]
   },
   "Inclusion & Belonging": {
@@ -680,6 +691,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     title: "Virtual Diversity and Inclusion Workshop",
     description: "An interactive workshop designed to strengthen inclusive practices and team belonging.",
     url: "https://www.withconfetti.com/product/virtual-diversity-and-inclusion-workshop",
+    imageUrl: "https://ucarecdn.com/ae802dae-0d25-4213-8e58-285927d1479c/-/preview/580x326/-/quality/lighter/",
     pills: ["Pro Dev", "Inclusion"]
   }
 };
@@ -1313,6 +1325,7 @@ function getRevelryGoalBasedRecommendations(rawGoals = []) {
         title: mapped.title,
         description: mapped.description,
         url: mapped.url,
+        imageUrl: mapped.imageUrl,
         type: "external",
         cost_per_person: 0,
         estimatedCost: 0,
@@ -5006,6 +5019,7 @@ function renderFourMonthProgram() {
                 <article class="event-card ${isSelected ? "selected" : ""}" ${isRevelryLockedFollowOnMonth ? "" : `data-action="four-month-shortlist-toggle" data-template-id="${escapeHtml(candidate.templateId)}"`} style="cursor: ${isRevelryLockedFollowOnMonth ? "default" : "pointer"};">
                   <span class="event-circle ${isSelected ? "selected" : "empty"}">${isSelected ? "" : "○"}</span>
                   <div class="event-preview">
+                    ${isAprilMonth && candidate.imageUrl ? `<div style="margin-bottom: 10px; text-align: left;"><img src="${escapeHtml(candidate.imageUrl)}" alt="${escapeHtml(candidate.title || "Event image")}" style="width: 75px; height: auto; display: block; border-radius: 8px;" loading="lazy" /></div>` : ""}
                     <h4 class="event-title">${escapeHtml(candidate.title || "")}</h4>
                     ${isAprilMonth && grayPills.length
                       ? `<div class="event-gray-pills">${grayPills.map((pill) => `<span class="event-gray-pill">${escapeHtml(pill)}</span>`).join("")}</div>`
