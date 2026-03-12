@@ -4242,6 +4242,11 @@ const setupProcessCurrentStep = (() => {
   }
   return null;
 })();
+const hasEnteredEventWorkflow = allCoreSetupComplete && (
+  Number(state.currentSetupStep || 0) >= EVENT_WORKFLOW_STEPS.SHORTLIST
+  || Number(state.eventWorkflowProcessStep || 0) >= EVENT_WORKFLOW_STEPS.SHORTLIST
+  || state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.SHORTLIST)
+);
 
 
 // Add click handler for sidebar setup steps
@@ -4321,21 +4326,36 @@ eventWorkflowItems.forEach((item) => {
     "track-results": 13,
     "review-impact": 14
   };
+  const revelryVisibleSidebarSteps = new Set([
+    EVENT_WORKFLOW_STEPS.SHORTLIST,
+    EVENT_WORKFLOW_STEPS.PROMOTE,
+    EVENT_WORKFLOW_STEPS.RUN,
+    EVENT_WORKFLOW_STEPS.FEEDBACK,
+    EVENT_WORKFLOW_STEPS.REVIEW
+  ]);
   const stepNum = stepKeyToNum[item.dataset.eventWorkflowMenuItem];
-  if (isWorkflowStepSkipped(stepNum, activeWorkflowType)) {
+  const forceRevelrySidebarSet = hasEnteredEventWorkflow && isRevelryLabsReadOnlyMagicLink();
+  if (forceRevelrySidebarSet && !revelryVisibleSidebarSteps.has(stepNum)) {
+    item.style.display = "none";
+    return;
+  }
+  const isSkippedByWorkflowType = isWorkflowStepSkipped(stepNum, activeWorkflowType);
+  if (isSkippedByWorkflowType && !hasEnteredEventWorkflow) {
     item.style.display = "none";
     return;
   }
   item.style.display = "";
   const processCurrentStep = getEventWorkflowProcessStep();
   const isBookEventDebugOverride = Boolean(state.debugMode) && item.dataset.eventWorkflowMenuItem === "book-event";
-  const isActive = state.currentSetupStep === stepNum;
-  const isProcessCurrent = stepNum === processCurrentStep;
-  const isCompleted = state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
-  const isFutureStep = !isCompleted && stepNum > processCurrentStep;
+  const shouldIgnoreWorkflowSkipForSidebar = forceRevelrySidebarSet && revelryVisibleSidebarSteps.has(stepNum);
+  const isConceptualInactive = !shouldIgnoreWorkflowSkipForSidebar && isSkippedByWorkflowType && hasEnteredEventWorkflow;
+  const isActive = !isConceptualInactive && state.currentSetupStep === stepNum;
+  const isProcessCurrent = !isConceptualInactive && stepNum === processCurrentStep;
+  const isCompleted = !isConceptualInactive && state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
+  const isFutureStep = isConceptualInactive || (!isCompleted && stepNum > processCurrentStep);
   const isLockedCompletedWorkflowStep = isCompleted && stepNum < processCurrentStep;
   const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
-  const isLocked = !allCoreSetupComplete || (!allowTestingStepNavigation && !isBookEventDebugOverride && (
+  const isLocked = isConceptualInactive || !allCoreSetupComplete || (!allowTestingStepNavigation && !isBookEventDebugOverride && (
     isLockedCompletedWorkflowStep
     || isFutureStep
     || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
