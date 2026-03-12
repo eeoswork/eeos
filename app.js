@@ -5342,6 +5342,21 @@ try {
 }
 }
 
+function showSaveNudge() {
+  if (getAuthToken()) return;
+  const el = $("saveNudge");
+  if (!el) return;
+  if (showSaveNudge._timer) clearTimeout(showSaveNudge._timer);
+  el.innerHTML = `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
+    <span>Your progress is saved locally &mdash; <button class="font-semibold text-slate-900 underline underline-offset-2 hover:text-slate-700" onclick="openAuthGateWithContext('save')">create a free account</button> to keep it across devices.</span>
+    <button class="flex-shrink-0 text-slate-400 hover:text-slate-600 text-base leading-none ml-2" onclick="document.getElementById('saveNudge').classList.add('hidden')" aria-label="Dismiss">&times;</button>
+  </div>`;
+  el.classList.remove("hidden");
+  showSaveNudge._timer = setTimeout(() => {
+    if (el) el.classList.add("hidden");
+  }, 8000);
+}
+
 function showMiniToast(message = "") {
   const text = String(message || "").trim();
   if (!text) return;
@@ -7255,6 +7270,7 @@ function attachSetupStepHandlers() {
         state.eventWorkflowProcessStep = Math.min(step + 1, 13);
       }
       
+      if (step === 1 || step === 5) showSaveNudge();
       persistState();
       renderSetupStepStates();
       renderSidebarStepMenus();
