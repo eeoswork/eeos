@@ -5347,9 +5347,9 @@ function showSaveNudge() {
   const el = $("saveNudge");
   if (!el) return;
   if (showSaveNudge._timer) clearTimeout(showSaveNudge._timer);
-  el.innerHTML = `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
-    <span>Your progress is saved locally &mdash; <button class="font-semibold text-slate-900 underline underline-offset-2 hover:text-slate-700" onclick="openAuthGateWithContext('save')">create a free account</button> to keep it across devices.</span>
-    <button class="flex-shrink-0 text-slate-400 hover:text-slate-600 text-base leading-none ml-2" onclick="document.getElementById('saveNudge').classList.add('hidden')" aria-label="Dismiss">&times;</button>
+  el.innerHTML = `<div class="flex items-start justify-between gap-3 rounded-r-xl border-l-4 border-indigo-400 bg-indigo-50 px-4 py-3 shadow-sm text-[13px] text-indigo-900">
+    <div class="leading-snug"><span class="font-semibold">Save your progress.</span> Your work is stored locally right now &mdash; <button class="font-semibold underline underline-offset-2 hover:text-indigo-700" onclick="openAuthGateWithContext('save')">create a free account</button> to keep it across devices.</div>
+    <button class="flex-shrink-0 text-indigo-400 hover:text-indigo-600 text-base leading-none mt-0.5 ml-2" onclick="document.getElementById('saveNudge').classList.add('hidden')" aria-label="Dismiss">&times;</button>
   </div>`;
   el.classList.remove("hidden");
   showSaveNudge._timer = setTimeout(() => {
@@ -7270,7 +7270,7 @@ function attachSetupStepHandlers() {
         state.eventWorkflowProcessStep = Math.min(step + 1, 13);
       }
       
-      if (step === 1 || step === 5) showSaveNudge();
+      if (step === 2 || step === 5) showSaveNudge();
       persistState();
       renderSetupStepStates();
       renderSidebarStepMenus();
