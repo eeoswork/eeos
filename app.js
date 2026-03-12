@@ -1222,23 +1222,10 @@ function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
   const defaults = MAGIC_LINK_SETUP_DEFAULTS[`${host}/${tokenId}`];
   if (!defaults || typeof defaults !== "object") return;
 
-  const currentTotalBudget = Number(state?.landingDraft?.totalBudget || 0);
-  const currentEmployeeCount = Number(state?.landingDraft?.employeeCount || 0);
-  const currentPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
   const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
 
-  const shouldSetEmployees = !currentEmployeeCount;
-  const shouldSetPerEmployee = !currentPerEmployee;
   const shouldSetCity = !currentLocalCity;
 
-  if (shouldSetEmployees) {
-    state.landingDraft.employeeCount = Number(defaults.employeeCount || 0);
-    state.programSettings.employeeCount = state.landingDraft.employeeCount;
-  }
-  if (shouldSetPerEmployee) {
-    state.landingDraft.perEmployee = Number(defaults.perEmployee || 0);
-    state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee;
-  }
   if (shouldSetCity) {
     state.landingDraft.localCity = String(defaults.localCity || "").trim();
   }
@@ -1430,18 +1417,8 @@ function applyTestingMagicProfileFromQuery() {
     ? profile.setupDefaults
     : null;
   if (defaults) {
-    const currentEmployeeCount = Number(state?.landingDraft?.employeeCount || 0);
-    const currentPerEmployee = Number(state?.landingDraft?.perEmployee || 0);
     const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
 
-    if (!currentEmployeeCount) {
-      state.landingDraft.employeeCount = Number(defaults.employeeCount || 0);
-      state.programSettings.employeeCount = state.landingDraft.employeeCount;
-    }
-    if (!currentPerEmployee) {
-      state.landingDraft.perEmployee = Number(defaults.perEmployee || 0);
-      state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee;
-    }
     if (!currentLocalCity) {
       state.landingDraft.localCity = String(defaults.localCity || "").trim();
     }
@@ -6676,6 +6653,9 @@ function initializeLandingSetupFlow() {
   if (isRevelryMagicBudgetContext) {
     if (modePerEmployeeBtn) {
       modePerEmployeeBtn.textContent = "Per Employee Monthly";
+    }
+    if (employeeCountInput) {
+      employeeCountInput.placeholder = "e.g. 40";
     }
     if (totalBudgetInput) {
       totalBudgetInput.min = String(revelryMinTotalMonthly);
