@@ -6190,8 +6190,8 @@ function renderLandingProgressBar() {
   if (!progressCard) return;
 
   const stage = getLandingProgressStage();
-  progressCard.classList.toggle("hidden", stage === 0);
-  if (stage === 0) return;
+  progressCard.classList.toggle("hidden", stage === 0 || stage >= 3);
+  if (stage === 0 || stage >= 3) return;
 
   document.querySelectorAll("[data-landing-progress-step]").forEach((stepEl) => {
     const stepNum = Number(stepEl.getAttribute("data-landing-progress-step") || 0);
