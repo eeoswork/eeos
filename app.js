@@ -2869,6 +2869,11 @@ adminDisplay.style.display = shouldShowStatic ? "block" : "none";
 companyDisplay.textContent = company;
 adminDisplay.textContent = admin;
 
+const mobileCompanyEl = $("mobileCompanyDisplay");
+const mobileAdminEl = $("mobileAdminDisplay");
+if (mobileCompanyEl) mobileCompanyEl.textContent = company;
+if (mobileAdminEl) mobileAdminEl.textContent = admin;
+
 if (testingResetBtn) {
   const testingContext = getActiveTestingMagicContext();
   testingResetBtn.style.display = (shouldShowStatic && testingContext) ? "inline-flex" : "none";
@@ -7906,6 +7911,21 @@ $("adminName").addEventListener("input", () => {
    appIdentityEditBtn.addEventListener("click", editAppIdentity);
  }
 
+const mobileSidebarToggle = $("mobileSidebarToggle");
+if (mobileSidebarToggle) {
+  mobileSidebarToggle.addEventListener("click", openMobileSidebar);
+}
+
+const mobileSidebarClose = $("mobileSidebarClose");
+if (mobileSidebarClose) {
+  mobileSidebarClose.addEventListener("click", closeMobileSidebar);
+}
+
+const mobileSidebarBackdrop = $("mobileSidebarBackdrop");
+if (mobileSidebarBackdrop) {
+  mobileSidebarBackdrop.addEventListener("click", closeMobileSidebar);
+}
+
 
 
 
@@ -7987,6 +8007,26 @@ if (window.electronAPI?.onCreateTabFromPopup) {
 
 
 
+
+function openMobileSidebar() {
+  const sidebar = document.querySelector(".eeos-sidebar");
+  const backdrop = $("mobileSidebarBackdrop");
+  const toggle = $("mobileSidebarToggle");
+  if (sidebar) sidebar.classList.add("sidebar-mobile-open");
+  if (backdrop) backdrop.classList.add("is-visible");
+  if (toggle) toggle.setAttribute("aria-expanded", "true");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector(".eeos-sidebar");
+  const backdrop = $("mobileSidebarBackdrop");
+  const toggle = $("mobileSidebarToggle");
+  if (sidebar) sidebar.classList.remove("sidebar-mobile-open");
+  if (backdrop) backdrop.classList.remove("is-visible");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+  document.body.style.overflow = "";
+}
 
 async function bootstrap() {
   state.sidebarSetupExpanded = false;
