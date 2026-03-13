@@ -27,8 +27,8 @@ height: 100vh;
 .eeos-sidebar {
 border-right: 1px solid #dbe2ea;
 background: #f8fafc;
-padding: 12px;
-overflow-y: auto;
+padding: 16px 12px 12px;
+overflow: hidden;
 position: relative;
 --sidebar-label-start: 31px;
 --sidebar-icon-left: 5px;
@@ -41,7 +41,7 @@ position: relative;
 display: flex;
 align-items: center;
 justify-content: space-between;
-margin-bottom: 10px;
+margin-bottom: 20px;
 }
 
 
@@ -186,10 +186,8 @@ background: #f1f5f9;
 
 
 .eeos-budget-sticky {
-position: fixed;
-bottom: 10px;
-left: 12px;
-width: calc(280px - 24px);
+position: static;
+width: 100%;
 display: flex;
 flex-direction: column;
 gap: 4px;
@@ -201,7 +199,6 @@ color: #0f172a;
 padding: 10px 12px;
 font-size: 11px;
 cursor: pointer;
-z-index: 10;
 }
 
 .eeos-budget-sticky__title {
@@ -458,6 +455,14 @@ font-size: 11px;
 
 
 
+/* ─── Sidebar pre-launch visibility ─────────────────────────────────────── */
+.eeos-layout.sidebar-hidden {
+  grid-template-columns: 1fr;
+}
+.eeos-layout.sidebar-hidden .eeos-sidebar {
+  display: none;
+}
+
 /* ─── Mobile hamburger button (top-right, hidden on desktop) ─────────────── */
 .eeos-hamburger {
   display: none;
@@ -552,9 +557,7 @@ font-size: 11px;
   }
 
   .eeos-budget-sticky {
-    position: sticky;
-    bottom: 10px;
-    left: 0;
+    position: static;
     width: 100%;
   }
 }
