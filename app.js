@@ -968,7 +968,8 @@ landingDraft: {
   localCity: "",
   surveyAnswers: {}
 },
-fourMonthProgram: null
+fourMonthProgram: null,
+landingTypeformComplete: false
 };
 
 
@@ -1764,6 +1765,8 @@ function openAuthGateWithContext(context = "save") {
   const continueButton = $("authContinueWithoutSaving");
   const createAccountButton = $("authCreateAccount");
   const signInButton = $("authSignIn");
+  const primaryActions = $("authPrimaryActions");
+  const passwordHint = $("authPasswordHint");
   const statusEl = $("authStatus");
   const parsedMagicLink = parseMagicLinkFromHostPath();
   const isMagicLink = Boolean(parsedMagicLink?.host && parsedMagicLink?.tokenId);
@@ -1771,26 +1774,39 @@ function openAuthGateWithContext(context = "save") {
   const showCreateOnly = isMagicLink && magicAuthStage !== "signin";
   const showSignInOnly = isMagicLink && magicAuthStage === "signin";
   const mode = String(context || "save").trim();
+  const isSigninMode = mode === "signin";
   if (titleEl) {
-    titleEl.textContent = mode === "poll_review"
+    titleEl.textContent = isSigninMode
+      ? "Log in"
+      : mode === "poll_review"
       ? "Save your poll and responses"
       : mode === "rsvp_review"
       ? "Save your RSVP and responses"
       : "Save your progress";
   }
   if (subtitleEl) {
-    subtitleEl.textContent = mode === "poll_review"
-      ? "You’ve shared this poll with your team. Create an account so you can come back later and keep your links and results safe."
-      : mode === "rsvp_review"
-      ? "You’ve shared this RSVP with your team. Create an account so your event data and responses stay safe across browsers and devices."
-      : "Create an account to keep your workspace across browsers and devices.";
+    if (isSigninMode) {
+      subtitleEl.textContent = "";
+      subtitleEl.classList.add("hidden");
+    } else {
+      subtitleEl.textContent = mode === "poll_review"
+        ? "You’ve shared this poll with your team. Create an account so you can come back later and keep your links and results safe."
+        : mode === "rsvp_review"
+        ? "You’ve shared this RSVP with your team. Create an account so your event data and responses stay safe across browsers and devices."
+        : "Create an account to keep your workspace across browsers and devices.";
+      subtitleEl.classList.remove("hidden");
+    }
   }
   if (createAccountButton) {
     createAccountButton.textContent = "Create account";
-    createAccountButton.classList.toggle("hidden", showSignInOnly);
+    createAccountButton.classList.toggle("hidden", showSignInOnly || isSigninMode);
   }
   if (signInButton) {
     signInButton.classList.toggle("hidden", showCreateOnly);
+    signInButton.classList.add("w-full");
+  }
+  if (primaryActions) {
+    primaryActions.classList.toggle("sm:flex-row", !isSigninMode);
   }
   if (continueButton) {
     const shouldShowContinue = mode === "poll_review" || mode === "rsvp_review";
@@ -1815,13 +1831,16 @@ function openAuthGateWithContext(context = "save") {
     emailInput.value = String(authDefaults.email || "").trim();
   }
   if (companyInput) {
-    companyInput.closest("label")?.classList.toggle("hidden", showSignInOnly);
+    companyInput.closest("label")?.classList.toggle("hidden", showSignInOnly || isSigninMode);
   }
   if (passwordConfirmRow) {
-    const hideConfirm = showSignInOnly || context === "signin";
+    const hideConfirm = showSignInOnly || isSigninMode;
     passwordConfirmRow.classList.toggle("hidden", hideConfirm);
   }
-  if (emailInput && context === "signin") {
+  if (passwordHint) {
+    passwordHint.classList.toggle("hidden", isSigninMode);
+  }
+  if (emailInput && isSigninMode) {
     emailInput.focus();
   }
   showAuthGate();
@@ -6372,15 +6391,33 @@ function applySidebarSetupPhaseState() {
 function updateLandingHomeView() {
   const hero = $("landingHeroCopy");
   const heroBrandLogoWrap = $("landingHeroBrandLogoWrap");
+  const landingTopHeader = $("landingTopHeader");
+  const landingView = $("landingView");
   const setupSteps = $("setupStepsContainer");
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
-  if (hero) hero.style.display = showHome ? "" : "none";
-  if (heroBrandLogoWrap) {
-    heroBrandLogoWrap.classList.toggle("hidden", !(showHome && isRevelryLabsReadOnlyMagicLink()));
+  const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
+  const showGenericLandingHeader = !isMagicLinkContext;
+  if (landingTopHeader) {
+    landingTopHeader.classList.toggle("hidden", !showGenericLandingHeader);
+    landingTopHeader.classList.toggle("flex", showGenericLandingHeader);
   }
-  if (setupSteps) setupSteps.classList.toggle("hidden", showHome);
-  if (startActions) startActions.style.display = showHome ? "block" : "none";
+  if (landingView) {
+    landingView.style.paddingTop = showGenericLandingHeader ? "84px" : "";
+  }
+  // Show the typeform for generic (non-magic-link) landing when not yet complete
+  const typeformRoot = $("landingTypeformRoot");
+  const showTypeform = !isMagicLinkContext && !state.landingTypeformComplete && !state.landingBuilderStarted;
+  if (typeformRoot) typeformRoot.style.display = showTypeform ? "" : "none";
+
+  // The original hero card is only shown for magic-link contexts that need it
+  if (hero) hero.style.display = (showHome && !showTypeform) ? "" : "none";
+  if (heroBrandLogoWrap) {
+    heroBrandLogoWrap.classList.toggle("hidden", !(showHome && !showTypeform && isRevelryLabsReadOnlyMagicLink()));
+  }
+  // Hide setup accordion steps while typeform is active
+  if (setupSteps) setupSteps.classList.toggle("hidden", showHome || showTypeform);
+  if (startActions) startActions.style.display = (showHome && !showTypeform) ? "block" : "none";
   renderLandingProgressBar();
   applySidebarSetupPhaseState();
 }
@@ -7978,6 +8015,412 @@ function renderSidebarVisibility() {
 
 
 
+// ================================================================
+// LANDING TYPEFORM
+// ================================================================
+
+const ltfAnswers = {
+  goals: [],
+  employeeCount: 0,
+  budgetMode: "total",
+  totalBudget: 0,
+  perEmployee: 0,
+  cadence: "Monthly",
+  schedule: [],
+  localCity: "",
+  daysSelected: ["Th"],
+  timesSelected: ["After 5p"],
+  saturdayOn: true,
+  teamPreferenceEstimate: []
+};
+
+let ltfCurrentQ = 0;
+let ltfPhase = "hero"; // "hero" | "builder" | "loading" | "complete"
+
+function initLandingTypeform() {
+  const root = $("landingTypeformRoot");
+  if (!root) return;
+
+  const isMagic = Boolean(parseMagicLinkFromHostPath());
+  if (isMagic || state.landingTypeformComplete || state.landingBuilderStarted) {
+    root.style.display = "none";
+    return;
+  }
+
+  // Populate Q0: Goals
+  renderGoalInputs("ltfGoalsGrid", ltfAnswers.goals, (goal, inputEl) => {
+    if (inputEl.checked) {
+      if (ltfAnswers.goals.length >= 3) { inputEl.checked = false; return; }
+      ltfAnswers.goals.push(goal);
+    } else {
+      ltfAnswers.goals = ltfAnswers.goals.filter(g => g !== goal);
+    }
+  });
+
+  // Populate Q1: Investment
+  initLtfBudget();
+
+  // Populate Q2: Cadence
+  initLtfCadence();
+
+  // Populate Q3: Setting
+  renderScheduleInputs("ltfScheduleGrid", ltfAnswers.schedule, (option) => {
+    const idx = ltfAnswers.schedule.indexOf(option);
+    if (idx >= 0) ltfAnswers.schedule.splice(idx, 1);
+    else ltfAnswers.schedule.push(option);
+    const localTriggers = ["In-person (outside the office)", "In-office events", "Hybrid (mix of remote + in-person)"];
+    const showCity = ltfAnswers.schedule.some(s => localTriggers.includes(s));
+    $("ltfLocalCityRow")?.classList.toggle("hidden", !showCity);
+  });
+
+  // Populate Q4: Availability
+  initLtfAvailability();
+
+  // Populate Q5: Interests
+  renderInterestInputs("ltfInterestsGrid", ltfAnswers.teamPreferenceEstimate, (interest, inputEl) => {
+    if (inputEl.checked) {
+      if (ltfAnswers.teamPreferenceEstimate.length >= 3) { inputEl.checked = false; return; }
+      ltfAnswers.teamPreferenceEstimate.push(interest);
+    } else {
+      ltfAnswers.teamPreferenceEstimate = ltfAnswers.teamPreferenceEstimate.filter(o => o !== interest);
+    }
+  });
+
+  // Bind CTA
+  $("ltfStartBtn")?.addEventListener("click", startLandingTypeform);
+
+  // Bind navigation
+  $("ltfBackBtn")?.addEventListener("click", () => goLtfQuestion(ltfCurrentQ - 1));
+  $("ltfNextBtn")?.addEventListener("click", advanceLtfQuestion);
+
+  root.style.display = "";
+}
+
+function initLtfBudget() {
+  const setLtfBudgetMode = (mode) => {
+    ltfAnswers.budgetMode = mode;
+    const isTotal = mode === "total";
+    const modeTotal = $("ltfModeTotal");
+    const modePer = $("ltfModePerEmployee");
+    if (modeTotal) {
+      modeTotal.classList.toggle("bg-white", isTotal);
+      modeTotal.classList.toggle("text-blue-700", isTotal);
+      modeTotal.classList.toggle("shadow-sm", isTotal);
+      modeTotal.classList.toggle("text-slate-600", !isTotal);
+    }
+    if (modePer) {
+      modePer.classList.toggle("bg-white", !isTotal);
+      modePer.classList.toggle("text-blue-700", !isTotal);
+      modePer.classList.toggle("shadow-sm", !isTotal);
+      modePer.classList.toggle("text-slate-600", isTotal);
+    }
+    $("ltfTotalBudgetPanel")?.classList.toggle("hidden", !isTotal);
+    $("ltfPerEmployeePanel")?.classList.toggle("hidden", isTotal);
+    updateLtfBudgetHelper();
+  };
+
+  $("ltfModeTotal")?.addEventListener("click", () => setLtfBudgetMode("total"));
+  $("ltfModePerEmployee")?.addEventListener("click", () => setLtfBudgetMode("perEmployee"));
+  $("ltfEmployeeCount")?.addEventListener("input", updateLtfBudgetHelper);
+  $("ltfTotalBudget")?.addEventListener("input", updateLtfBudgetHelper);
+  $("ltfPerEmployee")?.addEventListener("input", updateLtfBudgetHelper);
+
+  $("ltfBudgetGuidanceToggle")?.addEventListener("click", () => {
+    $("ltfBudgetGuidanceOptions")?.classList.toggle("hidden");
+  });
+  document.querySelectorAll(".ltf-budget-guidance-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      setLtfBudgetMode("perEmployee");
+      const perEmpInput = $("ltfPerEmployee");
+      if (perEmpInput) perEmpInput.value = btn.dataset.value;
+      $("ltfBudgetGuidanceOptions")?.classList.add("hidden");
+      updateLtfBudgetHelper();
+    });
+  });
+
+  setLtfBudgetMode("total");
+}
+
+function updateLtfBudgetHelper() {
+  const helper = $("ltfBudgetHelper");
+  if (!helper) return;
+  const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
+  const isTotal = ltfAnswers.budgetMode === "total";
+  const totalBudget = isTotal
+    ? (parseFloat($("ltfTotalBudget")?.value || "0") || 0)
+    : (parseFloat($("ltfPerEmployee")?.value || "0") || 0) * empCount;
+  const perEmp = empCount > 0 ? totalBudget / empCount : 0;
+  helper.textContent = `Investment: $${perEmp.toFixed(0)} / employee`;
+}
+
+function initLtfCadence() {
+  const sel = $("ltfCadence");
+  if (!sel) return;
+  sel.innerHTML = CADENCE_OPTIONS.map(opt =>
+    `<option value="${opt}"${opt === ltfAnswers.cadence ? " selected" : ""}>${opt}</option>`
+  ).join("");
+  sel.addEventListener("change", e => { ltfAnswers.cadence = e.target.value; });
+}
+
+function initLtfAvailability() {
+  const renderDayBtns = () => {
+    document.querySelectorAll("[data-ltf-day]").forEach(btn => {
+      const day = btn.dataset.ltfDay;
+      const sel = ltfAnswers.daysSelected.includes(day);
+      btn.classList.toggle("border-slate-800", sel);
+      btn.classList.toggle("bg-slate-800", sel);
+      btn.classList.toggle("text-white", sel);
+      btn.classList.toggle("border-slate-200", !sel);
+      btn.classList.toggle("bg-white", !sel);
+      btn.classList.toggle("text-slate-400", !sel);
+    });
+  };
+
+  const renderTimeBtns = () => {
+    document.querySelectorAll("[data-ltf-time]").forEach(btn => {
+      const time = btn.dataset.ltfTime;
+      const sel = ltfAnswers.timesSelected.includes(time);
+      btn.classList.toggle("bg-white", sel);
+      btn.classList.toggle("text-slate-800", sel);
+      btn.classList.toggle("shadow-sm", sel);
+      btn.classList.toggle("text-slate-500", !sel);
+    });
+  };
+
+  const renderSatToggle = () => {
+    const on = ltfAnswers.saturdayOn;
+    $("ltfSatSwitch")?.classList.toggle("bg-slate-800", on);
+    $("ltfSatSwitch")?.classList.toggle("bg-slate-300", !on);
+    const knob = $("ltfSatKnob");
+    if (knob) knob.style.left = on ? "calc(100% - 16px)" : "4px";
+  };
+
+  document.querySelectorAll("[data-ltf-day]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const day = btn.dataset.ltfDay;
+      if (ltfAnswers.daysSelected.includes(day)) {
+        ltfAnswers.daysSelected = ltfAnswers.daysSelected.filter(d => d !== day);
+      } else {
+        ltfAnswers.daysSelected.push(day);
+      }
+      renderDayBtns();
+    });
+  });
+
+  document.querySelectorAll("[data-ltf-time]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const time = btn.dataset.ltfTime;
+      if (ltfAnswers.timesSelected.includes(time)) {
+        ltfAnswers.timesSelected = ltfAnswers.timesSelected.filter(t => t !== time);
+      } else {
+        ltfAnswers.timesSelected.push(time);
+      }
+      renderTimeBtns();
+    });
+  });
+
+  $("ltfSaturdayToggle")?.addEventListener("click", () => {
+    ltfAnswers.saturdayOn = !ltfAnswers.saturdayOn;
+    renderSatToggle();
+  });
+
+  renderDayBtns();
+  renderTimeBtns();
+  renderSatToggle();
+}
+
+function startLandingTypeform() {
+  ltfPhase = "builder";
+  ltfCurrentQ = 0;
+  $("landingTfHero")?.classList.add("hidden");
+  $("landingTfBuilder")?.classList.remove("hidden");
+  renderLtfProgressBar();
+  renderLtfNavButtons();
+  // Blur all preview cards — reveal progressively as questions are answered
+  document.querySelectorAll(".ltf-preview-card").forEach(c => c.classList.add("ltf-blurred"));
+  const previewTitle = $("ltfPreviewTitle");
+  const previewSub = $("ltfPreviewSubtitle");
+  if (previewTitle) previewTitle.textContent = "Your program is building...";
+  if (previewSub) previewSub.textContent = "Answer each question to reveal events";
+}
+
+function renderLtfProgressBar() {
+  document.querySelectorAll("[data-ltf-node]").forEach(node => {
+    const idx = Number(node.dataset.ltfNode);
+    node.classList.remove("ltf-node--done", "ltf-node--active", "ltf-node--pending");
+    if (idx < ltfCurrentQ) node.classList.add("ltf-node--done");
+    else if (idx === ltfCurrentQ) node.classList.add("ltf-node--active");
+    else node.classList.add("ltf-node--pending");
+  });
+  document.querySelectorAll("[data-ltf-node-wrap]").forEach(wrap => {
+    const idx = Number(wrap.dataset.ltfNodeWrap);
+    wrap.classList.remove("ltf-nw-done", "ltf-nw-active");
+    if (idx < ltfCurrentQ) wrap.classList.add("ltf-nw-done");
+    else if (idx === ltfCurrentQ) wrap.classList.add("ltf-nw-active");
+  });
+  document.querySelectorAll("[data-ltf-connector]").forEach(conn => {
+    const idx = Number(conn.dataset.ltfConnector);
+    conn.classList.toggle("ltf-connector--done", idx < ltfCurrentQ);
+  });
+}
+
+function renderLtfNavButtons() {
+  const back = $("ltfBackBtn");
+  const next = $("ltfNextBtn");
+  if (back) back.classList.toggle("hidden", ltfCurrentQ === 0);
+  if (next) next.textContent = ltfCurrentQ === 5 ? "See your program →" : "Next →";
+}
+
+function goLtfQuestion(targetIdx) {
+  if (targetIdx < 0 || targetIdx > 5) return;
+  const isBack = targetIdx < ltfCurrentQ;
+  const currentEl = $(`ltfQ${ltfCurrentQ}`);
+  const targetEl = $(`ltfQ${targetIdx}`);
+
+  if (currentEl) {
+    currentEl.classList.remove("ltf-q--active", "ltf-slide-back");
+  }
+
+  if (targetEl) {
+    targetEl.classList.remove("ltf-slide-back");
+    if (isBack) targetEl.classList.add("ltf-slide-back");
+    // Force reflow so animation triggers fresh
+    void targetEl.offsetWidth;
+    targetEl.classList.add("ltf-q--active");
+  }
+
+  ltfCurrentQ = targetIdx;
+  renderLtfProgressBar();
+  renderLtfNavButtons();
+
+  // Hide error on navigation
+  const errEl = $("ltfErrorMsg");
+  if (errEl) errEl.classList.add("hidden");
+
+  // Reveal preview card when moving forward (one card per question answered)
+  if (!isBack) {
+    const revealIdx = ltfCurrentQ - 1;
+    if (revealIdx >= 0) {
+      const card = document.querySelector(`.ltf-preview-card[data-preview-month="${revealIdx + 1}"]`);
+      if (card) card.classList.remove("ltf-blurred");
+    }
+  }
+}
+
+function showLtfError(msg) {
+  const errEl = $("ltfErrorMsg");
+  if (!errEl) return;
+  errEl.textContent = msg;
+  errEl.classList.remove("hidden");
+}
+
+function validateLtfCurrentQuestion() {
+  if (ltfCurrentQ === 0) {
+    if (ltfAnswers.goals.length === 0) { showLtfError("Please select at least one goal."); return false; }
+    return true;
+  }
+  if (ltfCurrentQ === 1) {
+    const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10);
+    if (!empCount || empCount < 1) { showLtfError("Please enter the number of employees."); return false; }
+    const isTotal = ltfAnswers.budgetMode === "total";
+    const budget = isTotal
+      ? parseFloat($("ltfTotalBudget")?.value || "0")
+      : parseFloat($("ltfPerEmployee")?.value || "0");
+    if (!budget || budget < 1) { showLtfError(isTotal ? "Please enter a monthly budget." : "Please enter a per-employee amount."); return false; }
+    return true;
+  }
+  if (ltfCurrentQ === 2) return true; // cadence always has a value
+  if (ltfCurrentQ === 3) {
+    if (ltfAnswers.schedule.length === 0) { showLtfError("Please select at least one setting."); return false; }
+    return true;
+  }
+  if (ltfCurrentQ === 4) {
+    if (ltfAnswers.daysSelected.length === 0) { showLtfError("Please select at least one day."); return false; }
+    if (ltfAnswers.timesSelected.length === 0) { showLtfError("Please select at least one time window."); return false; }
+    return true;
+  }
+  if (ltfCurrentQ === 5) {
+    if (ltfAnswers.teamPreferenceEstimate.length === 0) { showLtfError("Please select at least one interest."); return false; }
+    return true;
+  }
+  return true;
+}
+
+function saveLtfCurrentAnswer() {
+  if (ltfCurrentQ === 1) {
+    ltfAnswers.employeeCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
+    if (ltfAnswers.budgetMode === "total") {
+      ltfAnswers.totalBudget = parseFloat($("ltfTotalBudget")?.value || "0") || 0;
+      ltfAnswers.perEmployee = ltfAnswers.employeeCount > 0 ? ltfAnswers.totalBudget / ltfAnswers.employeeCount : 0;
+    } else {
+      ltfAnswers.perEmployee = parseFloat($("ltfPerEmployee")?.value || "0") || 0;
+      ltfAnswers.totalBudget = ltfAnswers.perEmployee * ltfAnswers.employeeCount;
+    }
+  }
+  if (ltfCurrentQ === 2) {
+    ltfAnswers.cadence = $("ltfCadence")?.value || "Monthly";
+  }
+  if (ltfCurrentQ === 3) {
+    ltfAnswers.localCity = ($("ltfLocalCity")?.value || "").trim();
+  }
+}
+
+function advanceLtfQuestion() {
+  if (!validateLtfCurrentQuestion()) return;
+  saveLtfCurrentAnswer();
+  if (ltfCurrentQ < 5) {
+    goLtfQuestion(ltfCurrentQ + 1);
+  } else {
+    completeLtfSetup();
+  }
+}
+
+function completeLtfSetup() {
+  ltfPhase = "loading";
+  $("landingTfBuilder")?.classList.add("hidden");
+  $("landingTfLoading")?.classList.remove("hidden");
+
+  // Reveal all 4 preview cards
+  document.querySelectorAll(".ltf-preview-card").forEach(c => c.classList.remove("ltf-blurred"));
+
+  // Write answers to state.landingDraft
+  state.landingDraft.goals = [...ltfAnswers.goals];
+  state.landingDraft.employeeCount = ltfAnswers.employeeCount;
+  state.landingDraft.budgetMode = ltfAnswers.budgetMode;
+  state.landingDraft.totalBudget = ltfAnswers.totalBudget;
+  state.landingDraft.perEmployee = ltfAnswers.perEmployee;
+  state.landingDraft.budgetConfigured = true;
+  state.landingDraft.cadence = ltfAnswers.cadence;
+  state.landingDraft.schedule = [...ltfAnswers.schedule];
+  state.landingDraft.localCity = ltfAnswers.localCity;
+  state.landingDraft.daysSelected = [
+    ...ltfAnswers.daysSelected,
+    ...(ltfAnswers.saturdayOn ? ["Sa"] : [])
+  ];
+  state.landingDraft.timesSelected = [...ltfAnswers.timesSelected];
+  state.landingDraft.teamPreferenceEstimate = [...ltfAnswers.teamPreferenceEstimate];
+
+  state.landingTypeformComplete = true;
+  state.landingBuilderStarted = true;
+  state.completedSetupSteps = [1, 2, 3, 4, 5, 6];
+  state.currentSetupStep = 7;
+  persistState();
+
+  setTimeout(() => {
+    ltfPhase = "complete";
+    const root = $("landingTypeformRoot");
+    if (root) root.style.display = "none";
+    renderSetupStepStates();
+    updateLandingHomeView();
+    renderSidebarVisibility();
+  }, 1350);
+}
+
+// ================================================================
+// END LANDING TYPEFORM
+// ================================================================
+
+
 function bindStaticEvents() {
 // Initialize landing setup flow if it exists
 try {
@@ -8022,6 +8465,12 @@ try {
 const landingStartBuilderBtn = $("landingStartBuilder");
 if (landingStartBuilderBtn) {
   landingStartBuilderBtn.addEventListener("click", startLandingBuilder);
+}
+
+try {
+  initLandingTypeform();
+} catch (error) {
+  console.warn("initLandingTypeform failed", error);
 }
 
 const setupStepsContainer = $("setupStepsContainer");
