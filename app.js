@@ -11048,7 +11048,8 @@ function renderPromoteEventStep() {
     "Plenty of basketball left — the leaderboard can still change.",
     "",
     "Follow the standings here:",
-    "[BRACKET LINKS]"
+    "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9",
+    "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f"
   ].join("\n");
 
   const parseDateFromContext = () => {
@@ -11426,6 +11427,18 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     const reminderDayOfCardMessage = isRevelryBracketsPromoteFlow
       ? marchMadnessWeeklyLeaderboardMessage
       : reminderDayOfMessage;
+    const reminderDayOfCardHtml = isRevelryBracketsPromoteFlow
+      ? marchMadnessWeeklyLeaderboardMessage.split("\n").map((line) => {
+          const escapedLine = escapeHtml(line);
+          if (line === "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9") {
+            return `<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Men's tournament</a>`;
+          }
+          if (line === "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f") {
+            return `<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Women's tournament</a>`;
+          }
+          return escapedLine;
+        }).join("\n")
+      : escapeHtml(reminderDayOfCardMessage);
     const reminderDayOfIntroMessage = isRevelryBracketsPromoteFlow
       ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
       : "Send this reminder the day of the event.";
@@ -11433,7 +11446,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     return `
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
       <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
-      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(reminderDayOfCardMessage)}</div>
+      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${reminderDayOfCardHtml}</div>
       ${isRevelryBracketsPromoteFlow && isRevelryLeaderboardLock
         ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. No action is required right now.</div>`
         : `<div class="mt-4 flex flex-wrap items-center gap-2">
