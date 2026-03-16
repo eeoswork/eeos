@@ -12022,15 +12022,15 @@ function renderRunEventStep() {
 
     const isWeeklyLeaderboardStep = stepKey === "reminder_dayof" || stepKey === "reminder_dayof_2";
     const lockMeta = getRunSubstepLockMeta(stepKey);
-    const shouldMuteLeaderboardMessage = isWeeklyLeaderboardStep && lockMeta.locked && !allowTestingStepNavigation;
+    const isLockedWeeklyLeaderboardStep = isWeeklyLeaderboardStep && lockMeta.locked && !allowTestingStepNavigation;
     const introMessage = stepKey === "reminder_dayof_2"
       ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 31 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
       : "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:";
 
     return `
       <div class="mt-3 text-sm text-slate-800" style="white-space: pre-line;">${escapeHtml(introMessage)}</div>
-      <div class="mt-4 rounded-lg border border-slate-200 ${shouldMuteLeaderboardMessage ? "bg-slate-100 text-slate-500" : "bg-slate-50 text-slate-700"} p-3 text-sm" style="white-space: pre-line;">${runReminderCardHtml}</div>
-      ${shouldMuteLeaderboardMessage
+      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${runReminderCardHtml}</div>
+      ${isLockedWeeklyLeaderboardStep
         ? ""
         : `<div class="mt-4 flex flex-wrap items-center gap-2">
             <button type="button" data-run-substep-action="copy-reminder-dayof" data-run-substep-step="${stepKey}" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
@@ -12082,7 +12082,7 @@ function renderRunEventStep() {
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h3 class="text-2xl font-semibold text-slate-900 md:text-3xl">March Madness Bracket Challenge</h3>
-            <p class="mt-2 text-xs text-slate-500">March 19 - April 7</p>
+            <p class="mt-2 text-xs text-slate-700">March 19 - April 7</p>
           </div>
         </div>
       </div>
@@ -12221,7 +12221,7 @@ function renderRunEventStep() {
       const stageIndex = Number(item.getAttribute("data-process-index"));
       const isFutureStep = Number.isFinite(stageIndex) && stageIndex > runSubstepActiveIndex;
       if (isFutureStep && !allowTestingStepNavigation) {
-        item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        item.classList.add("cursor-not-allowed", "pointer-events-none");
         item.setAttribute("aria-disabled", "true");
       }
       item.addEventListener("click", () => {
