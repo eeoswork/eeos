@@ -1907,7 +1907,29 @@ function isValidHttpUrl(value) {
   return /^https?:\/\//i.test(raw);
 }
 
-const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof"];
+const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof", "reminder_dayof_2"];
+const REVELRY_LEADERBOARD_RELEASE_DATE_BY_STEP = {
+  reminder_dayof: "2026-03-24",
+  reminder_dayof_2: "2026-03-31"
+};
+const REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP = {
+  reminder_dayof: false,
+  reminder_dayof_2: false,
+  ...((APP_CONFIG.revelryLeaderboardUnlockByStep && typeof APP_CONFIG.revelryLeaderboardUnlockByStep === "object")
+    ? APP_CONFIG.revelryLeaderboardUnlockByStep
+    : {})
+};
+
+function getLocalDateKey(date = new Date()) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function isRevelryLeaderboardStepUnlocked(stepKey) {
+  if (!(stepKey in REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP)) return true;
+  return Boolean(REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP[stepKey]);
+}
 
 function normalizePromoteEventState() {
   if (!state.promoteEvent || typeof state.promoteEvent !== "object") {
@@ -1939,6 +1961,7 @@ function normalizePromoteEventState() {
   ensureStepStatus("announcement");
   ensureStepStatus("reminderWeek");
   ensureStepStatus("reminderDayOf");
+  ensureStepStatus("reminderDayOf2");
   ensureStepStatus("finalWinner");
 
   if (!promote.messages || typeof promote.messages !== "object") {
@@ -1957,14 +1980,17 @@ function normalizePromoteEventState() {
 }
 
 function enforceRevelryLeaderboardLockState() {
-  if (!isRevelryLeaderboardLockEnabled()) return false;
+  if (getActiveTestingMagicContext()) return false;
+  if (!isRevelryBracketsMagicContext()) return false;
 
   const completedSteps = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
   const promoteState = state.promoteEvent && typeof state.promoteEvent === "object" ? state.promoteEvent : {};
   const hasReachedLeaderboard = Boolean(state.revelryLeaderboardLockArmed)
     || String(promoteState.activeStep || "") === "reminder_dayof"
+    || String(promoteState.activeStep || "") === "reminder_dayof_2"
     || Boolean(promoteState.reminderWeekLockedAfterContinue)
     || Boolean(promoteState.reminderDayOf?.done)
+    || Boolean(promoteState.reminderDayOf2?.done)
     || Number(state.currentSetupStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
     || Number(state.eventWorkflowProcessStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
     || completedSteps.some((stepNum) => Number(stepNum || 0) > EVENT_WORKFLOW_STEPS.PROMOTE);
@@ -2000,8 +2026,11 @@ function enforceRevelryLeaderboardLockState() {
 
   normalizePromoteEventState();
   const promote = state.promoteEvent;
-  if (promote.activeStep !== "reminder_dayof") {
-    promote.activeStep = "reminder_dayof";
+  const targetLeaderboardStep = promote.reminderDayOf?.done
+    ? (promote.reminderDayOf2?.done ? "final_winner" : "reminder_dayof_2")
+    : "reminder_dayof";
+  if (promote.activeStep !== targetLeaderboardStep) {
+    promote.activeStep = targetLeaderboardStep;
     changed = true;
   }
   if (promote.collapsedStep !== "") {
@@ -2036,6 +2065,7 @@ function getPromoteStepDone(stepKey) {
   if (stepKey === "announcement") return Boolean(state.promoteEvent.announcement.done);
   if (stepKey === "reminder_week") return Boolean(state.promoteEvent.reminderWeek.done);
   if (stepKey === "reminder_dayof") return Boolean(state.promoteEvent.reminderDayOf.done);
+  if (stepKey === "reminder_dayof_2") return Boolean(state.promoteEvent.reminderDayOf2.done);
   return false;
 }
 
@@ -10877,9 +10907,9 @@ function renderPromoteEventStep() {
       : "Virtual";
   const eventSummary = `${eventName} · ${eventDate} · ${eventTime} · ${locationFormat}`;
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const isRevelryLeaderboardLock = isRevelryLeaderboardLockEnabled() && Boolean(state.revelryLeaderboardLockArmed);
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
-  const isMarchMadnessEvent = isRevelryLabsReadOnlyMagicLink() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
+  const isRevelryLeaderboardLock = !allowTestingStepNavigation && isRevelryBracketsMagicContext() && Boolean(state.revelryLeaderboardLockArmed);
+  const isMarchMadnessEvent = isRevelryBracketsMagicContext() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
     ? "Promote the Bracket Challenge"
     : "Promote Event";
@@ -10903,6 +10933,7 @@ function renderPromoteEventStep() {
     if (stepKey === "calendar") return promote.calendar;
     if (stepKey === "announcement") return promote.announcement;
     if (stepKey === "reminder_week") return promote.reminderWeek;
+    if (stepKey === "reminder_dayof_2") return promote.reminderDayOf2;
     if (stepKey === "final_winner") return promote.finalWinner;
     return promote.reminderDayOf;
   };
@@ -11102,6 +11133,7 @@ function renderPromoteEventStep() {
         { key: "announcement", label: "Announcement", title: "Announcement" },
         { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" },
         { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
+        { key: "reminder_dayof_2", label: "Weekly Leaderboard Updates #2", title: "Weekly Leaderboard Updates #2" },
         { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
       ]
     : [
@@ -11115,6 +11147,7 @@ function renderPromoteEventStep() {
     announcement: Boolean(promote.announcement.done),
     reminder_week: Boolean(promote.reminderWeek.done),
     reminder_dayof: Boolean(promote.reminderDayOf.done),
+    reminder_dayof_2: Boolean(promote.reminderDayOf2.done),
     final_winner: Boolean(promote.finalWinner?.done)
   };
   const isPromoteCompleted = processSteps.every((step) => doneFlags[step.key]);
@@ -11149,8 +11182,44 @@ function renderPromoteEventStep() {
     state.promoteEvent.collapsedStep = "";
     persistState();
   }
+  const reminderDayOf2Index = processSteps.findIndex((item) => item.key === "reminder_dayof_2");
+  const activeStepIndexAfterReminderDayOfResume = processSteps.findIndex((item) => item.key === activeStep);
+  const shouldResumeReminderDayOf2 = isRevelryBracketsPromoteFlow
+    && doneFlags.reminder_dayof
+    && !doneFlags.reminder_dayof_2
+    && reminderDayOf2Index >= 0
+    && activeStepIndexAfterReminderDayOfResume >= 0
+    && activeStepIndexAfterReminderDayOfResume < reminderDayOf2Index;
+  if (shouldResumeReminderDayOf2) {
+    activeStep = "reminder_dayof_2";
+    state.promoteEvent.activeStep = "reminder_dayof_2";
+    state.promoteEvent.collapsedStep = "";
+    persistState();
+  }
+
+  const getLeaderboardLockMeta = (stepKey) => {
+    if (!isRevelryBracketsPromoteFlow) return { locked: false, dateLabel: "" };
+    const dateMap = {
+      reminder_dayof: { key: "2026-03-24", label: "March 24" },
+      reminder_dayof_2: { key: "2026-03-31", label: "March 31" }
+    };
+    const target = dateMap[stepKey];
+    if (!target) return { locked: false, dateLabel: "" };
+    const unlocked = isRevelryLeaderboardStepUnlocked(stepKey);
+    const alreadyDone = Boolean(doneFlags[stepKey]);
+    return {
+      locked: !unlocked && !alreadyDone,
+      dateLabel: target.label
+    };
+  };
+
   const isAnnouncementGateActive = isRevelryBracketsPromoteFlow && !doneFlags.announcement;
-  const isStepLocked = (stepKey) => isAnnouncementGateActive && stepKey !== "announcement";
+  const isStepLocked = (stepKey) => {
+    if (allowTestingStepNavigation) return false;
+    if (isAnnouncementGateActive && stepKey !== "announcement") return true;
+    const lockMeta = getLeaderboardLockMeta(stepKey);
+    return lockMeta.locked;
+  };
   if (isAnnouncementGateActive && (activeStep !== "announcement" || promote.collapsedStep === "announcement")) {
     state.promoteEvent.activeStep = "announcement";
     state.promoteEvent.collapsedStep = "";
@@ -11439,30 +11508,48 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
           return escapedLine;
         }).join("\n")
       : escapeHtml(reminderDayOfCardMessage);
+    const isWeeklyLeaderboardStep = stepKey === "reminder_dayof" || stepKey === "reminder_dayof_2";
+    const leaderboardLockMeta = getLeaderboardLockMeta(stepKey);
     const reminderDayOfIntroMessage = isRevelryBracketsPromoteFlow
-      ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
+      ? (stepKey === "reminder_dayof_2"
+          ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 31 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
+          : "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:")
       : "Send this reminder the day of the event.";
 
     return `
       ${showOrderNote ? `<div class="mt-2 text-xs text-slate-500">Recommended order: Calendar → Announcement → Reminders.</div>` : ""}
       <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${reminderDayOfCardHtml}</div>
-      ${isRevelryBracketsPromoteFlow && isRevelryLeaderboardLock
-        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. No action is required right now.</div>`
+      ${isRevelryBracketsPromoteFlow && isWeeklyLeaderboardStep && leaderboardLockMeta.locked && !allowTestingStepNavigation
+        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. This step is currently locked and will be enabled manually (${leaderboardLockMeta.dateLabel} target). No action is required right now.</div>`
         : `<div class="mt-4 flex flex-wrap items-center gap-2">
             <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
             <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
           </div>
           ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}`
       }
-      ${isRevelryBracketsPromoteFlow ? "" : `
+      ${isRevelryBracketsPromoteFlow && stepKey === "reminder_dayof" && (!leaderboardLockMeta.locked || allowTestingStepNavigation) ? `
+      <div class="mt-12 flex flex-col items-start gap-3">
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" data-promote-complete="reminder_dayof" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_dayof ? "checked" : ""} />
+          <span>I shared Weekly Leaderboard Updates #1</span>
+        </label>
+      </div>
+      ` : isRevelryBracketsPromoteFlow && stepKey === "reminder_dayof_2" && (!leaderboardLockMeta.locked || allowTestingStepNavigation) ? `
+      <div class="mt-12 flex flex-col items-start gap-3">
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" data-promote-complete="reminder_dayof_2" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_dayof_2 ? "checked" : ""} />
+          <span>I shared Weekly Leaderboard Updates #2</span>
+        </label>
+      </div>
+      ` : !isRevelryBracketsPromoteFlow ? `
       <div class="mt-4 flex items-center justify-end gap-3">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" data-promote-complete="reminder_dayof" class="h-4 w-4 rounded border-slate-300" ${doneFlags.reminder_dayof ? "checked" : ""} />
           <span>Day-of reminder sent</span>
         </label>
       </div>
-      `}
+      ` : ""}
     `;
   };
 
@@ -11540,6 +11627,9 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
     } else if (stepKey === "reminder_dayof") {
       state.promoteEvent.reminderDayOf.done = done;
       state.promoteEvent.reminderDayOf.doneAt = stamp;
+    } else if (stepKey === "reminder_dayof_2") {
+      state.promoteEvent.reminderDayOf2.done = done;
+      state.promoteEvent.reminderDayOf2.doneAt = stamp;
     } else if (stepKey === "final_winner") {
       state.promoteEvent.finalWinner.done = done;
       state.promoteEvent.finalWinner.doneAt = stamp;
@@ -11565,11 +11655,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
   panel.querySelectorAll("#promoteProcessBar [data-process-index]").forEach((item) => {
     const stageIndex = Number(item.getAttribute("data-process-index"));
-    if (isRevelryLeaderboardLock) {
-      item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
-      item.setAttribute("aria-disabled", "true");
-      return;
-    }
     const isFutureStep = Number.isFinite(stageIndex) && stageIndex > activeIndex;
     if (isFutureStep && !allowTestingStepNavigation) {
       item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
@@ -11593,7 +11678,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   const announcementSlackBtn = document.getElementById("promoteAnnouncementChannelSlack");
   if (announcementSlackBtn) {
     announcementSlackBtn.addEventListener("click", () => {
-      if (isRevelryLeaderboardLock) return;
       promoteUiState.announcementChannel = "slack";
       renderPromoteEventStep();
     });
@@ -11601,17 +11685,12 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   const announcementEmailBtn = document.getElementById("promoteAnnouncementChannelEmail");
   if (announcementEmailBtn) {
     announcementEmailBtn.addEventListener("click", () => {
-      if (isRevelryLeaderboardLock) return;
       promoteUiState.announcementChannel = "email";
       renderPromoteEventStep();
     });
   }
 
   panel.querySelectorAll("[data-promote-complete]").forEach((checkbox) => {
-    if (isRevelryLeaderboardLock) {
-      checkbox.disabled = true;
-      return;
-    }
     checkbox.addEventListener("change", () => {
       const stepKey = String(checkbox.getAttribute("data-promote-complete") || "");
       setStepDone(stepKey, Boolean(checkbox.checked));
@@ -11619,11 +11698,6 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   });
 
   panel.querySelectorAll("[data-promote-action]").forEach((button) => {
-    if (isRevelryLeaderboardLock) {
-      button.disabled = true;
-      button.classList.add("cursor-not-allowed", "opacity-60");
-      return;
-    }
     button.addEventListener("click", () => {
       const action = String(button.getAttribute("data-promote-action") || "");
       if (action === "copy-emails") {
@@ -11684,7 +11758,10 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         if (!doneFlags.reminder_week) return;
         state.promoteEvent.reminderWeekLockedAfterContinue = true;
         persistState();
-        setActiveStep("reminder_dayof");
+        state.promoteEvent.activeStep = "reminder_dayof";
+        state.promoteEvent.collapsedStep = "";
+        persistState();
+        renderPromoteEventStep();
         setTimeout(() => {
           const card = document.getElementById("promote-card-reminder_dayof");
           if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
