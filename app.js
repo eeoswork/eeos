@@ -218,7 +218,7 @@ function getWorkflowTypeLabel(eventLike = {}) {
       || title === "march madness brackets challenge"
       || title === "company-wide march madness challenge";
     if (isRevelryBracketsMagicContext() && isMarchMadness) {
-      return "Runs from March 19 to April 6.  Your total admin time during the challenge: under 30 minutes.";
+      return "Runs from March 19 to April 7.  Your total admin time during the challenge: under 30 minutes.";
     }
     return "Promote";
   }
@@ -10910,13 +10910,20 @@ function renderPromoteEventStep() {
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isRevelryLeaderboardLock = !allowTestingStepNavigation && isRevelryBracketsMagicContext() && Boolean(state.revelryLeaderboardLockArmed);
   const isMarchMadnessEvent = isRevelryBracketsMagicContext() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
-  const promoteHeaderTitle = isMagicLinkContext && isMarchMadnessEvent
-    ? "Promote the Bracket Challenge"
+  const headerOverrideStep = String(promote.activeStep || "").trim();
+  const shouldUseMarchMadnessHeaderCopy = isMagicLinkContext
+    && isMarchMadnessEvent
+    && (headerOverrideStep === "reminder_dayof" || headerOverrideStep === "reminder_dayof_2" || headerOverrideStep === "final_winner");
+  const promoteHeaderTitle = shouldUseMarchMadnessHeaderCopy
+    ? "March Madness Bracket Challenge"
     : "Promote Event";
-  const promoteHeaderSummary = isMagicLinkContext && isMarchMadnessEvent
-    ? "March 19 - April 6"
+  const promoteHeaderDescription = shouldUseMarchMadnessHeaderCopy
+    ? "March Madness Bracket Challenge"
+    : "Let Revelers know the bracket challenge is live, and keep the excitement going throughout the tournament with weekly leaderboard updates.";
+  const promoteHeaderSummary = shouldUseMarchMadnessHeaderCopy
+    ? "March 19 - April 7"
     : eventSummary;
-  const promoteHeaderDescriptionStyle = isMagicLinkContext && isMarchMadnessEvent
+  const promoteHeaderDescriptionStyle = shouldUseMarchMadnessHeaderCopy
     ? "max-width: 75%;"
     : "";
   const attendeeCount = Number(bookingConfirmation?.bookedHeadcount || bookedEvent?.headcount || bookedEvent?.rsvps || 63);
@@ -11583,7 +11590,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 class="text-2xl font-semibold text-slate-900 md:text-3xl">${escapeHtml(promoteHeaderTitle)}</h2>
-          <p class="mt-1 text-sm text-slate-600" style="${promoteHeaderDescriptionStyle}">Let Revelers know the bracket challenge is live, and keep the excitement going throughout the tournament with weekly leaderboard updates.</p>
+          <p class="mt-1 text-sm text-slate-600" style="${promoteHeaderDescriptionStyle}">${escapeHtml(promoteHeaderDescription)}</p>
           <p class="mt-2 text-xs text-slate-500">${escapeHtml(promoteHeaderSummary)}</p>
         </div>
         <span class="inline-flex h-7 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600 whitespace-nowrap">${isPromoteCompleted ? "✓ Completed" : "● In progress"}</span>
