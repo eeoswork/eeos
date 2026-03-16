@@ -12095,17 +12095,19 @@ function renderRunEventStep() {
       </div>
     `
     : "";
+  // Hide legacy Run Event cards for Revelry/testing March Madness; only run substeps should be visible.
+  const showLegacyRunEventCards = !isRevelryMarchMadnessRunSubsteps;
 
   panel.innerHTML = `
     ${marchMadnessRunSubstepsHtml}
-    ${debugPreview ? `
+    ${showLegacyRunEventCards && debugPreview ? `
       <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">Debug preview (event details may be missing).</div>
     ` : ""}
-    ${!debugPreview && !hasEnoughSchedulingContext ? `
+    ${showLegacyRunEventCards && !debugPreview && !hasEnoughSchedulingContext ? `
       <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Run Event is visible now so the workflow stays intact. Final event details can still be filled in upstream.</div>
     ` : ""}
 
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
+    ${showLegacyRunEventCards ? `<div class="rounded-xl border border-slate-200 bg-white p-5">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 class="text-2xl font-semibold text-slate-900">Run Event</h3>
@@ -12113,9 +12115,9 @@ function renderRunEventStep() {
         </div>
         <span class="inline-flex h-7 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600">${statusText}</span>
       </div>
-    </div>
+    </div>` : ""}
 
-    <article class="rounded-xl border border-slate-200 bg-white p-5">
+    ${showLegacyRunEventCards ? `<article class="rounded-xl border border-slate-200 bg-white p-5">
       <h4 class="text-base font-semibold text-slate-900">Today’s plan</h4>
 
       <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
@@ -12159,9 +12161,9 @@ function renderRunEventStep() {
         <p class="text-xs text-slate-500 md:mr-3">Do this after the event ends.</p>
         <button id="runEventMarkCompleted" type="button" class="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700">Mark event completed →</button>
       </div>
-    </article>
+    </article>` : ""}
 
-    <article class="rounded-xl border border-slate-200 bg-white p-5">
+    ${showLegacyRunEventCards ? `<article class="rounded-xl border border-slate-200 bg-white p-5">
       <h4 class="text-base font-semibold text-slate-900">Quick notes</h4>
       <div class="mt-3">
         <label class="block text-sm font-medium text-slate-700" for="runEventNotesInput">Notes (optional)</label>
@@ -12172,7 +12174,7 @@ function renderRunEventStep() {
         <input id="runEventAttendanceInput" type="number" min="0" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800" value="${runState.attendanceEstimate === null ? "" : String(runState.attendanceEstimate)}" />
         <p class="mt-1 text-xs text-slate-500">Rough estimate is fine.</p>
       </div>
-    </article>
+    </article>` : ""}
   `;
 
   if (isRevelryMarchMadnessRunSubsteps) {
