@@ -11930,7 +11930,7 @@ function renderRunEventStep() {
   normalizePromoteEventState();
   const promote = state.promoteEvent;
   const runSubsteps = [
-    { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
+    { key: "reminder_dayof", label: "Weekly Leaderboard Update #1", title: "Weekly Leaderboard Update #1" },
     { key: "reminder_dayof_2", label: "Weekly Leaderboard Updates #2", title: "Weekly Leaderboard Updates #2" },
     { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
   ];
