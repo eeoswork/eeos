@@ -235,9 +235,9 @@ function getEventWorkflowStepSequence(workflowType = getActiveWorkflowType()) {
     sequence = [...EVENT_WORKFLOW_STEP_SEQUENCE];
   }
 
-  // Revelry production magic link is intentionally capped at Promote Event for now.
+  // Revelry read-only magic link is intentionally capped at Run Event for now.
   if (isRevelryLabsReadOnlyMagicLink()) {
-    return sequence.filter((stepNum) => stepNum <= EVENT_WORKFLOW_STEPS.PROMOTE);
+    return sequence.filter((stepNum) => stepNum <= EVENT_WORKFLOW_STEPS.RUN);
   }
 
   return sequence;
@@ -1991,9 +1991,9 @@ function enforceRevelryLeaderboardLockState() {
     || Boolean(promoteState.reminderWeekLockedAfterContinue)
     || Boolean(promoteState.reminderDayOf?.done)
     || Boolean(promoteState.reminderDayOf2?.done)
-    || Number(state.currentSetupStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
-    || Number(state.eventWorkflowProcessStep || 0) > EVENT_WORKFLOW_STEPS.PROMOTE
-    || completedSteps.some((stepNum) => Number(stepNum || 0) > EVENT_WORKFLOW_STEPS.PROMOTE);
+    || Number(state.currentSetupStep || 0) > EVENT_WORKFLOW_STEPS.RUN
+    || Number(state.eventWorkflowProcessStep || 0) > EVENT_WORKFLOW_STEPS.RUN
+    || completedSteps.some((stepNum) => Number(stepNum || 0) > EVENT_WORKFLOW_STEPS.RUN);
 
   if (!hasReachedLeaderboard) {
     return false;
@@ -2009,18 +2009,18 @@ function enforceRevelryLeaderboardLockState() {
     changed = true;
   }
 
-  const trimmedCompleted = state.completedSetupSteps.filter((stepNum) => Number(stepNum || 0) <= EVENT_WORKFLOW_STEPS.PROMOTE);
+  const trimmedCompleted = state.completedSetupSteps.filter((stepNum) => Number(stepNum || 0) <= EVENT_WORKFLOW_STEPS.RUN);
   if (trimmedCompleted.length !== state.completedSetupSteps.length) {
     state.completedSetupSteps = trimmedCompleted;
     changed = true;
   }
 
-  if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.PROMOTE) {
-    state.currentSetupStep = EVENT_WORKFLOW_STEPS.PROMOTE;
+  if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.RUN) {
+    state.currentSetupStep = EVENT_WORKFLOW_STEPS.RUN;
     changed = true;
   }
-  if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.PROMOTE) {
-    state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.PROMOTE;
+  if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.RUN) {
+    state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.RUN;
     changed = true;
   }
 
@@ -11138,10 +11138,7 @@ function renderPromoteEventStep() {
   const processSteps = (isMagicLinkContext && isMarchMadnessEvent)
     ? [
         { key: "announcement", label: "Announcement", title: "Announcement" },
-        { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" },
-        { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
-        { key: "reminder_dayof_2", label: "Weekly Leaderboard Updates #2", title: "Weekly Leaderboard Updates #2" },
-        { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
+        { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" }
       ]
     : [
         { key: "calendar", label: "Calendar invite", title: "Calendar invite" },
@@ -11766,13 +11763,13 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       if (action === "complete-reminder-week-and-continue") {
         if (!doneFlags.reminder_week) return;
         state.promoteEvent.reminderWeekLockedAfterContinue = true;
-        persistState();
         state.promoteEvent.activeStep = "reminder_dayof";
         state.promoteEvent.collapsedStep = "";
         persistState();
-        renderPromoteEventStep();
+        ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.PROMOTE);
+        goToEventWorkflowStep(EVENT_WORKFLOW_STEPS.RUN);
         setTimeout(() => {
-          const card = document.getElementById("promote-card-reminder_dayof");
+          const card = document.getElementById("run-substep-card-reminder_dayof");
           if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 0);
         return;
@@ -11918,8 +11915,189 @@ function renderRunEventStep() {
   const checklist = runState.runEventChecklist;
   const checkedCount = Number(Boolean(checklist.vendorConfirmed)) + Number(Boolean(checklist.teamPrepared)) + Number(Boolean(checklist.readyToRun));
   const hasEnoughSchedulingContext = Boolean(eventDateTime || vendorUrl || confirmedHeadcount > 0);
+  const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
+  const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
+  const isMarchMadnessEvent = isRevelryBracketsMagicContext() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
+  const isRevelryMarchMadnessRunSubsteps = isMagicLinkContext && isMarchMadnessEvent;
+
+  normalizePromoteEventState();
+  const promote = state.promoteEvent;
+  const runSubsteps = [
+    { key: "reminder_dayof", label: "Weekly Leaderboard Updates", title: "Weekly Leaderboard Updates" },
+    { key: "reminder_dayof_2", label: "Weekly Leaderboard Updates #2", title: "Weekly Leaderboard Updates #2" },
+    { key: "final_winner", label: "Final Winner Announcement", title: "Final Winner Announcement" }
+  ];
+  const runSubstepDoneFlags = {
+    reminder_dayof: Boolean(promote.reminderDayOf.done),
+    reminder_dayof_2: Boolean(promote.reminderDayOf2.done),
+    final_winner: Boolean(promote.finalWinner?.done)
+  };
+  const getRunSubstepLockMeta = (stepKey) => {
+    if (!isRevelryMarchMadnessRunSubsteps) return { locked: false, dateLabel: "" };
+    const dateMap = {
+      reminder_dayof: { key: "2026-03-24", label: "March 24" },
+      reminder_dayof_2: { key: "2026-03-31", label: "March 31" }
+    };
+    const target = dateMap[stepKey];
+    if (!target) return { locked: false, dateLabel: "" };
+    const unlocked = isRevelryLeaderboardStepUnlocked(stepKey);
+    const alreadyDone = Boolean(runSubstepDoneFlags[stepKey]);
+    return {
+      locked: !unlocked && !alreadyDone,
+      dateLabel: target.label
+    };
+  };
+  const isRunSubstepLocked = (stepKey) => {
+    if (allowTestingStepNavigation) return false;
+    const lockMeta = getRunSubstepLockMeta(stepKey);
+    return lockMeta.locked;
+  };
+
+  const runSubstepKeys = runSubsteps.map((item) => item.key);
+  let activeRunSubstep = runSubstepKeys.includes(promote.activeStep) ? promote.activeStep : "reminder_dayof";
+  if (isRevelryMarchMadnessRunSubsteps && runSubstepDoneFlags.reminder_dayof && !runSubstepDoneFlags.reminder_dayof_2 && activeRunSubstep === "reminder_dayof") {
+    activeRunSubstep = "reminder_dayof_2";
+    state.promoteEvent.activeStep = "reminder_dayof_2";
+    state.promoteEvent.collapsedStep = "";
+    persistState();
+  }
+
+  const defaultRunReminderDayOfMessage = (
+    `Today is the day: ${eventName} starts at ${eventTime}.\n` +
+    "See you soon - please join on time."
+  );
+  const runReminderDayOfMessage = (promote.messages?.reminderDayOfOverride || defaultRunReminderDayOfMessage).trim();
+  const marchMadnessWeeklyLeaderboardMessage = [
+    "🏀 March Madness Bracket Challenge Update",
+    "",
+    "Here are the current standings after the latest round:",
+    "",
+    "Men's Tournament",
+    "🥇 1st - [NAME] - [POINTS]",
+    "🥈 2nd - [NAME] - [POINTS]",
+    "🥉 3rd - [NAME] - [POINTS]",
+    "",
+    "Women's Tournament",
+    "🥇 1st - [NAME] - [POINTS]",
+    "🥈 2nd - [NAME] - [POINTS]",
+    "🥉 3rd - [NAME] - [POINTS]",
+    "",
+    "Plenty of basketball left - the leaderboard can still change.",
+    "",
+    "Follow the standings here:",
+    "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9",
+    "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f"
+  ].join("\n");
+
+  const runReminderCardHtml = marchMadnessWeeklyLeaderboardMessage.split("\n").map((line) => {
+    const escapedLine = escapeHtml(line);
+    if (line === "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9") {
+      return `<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Men's tournament</a>`;
+    }
+    if (line === "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f") {
+      return `<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Women's tournament</a>`;
+    }
+    return escapedLine;
+  }).join("\n");
+
+  const renderRunSubstepBody = (stepKey) => {
+    if (stepKey === "final_winner") {
+      return `
+        <div class="mt-3 text-sm text-slate-600">Send this announcement when the final winner is decided.</div>
+        <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${escapeHtml(runReminderDayOfMessage)}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <button type="button" data-run-substep-action="copy-reminder-dayof" data-run-substep-step="final_winner" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+          <button type="button" data-run-substep-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+          <button type="button" data-run-substep-action="open-gmail" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Email</button>
+        </div>
+        ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}
+        <div class="mt-4 flex items-center justify-end gap-3">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" data-run-substep-complete="final_winner" class="h-4 w-4 rounded border-slate-300" ${runSubstepDoneFlags.final_winner ? "checked" : ""} />
+            <span>Final winner announcement sent</span>
+          </label>
+        </div>
+      `;
+    }
+
+    const isWeeklyLeaderboardStep = stepKey === "reminder_dayof" || stepKey === "reminder_dayof_2";
+    const lockMeta = getRunSubstepLockMeta(stepKey);
+    const introMessage = stepKey === "reminder_dayof_2"
+      ? "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 31 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:"
+      : "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:";
+
+    return `
+      <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(introMessage)}</div>
+      <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${runReminderCardHtml}</div>
+      ${isWeeklyLeaderboardStep && lockMeta.locked && !allowTestingStepNavigation
+        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. This step is currently locked and will be enabled manually (${lockMeta.dateLabel} target). No action is required right now.</div>`
+        : `<div class="mt-4 flex flex-wrap items-center gap-2">
+            <button type="button" data-run-substep-action="copy-reminder-dayof" data-run-substep-step="${stepKey}" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
+            <button type="button" data-run-substep-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+          </div>
+          ${promoteUiState.copiedAction === "copy-reminder-dayof" ? `<div class="mt-2 text-sm font-medium" style="color: #10B981;">Copied to clipboard</div>` : ""}`
+      }
+      ${stepKey === "reminder_dayof" && (!lockMeta.locked || allowTestingStepNavigation) ? `
+      <div class="mt-12 flex flex-col items-start gap-3">
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" data-run-substep-complete="reminder_dayof" class="h-4 w-4 rounded border-slate-300" ${runSubstepDoneFlags.reminder_dayof ? "checked" : ""} />
+          <span>I shared Weekly Leaderboard Updates #1</span>
+        </label>
+      </div>
+      ` : stepKey === "reminder_dayof_2" && (!lockMeta.locked || allowTestingStepNavigation) ? `
+      <div class="mt-12 flex flex-col items-start gap-3">
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" data-run-substep-complete="reminder_dayof_2" class="h-4 w-4 rounded border-slate-300" ${runSubstepDoneFlags.reminder_dayof_2 ? "checked" : ""} />
+          <span>I shared Weekly Leaderboard Updates #2</span>
+        </label>
+      </div>
+      ` : ""}
+    `;
+  };
+
+  const runSubstepActiveIndex = runSubsteps.findIndex((item) => item.key === activeRunSubstep);
+  const runSubstepCompletedIndexes = runSubsteps
+    .map((step, index) => (runSubstepDoneFlags[step.key] ? index : -1))
+    .filter((index) => index >= 0);
+  const runSubstepProgressHtml = getHorizontalProcessBarHtml(runSubsteps.map((step) => step.label), runSubstepActiveIndex, {
+    completedIndexes: runSubstepCompletedIndexes,
+    clickable: true
+  });
+  const runSubstepCardsHtml = isRevelryMarchMadnessRunSubsteps
+    ? runSubsteps.filter((step) => step.key === activeRunSubstep).map((step) => `
+      <article id="run-substep-card-${step.key}" class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-2">
+            <h4 class="truncate text-base font-semibold text-slate-900">${escapeHtml(step.title)}</h4>
+          </div>
+        </div>
+        <div class="mt-4 border-t border-slate-200 pt-4">${renderRunSubstepBody(step.key)}</div>
+      </article>
+    `).join("")
+    : "";
+  const marchMadnessRunSubstepsHtml = isRevelryMarchMadnessRunSubsteps
+    ? `
+      <div class="rounded-xl border border-slate-200 bg-white p-5 md:p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h3 class="text-2xl font-semibold text-slate-900 md:text-3xl">March Madness Bracket Challenge</h3>
+            <p class="mt-2 text-xs text-slate-500">March 19 - April 7</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="runSubstepProcessBar" class="mt-3">
+        ${runSubstepProgressHtml}
+      </div>
+
+      <div class="mt-4 space-y-3">
+        ${runSubstepCardsHtml}
+      </div>
+    `
+    : "";
 
   panel.innerHTML = `
+    ${marchMadnessRunSubstepsHtml}
     ${debugPreview ? `
       <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">Debug preview (event details may be missing).</div>
     ` : ""}
@@ -11996,6 +12174,95 @@ function renderRunEventStep() {
       </div>
     </article>
   `;
+
+  if (isRevelryMarchMadnessRunSubsteps) {
+    const setRunSubstepActive = (stepKey) => {
+      if (!runSubsteps.some((item) => item.key === stepKey)) return;
+      if (isRunSubstepLocked(stepKey)) return;
+      state.promoteEvent.activeStep = stepKey;
+      state.promoteEvent.collapsedStep = "";
+      persistState();
+      renderRunEventStep();
+    };
+
+    const setRunSubstepDone = (stepKey, done) => {
+      normalizePromoteEventState();
+      const stamp = done ? new Date().toISOString() : "";
+      if (stepKey === "reminder_dayof") {
+        state.promoteEvent.reminderDayOf.done = done;
+        state.promoteEvent.reminderDayOf.doneAt = stamp;
+      } else if (stepKey === "reminder_dayof_2") {
+        state.promoteEvent.reminderDayOf2.done = done;
+        state.promoteEvent.reminderDayOf2.doneAt = stamp;
+      } else if (stepKey === "final_winner") {
+        state.promoteEvent.finalWinner.done = done;
+        state.promoteEvent.finalWinner.doneAt = stamp;
+      }
+
+      if (done) {
+        const currentIndex = runSubsteps.findIndex((item) => item.key === stepKey);
+        const nextStep = runSubsteps[currentIndex + 1]?.key;
+        if (nextStep) {
+          state.promoteEvent.activeStep = nextStep;
+          state.promoteEvent.collapsedStep = "";
+        }
+      } else {
+        state.promoteEvent.activeStep = stepKey;
+        state.promoteEvent.collapsedStep = "";
+      }
+      persistState();
+      renderRunEventStep();
+    };
+
+    panel.querySelectorAll("#runSubstepProcessBar [data-process-index]").forEach((item) => {
+      const stageIndex = Number(item.getAttribute("data-process-index"));
+      const isFutureStep = Number.isFinite(stageIndex) && stageIndex > runSubstepActiveIndex;
+      if (isFutureStep && !allowTestingStepNavigation) {
+        item.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        item.setAttribute("aria-disabled", "true");
+      }
+      item.addEventListener("click", () => {
+        const clickedIndex = Number(item.getAttribute("data-process-index"));
+        if (!Number.isFinite(clickedIndex)) return;
+        if (clickedIndex > runSubstepActiveIndex && !allowTestingStepNavigation) return;
+        const stepKey = runSubsteps[clickedIndex]?.key;
+        if (!stepKey) return;
+        setRunSubstepActive(stepKey);
+      });
+    });
+
+    panel.querySelectorAll("[data-run-substep-complete]").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const stepKey = String(checkbox.getAttribute("data-run-substep-complete") || "");
+        setRunSubstepDone(stepKey, Boolean(checkbox.checked));
+      });
+    });
+
+    panel.querySelectorAll("[data-run-substep-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = String(button.getAttribute("data-run-substep-action") || "");
+        if (action === "copy-reminder-dayof") {
+          const stepKey = String(button.getAttribute("data-run-substep-step") || activeRunSubstep || "");
+          const copyText = stepKey === "final_winner" ? runReminderDayOfMessage : marchMadnessWeeklyLeaderboardMessage;
+          navigator.clipboard.writeText(String(copyText || "")).catch(() => {});
+          promoteUiState.copiedAction = "copy-reminder-dayof";
+          renderRunEventStep();
+          setTimeout(() => {
+            promoteUiState.copiedAction = null;
+            renderRunEventStep();
+          }, 3000);
+          return;
+        }
+        if (action === "open-slack") {
+          window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+          return;
+        }
+        if (action === "open-gmail") {
+          window.open("https://gmail.com", "_blank", "noopener,noreferrer");
+        }
+      });
+    });
+  }
 
   const syncRunStateFields = () => {
     runStateTarget.runEventChecklist = runState.runEventChecklist;
