@@ -12028,7 +12028,7 @@ function renderRunEventStep() {
       : "Your work is done for now.\n\nExpect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:";
 
     return `
-      <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(introMessage)}</div>
+      <div class="mt-3 text-sm text-slate-800" style="white-space: pre-line;">${escapeHtml(introMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 ${shouldMuteLeaderboardMessage ? "bg-slate-100 text-slate-500" : "bg-slate-50 text-slate-700"} p-3 text-sm" style="white-space: pre-line;">${runReminderCardHtml}</div>
       ${shouldMuteLeaderboardMessage
         ? ""
