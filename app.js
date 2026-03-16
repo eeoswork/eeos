@@ -2023,6 +2023,10 @@ function enforceRevelryLeaderboardLockState() {
     state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.RUN;
     changed = true;
   }
+  if (!state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.PROMOTE)) {
+    state.completedSetupSteps.push(EVENT_WORKFLOW_STEPS.PROMOTE);
+    changed = true;
+  }
 
   normalizePromoteEventState();
   const promote = state.promoteEvent;
@@ -7853,10 +7857,13 @@ function renderSetupStepStates() {
       && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST
       && previousWorkflowStep !== null
       && !state.completedSetupSteps.includes(previousWorkflowStep);
+    const suppressRunStepLockStyling = stepNum === EVENT_WORKFLOW_STEPS.RUN
+      && isRevelryBracketsMagicContext();
+    const isEventWorkflowStepLockedForUi = isEventWorkflowStepLocked && !suppressRunStepLockStyling;
     const isRevelrySetupReadOnly = revelryReadOnlyCompletedSteps
       && allCoreSetupComplete
       && isCoreSetupStep;
-    stepEl.classList.toggle("setup-step-locked", isEventWorkflowStepLocked || isRevelrySetupReadOnly);
+    stepEl.classList.toggle("setup-step-locked", isEventWorkflowStepLockedForUi || isRevelrySetupReadOnly);
     if ((!allCoreSetupComplete && isEventWorkflowStep) || isSkippedWorkflowStep) {
       stepEl.style.display = "none";
     } else {
@@ -7881,7 +7888,7 @@ function renderSetupStepStates() {
           }
           return;
         }
-        if (isEventWorkflowStepLocked) {
+        if (isEventWorkflowStepLockedForUi) {
           if (allowWhenLocked) {
             if (control.tagName === "A") {
               control.removeAttribute("aria-disabled");
