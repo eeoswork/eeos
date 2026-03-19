@@ -8234,10 +8234,14 @@ function initLandingTypeform() {
   previewMonthOffsets.forEach(({ previewMonth, offset }) => {
     const monthLabelEl = document.querySelector(`.ltf-preview-card[data-preview-month="${previewMonth}"] .ltf-card-month`);
     if (!monthLabelEl) return;
-    const targetDate = new Date();
-    targetDate.setMonth(targetDate.getMonth() + offset);
-    const monthName = targetDate.toLocaleString("en-US", { month: "long" });
-    monthLabelEl.textContent = monthName;
+    if (previewMonth === 2) {
+      monthLabelEl.textContent = "UP NEXT";
+    } else {
+      const targetDate = new Date();
+      targetDate.setMonth(targetDate.getMonth() + offset);
+      const monthName = targetDate.toLocaleString("en-US", { month: "long" });
+      monthLabelEl.textContent = monthName;
+    }
   });
 
   const overviewCard = document.querySelector(".ltf-overview-card");

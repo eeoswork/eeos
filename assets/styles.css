@@ -1,3 +1,29 @@
+.ltf-overview-block--focus.ltf-overview-block--wide {
+  grid-column: span 2;
+  min-height: 48px;
+  margin-top: 8px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  border-top: 1px solid #e2e8f0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+}
+
+.ltf-pill {
+  display: inline-block;
+  background: #e5e7eb;
+  color: #64748b;
+  border-radius: 9999px;
+  padding: 0.25em 0.9em;
+  font-size: calc(1em - 6px);
+  font-weight: 500;
+  margin-right: 0.5em;
+  line-height: 1.5;
+}
 * {
 box-sizing: border-box;
 }
@@ -582,7 +608,7 @@ font-size: 11px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #ffffff;
-  padding: 12px;
+  padding: 16px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1339,7 +1365,7 @@ font-size: 11px;
 
 .ltf-card-title {
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 400;
   color: #0f172a;
   margin-bottom: 4px;
   line-height: 1.35;
@@ -1406,13 +1432,13 @@ font-size: 11px;
 }
 
 .ltf-preview-card--mini .ltf-card-title {
-  font-size: 0.8125rem;
-  margin-bottom: 3px;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
 }
 
 .ltf-preview-card--mini .ltf-card-desc {
-  font-size: 0.6875rem;
-  margin-bottom: 7px;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
 }
 
 .ltf-preview-card--mini .ltf-card-category,
@@ -1440,7 +1466,7 @@ font-size: 11px;
 .ltf-overview-kicker {
   margin: 0;
   font-size: 0.625rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #1d4ed8;
@@ -1579,7 +1605,7 @@ font-size: 11px;
 
 .ltf-overview-sentiment-label {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #0f172a;
 }
