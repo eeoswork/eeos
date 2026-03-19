@@ -9649,22 +9649,21 @@ async function bootstrap() {
       clearAuthSession();
       setAuthStatus(String(error?.message || "Session expired. Signed out.").trim(), true);
     } finally {
+      enforceRevelryRunEventViewHardLock();
       setSidebarHydrationLoading(false);
       renderSidebar();
     }
   }
 
+  enforceRevelryRunEventViewHardLock();
+
   hideAuthGate();
   if (isRevelryLabsReadOnlyMagicLink()) {
-    enforceRevelryRunEventViewHardLock();
     showApp();
   } else {
     showLanding();
   }
   renderAll();
-  if (enforceRevelryRunEventViewHardLock()) {
-    renderAll();
-  }
   updateMobileSidebarToggleOffset();
 }
 
