@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EEOS | Revelry Labs</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .sidebar { width: 240px; min-width: 240px; }
+  .main-scroll { height: 100vh; overflow-y: auto; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #475569; cursor: default; }
+  .nav-item.active { background: #E0E7FF; color: #1F2937; }
+  .nav-item.done { color: #94a3b8; }
+  .nav-item .check { color: #22c55e; font-size: 12px; }
+  .progress-bar { display: flex; gap: 0; align-items: center; }
+  .progress-step { flex: 1; padding: 8px 10px; font-size: 12px; font-weight: 500; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; text-align: center; }
+  .progress-step:first-child { border-radius: 8px 0 0 8px; }
+  .progress-step:last-child { border-radius: 0 8px 8px 0; }
+  .progress-step + .progress-step { border-left: none; }
+  .progress-step.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+  .message-pre { white-space: pre-line; font-size: 13px; line-height: 1.6; color: #334155; }
+  .copy-btn { background: #546373; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .copy-btn:hover { background: #3d4f5e; }
+  .slack-btn { background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .slack-btn:hover { background: #f8fafc; }
+  .copied-label { color: #10B981; font-size: 13px; font-weight: 500; display: none; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-900" style="display:flex;height:100vh;overflow:hidden;">
+
+<!-- Sidebar -->
+<aside class="sidebar bg-white border-r border-slate-200 flex flex-col" style="height:100vh;overflow-y:auto;">
+  <!-- Logo / Identity -->
+  <div class="px-4 pt-5 pb-3 border-b border-slate-100">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">EEOS</div>
+    <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
+    <div class="text-xs text-slate-500 mt-0.5">Jennifer Baldwin</div>
+  </div>
+
+  <!-- Setup section (completed, collapsed) -->
+  <div class="px-3 pt-4">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;">
+      <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Setup</span>
+      <span style="color:#22c55e;font-size:13px;font-weight:600;">✓</span>
+    </div>
+  </div>
+
+  <!-- Event Workflow section -->
+  <div class="px-3 pt-3">
+    <div style="padding:4px 8px;margin-bottom:4px;">
+      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Event Workflow</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <!-- March Madness subtitle -->
+      <div style="padding:2px 12px 6px;">
+        <span style="display:inline-block;background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-weight:600;padding:3px 8px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;">March Madness Bracket Challenge</span>
+      </div>
+      <div class="nav-item done">
+        <span class="check">✓</span>
+        <span>Events Shortlist</span>
+      </div>
+      <div class="nav-item done">
+        <span class="check">✓</span>
+        <span>Promote Event</span>
+      </div>
+      <div class="nav-item active">
+        <span style="width:14px;height:14px;border-radius:4px;background:#6366f1;display:inline-block;flex-shrink:0;"></span>
+        <span>Run Event</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main-scroll flex-1 bg-slate-100">
+  <div style="max-width:720px;margin:0 auto;padding:32px 24px;">
+
+    <!-- Header card -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 md:p-6 mb-3">
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-900 md:text-3xl">March Madness Bracket Challenge</h3>
+        <p class="mt-2 text-xs text-slate-700">March 19 - April 7</p>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar mb-4">
+      <div class="progress-step active">Weekly Leaderboard Update #1</div>
+      <div class="progress-step">Weekly Leaderboard Update #2</div>
+      <div class="progress-step">Final Winner Announcement</div>
+    </div>
+
+    <!-- Substep card -->
+    <div class="space-y-3">
+      <article class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-2">
+            <h4 class="truncate text-base font-semibold text-slate-900">Weekly Leaderboard Update #1</h4>
+          </div>
+        </div>
+        <div class="mt-4 border-t border-slate-200 pt-4">
+          <!-- Intro -->
+          <div class="mt-3 text-sm text-slate-800" style="white-space:pre-line;">Your work is done for now.
+
+Expect an email at jennifer.baldwin@revelry.co on March 24 with your completed weekly update. Since the leaderboards are handled for you, just copy the provided text and share it in Slack. It will look like this:</div>
+
+          <!-- Message preview -->
+          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div class="message-pre">🏀 March Madness Bracket Challenge Update
+
+Here are the current standings after the latest round:
+
+Men's Tournament
+🥇 1st - [NAME] - [POINTS]
+🥈 2nd - [NAME] - [POINTS]
+🥉 3rd - [NAME] - [POINTS]
+
+Women's Tournament
+🥇 1st - [NAME] - [POINTS]
+🥈 2nd - [NAME] - [POINTS]
+🥉 3rd - [NAME] - [POINTS]
+
+Plenty of basketball left - the leaderboard can still change.
+
+Follow the standings here:
+<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Men's tournament</a>
+<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Women's tournament</a></div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <button class="copy-btn" id="copyBtn" onclick="copyMessage()">Copy message</button>
+            <button class="slack-btn" onclick="window.open('https://app.slack.com/client/','_blank','noopener,noreferrer')">Open Slack</button>
+            <span class="copied-label" id="copiedLabel">✓ Copied</span>
+          </div>
+
+          <!-- Locked note -->
+          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">
+            Read-only stage. This step will be enabled on March 24 — you'll receive an email with the completed leaderboard text. No action required right now.
+          </div>
+        </div>
+      </article>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const MESSAGE = `🏀 March Madness Bracket Challenge Update
+
+Here are the current standings after the latest round:
+
+Men's Tournament
+🥇 1st - [NAME] - [POINTS]
+🥈 2nd - [NAME] - [POINTS]
+🥉 3rd - [NAME] - [POINTS]
+
+Women's Tournament
+🥇 1st - [NAME] - [POINTS]
+🥈 2nd - [NAME] - [POINTS]
+🥉 3rd - [NAME] - [POINTS]
+
+Plenty of basketball left - the leaderboard can still change.
+
+Follow the standings here:
+Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9
+Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f`;
+
+function copyMessage() {
+  navigator.clipboard.writeText(MESSAGE).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = MESSAGE;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  var btn = document.getElementById('copyBtn');
+  var label = document.getElementById('copiedLabel');
+  btn.textContent = '✓ Copied';
+  label.style.display = 'inline';
+  setTimeout(function() {
+    btn.textContent = 'Copy message';
+    label.style.display = 'none';
+  }, 3000);
+}
+</script>
+</body>
+</html>

@@ -38,6 +38,11 @@ async function serveStaticHostRequest(request, fallbackPath) {
 }
 
 async function serveMagicLinkHostRequest(request) {
+  const url = new URL(request.url);
+  const path = String(url.pathname || "").replace(/\/+$/, "");
+  if (path === "/rlabs2026a1b2c3d4") {
+    return serveStaticHostRequest(request, "/revelry-live.html");
+  }
   return serveStaticHostRequest(request, "/index.html");
 }
 
