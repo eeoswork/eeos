@@ -248,24 +248,29 @@
 
 
   <main class="eeos-main">
-    <section id="landingView" class="min-h-screen px-[45px] py-8">
+    <section id="landingView" class="min-h-screen py-8">
       <header id="landingTopHeader" class="hidden fixed inset-x-0 top-0 z-[250] h-[60px] bg-slate-100">
-        <div class="flex h-full w-full items-center px-[45px]">
-          <img src="assets/eeos.svg" alt="EEOS" class="h-[30px] w-auto ml-[5px]" />
-          <div id="landingHeaderLogoPlaceholder" class="h-full flex-1"></div>
-          <button
-            id="landingHeaderSignIn"
-            type="button"
-            onclick="openAuthGateWithContext('signin')"
-            class="text-sm font-medium"
-            style="background: transparent; border: none; padding: 0; color: #040404;"
-          >
-            Log in
-          </button>
+        <div class="landing-shell-inner landing-top-grid">
+          <div class="landing-top-left">
+            <div class="landing-top-left-inner">
+              <img src="assets/eeos.svg" alt="EEOS" class="h-[30px] w-auto" />
+            </div>
+          </div>
+          <div class="landing-top-right">
+            <button
+              id="landingHeaderSignIn"
+              type="button"
+              onclick="openAuthGateWithContext('signin')"
+              class="text-sm font-medium"
+              style="background: transparent; border: none; padding: 0; color: #040404;"
+            >
+              Log in
+            </button>
+          </div>
         </div>
       </header>
 
-      <div class="w-full">
+      <div class="landing-shell-inner">
 
         <div id="landingSetupFlow">
 
@@ -278,32 +283,46 @@
 
                 <!-- Phase: Hero -->
                 <div id="landingTfHero">
-                  <p class="landing-tf-eyebrow">Employee Experience Platform</p>
-                  <h2 class="landing-tf-headline">Build your team<br>experience program<br>in minutes</h2>
-                  <p class="landing-tf-sub">Answer a few questions and get a tailored 4-month event program — built around your goals, budget, and team preferences.</p>
-                  <p class="landing-tf-meta">Takes about 2 minutes &nbsp;·&nbsp; No signup required</p>
-                  <button id="ltfStartBtn" type="button" class="landing-tf-cta">Get started →</button>
+                  <p class="landing-tf-eyebrow">OS FOR PEOPLE LEADERS</p>
+                  <h2 class="landing-tf-headline">Build your people program and launch your first company event&mdash;on us</h2>
+                  <p class="landing-tf-sub">Answer a few quick questions and see the next 4 months of your program tailored to your goals, budget, and team preferences.</p>
+                  <div class="landing-tf-process" aria-label="3-step process overview">
+                    <div class="landing-tf-process-top" aria-hidden="true">
+                      <span>Step 1</span>
+                      <span class="landing-tf-step-line"></span>
+                      <span>Step 2</span>
+                      <span class="landing-tf-step-line"></span>
+                      <span>Step 3</span>
+                    </div>
+                    <div class="landing-tf-process-bottom">
+                      <span>Team details</span>
+                      <span>Get program</span>
+                      <span>Launch event</span>
+                    </div>
+                  </div>
+                  <p class="landing-tf-meta">We handle the logistics, planning, and communication. &nbsp; No signup required.</p>
+                  <button id="ltfStartBtn" type="button" class="landing-tf-cta">Build Your People Plan →</button>
                 </div>
 
                 <!-- Phase: Builder -->
                 <div id="landingTfBuilder" class="hidden">
 
-                  <!-- 6-node progress bar -->
+                  <!-- 6-node progress bar (Node 0 disabled) -->
                   <nav id="landingTfProgressBar" aria-label="Setup progress" class="ltf-pb-track">
-                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="0">
+                    <!-- <div class="ltf-pb-node-wrap" data-ltf-node-wrap="0">
                       <div class="ltf-node ltf-node--active" data-ltf-node="0">
                         <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <span class="ltf-node-ring"></span>
                       </div>
-                      <span class="ltf-node-label">Goals</span>
+                      <span class="ltf-node-label">Cadence</span>
                     </div>
-                    <div class="ltf-connector" data-ltf-connector="0"></div>
+                    <div class="ltf-connector" data-ltf-connector="0"></div> -->
                     <div class="ltf-pb-node-wrap" data-ltf-node-wrap="1">
                       <div class="ltf-node ltf-node--pending" data-ltf-node="1">
                         <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <span class="ltf-node-ring"></span>
                       </div>
-                      <span class="ltf-node-label">Investment</span>
+                      <span class="ltf-node-label">Setting</span>
                     </div>
                     <div class="ltf-connector" data-ltf-connector="1"></div>
                     <div class="ltf-pb-node-wrap" data-ltf-node-wrap="2">
@@ -311,7 +330,7 @@
                         <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <span class="ltf-node-ring"></span>
                       </div>
-                      <span class="ltf-node-label">Cadence</span>
+                      <span class="ltf-node-label">Availability</span>
                     </div>
                     <div class="ltf-connector" data-ltf-connector="2"></div>
                     <div class="ltf-pb-node-wrap" data-ltf-node-wrap="3">
@@ -319,7 +338,7 @@
                         <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <span class="ltf-node-ring"></span>
                       </div>
-                      <span class="ltf-node-label">Setting</span>
+                      <span class="ltf-node-label">Goals</span>
                     </div>
                     <div class="ltf-connector" data-ltf-connector="3"></div>
                     <div class="ltf-pb-node-wrap" data-ltf-node-wrap="4">
@@ -327,7 +346,7 @@
                         <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <span class="ltf-node-ring"></span>
                       </div>
-                      <span class="ltf-node-label">Availability</span>
+                      <span class="ltf-node-label">Investment</span>
                     </div>
                     <div class="ltf-connector" data-ltf-connector="4"></div>
                     <div class="ltf-pb-node-wrap" data-ltf-node-wrap="5">
@@ -345,141 +364,131 @@
                   <!-- Question cards -->
                   <div id="landingTfQWrap" class="ltf-qwrap">
 
-                    <!-- Q0: Goals -->
-                    <div id="ltfQ0" class="ltf-q ltf-q--active">
-                      <h3 class="ltf-q-title">What are you hoping to improve?</h3>
-                      <p class="ltf-q-sub">Select up to 3 goals — we'll recommend events that support them.</p>
+                    <!-- Q3: Goals -->
+                    <div id="ltfQ3" class="ltf-q">
+                      <h3 class="ltf-q-title">What do you want this program to help improve?</h3>
+                      <p class="ltf-q-sub">Select all that apply — we'll tailor your program around these.</p>
                       <div id="ltfGoalsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
                     </div>
 
-                    <!-- Q1: Investment -->
-                    <div id="ltfQ1" class="ltf-q">
-                      <div class="mb-6">
-                        <div class="mb-6">
-                          <div class="mb-3 flex items-center gap-2">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
-                            <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Team Size</h4>
-                          </div>
-                          <p class="mb-2 text-[14px] text-slate-600">How many employees are in this program?</p>
-                          <div class="relative max-w-[220px]">
-                            <input id="ltfEmployeeCount" type="number" min="0" placeholder="e.g. 25" class="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2.5 pr-14 text-lg font-semibold text-slate-900 focus:border-blue-600 focus:outline-none" />
-                            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">Emps</span>
-                          </div>
+                    <!-- Q4: Investment -->
+                    <div id="ltfQ4" class="ltf-q">
+                      <h3 class="ltf-q-title">What's your monthly investment for this program?</h3>
+
+                      <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-budget-section="teamsize">
+                        <div class="mb-3 flex items-center gap-[10px]">
+                          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
+                          <span class="text-sm font-medium text-slate-700">Enter team size:</span>
                         </div>
-                        <div class="mb-4 mt-8">
-                          <div class="mb-3 flex items-center gap-2">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
-                            <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Funding</h4>
-                          </div>
-                          <p class="mb-3 text-[14px] text-slate-600">Choose how you want to define your monthly investment.</p>
-                          <div class="flex gap-2 rounded-lg bg-slate-200 p-1">
-                            <button id="ltfModeTotal" type="button" class="flex-1 rounded-md bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-blue-700 shadow-sm">Total Monthly</button>
-                            <button id="ltfModePerEmployee" type="button" class="flex-1 rounded-md px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-600 hover:text-slate-800">Per Employee</button>
-                          </div>
-                        </div>
-                        <div class="overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm">
-                          <div class="p-4">
-                            <label class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Current Monthly Allocation</label>
-                            <div id="ltfTotalBudgetPanel" class="flex items-center gap-2">
-                              <span class="text-2xl font-semibold text-slate-400">$</span>
-                              <input id="ltfTotalBudget" type="number" min="300" placeholder="e.g. 585" class="w-full bg-transparent text-3xl font-semibold text-slate-900 focus:outline-none" />
-                            </div>
-                            <div id="ltfPerEmployeePanel" class="hidden flex items-center gap-2">
-                              <span class="text-2xl font-semibold text-slate-400">$</span>
-                              <input id="ltfPerEmployee" type="number" min="0" step="0.01" placeholder="e.g. 15" class="w-full bg-transparent text-3xl font-semibold text-slate-900 focus:outline-none" />
-                            </div>
-                            <div class="mt-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
-                              <span id="ltfBudgetHelper">Investment: $0 / employee</span>
-                            </div>
-                            <button id="ltfBudgetGuidanceToggle" type="button" class="mt-3 text-xs font-medium text-slate-600 underline" style="background: transparent; border: none; padding: 0;">Not sure what to choose?</button>
-                            <div id="ltfBudgetGuidanceOptions" class="hidden mt-2 rounded-lg border border-slate-200 bg-white p-2 space-y-1">
-                              <button type="button" class="ltf-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="40">Growing teams focused on engagement: $40</button>
-                              <button type="button" class="ltf-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="60">Retention-focused teams investing in culture consistency: $60</button>
-                              <button type="button" class="ltf-budget-guidance-option w-full rounded px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-50" data-value="90">High-growth or competitive hiring environments: $90</button>
-                            </div>
+                        <div class="mt-3">
+                          <div class="relative max-w-[180px]">
+                            <input id="ltfEmployeeCount" type="number" min="0" placeholder="e.g. 25" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" />
+                            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">Employees</span>
                           </div>
                         </div>
                       </div>
-                      <div class="mb-3 flex items-center gap-2 text-xs text-slate-600">
-                        <span class="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 text-[10px] font-semibold text-slate-500">i</span>
-                        <span>Our platform fee is included — no additional fees.</span>
+
+                      <div class="mb-6" data-ltf-budget-section="funding">
+                        <div class="mb-3 flex items-center gap-[10px]">
+                          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
+                          <span class="text-sm font-medium text-slate-700">Calculate monthly investment:</span>
+                        </div>
+                        
+                        <div class="rounded-sm border border-slate-300 bg-slate-50 px-3 py-3 mb-6">
+                          <div class="flex gap-1 rounded-lg bg-slate-200 p-1">
+                            <button id="ltfModeTotal" type="button" class="flex-1 rounded-md bg-white px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-blue-700 shadow-sm">Total</button>
+                            <button id="ltfModePerEmployee" type="button" class="flex-1 rounded-md px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-600 hover:text-slate-800">Per Employee</button>
+                          </div>
+                          <div id="ltfTotalRangeOptions" class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-3"></div>
+                          <div id="ltfPerEmployeeRangeOptions" class="hidden grid grid-cols-1 gap-2 sm:grid-cols-3 mt-3"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                          <div class="rounded-sm border border-slate-300 bg-slate-50 px-3 py-2">
+                            <div class="text-[10px] font-medium text-slate-500 mb-1">Per Employee</div>
+                            <div id="ltfPerEmployeeDisplay" class="text-sm font-semibold text-slate-900">$0</div>
+                          </div>
+                          <div class="rounded-sm border border-slate-300 bg-slate-50 px-3 py-2">
+                            <div class="text-[10px] font-medium text-slate-500 mb-1">Monthly Total</div>
+                            <div id="ltfTotalDisplay" class="text-sm font-semibold text-slate-900">$0</div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-xs text-slate-600">
+                          <span class="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 text-[10px] font-semibold text-slate-500">i</span>
+                          <span>Our platform fee is included — no additional fees.</span>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Q2: Cadence -->
-                    <div id="ltfQ2" class="ltf-q">
-                      <h3 class="ltf-q-title">How often should events occur?</h3>
-                      <p class="ltf-q-sub">This sets the rhythm for your 4-month program.</p>
+                    <!-- Q0: Cadence (DISABLED) -->
+                    <!-- <div id="ltfQ0" class="ltf-q ltf-q--active">
+                      <h3 class="ltf-q-title">How often would you like to run company events?</h3>
                       <div class="mt-4 mb-2">
                         <select id="ltfCadence" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-slate-500"></select>
                       </div>
-                    </div>
+                    </div> -->
 
-                    <!-- Q3: Setting -->
-                    <div id="ltfQ3" class="ltf-q">
-                      <h3 class="ltf-q-title">Where should team events take place?</h3>
+                    <!-- Q1: Setting -->
+                    <div id="ltfQ1" class="ltf-q">
+                      <h3 class="ltf-q-title">How does your team usually participate?</h3>
                       <p class="ltf-q-sub">Check all that apply.</p>
                       <div id="ltfScheduleGrid" class="flex flex-wrap gap-2 mt-4 mb-2"></div>
-                      <div id="ltfLocalCityRow" class="hidden mt-3">
+
+
+                      <div id="ltfLocalCityRow" class="hidden mt-8">
                         <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
                         <input id="ltfLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="e.g. New Orleans, Minneapolis, Boston" />
                       </div>
                     </div>
 
-                    <!-- Q4: Availability -->
-                    <div id="ltfQ4" class="ltf-q">
+                    <!-- Q2: Availability -->
+                    <div id="ltfQ2" class="ltf-q">
                       <div class="mb-6">
-                        <div class="mb-6">
-                          <div class="mb-2 flex items-center gap-2">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
-                            <span class="text-sm font-medium text-slate-700">What days work best for team events?</span>
+                        <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-availability-section="days">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
+                            <span class="text-sm font-medium text-slate-700">What days are your team typically available?</span>
                           </div>
-                          <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
+                          <p class="mb-5 text-xs text-slate-500">Check all that apply</p>
                           <div class="flex flex-wrap gap-1">
-                            <button data-ltf-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">M</button>
-                            <button data-ltf-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">T</button>
-                            <button data-ltf-day="W" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">W</button>
-                            <button data-ltf-day="Th" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">Th</button>
-                            <button data-ltf-day="F" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">F</button>
+                            <button data-ltf-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">M</button>
+                            <button data-ltf-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">T</button>
+                            <button data-ltf-day="W" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">W</button>
+                            <button data-ltf-day="Th" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Th</button>
+                            <button data-ltf-day="F" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">F</button>
                           </div>
                         </div>
-                        <div class="mb-6">
-                          <div class="mb-2 flex items-center gap-2">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
-                            <span class="text-sm font-medium text-slate-700">What time windows on these days work best?</span>
+                        <div class="mb-6 mt-12 border-b border-slate-200 pb-6" data-ltf-availability-section="times">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
+                            <span class="text-sm font-medium text-slate-700">What time of day works best?</span>
                           </div>
-                          <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
-                          <div class="max-w-md rounded-sm bg-slate-100 p-1">
-                            <div class="grid grid-cols-1 gap-1 sm:grid-cols-3">
-                              <button data-ltf-time="Before 9a" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">Before 9a</button>
-                              <button data-ltf-time="12-1p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">12-1p (Lunch)</button>
-                              <button data-ltf-time="After 5p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">After 5p</button>
-                            </div>
+                          <p class="mb-5 text-xs text-slate-500">Check all that apply</p>
+                          <div class="flex gap-1">
+                            <button data-availability-time="Before 9a" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Before 9a</button>
+                            <button data-availability-time="12-1p" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">12-1p (Lunch)</button>
+                            <button data-availability-time="After 5p" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">After 5p</button>
                           </div>
                         </div>
-                        <div class="mb-2">
-                          <div class="mb-2 flex items-center gap-2">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">iii</span>
+                        <div class="mb-2 mt-6" data-ltf-availability-section="weekend">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
                             <span class="text-sm font-medium text-slate-700">Include weekends?</span>
                           </div>
-                          <button id="ltfSaturdayToggle" type="button" class="flex w-full items-center justify-between rounded-sm border border-slate-200 bg-slate-50/50 p-4 text-left transition-all hover:border-slate-300">
-                            <div>
-                              <p class="text-xs font-bold uppercase text-slate-700">Saturday Availability</p>
-                              <p class="mt-1 text-xs italic text-slate-500">ⓘ Saturday is included so we can recommend volunteer opportunities, which are often scheduled on weekends.</p>
-                            </div>
-                            <span id="ltfSatSwitch" class="relative h-5 w-10 rounded-full bg-slate-300 transition-colors flex-shrink-0 ml-4">
-                              <span id="ltfSatKnob" class="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition-all"></span>
-                            </span>
-                          </button>
+                          <p class="mb-5 text-xs text-slate-500">Most volunteering opportunities take place on Saturdays.</p>
+                          <div class="flex gap-1">
+                            <button data-ltf-weekend="yes" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Yes</button>
+                            <button data-ltf-weekend="no" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">No</button>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     <!-- Q5: Interests -->
                     <div id="ltfQ5" class="ltf-q">
-                      <h3 class="ltf-q-title">What should events focus on?</h3>
-                      <p class="ltf-q-sub">To get your first event moving quickly, tell us what you think your team would enjoy most. Select up to 3 options.</p>
-                      <p class="ltf-q-sub mt-1 text-slate-400">Later, we'll gather direct employee input with a short team survey to refine future events.</p>
+                      <h3 class="ltf-q-title">What activities would your team most enjoy?</h3>
+                      <p class="ltf-q-sub">Pick up to 3 — we’ll use this to launch your first event.<br><span style="font-style: italic; color: #64748b;">Later on, we’ll gather input directly from your team to refine the rest of your program.</span></p>
                       <div id="ltfInterestsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
                     </div>
 
@@ -506,46 +515,73 @@
 
               <!-- RIGHT COLUMN: Preview panel -->
               <div id="landingTfRight" class="landing-tf-right">
+                <div id="ltfPreviewRailLabel" class="ltf-preview-rail-label">PREVIEW</div>
                 <div class="ltf-preview-panel">
-                  <div class="ltf-preview-header-row">
-                    <p id="ltfPreviewTitle" class="ltf-preview-title">Program Preview</p>
-                    <p id="ltfPreviewSubtitle" class="ltf-preview-subtitle">Example 4-month program</p>
-                  </div>
                   <div class="ltf-preview-cards">
 
-                    <!-- Month 1 -->
-                    <div class="ltf-preview-card" data-preview-month="1">
-                      <div class="ltf-card-header-band" style="background: linear-gradient(135deg, #818cf8, #6366f1);"></div>
-                      <div class="ltf-card-body">
-                        <div class="ltf-card-tags">
-                          <span class="ltf-card-month">Month 1 &nbsp;·&nbsp; April 2026</span>
+                    <!-- Program Overview -->
+                    <div class="ltf-preview-card ltf-overview-card" data-preview-month="1" data-overview-spent="2500" data-overview-engaged="125">
+                      <div class="ltf-overview-top">
+                        <div class="ltf-overview-top-row">
+                          <p class="ltf-overview-kicker">Program Overview</p>
+                          <span id="ltfOverviewCyclePill" class="ltf-overview-cycle-pill">Cycle ending</span>
                         </div>
-                        <h4 class="ltf-card-title">Virtual Trivia Night: Pop Culture Edition</h4>
-                        <div class="flex gap-2 mb-2">
-                          <span class="ltf-card-category" style="background:#ede9fe; color:#6d28d9;">Fun &amp; Social</span>
-                          <span class="ltf-card-format">Virtual &nbsp;·&nbsp; 75 min</span>
+                      </div>
+
+                      <div class="ltf-overview-grid">
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Budget efficiency</p>
+                          <div class="ltf-overview-bar-wrap">
+                            <div class="ltf-overview-bar" style="width: 85%;"></div>
+                          </div>
+                          <p class="ltf-overview-value">85% used <span class="ltf-overview-meta-inline">$2500 spent of $3500 allocated</span></p>
                         </div>
-                        <p class="ltf-card-desc">A fast-paced hosted trivia competition — great for energy, laughs, and cross-team connection.</p>
-                        <div class="ltf-card-footer">
-                          <span class="ltf-card-status-dot"></span>
-                          <span class="ltf-card-status-label">Ready to launch</span>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Operations automated: <span class="ltf-overview-score-inline">93%</span></p>
+                          <p class="ltf-overview-meta ltf-overview-meta--check">End-to-end vendor coordination</p>
+                          <p class="ltf-overview-meta ltf-overview-meta--check">Internal marketing: polling, RSVP, all comms</p>
+                        </div>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Participation</p>
+                          <div class="ltf-overview-bar-wrap">
+                            <div class="ltf-overview-bar" style="width: 78%;"></div>
+                          </div>
+                          <p class="ltf-overview-value">78% <span class="ltf-overview-meta-inline">125 attendees of 190 invited</span></p>
+                        </div>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Admin workload: <span class="ltf-overview-score-inline">60 minutes</span></p>
+                          <p class="ltf-overview-meta">Time saved this period: 14 hours</p>
+                        </div>
+                      </div>
+
+                      <div class="ltf-overview-mini-grid">
+                        <div class="ltf-overview-block ltf-overview-block--mini">
+                          <p class="ltf-overview-sentiment-label">Employee sentiment: <span class="ltf-overview-sentiment-score">4.9 / 5</span></p>
+                        </div>
+                        <div class="ltf-overview-block ltf-overview-block--mini">
+                          <p class="ltf-overview-sentiment-label">Cost per engaged employee: <span id="ltfOverviewCostPerEngaged" class="ltf-overview-sentiment-score">$0</span></p>
                         </div>
                       </div>
                     </div>
 
+                    <p class="ltf-overview-kicker ltf-events-cycle-label">Current Period</p>
+
                     <!-- Month 2 -->
-                    <div class="ltf-preview-card" data-preview-month="2">
+                    <div class="ltf-preview-card ltf-preview-card--mini" data-preview-month="2">
                       <div class="ltf-card-header-band" style="background: linear-gradient(135deg, #34d399, #10b981);"></div>
                       <div class="ltf-card-body">
                         <div class="ltf-card-tags">
-                          <span class="ltf-card-month">Month 2 &nbsp;·&nbsp; May 2026</span>
+                          <span class="ltf-card-month">May</span>
                         </div>
                         <h4 class="ltf-card-title">Guided Meditation &amp; Breathwork Session</h4>
                         <div class="flex gap-2 mb-2">
                           <span class="ltf-card-category" style="background:#d1fae5; color:#065f46;">Wellness</span>
                           <span class="ltf-card-format">Virtual &nbsp;·&nbsp; 45 min</span>
                         </div>
-                        <p class="ltf-card-desc">A certified mindfulness coach leads your team through calming breathwork and stress-relief techniques.</p>
+                        <p class="ltf-card-desc">A certified coach leads calming breathwork and stress-reset techniques.</p>
                         <div class="ltf-card-footer">
                           <span class="ltf-card-status-dot"></span>
                           <span class="ltf-card-status-label">Ready to launch</span>
@@ -554,42 +590,35 @@
                     </div>
 
                     <!-- Month 3 -->
-                    <div class="ltf-preview-card" data-preview-month="3">
+                    <div class="ltf-preview-card ltf-preview-card--mini" data-preview-month="3">
                       <div class="ltf-card-header-band" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);"></div>
                       <div class="ltf-card-body">
                         <div class="ltf-card-tags">
-                          <span class="ltf-card-month">Month 3 &nbsp;·&nbsp; June 2026</span>
+                          <span class="ltf-card-month">June</span>
                         </div>
                         <h4 class="ltf-card-title">Virtual Charcuterie Board Workshop</h4>
-                        <div class="flex gap-2 mb-2">
-                          <span class="ltf-card-category" style="background:#fef3c7; color:#92400e;">Food &amp; Drinks</span>
-                          <span class="ltf-card-format">Virtual &nbsp;·&nbsp; 60 min</span>
-                        </div>
-                        <p class="ltf-card-desc">Each team member builds their own board live, guided step-by-step by a professional artisan.</p>
-                        <div class="ltf-card-footer">
-                          <span class="ltf-card-status-dot"></span>
-                          <span class="ltf-card-status-label">Ready to launch</span>
-                        </div>
                       </div>
                     </div>
 
                     <!-- Month 4 -->
-                    <div class="ltf-preview-card" data-preview-month="4">
+                    <div class="ltf-preview-card ltf-preview-card--mini" data-preview-month="4">
                       <div class="ltf-card-header-band" style="background: linear-gradient(135deg, #e879f9, #d946ef);"></div>
                       <div class="ltf-card-body">
                         <div class="ltf-card-tags">
-                          <span class="ltf-card-month">Month 4 &nbsp;·&nbsp; July 2026</span>
+                          <span class="ltf-card-month">July</span>
                         </div>
                         <h4 class="ltf-card-title">Habitat for Humanity Build Day</h4>
-                        <div class="flex gap-2 mb-2">
-                          <span class="ltf-card-category" style="background:#fce7f3; color:#9d174d;">Community Impact</span>
-                          <span class="ltf-card-format">In-Person &nbsp;·&nbsp; Half day</span>
+                      </div>
+                    </div>
+
+                    <!-- Month 5 -->
+                    <div class="ltf-preview-card ltf-preview-card--mini" data-preview-month="5">
+                      <div class="ltf-card-header-band" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9);"></div>
+                      <div class="ltf-card-body">
+                        <div class="ltf-card-tags">
+                          <span class="ltf-card-month">August</span>
                         </div>
-                        <p class="ltf-card-desc">Strengthen team bonds through hands-on community service and meaningful local impact.</p>
-                        <div class="ltf-card-footer">
-                          <span class="ltf-card-status-dot"></span>
-                          <span class="ltf-card-status-label">Ready to launch</span>
-                        </div>
+                        <h4 class="ltf-card-title">Creative Problem-Solving Sprint</h4>
                       </div>
                     </div>
 
@@ -605,6 +634,7 @@
             <div id="landingHeroBrandLogoWrap" class="hidden pb-2">
               <img id="landingHeroBrandLogo" src="revelry.png" alt="Revelry Labs" class="mx-auto mb-6 block h-auto w-full max-w-[250px]" />
             </div>
+            <p class="landing-tf-eyebrow">OS FOR PEOPLE LEADERS</p>
             <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Create your employee experience program in minutes</h2>
             <p class="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:text-lg">Answer a few quick questions and see the next 4 months of team events tailored to your goals, budget, and team interests.</p>
             <p class="mt-3 text-sm font-medium text-slate-500">Takes about 2 minutes • No signup required</p>
@@ -646,7 +676,7 @@
           <div id="setupStepsContainer" class="space-y-3 mb-8 hidden">
             <div id="setupHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; position: relative; display: flex; align-items: center; justify-content: space-between; width: calc(100% - 60px);">
               <span id="setupSectionIcon" aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; line-height: 1;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0 .274 1.128 1.514 1.66 2.515 1.168 1.556-.765 3.323 1.002 2.558 2.558-.492 1.001.04 2.241 1.168 2.515 1.756.426 1.756 2.924 0 3.35-1.128.274-1.66 1.514-1.168 2.515.765 1.556-1.002 3.323-2.558 2.558-1.001-.492-2.241.04-2.515 1.168-.426 1.756-2.924 1.756-3.35 0-.274-1.128-1.514-1.66-2.515-1.168-1.556.765-3.323-1.002-2.558-2.558.492-1.001-.04-2.241-1.168-2.515-1.756-.426-1.756-2.924 0-3.35 1.128-.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323 2.558-2.558 1.001.492 2.241-.04 2.515-1.168Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0 .274 1.128 1.514 1.66 2.515 1.168 1.556-.765 3.323 1.002 2.558 2.558.492 1.001.04 2.241 1.168 2.515 1.756.426 1.756 2.924 0 3.35-1.128.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323-2.558 2.558-1.001-.492-2.241.04-2.515 1.168-.426 1.756-2.924 1.756-3.35 0-.274-1.128-1.514-1.66-2.515-1.168-1.556.765-3.323-1.002-2.558-2.558.492-1.001-.04-2.241-1.168-2.515-1.756-.426-1.756-2.924 0-3.35 1.128-.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323 2.558-2.558 1.001.492 2.241-.04 2.515-1.168Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
               <span id="setupHeadingMainLabel">SETUP</span>
               <a id="setupHeadingMainEdit" href="#" style="display: none; margin-left: auto; font-size: 12px; color: #94a3b8; font-weight: 500; text-decoration: none; text-transform: none;">Edit</a>
@@ -663,8 +693,8 @@
               </div>
               <div class="setup-step-content" style="padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="block text-sm font-medium mb-3">
-                  <p class="mb-2">What are you hoping to improve?</p>
-                  <p class="text-xs font-normal text-slate-600">Select 3 goals — we'll recommend events that support them.</p>
+                  <p class="mb-2">What do you want this program to help improve?</p>
+                  <p class="text-xs font-normal text-slate-600">Select all that apply — we'll tailor your program around these.</p>
                 </div>
                 <div id="landingGoalsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="1">Next</button>
@@ -779,7 +809,7 @@
                 <label class="block text-sm font-medium mb-1">Where should team events take place?</label>
                 <div class="text-xs text-slate-500 mb-2">Check all that apply</div>
                 <div id="setupSchedule" class="flex flex-wrap gap-2 mb-4"></div>
-                <div id="setupLocalCityRow" class="hidden" style="margin-bottom: 12px;">
+                <div id="setupLocalCityRow" class="hidden" style="margin-top: 24px; margin-bottom: 12px;">
                   <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
                   <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" />
                 </div>
@@ -875,9 +905,8 @@
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="block text-sm font-medium mb-3">
-                  <p class="mb-2">To get your first event moving quickly, tell us what you think your team would enjoy most.</p>
-                  <p class="text-xs font-normal text-slate-600">Later, we'll gather direct employee input with a short team survey to refine future events.</p>
-                  <p class="text-xs font-normal text-slate-600 mt-2">Select up to 3 options.</p>
+                  <p class="mb-2">What activities would your team most enjoy?</p>
+                  <p class="text-xs font-normal text-slate-600">Pick up to 3 — we’ll use this to launch your first event.<br><span style="font-style: italic; color: #64748b;">Later on, we’ll gather input directly from your team to refine the rest of your program.</span></p>
                 </div>
                 <div id="landingInterestsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">See your employee experience program →</button>

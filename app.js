@@ -142,12 +142,10 @@ function updateSidebarEventWorkflowCollapseUI() {
  */
 
 const GOALS = [
-"Retention & Engagement",
-"Team Connection & Culture",
-"Performance & Productivity",
-"Wellbeing, Growth & Recognition",
-"Employer Brand & Recruiting",
-"Inclusion & Belonging"
+"Strengthen team connection",
+"Improve employee performance",
+"Boost morale",
+"Support employee wellbeing"
 ];
 
 const EVENT_WORKFLOW_TYPES = {
@@ -374,30 +372,26 @@ function migrateEventWorkflowStepsIfNeeded() {
 
 
 const GOAL_DESCRIPTIONS = {
-  "Retention & Engagement": "Boost morale, loyalty, and employee commitment",
-  "Team Connection & Culture": "Strengthen relationships and shared culture across teams",
-  "Performance & Productivity": "Improve employee focus, energy, and effectiveness",
-  "Employer Brand & Recruiting": "Enhance attractiveness to current and future employees",
-  "Wellbeing, Growth & Recognition": "Support employee development, mental health, and appreciation",
-  "Inclusion & Belonging": "Ensure all employees feel respected and included"
+  "Strengthen team connection": "Build stronger relationships and shared culture across teams",
+  "Improve employee performance": "Boost focus, energy, and effectiveness across your team",
+  "Boost morale": "Increase positivity, loyalty, and day-to-day engagement",
+  "Support employee wellbeing": "Support mental health, balance, and employee appreciation"
 };
 
 const INTEREST_OPTIONS = [
-  "Fun / Social event",
-  "Professional development",
-  "Wellness / Health focused",
-  "Food / Drinks experience",
-  "Learn a new creative skill",
-  "Volunteering"
+  "Games & competitions",
+  "Food & drinks",
+  "Volunteering",
+  "Learning events",
+  "Social meetups"
 ];
 
 const INTEREST_DESCRIPTIONS = {
-  "Fun / Social event": "High-energy events focused on team connection",
-  "Professional development": "Learning-oriented sessions to build practical skills",
-  "Wellness / Health focused": "Activities that support wellbeing and healthy habits",
-  "Food / Drinks experience": "Shared tasting, cooking, or hosted culinary moments",
-  "Learn a new creative skill": "Hands-on creative workshops and maker-style sessions",
-  "Volunteering": "Purpose-driven experiences that support local communities"
+  "Games & competitions": "Playful team challenges and friendly competition",
+  "Food & drinks": "Shared tasting, cooking, and hosted culinary moments",
+  "Volunteering": "Purpose-driven experiences that support local communities",
+  "Learning events": "Sessions focused on skills, growth, and practical learning",
+  "Social meetups": "Connection-focused social time across teams"
 };
 
 
@@ -405,10 +399,9 @@ const INTEREST_DESCRIPTIONS = {
 
 const CADENCE_OPTIONS = ["Monthly", "Every 2 months", "Quarterly"];
 const SCHEDULE_OPTIONS = [
-  "Remote / virtual",
-  "In-person (outside the office)",
-  "In-office events",
-  "Hybrid (mix of remote + in-person)"
+  "Remote",
+  "In-person",
+  "Hybrid"
 ];
 
 
@@ -608,15 +601,13 @@ const REVELRY_BRACKETS_MAGIC_LINK_KEYS = new Set([
   "testing.eeos.work/rlabs2026testa1b2c3d4"
 ]);
 const REVELRY_GOAL_PRIORITY_ORDER = [
-  "Wellbeing, Growth & Recognition",
-  "Team Connection & Culture",
-  "Performance & Productivity",
-  "Retention & Engagement",
-  "Employer Brand & Recruiting",
-  "Inclusion & Belonging"
+  "Support employee wellbeing",
+  "Strengthen team connection",
+  "Improve employee performance",
+  "Boost morale"
 ];
 const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
-  "Wellbeing, Growth & Recognition": {
+  "Support employee wellbeing": {
     templateId: "revelry-goal-wellbeing",
     title: "Elixir Making Class",
     description: "A guided wellness-focused team experience centered on creating restorative elixirs together.",
@@ -624,7 +615,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     imageUrl: "https://ucarecdn.com/6c9ffa95-6119-4a02-8b89-ff6b6b363116/-/preview/580x326/-/quality/lighter/",
     pills: ["Wellbeing", "Creative Skill"]
   },
-  "Team Connection & Culture": {
+  "Strengthen team connection": {
     templateId: "revelry-goal-team-connection",
     title: "Virtual Funnel Cake Class",
     description: "A shared food experience designed to spark connection and fun across the team.",
@@ -632,7 +623,7 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     imageUrl: "https://ucarecdn.com/a5cf1674-5669-4c6a-a1c2-f92054051848/-/preview/580x326/-/quality/lighter/",
     pills: ["Food & Drink", "Creative Skill"]
   },
-  "Performance & Productivity": {
+  "Improve employee performance": {
     templateId: "revelry-goal-performance",
     title: "Champion Mindset for Professionals",
     description: "A practical session focused on mindset habits that improve individual and team performance.",
@@ -640,33 +631,17 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     imageUrl: "https://ucarecdn.com/f1ceef12-77da-4e6f-a953-9d6acd5ffcc0/-/preview/580x326/-/quality/lighter/",
     pills: ["Productivity", "Pro Dev"]
   },
-  "Retention & Engagement": {
+  "Boost morale": {
     templateId: "revelry-goal-retention",
     title: "Virtual Murder Mystery Party",
     description: "A social, high-energy event that drives participation and team engagement.",
     url: "https://www.withconfetti.com/product/virtual-murder-mystery-party",
     imageUrl: "https://ucarecdn.com/f788f0a4-781c-4e6f-b7f7-bb36b78b11b9/-/preview/580x326/-/quality/lighter/",
     pills: ["Fun/Social", "Team Connection"]
-  },
-  "Employer Brand & Recruiting": {
-    templateId: "revelry-goal-employer-brand",
-    title: "Virtual Black History Jeoparty for Good",
-    description: "A purpose-driven team event that supports employer brand storytelling and culture-forward recruiting.",
-    url: "https://www.withconfetti.com/product/virtual-black-history-jeoparty-for-good",
-    imageUrl: "https://ucarecdn.com/8b9b2fbf-e36c-4113-acdf-9839e6866e0a/-/preview/580x326/-/quality/lighter/",
-    pills: ["Inclusion", "Fun/Social"]
-  },
-  "Inclusion & Belonging": {
-    templateId: "revelry-goal-inclusion",
-    title: "LGBTQIA Allyship in the Workplace",
-    description: "An interactive workshop focused on inclusive behaviors and building workplace belonging.",
-    url: "https://www.withconfetti.com/product/virtual-lgbtqia-allyship-in-the-workplace",
-    imageUrl: "https://ucarecdn.com/1d1f3705-5bef-43b3-bedd-8fc1bdac81f8/-/preview/580x326/-/quality/lighter/",
-    pills: ["Inclusion", "Pro Dev"]
   }
 };
 const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
-  "Wellbeing, Growth & Recognition": {
+  "Support employee wellbeing": {
     templateId: "revelry-goal-wellbeing-mid",
     title: "Virtual Bucket List Workshop",
     description: "A collaborative workshop designed to spark motivation, reflection, and personal growth across the team.",
@@ -674,7 +649,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     imageUrl: "https://ucarecdn.com/5d0ca8d4-e22e-4de3-9295-ae18234d02d3/-/preview/580x326/-/quality/lighter/",
     pills: ["Team Connection", "Wellbeing"]
   },
-  "Team Connection & Culture": {
+  "Strengthen team connection": {
     templateId: "revelry-goal-team-connection-mid",
     title: "Virtual Live City Tours",
     description: "A shared guided experience that brings teams together through live exploration and conversation.",
@@ -682,7 +657,7 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     imageUrl: "https://ucarecdn.com/ca73a96d-5712-4e31-94c6-752e7e64ad73/-/preview/580x326/-/quality/lighter/",
     pills: ["Team Connection", "Engagement"]
   },
-  "Performance & Productivity": {
+  "Improve employee performance": {
     templateId: "revelry-goal-performance-mid",
     title: "Culture Club: Self-Doubt to Confidence",
     description: "A practical session focused on confidence-building tools that support stronger day-to-day performance.",
@@ -690,29 +665,13 @@ const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
     imageUrl: "https://ucarecdn.com/80daf2a8-fe7c-41c7-ac4c-3d8d246b6cd9/-/preview/580x326/-/quality/lighter/",
     pills: ["Productivity", "Wellbeing"]
   },
-  "Retention & Engagement": {
+  "Boost morale": {
     templateId: "revelry-goal-retention-mid",
     title: "Virtual Office Olympics",
     description: "A high-energy team activity that encourages participation, connection, and ongoing engagement.",
     url: "https://www.withconfetti.com/product/virtual-office-olympics",
     imageUrl: "https://ucarecdn.com/0d565892-6577-4379-9826-82cd10798264/-/preview/580x326/-/quality/lighter/",
     pills: ["Engagement", "Fun/Social"]
-  },
-  "Employer Brand & Recruiting": {
-    templateId: "revelry-goal-employer-brand-mid",
-    title: "Virtual Vision Board Workshop",
-    description: "A culture-forward workshop that helps reinforce company values and employer brand narrative.",
-    url: "https://www.withconfetti.com/product/virtual-vision-board-workshop",
-    imageUrl: "https://ucarecdn.com/13973972-7b38-44b8-bc12-a71666d51b4d/-/preview/580x326/-/quality/lighter/",
-    pills: ["Fun/Social", "Creative Skill"]
-  },
-  "Inclusion & Belonging": {
-    templateId: "revelry-goal-inclusion-mid",
-    title: "Virtual Diversity and Inclusion Workshop",
-    description: "An interactive workshop designed to strengthen inclusive practices and team belonging.",
-    url: "https://www.withconfetti.com/product/virtual-diversity-and-inclusion-workshop",
-    imageUrl: "https://ucarecdn.com/ae802dae-0d25-4213-8e58-285927d1479c/-/preview/580x326/-/quality/lighter/",
-    pills: ["Pro Dev", "Inclusion"]
   }
 };
 
@@ -849,7 +808,9 @@ adminName: "",
 programSettings: {
   budgetMode: "total",
   totalBudget: 3000,
+  totalBudgetRange: "",
   perEmployeeBudget: 75,
+  perEmployeeBudgetRange: "",
   employeeCount: 40,
   goals: [],
   teamPreferenceEstimate: [],
@@ -957,8 +918,10 @@ landingDraft: {
   budgetConfigured: false,
   budgetMode: "total",
   totalBudget: 3000,
+  totalBudgetRange: "",
   employeeCount: 0,
   perEmployee: 0,
+  perEmployeeBudgetRange: "",
   cadence: "Monthly",
   goals: [],
   teamPreferenceEstimate: [],
@@ -1907,6 +1870,38 @@ function isValidHttpUrl(value) {
   return /^https?:\/\//i.test(raw);
 }
 
+const INVESTMENT_RANGE_OPTIONS = {
+  total: [
+    { key: "total_1k_3k", label: "$1K - $3K", min: 1000, max: 3000, representative: 2000 },
+    { key: "total_3k_5k", label: "$3K - $5K", min: 3000, max: 5000, representative: 4000 },
+    { key: "total_5k_plus", label: "$5K+", min: 5000, max: Infinity, representative: 6000 }
+  ],
+  perEmployee: [
+    { key: "per_25_50", label: "$25 - $50", min: 25, max: 50, representative: 37 },
+    { key: "per_50_75", label: "$50 - $75", min: 50, max: 75, representative: 62 },
+    { key: "per_75_plus", label: "$75+", min: 75, max: Infinity, representative: 90 }
+  ]
+};
+
+function getBudgetRangeOptions(mode = "total") {
+  return mode === "perEmployee"
+    ? INVESTMENT_RANGE_OPTIONS.perEmployee
+    : INVESTMENT_RANGE_OPTIONS.total;
+}
+
+function getBudgetRangeByKey(mode = "total", key = "") {
+  const options = getBudgetRangeOptions(mode);
+  return options.find((item) => item.key === key) || null;
+}
+
+function getBudgetRangeKeyFromValue(mode = "total", value = 0) {
+  const amount = Number(value || 0);
+  if (!(amount > 0)) return "";
+  const options = getBudgetRangeOptions(mode);
+  const matched = options.find((item) => amount >= Number(item.min || 0) && amount <= Number(item.max || 0));
+  return matched ? matched.key : "";
+}
+
 const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof", "reminder_dayof_2"];
 const REVELRY_LEADERBOARD_RELEASE_DATE_BY_STEP = {
   reminder_dayof: "2026-03-24",
@@ -1983,9 +1978,11 @@ function enforceRevelryLeaderboardLockState() {
   if (getActiveTestingMagicContext()) return false;
   if (!isRevelryBracketsMagicContext()) return false;
 
+  const forceWeeklyLeaderboardUpdateOne = isRevelryLabsReadOnlyMagicLink();
   const completedSteps = Array.isArray(state.completedSetupSteps) ? state.completedSetupSteps : [];
   const promoteState = state.promoteEvent && typeof state.promoteEvent === "object" ? state.promoteEvent : {};
-  const hasReachedLeaderboard = Boolean(state.revelryLeaderboardLockArmed)
+  const hasReachedLeaderboard = forceWeeklyLeaderboardUpdateOne
+    || Boolean(state.revelryLeaderboardLockArmed)
     || String(promoteState.activeStep || "") === "reminder_dayof"
     || String(promoteState.activeStep || "") === "reminder_dayof_2"
     || Boolean(promoteState.reminderWeekLockedAfterContinue)
@@ -2030,12 +2027,31 @@ function enforceRevelryLeaderboardLockState() {
 
   normalizePromoteEventState();
   const promote = state.promoteEvent;
-  const targetLeaderboardStep = promote.reminderDayOf?.done
+  const targetLeaderboardStep = forceWeeklyLeaderboardUpdateOne
+    ? "reminder_dayof"
+    : (promote.reminderDayOf?.done
     ? (promote.reminderDayOf2?.done ? "final_winner" : "reminder_dayof_2")
-    : "reminder_dayof";
+    : "reminder_dayof");
   if (promote.activeStep !== targetLeaderboardStep) {
     promote.activeStep = targetLeaderboardStep;
     changed = true;
+  }
+  if (forceWeeklyLeaderboardUpdateOne) {
+    if (promote.reminderDayOf.done !== false) {
+      promote.reminderDayOf.done = false;
+      promote.reminderDayOf.doneAt = "";
+      changed = true;
+    }
+    if (promote.reminderDayOf2.done !== false) {
+      promote.reminderDayOf2.done = false;
+      promote.reminderDayOf2.doneAt = "";
+      changed = true;
+    }
+    if (promote.finalWinner?.done) {
+      promote.finalWinner.done = false;
+      promote.finalWinner.doneAt = "";
+      changed = true;
+    }
   }
   if (promote.collapsedStep !== "") {
     promote.collapsedStep = "";
@@ -2793,7 +2809,9 @@ try {
     state.programSettings = {
       budgetMode: "total",
       totalBudget: 3000,
+      totalBudgetRange: "",
       perEmployeeBudget: 75,
+      perEmployeeBudgetRange: "",
       employeeCount: 40,
       goals: [],
       teamPreferenceEstimate: [],
@@ -2822,8 +2840,20 @@ try {
   if (!Array.isArray(state.landingDraft?.teamPreferenceEstimate)) {
     state.landingDraft.teamPreferenceEstimate = [];
   }
+  if (typeof state.programSettings?.totalBudgetRange !== "string") {
+    state.programSettings.totalBudgetRange = "";
+  }
+  if (typeof state.programSettings?.perEmployeeBudgetRange !== "string") {
+    state.programSettings.perEmployeeBudgetRange = "";
+  }
   if (typeof state.landingDraft?.budgetConfigured !== "boolean") {
     state.landingDraft.budgetConfigured = false;
+  }
+  if (typeof state.landingDraft?.totalBudgetRange !== "string") {
+    state.landingDraft.totalBudgetRange = "";
+  }
+  if (typeof state.landingDraft?.perEmployeeBudgetRange !== "string") {
+    state.landingDraft.perEmployeeBudgetRange = "";
   }
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
     state.pollBuilder = {
@@ -3751,12 +3781,16 @@ function eventMatchesInterest(event, interest) {
   const normalized = String(interest || "").toLowerCase();
 
   const keywordMap = {
+    "games & competitions": ["game", "competition", "trivia", "escape", "challenge", "olympics", "tournament"],
+    "food & drinks": ["food", "drink", "cocktail", "cooking", "tasting", "culinary"],
+    "volunteering": ["volunteer", "community", "service", "nonprofit", "impact"],
+    "learning events": ["workshop", "learning", "skills", "coaching", "development", "training"],
+    "social meetups": ["social", "team", "bond", "network", "meetup", "connection"],
     "fun / social event": ["fun", "social", "team", "trivia", "escape", "game", "bond"],
     "professional development": ["workshop", "learning", "skills", "coaching", "development"],
     "wellness / health focused": ["wellness", "mindful", "health", "fitness", "workout"],
     "food / drinks experience": ["food", "drink", "cocktail", "cooking", "tasting"],
-    "learn a new creative skill": ["creative", "build", "craft", "making", "skill"],
-    "volunteering": ["volunteer", "community", "service", "nonprofit", "impact"]
+    "learn a new creative skill": ["creative", "build", "craft", "making", "skill"]
   };
 
   const keywords = keywordMap[normalized] || [];
@@ -3817,14 +3851,12 @@ const selectedValues = Array.isArray(selected) ? selected : [];
 GOALS.forEach((goal) => {
   const id = `${containerId}-${goal}`.replace(/[^a-zA-Z0-9]/g, "-");
   const checked = selectedValues.includes(goal);
-  const description = GOAL_DESCRIPTIONS[goal] || "";
   const wrapper = document.createElement("label");
   wrapper.className = "goal-pill";
   wrapper.innerHTML = `
     <input id="${id}" type="checkbox" ${checked ? "checked" : ""} />
     <span>
       <div class="goal-title">${goal}</div>
-      <div class="goal-description">${description}</div>
     </span>
   `;
   wrapper.querySelector("input").addEventListener("change", (event) => onToggle(goal, event.target));
@@ -3841,14 +3873,12 @@ const selectedValues = Array.isArray(selected) ? selected : [];
 INTEREST_OPTIONS.forEach((interest) => {
   const id = `${containerId}-${interest}`.replace(/[^a-zA-Z0-9]/g, "-");
   const checked = selectedValues.includes(interest);
-  const description = INTEREST_DESCRIPTIONS[interest] || "";
   const wrapper = document.createElement("label");
   wrapper.className = "goal-pill";
   wrapper.innerHTML = `
     <input id="${id}" type="checkbox" ${checked ? "checked" : ""} />
     <span>
       <div class="goal-title">${interest}</div>
-      <div class="goal-description">${description}</div>
     </span>
   `;
   wrapper.querySelector("input").addEventListener("change", (event) => onToggle(interest, event.target));
@@ -3865,10 +3895,13 @@ if (!container) return;
 container.innerHTML = "";
 SCHEDULE_OPTIONS.forEach((option) => {
   const id = `${containerId}-${option}`.replace(/[^a-zA-Z0-9]/g, "-");
-  const checked = selected.includes(option);
+  const checked = selected[0] === option;
   const label = document.createElement("label");
-  label.className = "schedule-pill";
-  label.innerHTML = `<input id="${id}" type="checkbox" ${checked ? "checked" : ""} /><span>${option}</span>`;
+  label.className = "group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition-all";
+  label.innerHTML = `
+    <input id="${id}" name="${containerId}-radio" type="radio" value="${option}" ${checked ? "checked" : ""} class="h-4 w-4 accent-slate-900" />
+    <span class="text-sm font-medium text-slate-900">${option}</span>
+  `;
   label.querySelector("input").addEventListener("change", () => onToggle(option));
   container.appendChild(label);
 });
@@ -3944,9 +3977,7 @@ renderGoalInputs("landingGoals", state.landingDraft.goals, (goal) => {
 
 
 renderScheduleInputs("landingSchedule", state.landingDraft.schedule, (option) => {
-  state.landingDraft.schedule = state.landingDraft.schedule.includes(option)
-    ? state.landingDraft.schedule.filter((s) => s !== option)
-    : [...state.landingDraft.schedule, option];
+  state.landingDraft.schedule = [option];
   renderLanding();
 });
 }
@@ -4496,9 +4527,7 @@ renderGoalInputs("goalOptions", state.programSettings.goals, (goal) => {
 
 
 renderScheduleInputs("scheduleOptions", state.programSettings.preferredSchedule, (option) => {
-  state.programSettings.preferredSchedule = state.programSettings.preferredSchedule.includes(option)
-    ? state.programSettings.preferredSchedule.filter((s) => s !== option)
-    : [...state.programSettings.preferredSchedule, option];
+  state.programSettings.preferredSchedule = [option];
   renderProgramSetupForm();
   persistState();
 });
@@ -5942,6 +5971,10 @@ if (active && state.workflowStates[active.id]) {
 
 
 function showLanding() {
+if (isRevelryLabsReadOnlyMagicLink()) {
+  showApp();
+  return;
+}
 $("landingView").classList.remove("hidden");
 $("appView").classList.add("hidden");
 renderLandingIdentityView();
@@ -6521,8 +6554,8 @@ function initializeLandingSetupFlow() {
   renderSidebarStepMenus();
 
   // Populate step 1: Goals
-  if (Array.isArray(state.landingDraft.goals) && state.landingDraft.goals.length > 3) {
-    state.landingDraft.goals = state.landingDraft.goals.slice(0, 3);
+  if (Array.isArray(state.landingDraft.goals) && state.landingDraft.goals.length > 4) {
+    state.landingDraft.goals = state.landingDraft.goals.slice(0, 4);
     persistState();
   }
   renderGoalInputs("landingGoalsSetup", state.landingDraft.goals, (goal, inputEl) => {
@@ -6535,7 +6568,7 @@ function initializeLandingSetupFlow() {
     if (state.landingDraft.goals.includes(goal)) {
       state.landingDraft.goals = state.landingDraft.goals.filter(g => g !== goal);
       changed = true;
-    } else if (state.landingDraft.goals.length < 3) {
+    } else if (state.landingDraft.goals.length < 4) {
       state.landingDraft.goals.push(goal);
       changed = true;
     } else if (inputEl) {
@@ -6569,11 +6602,11 @@ function initializeLandingSetupFlow() {
   if (scheduleContainer) {
     scheduleContainer.innerHTML = SCHEDULE_OPTIONS.map((opt) => {
       const id = `setupSchedule-${opt.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
-      const checked = state.landingDraft.schedule.includes(opt);
+      const isSelected = state.landingDraft.schedule[0] === opt;
       return `
-        <label class="schedule-pill">
-          <input id="${id}" type="checkbox" ${checked ? 'checked' : ''} />
-          <span>${opt}</span>
+        <label class="group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition-all">
+          <input id="${id}" name="setupSchedule-radio" type="radio" value="${opt}" ${isSelected ? 'checked' : ''} class="h-4 w-4 accent-slate-900" />
+          <span class="text-sm font-medium text-slate-900">${opt}</span>
         </label>
       `;
     }).join('');
@@ -6581,27 +6614,25 @@ function initializeLandingSetupFlow() {
     const localCityRow = $("setupLocalCityRow");
     const localCityInput = $("setupLocalCity");
     const magicSetupDefaults = getMagicLinkSetupDefaultsForCurrentPath();
-    const localCityTriggers = new Set([
-      "In-person (outside the office)",
-      "In-office events",
-      "Hybrid (mix of remote + in-person)"
-    ]);
+    const localCityTriggers = new Set(["In-person", "Hybrid"]);
+    
     const updateLocalCityVisibility = () => {
       if (!localCityRow) return;
-      const selected = Array.from(scheduleContainer.querySelectorAll('input:checked')).map(i => i.nextElementSibling.textContent);
-      const shouldShow = selected.some(option => localCityTriggers.has(option));
+      const selectedOption = state.landingDraft.schedule[0] || "";
+      const shouldShow = localCityTriggers.has(selectedOption);
       localCityRow.classList.toggle("hidden", !shouldShow);
     };
 
     scheduleContainer.querySelectorAll('input').forEach(input => {
       input.addEventListener("change", () => {
-        const option = input.nextElementSibling?.textContent;
+        if (!input.checked) return;
+        const option = input.value;
         if (isCompletedStepEditBlocked(4)) {
-          input.checked = state.landingDraft.schedule.includes(option);
+          input.checked = false;
           showSetupSignUpPopup();
           return;
         }
-        state.landingDraft.schedule = Array.from(scheduleContainer.querySelectorAll('input:checked')).map(i => i.nextElementSibling.textContent);
+        state.landingDraft.schedule = [option];
         updateLocalCityVisibility();
         persistState();
         validateAndUpdateStep4();
@@ -7077,11 +7108,15 @@ function initializeLandingSetupFlow() {
     state.landingDraft.employeeCount = employeeValue;
     state.landingDraft.perEmployee = perEmployeeValue;
     state.landingDraft.budgetMode = budgetMode;
+    state.landingDraft.totalBudgetRange = getBudgetRangeKeyFromValue("total", computedTotal);
+    state.landingDraft.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", perEmployeeValue);
     state.landingDraft.budgetConfigured = computedTotal > 0 || employeeValue > 0 || perEmployeeValue > 0;
     state.programSettings.totalBudget = computedTotal;
     state.programSettings.employeeCount = employeeValue;
     state.programSettings.perEmployeeBudget = perEmployeeValue;
     state.programSettings.budgetMode = budgetMode;
+    state.programSettings.totalBudgetRange = state.landingDraft.totalBudgetRange;
+    state.programSettings.perEmployeeBudgetRange = state.landingDraft.perEmployeeBudgetRange;
 
     // Preserve empty state while the user clears the total field so placeholder can return.
     if (totalBudgetInput && computedTotal > 0 && totalRaw !== "") {
@@ -7400,9 +7435,21 @@ function attachSetupStepHandlers() {
       state.setupStepDirty[step] = false;
 
       if (step === 6) {
+        // Transfer all budget and goal settings from landing draft to programSettings
+        state.programSettings.budgetMode = state.landingDraft.budgetMode || "total";
+        state.programSettings.totalBudget = state.landingDraft.totalBudget || 3000;
+        state.programSettings.totalBudgetRange = state.landingDraft.totalBudgetRange || "";
+        state.programSettings.monthlyBudget = state.landingDraft.totalBudget || 3000; // User input is monthly budget
+        state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee || 75;
+        state.programSettings.perEmployeeBudgetRange = state.landingDraft.perEmployeeBudgetRange || "";
+        state.programSettings.employeeCount = state.landingDraft.employeeCount || 40;
+        state.programSettings.goals = Array.isArray(state.landingDraft.goals)
+          ? [...state.landingDraft.goals]
+          : [];
         state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
           ? [...state.landingDraft.teamPreferenceEstimate]
           : [];
+        state.programSettings.cadence = state.landingDraft.cadence || "Monthly";
         state.programSettings.admin_preference_weight = state.programSettings.admin_preference_weight || { boost: 0.22, first_cycle_only: true };
       }
       
@@ -7505,9 +7552,8 @@ function isSetupStepValid(step) {
       }
       // Check if city sub-question should be shown and if it's filled
       const cityTriggers = new Set([
-        "In-person (outside the office)",
-        "In-office events",
-        "Hybrid (mix of remote + in-person)"
+        "In-person",
+        "Hybrid"
       ]);
       const shouldShowCity = state.landingDraft.schedule.some(option => cityTriggers.has(option));
       if (shouldShowCity) {
@@ -8061,14 +8107,24 @@ const ltfAnswers = {
   employeeCount: 0,
   budgetMode: "total",
   totalBudget: 0,
+  totalBudgetRange: "",
   perEmployee: 0,
+  perEmployeeBudgetRange: "",
   cadence: "Monthly",
   schedule: [],
   localCity: "",
-  daysSelected: ["Th"],
-  timesSelected: ["After 5p"],
-  saturdayOn: true,
-  teamPreferenceEstimate: []
+  daysSelected: [],
+  timesSelected: [],
+  saturdayOn: undefined,
+  teamPreferenceEstimate: [],
+  activeLtfAvailabilitySection: "days",
+  ltfAvailabilitySectionsTouched: { days: false, times: false, weekend: false },
+  ltfAvailabilitySectionsCompleted: { days: false, times: false, weekend: false },
+  ltfAvailabilitySectionCompleteTimers: { days: null, times: null, weekend: null },
+  activeLtfBudgetSection: "teamsize",
+  ltfBudgetSectionsTouched: { teamsize: false, funding: false },
+  ltfBudgetSectionsCompleted: { teamsize: false, funding: false },
+  ltfBudgetSectionCompleteTimers: { teamsize: null, funding: null }
 };
 
 let ltfCurrentQ = 0;
@@ -8077,6 +8133,36 @@ let ltfPhase = "hero"; // "hero" | "builder" | "loading" | "complete"
 function initLandingTypeform() {
   const root = $("landingTypeformRoot");
   if (!root) return;
+
+  const cyclePill = $("ltfOverviewCyclePill");
+  if (cyclePill) {
+    const currentMonth = new Date().toLocaleString("en-US", { month: "long" });
+    cyclePill.textContent = `Period ending ${currentMonth}`;
+  }
+
+  const previewMonthOffsets = [
+    { previewMonth: 2, offset: 1 },
+    { previewMonth: 3, offset: 2 },
+    { previewMonth: 4, offset: 3 },
+    { previewMonth: 5, offset: 4 }
+  ];
+  previewMonthOffsets.forEach(({ previewMonth, offset }) => {
+    const monthLabelEl = document.querySelector(`.ltf-preview-card[data-preview-month="${previewMonth}"] .ltf-card-month`);
+    if (!monthLabelEl) return;
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth() + offset);
+    const monthName = targetDate.toLocaleString("en-US", { month: "long" });
+    monthLabelEl.textContent = monthName;
+  });
+
+  const overviewCard = document.querySelector(".ltf-overview-card");
+  const costPerEngagedEl = $("ltfOverviewCostPerEngaged");
+  if (overviewCard && costPerEngagedEl) {
+    const spent = Number(overviewCard.dataset.overviewSpent || 0);
+    const engaged = Number(overviewCard.dataset.overviewEngaged || 0);
+    const costPerEngaged = engaged > 0 ? spent / engaged : 0;
+    costPerEngagedEl.textContent = `$${Math.round(costPerEngaged).toLocaleString("en-US")}`;
+  }
 
   const isMagic = Boolean(parseMagicLinkFromHostPath());
   if (isMagic || state.landingTypeformComplete || state.landingBuilderStarted) {
@@ -8087,7 +8173,7 @@ function initLandingTypeform() {
   // Populate Q0: Goals
   renderGoalInputs("ltfGoalsGrid", ltfAnswers.goals, (goal, inputEl) => {
     if (inputEl.checked) {
-      if (ltfAnswers.goals.length >= 3) { inputEl.checked = false; return; }
+      if (ltfAnswers.goals.length >= 4) { inputEl.checked = false; return; }
       ltfAnswers.goals.push(goal);
     } else {
       ltfAnswers.goals = ltfAnswers.goals.filter(g => g !== goal);
@@ -8097,18 +8183,51 @@ function initLandingTypeform() {
   // Populate Q1: Investment
   initLtfBudget();
 
-  // Populate Q2: Cadence
-  initLtfCadence();
+  // Populate Q2: Cadence (DISABLED)
+  // initLtfCadence();
 
   // Populate Q3: Setting
+  const updateNextButtonStateForSchedule = () => {
+    const nextBtn = $("ltfNextBtn");
+    if (!nextBtn) return;
+    
+    // Button enables when schedule is selected AND
+    // (if Remote, just needs selection) OR (if In-person/Hybrid, needs city filled too)
+    const hasScheduleSelection = ltfAnswers.schedule.length > 0;
+    if (!hasScheduleSelection) {
+      nextBtn.disabled = true;
+      return;
+    }
+    
+    const selectedOption = ltfAnswers.schedule[0];
+    const localTriggers = ["In-person", "Hybrid"];
+    const needsCity = localTriggers.includes(selectedOption);
+    
+    if (needsCity) {
+      const cityFilled = (ltfAnswers.localCity || "").trim().length > 0;
+      nextBtn.disabled = !cityFilled;
+    } else {
+      // Remote selected - just needs schedule, no city needed
+      nextBtn.disabled = false;
+    }
+  };
+
   renderScheduleInputs("ltfScheduleGrid", ltfAnswers.schedule, (option) => {
-    const idx = ltfAnswers.schedule.indexOf(option);
-    if (idx >= 0) ltfAnswers.schedule.splice(idx, 1);
-    else ltfAnswers.schedule.push(option);
-    const localTriggers = ["In-person (outside the office)", "In-office events", "Hybrid (mix of remote + in-person)"];
-    const showCity = ltfAnswers.schedule.some(s => localTriggers.includes(s));
+    ltfAnswers.schedule = [option];
+    const localTriggers = ["In-person", "Hybrid"];
+    const showCity = localTriggers.includes(option);
     $("ltfLocalCityRow")?.classList.toggle("hidden", !showCity);
+    updateNextButtonStateForSchedule();
   });
+
+  // Bind city input for real-time updates
+  const cityInput = $("ltfLocalCity");
+  if (cityInput) {
+    cityInput.addEventListener("input", () => {
+      ltfAnswers.localCity = (cityInput.value || "").trim();
+      updateNextButtonStateForSchedule();
+    });
+  }
 
   // Populate Q4: Availability
   initLtfAvailability();
@@ -8134,6 +8253,109 @@ function initLandingTypeform() {
 }
 
 function initLtfBudget() {
+  const totalRangeOptionsWrap = $("ltfTotalRangeOptions");
+  const perEmployeeRangeOptionsWrap = $("ltfPerEmployeeRangeOptions");
+  const rangePrompt = $("ltfRangePrompt");
+  const totalInput = $("setupTotalBudget");
+  const perInput = $("setupPerEmployee");
+  const modeTotalBtn = $("ltfModeTotal");
+  const modePerEmployeeBtn = $("ltfModePerEmployee");
+  const budgetGuidanceToggle = $("ltfBudgetGuidanceToggle");
+
+  const hasEnteredTeamSize = () => (parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0) > 0;
+
+  const applyLtfFundingGateState = () => {
+    const unlocked = hasEnteredTeamSize();
+    if (modeTotalBtn) {
+      modeTotalBtn.disabled = !unlocked;
+      modeTotalBtn.classList.toggle("opacity-50", !unlocked);
+      modeTotalBtn.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (modePerEmployeeBtn) {
+      modePerEmployeeBtn.disabled = !unlocked;
+      modePerEmployeeBtn.classList.toggle("opacity-50", !unlocked);
+      modePerEmployeeBtn.classList.toggle("cursor-not-allowed", !unlocked);
+    }
+    if (budgetGuidanceToggle) {
+      budgetGuidanceToggle.disabled = !unlocked;
+      budgetGuidanceToggle.classList.toggle("opacity-50", !unlocked);
+      budgetGuidanceToggle.classList.toggle("cursor-not-allowed", !unlocked);
+      if (!unlocked) {
+        $("ltfBudgetGuidanceOptions")?.classList.add("hidden");
+      }
+    }
+    document.querySelectorAll("[data-ltf-budget-range-key]").forEach((node) => {
+      const button = node;
+      button.disabled = !unlocked;
+      button.classList.toggle("opacity-50", !unlocked);
+      button.classList.toggle("cursor-not-allowed", !unlocked);
+    });
+  };
+
+  const syncLtfRangeDerivedValues = () => {
+    const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
+    const totalOption = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
+    const perOption = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
+
+    if (ltfAnswers.budgetMode === "total") {
+      const totalValue = totalOption ? Number(totalOption.representative || 0) : 0;
+      ltfAnswers.totalBudget = totalValue;
+      ltfAnswers.perEmployee = empCount > 0 ? totalValue / empCount : 0;
+    } else {
+      const perValue = perOption ? Number(perOption.representative || 0) : 0;
+      ltfAnswers.perEmployee = perValue;
+      ltfAnswers.totalBudget = empCount > 0 ? perValue * empCount : 0;
+    }
+
+    if (totalInput) totalInput.value = ltfAnswers.totalBudget > 0 ? String(Math.round(ltfAnswers.totalBudget)) : "0";
+    if (perInput) perInput.value = ltfAnswers.perEmployee > 0 ? String(Math.round(ltfAnswers.perEmployee)) : "0";
+  };
+
+  const renderLtfRangeOptions = () => {
+    const renderButtons = (mode, selectedKey, targetEl) => {
+      if (!targetEl) return;
+      const options = getBudgetRangeOptions(mode);
+      targetEl.innerHTML = options.map((option) => {
+        const isSelected = option.key === selectedKey;
+        return `<button type="button" data-ltf-budget-range-mode="${mode}" data-ltf-budget-range-key="${option.key}" class="w-full rounded-full border px-4 py-2 text-sm font-semibold ${isSelected ? "border-slate-900 bg-slate-900 text-white shadow-sm" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">${escapeHtml(option.label)}</button>`;
+      }).join("");
+    };
+
+    renderButtons("total", ltfAnswers.totalBudgetRange, totalRangeOptionsWrap);
+    renderButtons("perEmployee", ltfAnswers.perEmployeeBudgetRange, perEmployeeRangeOptionsWrap);
+
+    document.querySelectorAll("[data-ltf-budget-range-key]").forEach((node) => {
+      const button = node;
+      if (button.dataset.ltfBudgetRangeBound === "true") return;
+      button.dataset.ltfBudgetRangeBound = "true";
+      button.addEventListener("click", () => {
+        if (!hasEnteredTeamSize()) {
+          $("ltfEmployeeCount")?.focus();
+          return;
+        }
+        const mode = String(button.dataset.ltfBudgetRangeMode || "");
+        const key = String(button.dataset.ltfBudgetRangeKey || "");
+        const option = getBudgetRangeByKey(mode, key);
+        if (!option) return;
+        if (mode === "total") {
+          ltfAnswers.totalBudgetRange = key;
+        } else {
+          ltfAnswers.perEmployeeBudgetRange = key;
+        }
+        syncLtfRangeDerivedValues();
+        updateLtfBudgetHelper();
+        renderLtfRangeOptions();
+        
+        // Mark funding section as touched if this is the first selection
+        if (!ltfAnswers.ltfBudgetSectionsTouched.funding) {
+          markQ4SectionTouched("funding");
+        }
+        updateQ4NextButtonState();
+      });
+    });
+    applyLtfFundingGateState();
+  };
+
   const setLtfBudgetMode = (mode) => {
     ltfAnswers.budgetMode = mode;
     const isTotal = mode === "total";
@@ -8151,43 +8373,245 @@ function initLtfBudget() {
       modePer.classList.toggle("shadow-sm", !isTotal);
       modePer.classList.toggle("text-slate-600", isTotal);
     }
-    $("ltfTotalBudgetPanel")?.classList.toggle("hidden", !isTotal);
-    $("ltfPerEmployeePanel")?.classList.toggle("hidden", isTotal);
+    if (totalRangeOptionsWrap) totalRangeOptionsWrap.classList.toggle("hidden", !isTotal);
+    if (perEmployeeRangeOptionsWrap) perEmployeeRangeOptionsWrap.classList.toggle("hidden", isTotal);
+    if (rangePrompt) {
+      rangePrompt.textContent = isTotal
+        ? "Choose a total monthly range:"
+        : "Choose a per-employee monthly range:";
+    }
+    syncLtfRangeDerivedValues();
+    renderLtfRangeOptions();
     updateLtfBudgetHelper();
   };
 
-  $("ltfModeTotal")?.addEventListener("click", () => setLtfBudgetMode("total"));
-  $("ltfModePerEmployee")?.addEventListener("click", () => setLtfBudgetMode("perEmployee"));
-  $("ltfEmployeeCount")?.addEventListener("input", updateLtfBudgetHelper);
-  $("ltfTotalBudget")?.addEventListener("input", updateLtfBudgetHelper);
-  $("ltfPerEmployee")?.addEventListener("input", updateLtfBudgetHelper);
+  $("ltfModeTotal")?.addEventListener("click", () => {
+    if (!hasEnteredTeamSize()) {
+      $("ltfEmployeeCount")?.focus();
+      return;
+    }
+    setLtfBudgetMode("total");
+  });
+  $("ltfModePerEmployee")?.addEventListener("click", () => {
+    if (!hasEnteredTeamSize()) {
+      $("ltfEmployeeCount")?.focus();
+      return;
+    }
+    setLtfBudgetMode("perEmployee");
+  });
+  $("ltfEmployeeCount")?.addEventListener("input", () => {
+    const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
+    syncLtfRangeDerivedValues();
+    updateLtfBudgetHelper();
+    applyLtfFundingGateState();
+    
+    // Mark team size as touched if user enters a value
+    if (empCount > 0 && !ltfAnswers.ltfBudgetSectionsTouched.teamsize) {
+      markQ4SectionTouched("teamsize");
+      updateQ4NextButtonState();
+    }
+  });
 
   $("ltfBudgetGuidanceToggle")?.addEventListener("click", () => {
+    if (!hasEnteredTeamSize()) {
+      $("ltfEmployeeCount")?.focus();
+      return;
+    }
     $("ltfBudgetGuidanceOptions")?.classList.toggle("hidden");
   });
   document.querySelectorAll(".ltf-budget-guidance-option").forEach(btn => {
     btn.addEventListener("click", () => {
       setLtfBudgetMode("perEmployee");
-      const perEmpInput = $("ltfPerEmployee");
-      if (perEmpInput) perEmpInput.value = btn.dataset.value;
+      ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", Number(btn.dataset.value || 0));
+      syncLtfRangeDerivedValues();
       $("ltfBudgetGuidanceOptions")?.classList.add("hidden");
       updateLtfBudgetHelper();
+      renderLtfRangeOptions();
     });
   });
 
+  const startingTotal = Number(ltfAnswers.totalBudget || 0);
+  const startingPerEmployee = Number(ltfAnswers.perEmployee || 0);
+  if (!ltfAnswers.totalBudgetRange) {
+    ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", startingTotal);
+  }
+  if (!ltfAnswers.perEmployeeBudgetRange) {
+    ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", startingPerEmployee);
+  }
+  syncLtfRangeDerivedValues();
   setLtfBudgetMode("total");
+  applyLtfFundingGateState();
+  
+  // Initialize Q4 circle indicators and lock state
+  updateQ4CircleIndicators();
+  updateQ4BudgetLockState();
+  updateQ4NextButtonState();
 }
 
 function updateLtfBudgetHelper() {
-  const helper = $("ltfBudgetHelper");
-  if (!helper) return;
+  const perEmployeeDisplay = $("ltfPerEmployeeDisplay");
+  const totalDisplay = $("ltfTotalDisplay");
+  if (!perEmployeeDisplay || !totalDisplay) return;
+
   const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
   const isTotal = ltfAnswers.budgetMode === "total";
-  const totalBudget = isTotal
-    ? (parseFloat($("ltfTotalBudget")?.value || "0") || 0)
-    : (parseFloat($("ltfPerEmployee")?.value || "0") || 0) * empCount;
-  const perEmp = empCount > 0 ? totalBudget / empCount : 0;
-  helper.textContent = `Investment: $${perEmp.toFixed(0)} / employee`;
+
+  const formatMoney = (value) => `$${Math.max(0, Math.round(Number(value || 0))).toLocaleString("en-US")}`;
+  const formatLessThan = (value, suffix = "") => `< ${formatMoney(value)}${suffix}`;
+  const isLowBucket = (key) => String(key || "").includes("_lt_");
+  const formatRange = (minValue, maxValue, suffix = "") => {
+    const min = Math.max(0, Math.round(Number(minValue || 0)));
+    const max = Number(maxValue);
+    if (!Number.isFinite(max)) return `${formatMoney(min)}+${suffix}`;
+    const normalizedMax = Math.max(min, Math.round(max));
+    if (normalizedMax === min) return `${formatMoney(min)}${suffix}`;
+    return `${formatMoney(min)} - ${formatMoney(normalizedMax)}${suffix}`;
+  };
+
+  if (empCount <= 0) {
+    perEmployeeDisplay.textContent = "—";
+    totalDisplay.textContent = "—";
+    return;
+  }
+
+  if (isTotal) {
+    const totalRange = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
+    if (!totalRange) {
+      perEmployeeDisplay.textContent = "—";
+      totalDisplay.textContent = "—";
+      return;
+    }
+
+    const perEmployeeMin = totalRange.min / empCount;
+    const perEmployeeMax = Number.isFinite(totalRange.max) ? (totalRange.max / empCount) : Infinity;
+    const perEmployeeText = isLowBucket(totalRange.key)
+      ? formatLessThan(perEmployeeMax, " / mo")
+      : formatRange(perEmployeeMin, perEmployeeMax, " / mo");
+
+    const totalText = isLowBucket(totalRange.key)
+      ? formatLessThan(totalRange.max)
+      : formatRange(totalRange.min, totalRange.max);
+
+    perEmployeeDisplay.textContent = perEmployeeText;
+    totalDisplay.textContent = totalText;
+    return;
+  }
+
+  const perEmployeeRange = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
+  if (!perEmployeeRange) {
+    perEmployeeDisplay.textContent = "—";
+    totalDisplay.textContent = "—";
+    return;
+  }
+
+  const monthlyTotalMin = perEmployeeRange.min * empCount;
+  const monthlyTotalMax = Number.isFinite(perEmployeeRange.max) ? (perEmployeeRange.max * empCount) : Infinity;
+  const monthlyTotalText = isLowBucket(perEmployeeRange.key)
+    ? formatLessThan(monthlyTotalMax)
+    : formatRange(monthlyTotalMin, monthlyTotalMax);
+
+  const perEmployeeText = isLowBucket(perEmployeeRange.key)
+    ? formatLessThan(perEmployeeRange.max, " / mo")
+    : formatRange(perEmployeeRange.min, perEmployeeRange.max, " / mo");
+
+  perEmployeeDisplay.textContent = perEmployeeText;
+  totalDisplay.textContent = monthlyTotalText;
+}
+
+function updateQ4CircleIndicators() {
+  const sections = ["teamsize", "funding"];
+  
+  sections.forEach(section => {
+    const indicator = document.querySelector(`[data-ltf-budget-section="${section}"] .ltf-availability-indicator`);
+    if (!indicator) return;
+    
+    const isCompleted = ltfAnswers.ltfBudgetSectionsCompleted[section];
+    const isActive = ltfAnswers.activeLtfBudgetSection === section;
+    
+    indicator.classList.remove("bg-white", "bg-slate-800", "border", "border-slate-700", "text-slate-700", "text-white");
+    
+    if (isCompleted) {
+      // Filled circle with checkmark
+      indicator.classList.add("bg-slate-800", "text-white");
+      indicator.innerHTML = '✓';
+    } else if (isActive) {
+      // Current step: filled circle (no label)
+      indicator.classList.add("bg-slate-800", "text-white");
+      indicator.textContent = '';
+    } else {
+      // Upcoming step: unfilled circle with border (no label)
+      indicator.classList.add("border", "border-slate-700", "bg-white", "text-slate-700");
+      indicator.textContent = '';
+    }
+  });
+}
+
+function updateQ4BudgetLockState() {
+  const sections = ["teamsize", "funding"];
+  
+  sections.forEach((section) => {
+    const isCompleted = ltfAnswers.ltfBudgetSectionsCompleted[section];
+    const isActive = ltfAnswers.activeLtfBudgetSection === section;
+    const shouldBeEnabled = isCompleted || isActive;
+    
+    // Gray out the entire section container
+    const sectionEl = document.querySelector(`[data-ltf-budget-section="${section}"]`);
+    if (sectionEl) {
+      sectionEl.classList.toggle("opacity-50", !shouldBeEnabled);
+      sectionEl.classList.toggle("text-slate-400", !shouldBeEnabled);
+      sectionEl.style.pointerEvents = shouldBeEnabled ? "auto" : "none";
+    }
+    
+    // Disable buttons/inputs in this section if not enabled
+    if (section === "teamsize") {
+      const input = $("ltfEmployeeCount");
+      if (input) input.disabled = !shouldBeEnabled;
+    } else if (section === "funding") {
+      document.querySelectorAll("[data-ltf-budget-range-key], #ltfModeTotal, #ltfModePerEmployee").forEach((btn) => {
+        btn.disabled = !shouldBeEnabled;
+        btn.classList.toggle("opacity-50", !shouldBeEnabled);
+        btn.classList.toggle("cursor-not-allowed", !shouldBeEnabled);
+      });
+    }
+  });
+}
+
+function markQ4SectionTouched(section) {
+  ltfAnswers.ltfBudgetSectionsTouched[section] = true;
+  
+  // Clear any existing timer
+  if (ltfAnswers.ltfBudgetSectionCompleteTimers[section]) {
+    clearTimeout(ltfAnswers.ltfBudgetSectionCompleteTimers[section]);
+  }
+  
+  const sections = ["teamsize", "funding"];
+  const currentIndex = sections.indexOf(section);
+  const isLastSection = currentIndex === sections.length - 1;
+  
+  // Set 0.5-second timer to mark complete and auto-advance to next section
+  ltfAnswers.ltfBudgetSectionCompleteTimers[section] = setTimeout(() => {
+    ltfAnswers.ltfBudgetSectionsCompleted[section] = true;
+    
+    // Auto-advance to next section (if not the last one)
+    if (!isLastSection) {
+      ltfAnswers.activeLtfBudgetSection = sections[currentIndex + 1];
+    }
+    
+    updateQ4CircleIndicators();
+    updateQ4BudgetLockState();
+    updateQ4NextButtonState();
+  }, 500);
+}
+
+function updateQ4NextButtonState() {
+  // Button enables when both sections are completed
+  const teamSizeComplete = ltfAnswers.ltfBudgetSectionsCompleted.teamsize;
+  const fundingComplete = ltfAnswers.ltfBudgetSectionsCompleted.funding;
+  
+  const nextBtn = $("ltfNextBtn");
+  if (!nextBtn) return;
+  
+  nextBtn.disabled = !(teamSizeComplete && fundingComplete);
 }
 
 function initLtfCadence() {
@@ -8200,6 +8624,95 @@ function initLtfCadence() {
 }
 
 function initLtfAvailability() {
+  const getNormalizedDaysForDraft = () => {
+    const weekdays = Array.isArray(ltfAnswers.daysSelected)
+      ? ltfAnswers.daysSelected.filter((day) => ["M", "T", "W", "Th", "F"].includes(day))
+      : [];
+    return ltfAnswers.saturdayOn ? [...weekdays, "Sa"] : weekdays;
+  };
+
+  const persistLtfAvailabilityDraft = () => {
+    state.landingDraft.daysSelected = getNormalizedDaysForDraft();
+    state.landingDraft.timesSelected = Array.isArray(ltfAnswers.timesSelected)
+      ? [...ltfAnswers.timesSelected]
+      : [];
+    persistState();
+  };
+
+  const updateCircleIndicators = () => {
+    const sections = ["days", "times", "weekend"];
+    
+    sections.forEach(section => {
+      const indicator = document.querySelector(`[data-ltf-availability-section="${section}"] span:first-child`);
+      if (!indicator) return;
+      
+      const isCompleted = ltfAnswers.ltfAvailabilitySectionsCompleted[section];
+      const isActive = ltfAnswers.activeLtfAvailabilitySection === section;
+      
+      indicator.classList.remove("bg-white", "bg-slate-800", "border", "border-slate-700", "text-slate-700", "text-white");
+      
+      if (isCompleted) {
+        // Filled circle with checkmark
+        indicator.classList.add("bg-slate-800", "text-white");
+        indicator.innerHTML = '✓';
+      } else if (isActive) {
+        // Current step: filled circle (no label)
+        indicator.classList.add("bg-slate-800", "text-white");
+        indicator.textContent = '';
+      } else {
+        // Upcoming step: unfilled circle with border (no label)
+        indicator.classList.add("border", "border-slate-700", "bg-white", "text-slate-700");
+        indicator.textContent = '';
+      }
+    });
+  };
+
+  const updateNextButtonState = () => {
+    // Button enables when all 3 sections have at least one selection
+    const daysHasSelection = ltfAnswers.daysSelected.length > 0;
+    const timesHasSelection = ltfAnswers.timesSelected.length > 0;
+    const weekendHasSelection = ltfAnswers.saturdayOn !== undefined && ltfAnswers.ltfAvailabilitySectionsTouched.weekend;
+    
+    const allHaveSelections = daysHasSelection && timesHasSelection && weekendHasSelection;
+    
+    const nextBtn = $("ltfNextBtn");
+    if (!nextBtn) return;
+    
+    nextBtn.disabled = !allHaveSelections;
+  };
+
+  const markSectionTouched = (section) => {
+    ltfAnswers.ltfAvailabilitySectionsTouched[section] = true;
+    
+    // Clear any existing timer
+    if (ltfAnswers.ltfAvailabilitySectionCompleteTimers[section]) {
+      clearTimeout(ltfAnswers.ltfAvailabilitySectionCompleteTimers[section]);
+    }
+    
+    const sections = ["days", "times", "weekend"];
+    const currentIndex = sections.indexOf(section);
+    const isLastSection = currentIndex === sections.length - 1;
+    
+    // Set 0.25-second timer to mark complete and auto-advance to next section
+    ltfAnswers.ltfAvailabilitySectionCompleteTimers[section] = setTimeout(() => {
+      ltfAnswers.ltfAvailabilitySectionsCompleted[section] = true;
+      
+      // Auto-advance to next section (if not the last one)
+      if (!isLastSection) {
+        ltfAnswers.activeLtfAvailabilitySection = sections[currentIndex + 1];
+      }
+      
+      updateCircleIndicators();
+      updateNextButtonState();
+      updateAvailabilityButtonLockState();
+    }, 250);
+    
+    // For the last section, immediately activate the button (don't wait for the 1-second timer)
+    if (isLastSection) {
+      updateNextButtonState();
+    }
+  };
+
   const renderDayBtns = () => {
     document.querySelectorAll("[data-ltf-day]").forEach(btn => {
       const day = btn.dataset.ltfDay;
@@ -8209,27 +8722,64 @@ function initLtfAvailability() {
       btn.classList.toggle("text-white", sel);
       btn.classList.toggle("border-slate-200", !sel);
       btn.classList.toggle("bg-white", !sel);
-      btn.classList.toggle("text-slate-400", !sel);
+      btn.classList.toggle("text-slate-700", !sel);
     });
   };
 
   const renderTimeBtns = () => {
-    document.querySelectorAll("[data-ltf-time]").forEach(btn => {
-      const time = btn.dataset.ltfTime;
+    document.querySelectorAll("[data-availability-time]").forEach(btn => {
+      const time = btn.dataset.availabilityTime;
       const sel = ltfAnswers.timesSelected.includes(time);
-      btn.classList.toggle("bg-white", sel);
-      btn.classList.toggle("text-slate-800", sel);
-      btn.classList.toggle("shadow-sm", sel);
-      btn.classList.toggle("text-slate-500", !sel);
+      btn.classList.toggle("border-slate-800", sel);
+      btn.classList.toggle("bg-slate-800", sel);
+      btn.classList.toggle("text-white", sel);
+      btn.classList.toggle("border-slate-200", !sel);
+      btn.classList.toggle("bg-white", !sel);
+      btn.classList.toggle("text-slate-700", !sel);
     });
   };
 
-  const renderSatToggle = () => {
-    const on = ltfAnswers.saturdayOn;
-    $("ltfSatSwitch")?.classList.toggle("bg-slate-800", on);
-    $("ltfSatSwitch")?.classList.toggle("bg-slate-300", !on);
-    const knob = $("ltfSatKnob");
-    if (knob) knob.style.left = on ? "calc(100% - 16px)" : "4px";
+  const renderWeekendBtns = () => {
+    document.querySelectorAll("[data-ltf-weekend]").forEach((btn) => {
+      const value = String(btn.dataset.ltfWeekend || "").toLowerCase();
+      const selected = (value === "yes" && ltfAnswers.saturdayOn === true)
+        || (value === "no" && ltfAnswers.saturdayOn === false);
+      btn.classList.toggle("border-slate-800", selected);
+      btn.classList.toggle("bg-slate-800", selected);
+      btn.classList.toggle("text-white", selected);
+      btn.classList.toggle("border-slate-200", !selected);
+      btn.classList.toggle("bg-white", !selected);
+      btn.classList.toggle("text-slate-700", !selected);
+    });
+  };
+
+  const updateAvailabilityButtonLockState = () => {
+    const sections = ["days", "times", "weekend"];
+    
+    sections.forEach((section) => {
+      const isCompleted = ltfAnswers.ltfAvailabilitySectionsCompleted[section];
+      const isActive = ltfAnswers.activeLtfAvailabilitySection === section;
+      const shouldBeEnabled = isCompleted || isActive;
+      
+      // Gray out the entire section container
+      const sectionEl = document.querySelector(`[data-ltf-availability-section="${section}"]`);
+      if (sectionEl) {
+        sectionEl.classList.toggle("opacity-50", !shouldBeEnabled);
+        sectionEl.classList.toggle("text-slate-400", !shouldBeEnabled);
+        // Also disable pointer events on the whole section
+        sectionEl.style.pointerEvents = shouldBeEnabled ? "auto" : "none";
+      }
+      
+      // Find the selector for this section's buttons
+      let selector;
+      if (section === "days") selector = "[data-ltf-day]";
+      if (section === "times") selector = "[data-availability-time]";
+      if (section === "weekend") selector = "[data-ltf-weekend]";
+      
+      document.querySelectorAll(selector).forEach((btn) => {
+        btn.disabled = !shouldBeEnabled;
+      });
+    });
   };
 
   document.querySelectorAll("[data-ltf-day]").forEach(btn => {
@@ -8241,29 +8791,46 @@ function initLtfAvailability() {
         ltfAnswers.daysSelected.push(day);
       }
       renderDayBtns();
+      markSectionTouched("days");
+      persistLtfAvailabilityDraft();
+      updateAvailabilityButtonLockState();
     });
   });
 
-  document.querySelectorAll("[data-ltf-time]").forEach(btn => {
+  document.querySelectorAll("[data-availability-time]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const time = btn.dataset.ltfTime;
+      const time = btn.dataset.availabilityTime;
       if (ltfAnswers.timesSelected.includes(time)) {
         ltfAnswers.timesSelected = ltfAnswers.timesSelected.filter(t => t !== time);
       } else {
         ltfAnswers.timesSelected.push(time);
       }
       renderTimeBtns();
+      markSectionTouched("times");
+      persistLtfAvailabilityDraft();
+      updateAvailabilityButtonLockState();
     });
   });
 
-  $("ltfSaturdayToggle")?.addEventListener("click", () => {
-    ltfAnswers.saturdayOn = !ltfAnswers.saturdayOn;
-    renderSatToggle();
+  document.querySelectorAll("[data-ltf-weekend]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const value = String(btn.dataset.ltfWeekend || "").toLowerCase();
+      if (value === "yes") ltfAnswers.saturdayOn = true;
+      if (value === "no") ltfAnswers.saturdayOn = false;
+      renderWeekendBtns();
+      markSectionTouched("weekend");
+      persistLtfAvailabilityDraft();
+      updateAvailabilityButtonLockState();
+    });
   });
 
   renderDayBtns();
   renderTimeBtns();
-  renderSatToggle();
+  renderWeekendBtns();
+  updateCircleIndicators();
+  updateNextButtonState();
+  persistLtfAvailabilityDraft();
+  updateAvailabilityButtonLockState();
 }
 
 function startLandingTypeform() {
@@ -8273,12 +8840,36 @@ function startLandingTypeform() {
   $("landingTfBuilder")?.classList.remove("hidden");
   renderLtfProgressBar();
   renderLtfNavButtons();
-  // Blur all preview cards — reveal progressively as questions are answered
-  document.querySelectorAll(".ltf-preview-card").forEach(c => c.classList.add("ltf-blurred"));
+  // Update rail label and enable full color preview
+  const railLabel = $("ltfPreviewRailLabel");
+  if (railLabel) {
+    railLabel.textContent = "YOUR PROGRAM";
+    railLabel.classList.add("ltf-preview-rail-label--active");
+  }
+  const previewPanel = $("landingTfRight");
+  if (previewPanel) {
+    previewPanel.querySelector(".ltf-preview-panel")?.classList.add("ltf-preview-panel--active");
+  }
+  // Blur all preview cards and the cycle label — reveal progressively as questions are answered.
+  document.querySelectorAll(".ltf-preview-card, .ltf-events-cycle-label").forEach((node) => node.classList.add("ltf-blurred"));
   const previewTitle = $("ltfPreviewTitle");
   const previewSub = $("ltfPreviewSubtitle");
   if (previewTitle) previewTitle.textContent = "Your program is building...";
   if (previewSub) previewSub.textContent = "Answer each question to reveal events";
+  // Display first question (Setting, since Cadence is disabled) without blurring preview
+  ltfCurrentQ = 1;
+  const q1 = $("ltfQ1");
+  if (q1) {
+    q1.classList.add("ltf-q--active");
+  }
+  renderLtfProgressBar();
+  renderLtfNavButtons();
+  
+  // Initialize button state for Setting question
+  const nextBtn = $("ltfNextBtn");
+  if (nextBtn) {
+    nextBtn.disabled = true;
+  }
 }
 
 function renderLtfProgressBar() {
@@ -8304,12 +8895,16 @@ function renderLtfProgressBar() {
 function renderLtfNavButtons() {
   const back = $("ltfBackBtn");
   const next = $("ltfNextBtn");
-  if (back) back.classList.toggle("hidden", ltfCurrentQ === 0);
+  // Hide Back button on the initial/setting question (Q0 or Q1)
+  const hideBack = ltfCurrentQ === 0 || ltfCurrentQ === 1;
+  if (back) back.classList.toggle("hidden", hideBack);
   if (next) next.textContent = ltfCurrentQ === 5 ? "See your program →" : "Next →";
 }
 
 function goLtfQuestion(targetIdx) {
-  if (targetIdx < 0 || targetIdx > 5) return;
+  // Skip Q0 (Cadence is disabled)
+  if (targetIdx === 0) targetIdx = 1;
+  if (targetIdx < 1 || targetIdx > 5) return;
   const isBack = targetIdx < ltfCurrentQ;
   const currentEl = $(`ltfQ${ltfCurrentQ}`);
   const targetEl = $(`ltfQ${targetIdx}`);
@@ -8329,6 +8924,42 @@ function goLtfQuestion(targetIdx) {
   ltfCurrentQ = targetIdx;
   renderLtfProgressBar();
   renderLtfNavButtons();
+
+  // Update button state based on current question
+  if (ltfCurrentQ === 1) {
+    // Setting question: update button state
+    const nextBtn = $("ltfNextBtn");
+    if (nextBtn) {
+      const hasScheduleSelection = ltfAnswers.schedule.length > 0;
+      if (!hasScheduleSelection) {
+        nextBtn.disabled = true;
+      } else {
+        const selectedOption = ltfAnswers.schedule[0];
+        const localTriggers = ["In-person", "Hybrid"];
+        const needsCity = localTriggers.includes(selectedOption);
+        if (needsCity) {
+          const cityFilled = (ltfAnswers.localCity || "").trim().length > 0;
+          nextBtn.disabled = !cityFilled;
+        } else {
+          nextBtn.disabled = false;
+        }
+      }
+    }
+  } else if (ltfCurrentQ === 2) {
+    // Availability question: update button state based on selections
+    const nextBtn = $("ltfNextBtn");
+    if (nextBtn) {
+      const daysHasSelection = ltfAnswers.daysSelected.length > 0;
+      const timesHasSelection = ltfAnswers.timesSelected.length > 0;
+      const weekendHasSelection = ltfAnswers.saturdayOn !== undefined && ltfAnswers.ltfAvailabilitySectionsTouched.weekend;
+      const allHaveSelections = daysHasSelection && timesHasSelection && weekendHasSelection;
+      nextBtn.disabled = !allHaveSelections;
+    }
+  } else {
+    // Other questions: enable by default
+    const nextBtn = $("ltfNextBtn");
+    if (nextBtn) nextBtn.disabled = false;
+  }
 
   // Hide error on navigation
   const errEl = $("ltfErrorMsg");
@@ -8352,28 +8983,45 @@ function showLtfError(msg) {
 }
 
 function validateLtfCurrentQuestion() {
-  if (ltfCurrentQ === 0) {
+  // Q0 (Cadence) is disabled, always return true to allow advancement
+  if (ltfCurrentQ === 0) return true;
+  // if (ltfCurrentQ === 0) return true; // cadence always has a value
+  if (ltfCurrentQ === 1) {
+    if (ltfAnswers.schedule.length === 0) { showLtfError("Please select at least one setting."); return false; }
+    // Check if city is required and filled
+    const localTriggers = ["In-person", "Hybrid"];
+    const shouldShowCity = ltfAnswers.schedule.some(s => localTriggers.includes(s));
+    if (shouldShowCity) {
+      const city = (ltfAnswers.localCity || "").trim();
+      if (!city) { showLtfError("Please enter a city for local recommendations."); return false; }
+    }
+    return true;
+  }
+  if (ltfCurrentQ === 2) {
+    // Check if all 3 availability sections are completed
+    const allCompleted = ltfAnswers.ltfAvailabilitySectionsCompleted.days 
+      && ltfAnswers.ltfAvailabilitySectionsCompleted.times 
+      && ltfAnswers.ltfAvailabilitySectionsCompleted.weekend;
+    if (!allCompleted) { showLtfError("Please complete all availability questions."); return false; }
+    if (ltfAnswers.daysSelected.length === 0) { showLtfError("Please select at least one day."); return false; }
+    if (ltfAnswers.timesSelected.length === 0) { showLtfError("Please select at least one time window."); return false; }
+    return true;
+  }
+  if (ltfCurrentQ === 3) {
     if (ltfAnswers.goals.length === 0) { showLtfError("Please select at least one goal."); return false; }
     return true;
   }
-  if (ltfCurrentQ === 1) {
+  if (ltfCurrentQ === 4) {
     const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10);
     if (!empCount || empCount < 1) { showLtfError("Please enter the number of employees."); return false; }
     const isTotal = ltfAnswers.budgetMode === "total";
-    const budget = isTotal
-      ? parseFloat($("ltfTotalBudget")?.value || "0")
-      : parseFloat($("ltfPerEmployee")?.value || "0");
-    if (!budget || budget < 1) { showLtfError(isTotal ? "Please enter a monthly budget." : "Please enter a per-employee amount."); return false; }
-    return true;
-  }
-  if (ltfCurrentQ === 2) return true; // cadence always has a value
-  if (ltfCurrentQ === 3) {
-    if (ltfAnswers.schedule.length === 0) { showLtfError("Please select at least one setting."); return false; }
-    return true;
-  }
-  if (ltfCurrentQ === 4) {
-    if (ltfAnswers.daysSelected.length === 0) { showLtfError("Please select at least one day."); return false; }
-    if (ltfAnswers.timesSelected.length === 0) { showLtfError("Please select at least one time window."); return false; }
+    const hasSelectedRange = isTotal
+      ? Boolean(ltfAnswers.totalBudgetRange)
+      : Boolean(ltfAnswers.perEmployeeBudgetRange);
+    if (!hasSelectedRange) {
+      showLtfError(isTotal ? "Please select a total monthly range." : "Please select a per-employee monthly range.");
+      return false;
+    }
     return true;
   }
   if (ltfCurrentQ === 5) {
@@ -8384,21 +9032,28 @@ function validateLtfCurrentQuestion() {
 }
 
 function saveLtfCurrentAnswer() {
+  // Q0 (Cadence) is disabled, skip saving
+  // if (ltfCurrentQ === 0) {
+  //   ltfAnswers.cadence = $("ltfCadence")?.value || "Monthly";
+  // }
   if (ltfCurrentQ === 1) {
+    ltfAnswers.localCity = ($("ltfLocalCity")?.value || "").trim();
+  }
+  if (ltfCurrentQ === 4) {
     ltfAnswers.employeeCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
     if (ltfAnswers.budgetMode === "total") {
-      ltfAnswers.totalBudget = parseFloat($("ltfTotalBudget")?.value || "0") || 0;
+      const totalRange = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
+      ltfAnswers.totalBudget = totalRange ? Number(totalRange.representative || 0) : 0;
+      ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", ltfAnswers.totalBudget);
       ltfAnswers.perEmployee = ltfAnswers.employeeCount > 0 ? ltfAnswers.totalBudget / ltfAnswers.employeeCount : 0;
+      ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
     } else {
-      ltfAnswers.perEmployee = parseFloat($("ltfPerEmployee")?.value || "0") || 0;
+      const perRange = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
+      ltfAnswers.perEmployee = perRange ? Number(perRange.representative || 0) : 0;
+      ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
       ltfAnswers.totalBudget = ltfAnswers.perEmployee * ltfAnswers.employeeCount;
+      ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", ltfAnswers.totalBudget);
     }
-  }
-  if (ltfCurrentQ === 2) {
-    ltfAnswers.cadence = $("ltfCadence")?.value || "Monthly";
-  }
-  if (ltfCurrentQ === 3) {
-    ltfAnswers.localCity = ($("ltfLocalCity")?.value || "").trim();
   }
 }
 
@@ -8417,17 +9072,25 @@ function completeLtfSetup() {
   $("landingTfBuilder")?.classList.add("hidden");
   $("landingTfLoading")?.classList.remove("hidden");
 
-  // Reveal all 4 preview cards
-  document.querySelectorAll(".ltf-preview-card").forEach(c => c.classList.remove("ltf-blurred"));
+  // Reveal all preview cards and the cycle label
+  document.querySelectorAll(".ltf-preview-card, .ltf-events-cycle-label").forEach((node) => node.classList.remove("ltf-blurred"));
 
   // Write answers to state.landingDraft
   state.landingDraft.goals = [...ltfAnswers.goals];
   state.landingDraft.employeeCount = ltfAnswers.employeeCount;
   state.landingDraft.budgetMode = ltfAnswers.budgetMode;
   state.landingDraft.totalBudget = ltfAnswers.totalBudget;
+  state.landingDraft.totalBudgetRange = ltfAnswers.totalBudgetRange;
   state.landingDraft.perEmployee = ltfAnswers.perEmployee;
+  state.landingDraft.perEmployeeBudgetRange = ltfAnswers.perEmployeeBudgetRange;
   state.landingDraft.budgetConfigured = true;
-  state.landingDraft.cadence = ltfAnswers.cadence;
+  state.programSettings.budgetMode = ltfAnswers.budgetMode;
+  state.programSettings.totalBudget = ltfAnswers.totalBudget;
+  state.programSettings.totalBudgetRange = ltfAnswers.totalBudgetRange;
+  state.programSettings.perEmployeeBudget = ltfAnswers.perEmployee;
+  state.programSettings.perEmployeeBudgetRange = ltfAnswers.perEmployeeBudgetRange;
+  state.programSettings.employeeCount = ltfAnswers.employeeCount;
+  // state.landingDraft.cadence = ltfAnswers.cadence; // Q0 (Cadence) is disabled
   state.landingDraft.schedule = [...ltfAnswers.schedule];
   state.landingDraft.localCity = ltfAnswers.localCity;
   state.landingDraft.daysSelected = [
@@ -8908,7 +9571,11 @@ async function bootstrap() {
   }
 
   hideAuthGate();
-  showLanding();
+  if (isRevelryLabsReadOnlyMagicLink()) {
+    showApp();
+  } else {
+    showLanding();
+  }
   renderAll();
   updateMobileSidebarToggleOffset();
 }
@@ -15986,7 +16653,10 @@ function initializePollBuilderInteractions() {
 function generateRecommendedEvents() {
   state.programSettings.goals = Array.isArray(state.landingDraft.goals) ? [...state.landingDraft.goals] : [];
   state.programSettings.preferredSchedule = Array.isArray(state.landingDraft.schedule) ? [...state.landingDraft.schedule] : [];
-  state.programSettings.cadence = state.landingDraft.cadence || state.programSettings.cadence;
+  // state.programSettings.cadence = state.landingDraft.cadence || state.programSettings.cadence; // Q0 (Cadence) is disabled
+  state.programSettings.daysSelected = Array.isArray(state.landingDraft.daysSelected) ? [...state.landingDraft.daysSelected] : [];
+  state.programSettings.timesSelected = Array.isArray(state.landingDraft.timesSelected) ? [...state.landingDraft.timesSelected] : [];
+  state.programSettings.localCity = state.landingDraft.localCity || state.programSettings.localCity;
   state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
     ? [...state.landingDraft.teamPreferenceEstimate]
     : [];

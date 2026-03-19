@@ -203,12 +203,16 @@ function eventMatchesInterest(event, interest) {
   const haystack = `${event?.name || ""} ${event?.description || ""} ${(event?.goals || []).join(" ")}`.toLowerCase();
   const normalized = String(interest || "").toLowerCase();
   const keywordMap = {
+    "games & competitions": ["game", "competition", "trivia", "escape", "challenge", "olympics", "tournament"],
+    "food & drinks": ["food", "drink", "cocktail", "cooking", "tasting", "culinary"],
+    "volunteering": ["volunteer", "community", "service", "nonprofit", "impact"],
+    "learning events": ["workshop", "learning", "skills", "coaching", "development", "training"],
+    "social meetups": ["social", "team", "bond", "network", "meetup", "connection"],
     "fun / social event": ["fun", "social", "team", "trivia", "escape", "game", "bond"],
     "professional development": ["workshop", "learning", "skills", "coaching", "development"],
     "wellness / health focused": ["wellness", "mindful", "health", "fitness", "workout"],
     "food / drinks experience": ["food", "drink", "cocktail", "cooking", "tasting"],
-    "learn a new creative skill": ["creative", "build", "craft", "making", "skill"],
-    "volunteering": ["volunteer", "community", "service", "nonprofit", "impact"]
+    "learn a new creative skill": ["creative", "build", "craft", "making", "skill"]
   };
   const keywords = keywordMap[normalized] || [];
   return keywords.some((keyword) => haystack.includes(keyword));

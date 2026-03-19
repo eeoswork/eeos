@@ -2,21 +2,22 @@
  * EVENT_TEMPLATES - Master repository of event templates
  * Used by the 4-month program generator to recommend bundled events
  * 
- * Each template represents a pre-configured event option that can be
- * instantiated as a poll, RSVP, or external event in the workflow.
+ * Maps to landing page goals and interests:
+ * Goals: "Strengthen team connection", "Improve employee performance", "Boost morale", "Support employee wellbeing"
+ * Interests: "Games & competitions", "Food & drinks", "Volunteering", "Learning events", "Social meetups"
  */
 
 window.EVENT_TEMPLATES = [
-  // ===== EXISTING EVENTS (Mapped from EVENTS_MASTER_DEFAULT) =====
+  // ===== CORE EVENTS (Non-Confetti) =====
   
   {
     id: "evt-1",
-    title: "Virtual Trivia League",
-    description: "Live-hosted team trivia with custom company rounds.",
+    title: "Team Trivia Championship",
+    description: "Live trivia competition for team bonding and friendly competition.",
     type: "rsvp",
     workflowType: "rsvp",
-    goals: ["Retention & Engagement", "Team Connection & Culture"],
-    interestCategories: ["social", "fun"],
+    goals: ["Strengthen team connection", "Boost morale"],
+    interestCategories: ["Games & competitions", "Social meetups"],
     costPerPerson: 35,
     remoteCompatible: true,
     isConfetti: false,
@@ -26,12 +27,12 @@ window.EVENT_TEMPLATES = [
   
   {
     id: "evt-2",
-    title: "Mindful Monday Workshop",
-    description: "Guided wellbeing and stress reset for teams.",
+    title: "Mindfulness & Wellness Workshop",
+    description: "Guided wellness and stress management session for team wellbeing.",
     type: "rsvp",
     workflowType: "rsvp",
-    goals: ["Wellbeing, Growth & Recognition", "Retention & Engagement"],
-    interestCategories: ["wellness"],
+    goals: ["Support employee wellbeing", "Boost morale"],
+    interestCategories: ["Learning events", "Social meetups"],
     costPerPerson: 20,
     remoteCompatible: true,
     isConfetti: false,
@@ -41,12 +42,12 @@ window.EVENT_TEMPLATES = [
   
   {
     id: "evt-3",
-    title: "Creative Build Challenge",
-    description: "Hands-on problem-solving challenge in small groups.",
+    title: "Creative Problem-Solving Challenge",
+    description: "Hands-on team challenge to boost creativity and collaborative performance.",
     type: "rsvp",
     workflowType: "rsvp",
-    goals: ["Performance & Productivity", "Team Connection & Culture"],
-    interestCategories: ["social", "learning"],
+    goals: ["Improve employee performance", "Strengthen team connection"],
+    interestCategories: ["Games & competitions", "Learning events"],
     costPerPerson: 42,
     remoteCompatible: true,
     isConfetti: false,
@@ -56,28 +57,13 @@ window.EVENT_TEMPLATES = [
   
   {
     id: "evt-4",
-    title: "Employer Brand Story Jam",
-    description: "Employee storytelling sprint for recruiting brand content.",
+    title: "Cooking Class & Team Dinner",
+    description: "Virtual cooking experience where teams create and share a meal together.",
     type: "rsvp",
     workflowType: "rsvp",
-    goals: ["Employer Brand & Recruiting", "Retention & Engagement"],
-    interestCategories: ["learning", "social"],
-    costPerPerson: 28,
-    remoteCompatible: true,
-    isConfetti: false,
-    url: "https://www.teamraderie.com/experience-finder/",
-    facilitation_kit: null
-  },
-  
-  {
-    id: "evt-5",
-    title: "Peer Coaching Pods",
-    description: "Structured peer coaching circles with prompts.",
-    type: "rsvp",
-    workflowType: "rsvp",
-    goals: ["Retention & Engagement", "Performance & Productivity"],
-    interestCategories: ["learning", "wellbeing"],
-    costPerPerson: 18,
+    goals: ["Strengthen team connection", "Boost morale"],
+    interestCategories: ["Food & drinks", "Social meetups"],
+    costPerPerson: 45,
     remoteCompatible: true,
     isConfetti: false,
     url: "https://www.withconfetti.com/",
@@ -85,35 +71,49 @@ window.EVENT_TEMPLATES = [
   },
   
   {
-    id: "evt-6",
-    title: "Zero-Cost Team Reflection Sprint",
-    description: "Facilitated retrospective format to improve team alignment.",
-    type: "poll",
-    workflowType: "poll",
-    pollVariant: "event-and-datetime",
-    goals: ["Team Connection & Culture", "Performance & Productivity"],
-    interestCategories: ["learning", "team"],
-    costPerPerson: 0,
+    id: "evt-5",
+    title: "Professional Development Workshop",
+    description: "Skill-building session focused on career growth and team effectiveness.",
+    type: "rsvp",
+    workflowType: "rsvp",
+    goals: ["Improve employee performance", "Support employee wellbeing"],
+    interestCategories: ["Learning events"],
+    costPerPerson: 25,
     remoteCompatible: true,
     isConfetti: false,
-    url: "https://www.notion.so/",
+    url: "https://calendar.google.com/",
+    facilitation_kit: null
+  },
+  
+  {
+    id: "evt-6",
+    title: "Community Volunteering Initiative",
+    description: "Team volunteering opportunity supporting local community causes.",
+    type: "rsvp",
+    workflowType: "rsvp",
+    goals: ["Strengthen team connection", "Support employee wellbeing"],
+    interestCategories: ["Volunteering", "Social meetups"],
+    costPerPerson: 0,
+    remoteCompatible: false,
+    isConfetti: false,
+    url: "https://www.volunteermatch.org/",
     facilitation_kit: {
-      host_script: "Kickoff, framing, and closing script.",
-      agenda: "45-minute agenda with checkpoints.",
-      timeline: "Minute-by-minute facilitation timeline.",
-      discussion_prompts: "Guided prompts for team reflection.",
-      follow_up_template: "Post-session action follow-up template."
+      host_script: "Volunteer orientation and team assignment guide.",
+      agenda: "3-hour volunteering event with team coordination.",
+      timeline: "Check-in, orientation, volunteer work, and debrief.",
+      discussion_prompts: "Pre-volunteering team briefing and post-event reflection.",
+      follow_up_template: "Impact summary and volunteer appreciation template."
     }
   },
   
   {
     id: "evt-7",
-    title: "Lunch-and-Learn Lightning Talks",
-    description: "Employee-led quick talks for knowledge sharing.",
+    title: "Lunch-and-Learn Knowledge Series",
+    description: "Employee-led sessions for knowledge sharing and skill development.",
     type: "rsvp",
     workflowType: "rsvp",
-    goals: ["Performance & Productivity", "Employer Brand & Recruiting"],
-    interestCategories: ["learning"],
+    goals: ["Improve employee performance", "Strengthen team connection"],
+    interestCategories: ["Learning events"],
     costPerPerson: 12,
     remoteCompatible: true,
     isConfetti: false,
@@ -123,27 +123,26 @@ window.EVENT_TEMPLATES = [
   
   {
     id: "evt-8",
-    title: "Recognition Roundtable",
-    description: "Peer appreciation format to boost morale.",
-    type: "poll",
-    workflowType: "poll",
-    pollVariant: "datetime-only",
-    goals: ["Retention & Engagement", "Retention & Engagement"],
-    interestCategories: ["social", "recognition"],
-    costPerPerson: 0,
+    title: "Team Recognition & Appreciation Hour",
+    description: "Peer recognition event celebrating team wins and individual contributions.",
+    type: "rsvp",
+    workflowType: "rsvp",
+    goals: ["Boost morale", "Strengthen team connection"],
+    interestCategories: ["Social meetups"],
+    costPerPerson: 15,
     remoteCompatible: true,
     isConfetti: false,
     url: "https://www.withconfetti.com/",
     facilitation_kit: {
-      host_script: "Recognition-focused facilitation script.",
-      agenda: "30-minute recognition agenda.",
-      timeline: "Structured round-robin timing guide.",
-      discussion_prompts: "Prompt list for appreciation and wins.",
-      follow_up_template: "Template for monthly recognition follow-up."
+      host_script: "Recognition event facilitation guide.",
+      agenda: "45-minute structured appreciation session.",
+      timeline: "Nomination, presentations, and celebration timeline.",
+      discussion_prompts: "Recognition prompts and appreciation categories.",
+      follow_up_template: "Recognition highlights and follow-up appreciation."
     }
   },
 
-  // ===== NEW CONFETTI EVENTS (isConfetti = true) =====
+  // ===== CONFETTI EVENTS (isConfetti = true) =====
   
   {
     id: "confetti-trivia",
@@ -152,8 +151,8 @@ window.EVENT_TEMPLATES = [
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
-    goals: ["Team Connection & Culture", "Retention & Engagement"],
-    interestCategories: ["fun", "social"],
+    goals: ["Strengthen team connection", "Boost morale"],
+    interestCategories: ["Games & competitions", "Social meetups"],
     costPerPerson: 0,
     remoteCompatible: true,
     isConfetti: true,
@@ -174,8 +173,8 @@ window.EVENT_TEMPLATES = [
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
-    goals: ["Team Connection & Culture", "Performance & Productivity"],
-    interestCategories: ["social", "fun"],
+    goals: ["Strengthen team connection", "Boost morale"],
+    interestCategories: ["Games & competitions", "Social meetups"],
     costPerPerson: 0,
     remoteCompatible: true,
     isConfetti: true,
@@ -196,8 +195,8 @@ window.EVENT_TEMPLATES = [
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
-    goals: ["Team Connection & Culture", "Retention & Engagement"],
-    interestCategories: ["social", "fun", "sports"],
+    goals: ["Boost morale", "Strengthen team connection"],
+    interestCategories: ["Games & competitions"],
     costPerPerson: 0,
     remoteCompatible: true,
     isConfetti: true,
@@ -218,8 +217,8 @@ window.EVENT_TEMPLATES = [
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
-    goals: ["Team Connection & Culture", "Employer Brand & Recruiting"],
-    interestCategories: ["fun", "social"],
+    goals: ["Strengthen team connection", "Boost morale"],
+    interestCategories: ["Games & competitions", "Social meetups"],
     costPerPerson: 0,
     remoteCompatible: true,
     isConfetti: true,
@@ -240,8 +239,8 @@ window.EVENT_TEMPLATES = [
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
-    goals: ["Retention & Engagement", "Wellbeing, Growth & Recognition"],
-    interestCategories: ["recognition", "social", "fun"],
+    goals: ["Boost morale", "Strengthen team connection"],
+    interestCategories: ["Social meetups"],
     costPerPerson: 0,
     remoteCompatible: true,
     isConfetti: true,
