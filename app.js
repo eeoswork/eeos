@@ -2001,15 +2001,49 @@ function enforceRevelryLeaderboardLockState() {
     state.revelryLeaderboardLockArmed = true;
     changed = true;
   }
-  if (!Array.isArray(state.completedSetupSteps)) {
-    state.completedSetupSteps = [];
+  const normalizedCompleted = Array.from(new Set(
+    completedSteps
+      .map((stepNum) => Number(stepNum || 0))
+      .filter((stepNum) => Number.isInteger(stepNum) && stepNum >= 1 && stepNum <= EVENT_WORKFLOW_STEPS.RUN)
+  ));
+  if (!Array.isArray(state.completedSetupSteps) || normalizedCompleted.length !== state.completedSetupSteps.length || normalizedCompleted.some((stepNum, idx) => stepNum !== state.completedSetupSteps[idx])) {
+    state.completedSetupSteps = normalizedCompleted;
     changed = true;
   }
 
-  const trimmedCompleted = state.completedSetupSteps.filter((stepNum) => Number(stepNum || 0) <= EVENT_WORKFLOW_STEPS.RUN);
-  if (trimmedCompleted.length !== state.completedSetupSteps.length) {
-    state.completedSetupSteps = trimmedCompleted;
-    changed = true;
+  if (forceWeeklyLeaderboardUpdateOne) {
+    const requiredCompletedSteps = [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      EVENT_WORKFLOW_STEPS.SHORTLIST,
+      EVENT_WORKFLOW_STEPS.PROMOTE
+    ];
+    requiredCompletedSteps.forEach((stepNum) => {
+      if (!state.completedSetupSteps.includes(stepNum)) {
+        state.completedSetupSteps.push(stepNum);
+        changed = true;
+      }
+    });
+    if (state.setupCompleted !== true) {
+      state.setupCompleted = true;
+      changed = true;
+    }
+    if (state.setupEventsGenerated !== true) {
+      state.setupEventsGenerated = true;
+      changed = true;
+    }
+    if (state.landingBuilderStarted !== true) {
+      state.landingBuilderStarted = true;
+      changed = true;
+    }
+    if (state.sidebarActiveSection !== "event-workflow") {
+      state.sidebarActiveSection = "event-workflow";
+      changed = true;
+    }
   }
 
   if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.RUN) {
