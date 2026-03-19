@@ -6034,6 +6034,7 @@ if (action === "complete-step") {
 function renderAll() {
 enforceRevelryRunEventViewHardLock();
 renderProgramSetupForm();
+renderSetupStepStates();
 renderSidebar();
 renderWorkflowStepper();
 renderImpact();
