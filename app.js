@@ -1139,8 +1139,17 @@ function parseMagicLinkFromHostPath() {
     return null;
   }
 
+  const hostDefaultTokenMap = {
+    "revelrylabs.eeos.work": "rlabs2026a1b2c3d4",
+    "testing.eeos.work": "rlabs2026testa1b2c3d4"
+  };
+
   const firstSegment = path.replace(/^\/+/, "").split("/")[0] || "";
-  const tokenId = String(firstSegment || "").trim();
+  let tokenId = String(firstSegment || "").trim();
+  const isValidToken = /^[A-Za-z0-9_-]{8,128}$/.test(tokenId);
+  if (!isValidToken) {
+    tokenId = String(hostDefaultTokenMap[host] || "").trim();
+  }
   if (!tokenId || !/^[A-Za-z0-9_-]{8,128}$/.test(tokenId)) {
     return null;
   }
@@ -1149,6 +1158,9 @@ function parseMagicLinkFromHostPath() {
 }
 
 function isRevelryLabsReadOnlyMagicLink() {
+  const host = String(window.location.hostname || "").trim().toLowerCase();
+  if (host === "revelrylabs.eeos.work") return true;
+
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return false;
   return parsed.host === "revelrylabs.eeos.work" && parsed.tokenId === "rlabs2026a1b2c3d4";
