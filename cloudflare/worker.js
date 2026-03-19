@@ -41,7 +41,8 @@ async function serveMagicLinkHostRequest(request) {
   const url = new URL(request.url);
   const path = String(url.pathname || "").replace(/\/+$/, "");
   if (path === "/rlabs2026a1b2c3d4") {
-    return serveStaticHostRequest(request, "/revelry-live.html");
+    const target = new URL("/revelry-live.html", url.origin);
+    return Response.redirect(target.toString(), 302);
   }
   return serveStaticHostRequest(request, "/index.html");
 }
