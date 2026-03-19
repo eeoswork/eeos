@@ -33,7 +33,7 @@
 <aside class="sidebar bg-white border-r border-slate-200 flex flex-col" style="height:100vh;overflow-y:auto;">
   <!-- Logo / Identity -->
   <div class="px-4 pt-5 pb-3 border-b border-slate-100">
-    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">EEOS</div>
+    <img src="assets/eeos.svg" alt="EEOS" style="height:18px; width:auto; margin-bottom:6px;" />
     <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
     <div class="text-xs text-slate-500 mt-0.5">Jennifer Baldwin</div>
   </div>
@@ -58,7 +58,7 @@
       </div>
       <div class="nav-item done">
         <span class="check">✓</span>
-        <span>Events Shortlist</span>
+        <span>Launch Event</span>
       </div>
       <div class="nav-item done">
         <span class="check">✓</span>
@@ -67,6 +67,14 @@
       <div class="nav-item active">
         <span style="width:14px;height:14px;border-radius:4px;background:#6366f1;display:inline-block;flex-shrink:0;"></span>
         <span>Run Event</span>
+      </div>
+      <div class="nav-item done" style="color:#94a3b8;">
+        <span style="width:14px;height:14px;border-radius:4px;background:#cbd5e1;display:inline-block;flex-shrink:0;"></span>
+        <span>Collect Feedback</span>
+      </div>
+      <div class="nav-item done" style="color:#94a3b8;">
+        <span style="width:14px;height:14px;border-radius:4px;background:#cbd5e1;display:inline-block;flex-shrink:0;"></span>
+        <span>Review Impact</span>
       </div>
     </div>
   </div>
@@ -130,14 +138,9 @@ Follow the standings here:
 
           <!-- Actions -->
           <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="copy-btn" id="copyBtn" onclick="copyMessage()">Copy message</button>
-            <button class="slack-btn" onclick="window.open('https://app.slack.com/client/','_blank','noopener,noreferrer')">Open Slack</button>
+            <button class="copy-btn" id="copyBtn" type="button" disabled aria-disabled="true" style="opacity:0.5;cursor:not-allowed;">Copy message</button>
+            <button class="slack-btn" type="button" disabled aria-disabled="true" style="opacity:0.5;cursor:not-allowed;">Open Slack</button>
             <span class="copied-label" id="copiedLabel">✓ Copied</span>
-          </div>
-
-          <!-- Locked note -->
-          <div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">
-            Read-only stage. This step will be enabled on March 24 — you'll receive an email with the completed leaderboard text. No action required right now.
           </div>
         </div>
       </article>
