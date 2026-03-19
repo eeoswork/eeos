@@ -2125,6 +2125,42 @@ function enforceRevelryLeaderboardLockState() {
   return changed;
 }
 
+function enforceRevelryRunEventViewHardLock() {
+  if (!isRevelryLabsReadOnlyMagicLink()) return false;
+
+  let changed = enforceRevelryLeaderboardLockState();
+  if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.RUN) {
+    state.currentSetupStep = EVENT_WORKFLOW_STEPS.RUN;
+    changed = true;
+  }
+  if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.RUN) {
+    state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.RUN;
+    changed = true;
+  }
+  if (state.sidebarActiveSection !== "event-workflow") {
+    state.sidebarActiveSection = "event-workflow";
+    changed = true;
+  }
+  if (state.sidebarSetupExpanded !== false) {
+    state.sidebarSetupExpanded = false;
+    changed = true;
+  }
+  if (state.setupMenuExpanded !== false) {
+    state.setupMenuExpanded = false;
+    changed = true;
+  }
+  if (state.sidebarEventWorkflowExpanded !== true) {
+    state.sidebarEventWorkflowExpanded = true;
+    changed = true;
+  }
+  if (state.setupCompleted !== true) {
+    state.setupCompleted = true;
+    changed = true;
+  }
+
+  return changed;
+}
+
 function getPromoteStepDone(stepKey) {
   normalizePromoteEventState();
   if (stepKey === "calendar") return Boolean(state.promoteEvent.calendar.done);
@@ -5996,6 +6032,7 @@ if (action === "complete-step") {
 
 
 function renderAll() {
+enforceRevelryRunEventViewHardLock();
 renderProgramSetupForm();
 renderSidebar();
 renderWorkflowStepper();
@@ -6031,6 +6068,7 @@ renderAppIdentityView();
 
 
 function showApp() {
+enforceRevelryRunEventViewHardLock();
 $("landingView").classList.add("hidden");
 $("appView").classList.remove("hidden");
 renderLandingIdentityView();
@@ -9618,11 +9656,15 @@ async function bootstrap() {
 
   hideAuthGate();
   if (isRevelryLabsReadOnlyMagicLink()) {
+    enforceRevelryRunEventViewHardLock();
     showApp();
   } else {
     showLanding();
   }
   renderAll();
+  if (enforceRevelryRunEventViewHardLock()) {
+    renderAll();
+  }
   updateMobileSidebarToggleOffset();
 }
 
