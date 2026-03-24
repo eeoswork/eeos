@@ -67,6 +67,7 @@ position: relative;
 display: flex;
 align-items: center;
 justify-content: space-between;
+padding-left: var(--sidebar-icon-left);
 margin-bottom: 20px;
 }
 

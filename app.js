@@ -715,6 +715,116 @@ function getRevelryGoalEventMapForBudget(monthlyBudget = 0) {
   // For budgets below the specified ranges, default to the mid-budget set.
   return REVELRY_GOAL_EVENT_MAP_MID_BUDGET;
 }
+
+function getSeededFreeEventTemplates() {
+  return [
+    {
+      id: "seed-lunch-listen",
+      templateId: "seed-lunch-listen",
+      title: "Lunch & Listen",
+      description: "A casual team lunch where one person shares a short story, lesson, or current project.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "hybrid"
+    },
+    {
+      id: "seed-coffee-break",
+      templateId: "seed-coffee-break",
+      title: "Coffee Break",
+      description: "A 20-minute informal chat break to help teammates connect across functions.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "hybrid"
+    },
+    {
+      id: "seed-wind-down",
+      templateId: "seed-wind-down",
+      title: "Wind Down",
+      description: "A low-key end-of-week check-in to celebrate wins and close the week together.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "hybrid"
+    },
+    {
+      id: "seed-pet-parade",
+      templateId: "seed-pet-parade",
+      title: "Pet Parade",
+      description: "A fun show-and-tell where teammates introduce their pets and share quick stories.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "hybrid"
+    }
+  ];
+}
+
+function getSeededFreeEventTemplateById(templateId = "") {
+  const normalizedTemplateId = String(templateId || "").trim();
+  if (!normalizedTemplateId) return null;
+  const seeded = getSeededFreeEventTemplates();
+  return seeded.find((item) => String(item.templateId || item.id || "").trim() === normalizedTemplateId) || null;
+}
+
+function seedFirstMonthFreeEvents(program) {
+  if (!program || typeof program !== "object") return program;
+  const seededEvents = getSeededFreeEventTemplates();
+  const existingEvents = Array.isArray(program.events) ? [...program.events] : [];
+  const firstSeed = seededEvents[0];
+
+  const monthOneSeedCard = {
+    month: 1,
+    isSeededFreeMonth: true,
+    title: firstSeed.title,
+    description: firstSeed.description,
+    templateId: firstSeed.templateId,
+    type: firstSeed.type,
+    workflowType: firstSeed.workflowType,
+    estimatedCost: 0,
+    goals: ["Strengthen team connection"],
+    seededEvents: seededEvents.map((item) => ({
+      templateId: item.templateId,
+      title: item.title,
+      description: item.description,
+      type: item.type,
+      workflowType: item.workflowType,
+      estimatedCost: 0,
+      url: item.url,
+      costPerPerson: 0,
+      eventLocationType: item.eventLocationType
+    })),
+    launchReadyTemplateId: firstSeed.templateId
+  };
+
+  if (existingEvents.length > 0) {
+    existingEvents[0] = monthOneSeedCard;
+  } else {
+    existingEvents.push(monthOneSeedCard);
+  }
+
+  const totalEstimatedCost = existingEvents.reduce((sum, eventItem) => {
+    const cost = Number(eventItem?.estimatedCost || 0);
+    return cost > 0 ? sum + cost : sum;
+  }, 0);
+
+  return {
+    ...program,
+    events: existingEvents,
+    totalEstimatedCost,
+    remainingBudget: Math.max(0, Number(program.totalBudget || 0) - totalEstimatedCost)
+  };
+}
+
 const TESTING_MAGIC_QUERY_PROFILES = {
   "revelry-test": {
     companyName: "Revelry Labs (Testing)",
@@ -1884,15 +1994,27 @@ function isValidHttpUrl(value) {
 
 const INVESTMENT_RANGE_OPTIONS = {
   total: [
-    { key: "total_1k_3k", label: "$1K - $3K", min: 1000, max: 3000, representative: 2000 },
-    { key: "total_3k_5k", label: "$3K - $5K", min: 3000, max: 5000, representative: 4000 },
-    { key: "total_5k_plus", label: "$5K+", min: 5000, max: Infinity, representative: 6000 }
+    { key: "total_500_2k", label: "$500 - $2K", min: 500, max: 2000, representative: 2000 },
+    { key: "total_2k_5k", label: "$2K - $5K", min: 2001, max: 5000, representative: 5000 },
+    { key: "total_5k_10k", label: "$5K - $10K", min: 5001, max: 10000, representative: 10000 }
   ],
   perEmployee: [
-    { key: "per_25_50", label: "$25 - $50", min: 25, max: 50, representative: 37 },
-    { key: "per_50_75", label: "$50 - $75", min: 50, max: 75, representative: 62 },
-    { key: "per_75_plus", label: "$75+", min: 75, max: Infinity, representative: 90 }
+    { key: "per_up_40", label: "Up to $40", min: 1, max: 40, representative: 40 },
+    { key: "per_up_75", label: "Up to $75", min: 41, max: 75, representative: 75 },
+    { key: "per_up_150", label: "Up to $150", min: 76, max: 150, representative: 150 }
   ]
+};
+
+const LEGACY_BUDGET_RANGE_KEY_MAP = {
+  total_up_2k: "total_500_2k",
+  total_up_5k: "total_2k_5k",
+  total_up_10k: "total_5k_10k",
+  total_1k_3k: "total_500_2k",
+  total_3k_5k: "total_2k_5k",
+  total_5k_plus: "total_5k_10k",
+  per_25_50: "per_up_40",
+  per_50_75: "per_up_75",
+  per_75_plus: "per_up_150"
 };
 
 function getBudgetRangeOptions(mode = "total") {
@@ -1903,7 +2025,9 @@ function getBudgetRangeOptions(mode = "total") {
 
 function getBudgetRangeByKey(mode = "total", key = "") {
   const options = getBudgetRangeOptions(mode);
-  return options.find((item) => item.key === key) || null;
+  const normalizedKey = String(key || "").trim();
+  const mappedKey = LEGACY_BUDGET_RANGE_KEY_MAP[normalizedKey] || normalizedKey;
+  return options.find((item) => item.key === mappedKey) || null;
 }
 
 function getBudgetRangeKeyFromValue(mode = "total", value = 0) {
@@ -1912,6 +2036,15 @@ function getBudgetRangeKeyFromValue(mode = "total", value = 0) {
   const options = getBudgetRangeOptions(mode);
   const matched = options.find((item) => amount >= Number(item.min || 0) && amount <= Number(item.max || 0));
   return matched ? matched.key : "";
+}
+
+function getBudgetRangeHighEnd(mode = "total", rangeKey = "", fallbackValue = 0) {
+  const matchedRange = getBudgetRangeByKey(mode, rangeKey);
+  if (matchedRange && Number.isFinite(Number(matchedRange.max)) && Number(matchedRange.max) > 0) {
+    return Math.round(Number(matchedRange.max));
+  }
+  const fallback = Number(fallbackValue || 0);
+  return fallback > 0 ? Math.round(fallback) : 0;
 }
 
 const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof", "reminder_dayof_2"];
@@ -2257,9 +2390,36 @@ if (remainingLabel) remainingLabel.textContent = `Remaining: ${fmtMoney(remainin
 const progTotal = $("progBudgetTotal");
 const progEstimated = $("progBudgetEstimated");
 const progRemaining = $("progBudgetRemaining");
+const progMonthlyBudgetNote = $("progMonthlyBudgetNote");
 if (progTotal) progTotal.textContent = fmtMoney(total);
 if (progEstimated) progEstimated.textContent = fmtMoney(spent);
 if (progRemaining) progRemaining.textContent = fmtMoney(remaining);
+if (progMonthlyBudgetNote) {
+  const mode = String(state.landingDraft?.budgetMode || state.programSettings?.budgetMode || "total").trim();
+  const employeeCount = Number(state.landingDraft?.employeeCount || state.programSettings?.employeeCount || 0);
+  const totalBudget = Number(state.landingDraft?.totalBudget || state.programSettings?.totalBudget || 0);
+  const perEmployee = Number(state.landingDraft?.perEmployee || state.programSettings?.perEmployeeBudget || 0);
+  const totalRangeKey = String(state.landingDraft?.totalBudgetRange || state.programSettings?.totalBudgetRange || "").trim();
+  const perRangeKey = String(state.landingDraft?.perEmployeeBudgetRange || state.programSettings?.perEmployeeBudgetRange || "").trim();
+  const monthlyBudgetCap = mode === "perEmployee"
+    ? getBudgetRangeHighEnd("perEmployee", perRangeKey, perEmployee) * Math.max(1, employeeCount || 0)
+    : getBudgetRangeHighEnd("total", totalRangeKey, totalBudget);
+
+  const effectiveMonthly = monthlyBudgetCap > 0 ? monthlyBudgetCap : total;
+  const effectiveEmployees = Math.max(0, Number(employeeCount || 0));
+  const pepm = effectiveMonthly > 0 && effectiveEmployees > 0
+    ? Math.round(effectiveMonthly / effectiveEmployees)
+    : 0;
+  const averageSpend = state.fourMonthProgram?.monthlyBudget
+    ? Math.round(Number(state.fourMonthProgram.monthlyBudget || 0))
+    : Math.round(effectiveMonthly || 0);
+
+  if (effectiveMonthly > 0) {
+    progMonthlyBudgetNote.textContent = `Monthly budget: ~${fmtMoney(effectiveMonthly)}${pepm > 0 ? ` (~${fmtMoney(pepm)} per employee)` : ""}. Average monthly spend: ~${fmtMoney(averageSpend)}. Unused budget rolls over to support higher-quality events.`;
+  } else {
+    progMonthlyBudgetNote.textContent = "Unused budget rolls over to support higher-quality events.";
+  }
+}
 }
 
 function getDateWithinCurrentQuarter(rawValue) {
@@ -4454,7 +4614,8 @@ setupItems.forEach((item) => {
 });
 
 if (eventWorkflowSection) {
-  eventWorkflowSection.style.display = "block";
+  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST;
+  eventWorkflowSection.style.display = isOnProgramRevealPage ? "none" : "block";
 
   const sidebarNavWorkflowEventSubtitle = document.getElementById("sidebarNavWorkflowEventSubtitle");
   if (sidebarNavWorkflowEventSubtitle) {
@@ -4492,6 +4653,11 @@ eventWorkflowItems.forEach((item) => {
     "track-results": 13,
     "review-impact": 14
   };
+  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST;
+  if (isOnProgramRevealPage) {
+    item.style.display = "none";
+    return;
+  }
   const revelryVisibleSidebarSteps = new Set([
     EVENT_WORKFLOW_STEPS.SHORTLIST,
     EVENT_WORKFLOW_STEPS.PROMOTE,
@@ -4925,7 +5091,7 @@ function getFourMonthCategoryPills() {
   const parsedMagicLink = parseMagicLinkFromHostPath();
   if (parsedMagicLink?.host === "revelrylabs.eeos.work" && parsedMagicLink?.tokenId === "rlabs2026a1b2c3d4") {
     return [
-      "Budget-friendly team engagement",
+      "Budget-friendly: team engagement",
       "Premium group experience",
       "Quick and easy team bonding",
       "Morale-boosting group outing"
@@ -4933,7 +5099,7 @@ function getFourMonthCategoryPills() {
   }
   // Default generic pills
   return [
-    "Budget-friendly team event",
+    "Budget-friendly: team event",
     "Celebration moment",
     "Easy team bonding",
     "Team building activity"
@@ -5187,6 +5353,7 @@ function renderFourMonthProgram() {
   const budgetSummary = $("fourMonthBudgetSummary");
   if (!container || !state.fourMonthProgram) return;
 
+  state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
   state.fourMonthProgram = normalizeRevelryMarchCardCopy(state.fourMonthProgram);
 
   const existingCards = Array.from(container.querySelectorAll(".four-month-card"));
@@ -5198,6 +5365,17 @@ function renderFourMonthProgram() {
   );
 
   const program = state.fourMonthProgram;
+  const programHeader = document.querySelector("#fourMonthProgram h4");
+  const programSubtitle = document.querySelector("#fourMonthProgram h4 + p");
+  const teamSize = Math.max(0, Number(program?.teamSize || state.programSettings?.employeeCount || 0));
+  if (programHeader) {
+    programHeader.textContent = "Your Team Engagement Program";
+  }
+  if (programSubtitle) {
+    programSubtitle.textContent = teamSize > 0
+      ? `Built for ${teamSize} employees`
+      : "Built for your team";
+  }
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
   // Get current month (0-11)
@@ -5226,7 +5404,9 @@ function renderFourMonthProgram() {
       ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
       : "";
     const isNextEvent = index === highlightedIndex;
-    const _sectionLabels = ["YOUR FIRST EVENT", "UPCOMING", null, "LATER"];
+    const fallbackQuarter = Math.floor(((currentMonth + 1) % 12) / 3) + 1;
+    const quarterLabel = Number(program?.nextQuarter || fallbackQuarter);
+    const _sectionLabels = ["KICKOFF", `YOUR NEXT QUARTER (Q${quarterLabel})`, null, null];
     const _sectionLabel = _sectionLabels[index] || null;
     const _isFirstSection = index === 0;
     const _sectionColor = _isFirstSection ? "#0074ff" : "#94a3b8";
@@ -5244,6 +5424,74 @@ function renderFourMonthProgram() {
     const cardBorderStyle = "1px solid #e2e8f0";
     const cardShadowStyle = isNextEvent ? "0 6px 18px rgba(15, 23, 42, 0.10)" : "0 1px 2px rgba(15, 23, 42, 0.04)";
     const headerBackgroundStyle = isNextEvent ? "#f1f5f9" : "#f8fafc";
+
+    if (monthEvent.isSeededFreeMonth && Array.isArray(monthEvent.seededEvents)) {
+      const seededEvents = monthEvent.seededEvents.filter((item) => item && typeof item === "object");
+      const thisWeekEvent = seededEvents[0] || null;
+      const nextWeekEvent = seededEvents[1] || null;
+      const laterEvents = seededEvents.slice(2);
+      const launchTemplateId = String(monthEvent.launchReadyTemplateId || thisWeekEvent?.templateId || "").trim();
+
+      return sectionHeaderHtml + `
+        <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}" ${isNextEvent ? 'aria-label="Next event"' : ""}>
+          <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="display: inline-flex; align-items: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 text-slate-500" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 2.25v2.25m7.5-2.25v2.25M3.75 8.25h16.5M4.5 4.5h15a.75.75 0 01.75.75v14.25a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V5.25A.75.75 0 014.5 4.5z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12h.008v.008H8.25V12zm3.75 0h.008v.008H12V12zm3.75 0h.008v.008h-.008V12zM8.25 15h.008v.008H8.25V15zm3.75 0h.008v.008H12V15zm3.75 0h.008v.008h-.008V15z" />
+                    </svg>
+                    <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(monthName)}</h3>
+                  </div>
+                  <span style="display: inline-block; background: #ecfeff; color: #0f766e; border: 1px solid #99f6e4; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap;">Kickoff</span>
+                </div>
+                <p class="text-base font-semibold text-slate-900" style="margin: 0;">Start light to build momentum</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+              ${nextEventBadge}
+              <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; line-height: 1;">${isExpanded ? "▾" : "▸"}</span>
+            </div>
+          </div>
+          <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
+            <div style="display: grid; gap: 12px;">
+              ${thisWeekEvent ? `
+                <article style="border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; background: #f8fafc;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #0369a1; margin-bottom: 6px;">THIS WEEK</div>
+                  <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #0f172a;">${escapeHtml(thisWeekEvent.title || "")}</h4>
+                  <p style="margin: 6px 0 0 0; font-size: 13px; color: #475569;">${escapeHtml(thisWeekEvent.description || "")}</p>
+                  <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <span style="font-size: 12px; color: #0f766e; font-weight: 600;">Free</span>
+                    <button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(launchTemplateId)}" data-month="${index + 1}">Launch this Event</button>
+                  </div>
+                </article>
+              ` : ""}
+              ${nextWeekEvent ? `
+                <article style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background: #ffffff;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; margin-bottom: 6px;">NEXT WEEK</div>
+                  <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #0f172a;">${escapeHtml(nextWeekEvent.title || "")}</h4>
+                  <p style="margin: 6px 0 0 0; font-size: 13px; color: #475569;">${escapeHtml(nextWeekEvent.description || "")}</p>
+                  <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <span style="font-size: 12px; color: #0f766e; font-weight: 600;">Free</span>
+                    <span style="font-size: 11px; color: #64748b; border: 1px solid #e2e8f0; background: #f8fafc; padding: 5px 8px; border-radius: 999px;">Not ready yet</span>
+                  </div>
+                </article>
+              ` : ""}
+              ${laterEvents.length ? `
+                <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                  <div style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600;">Coming up after next week</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${laterEvents.map((item) => `<span style="font-size: 11px; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 999px; padding: 4px 8px;">${escapeHtml(item.title || "")}</span>`).join("")}
+                  </div>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
     // Month 2: Confetti options
     if (monthEvent.isConfettiMonth && Array.isArray(monthEvent.confettiOptions)) {
@@ -5360,8 +5608,13 @@ function renderFourMonthProgram() {
     const inCardHeading = isRevelryBracketsMagicContext()
       ? "How it Works"
       : String(event.title || "");
+    const generatedEvents = Array.isArray(event.generatedEvents)
+      ? event.generatedEvents.filter((item) => item && typeof item === "object")
+      : [];
+    const monthSubtitle = String(event.subtitle || "").trim();
     const typeLabel = getWorkflowTypeLabel(event);
-    const cardFooterText = revelryMonthFooterText || typeLabel;
+    const monthBudgetValue = Math.max(0, Number(event.monthBudget || 0));
+    const cardFooterText = revelryMonthFooterText || (monthBudgetValue > 0 ? `Budget: ~${fmtMoney(monthBudgetValue)}` : typeLabel);
     const launchButtonHtml = isRevelryLockedFollowOnMonth
       ? ""
       : `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(event.templateId || event.id || "")}" data-month="${index + 1}">Launch ${escapeHtml(monthName)} Event →</button>`;
@@ -5391,7 +5644,9 @@ function renderFourMonthProgram() {
         </div>
         <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
           <h4 class="text-sm font-semibold text-slate-900">${escapeHtml(inCardHeading)}</h4>
+          ${monthSubtitle ? `<p class="text-xs text-slate-500 mt-1">${escapeHtml(monthSubtitle)}</p>` : ""}
           <p class="text-sm text-slate-600 mt-2">${escapeHtml(event.description || "")}</p>
+          ${generatedEvents.length ? `<div style="margin-top: 10px; display: grid; gap: 6px;">${generatedEvents.map((item) => `<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #334155;"><span>${escapeHtml(String(item.name || "Event"))}</span><span style="font-weight: 600;">${Number(item.cost || 0) > 0 ? fmtMoney(Number(item.cost || 0)) : "Free"}</span></div>`).join("")}</div>` : ""}
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
             <div style="font-size: 12px; color: #64748b;">
               <div>${escapeHtml(cardFooterText)}</div>
@@ -5965,7 +6220,8 @@ if (action === "select-confetti") {
 if (action === "create-event") {
   const templateId = actionTarget.dataset.templateId;
   const template = (state.fourMonthProgram?.events || []).find((e) => String(e.templateId || e.id || "") === String(templateId))
-    || (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId));
+    || (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId))
+    || getSeededFreeEventTemplateById(templateId);
 
   if (!template) {
     showMiniToast("Event template not found");
@@ -6549,7 +6805,8 @@ function updateLandingHomeView() {
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const showGenericLandingHeader = !isMagicLinkContext;
+  const showSidebar = isMagicLinkContext || Number(state.currentSetupStep || 1) >= 7;
+  const showGenericLandingHeader = !isMagicLinkContext && !showSidebar;
   if (landingTopHeader) {
     landingTopHeader.classList.toggle("hidden", !showGenericLandingHeader);
     landingTopHeader.classList.toggle("flex", showGenericLandingHeader);
@@ -6945,12 +7202,15 @@ function initializeLandingSetupFlow() {
   const totalBudgetInput = $("setupTotalBudget");
   const employeeCountInput = $("setupEmployeeCount");
   const perEmployeeInput = $("setupPerEmployee");
+  const setupTotalRangeOptions = $("setupTotalRangeOptions");
   const modeTotalBtn = $("setupModeTotal");
   const modePerEmployeeBtn = $("setupModePerEmployee");
   const totalBudgetPanel = $("setupTotalBudgetPanel");
   const perEmployeePanel = $("setupPerEmployeePanel");
   const budgetInputLabel = $("setupBudgetInputLabel");
   const budgetHelper = $("setupBudgetHelper");
+  const setupPlatformFeeCopy = $("setupPlatformFeeCopy");
+  const budgetRangeExplainer = $("setupBudgetRangeExplainer");
   const annualTotalEl = $("setupAnnualTotal");
   const budgetGuidanceToggle = $("setupBudgetGuidanceToggle");
   const budgetGuidanceOptions = $("setupBudgetGuidanceOptions");
@@ -6958,11 +7218,7 @@ function initializeLandingSetupFlow() {
   const isRevelryMagicBudgetContext = isRevelryLabsReadOnlyMagicLink();
   const revelryMinTotalMonthly = 585;
   const revelryMinPerEmployeeMonthly = 15;
-  let budgetMode = ["total", "perEmployee"].includes(String(state.landingDraft?.budgetMode || ""))
-    ? String(state.landingDraft.budgetMode)
-    : (["total", "perEmployee"].includes(String(state.programSettings?.budgetMode || ""))
-      ? String(state.programSettings.budgetMode)
-      : "total");
+  let budgetMode = "total";
 
   const fmtWholeMoney = (value) => {
     const n = Math.round(Number(value || 0));
@@ -6991,8 +7247,6 @@ function initializeLandingSetupFlow() {
     const totalRaw = Number(totalBudgetInput?.value || 0);
     const totalDigits = String(totalBudgetInput?.value || "").replace(/\D/g, "").length;
     const employeeRaw = Number(employeeCountInput?.value || 0);
-    const perEmployeeRaw = Number(perEmployeeInput?.value || 0);
-    const perEmployeeDigits = String(perEmployeeInput?.value || "").replace(/\D/g, "").length;
 
     if (budgetMode === "total" && totalRaw > 0 && totalRaw < revelryMinTotalMonthly) {
       if (!warnOnly) {
@@ -7006,21 +7260,6 @@ function initializeLandingSetupFlow() {
         return;
       }
       setBudgetValidationMessage("Based on company size, the minimum is $585.");
-      return;
-    }
-
-    if (budgetMode === "perEmployee" && perEmployeeRaw > 0 && perEmployeeRaw < revelryMinPerEmployeeMonthly) {
-      if (!warnOnly) {
-        if (perEmployeeInput) perEmployeeInput.value = String(revelryMinPerEmployeeMonthly);
-        if (employeeRaw > 0 && totalBudgetInput) {
-          totalBudgetInput.value = String(Math.round(employeeRaw * revelryMinPerEmployeeMonthly));
-        }
-      } else if (perEmployeeDigits < 2) {
-        // Not enough digits typed yet — suppress warning while editing
-        setBudgetValidationMessage("");
-        return;
-      }
-      setBudgetValidationMessage("Based on company size, the minimum is $15 per employee per month.");
       return;
     }
 
@@ -7050,6 +7289,14 @@ function initializeLandingSetupFlow() {
       perEmployeeInput.classList.toggle("opacity-60", !unlocked);
       perEmployeeInput.classList.toggle("cursor-not-allowed", !unlocked);
     }
+    if (setupTotalRangeOptions) {
+      setupTotalRangeOptions.querySelectorAll("[data-setup-budget-range-key]").forEach((node) => {
+        const button = node;
+        button.disabled = !unlocked;
+        button.classList.toggle("opacity-50", !unlocked);
+        button.classList.toggle("cursor-not-allowed", !unlocked);
+      });
+    }
     if (budgetGuidanceToggle) {
       budgetGuidanceToggle.disabled = !unlocked;
       budgetGuidanceToggle.classList.toggle("opacity-50", !unlocked);
@@ -7063,23 +7310,66 @@ function initializeLandingSetupFlow() {
   const updateBudgetSummary = () => {
     const totalValue = Number(totalBudgetInput?.value || 0);
     const employeeValue = Number(employeeCountInput?.value || 0);
-    const perEmployeeValue = Number(perEmployeeInput?.value || 0);
-    const computedTotal = totalValue > 0 ? totalValue : Math.round(employeeValue * perEmployeeValue);
+    const roundToNearestFive = (value) => Math.round(Number(value || 0) / 5) * 5;
+    const computedTotal = totalValue;
+    const selectedRangeKey = String(state.landingDraft?.totalBudgetRange || getBudgetRangeKeyFromValue("total", computedTotal) || "").trim();
+    const selectedRange = getBudgetRangeByKey("total", selectedRangeKey);
+    const rangeLow = selectedRange ? Math.round(Number(selectedRange.min || 0)) : Math.round(computedTotal || 0);
+    const rangeHigh = selectedRange ? Math.round(Number(selectedRange.max || 0)) : Math.round(computedTotal || 0);
+    const rangeMedian = Math.round((rangeLow + rangeHigh) / 2);
     const computedPerEmployee = employeeValue > 0
-      ? Math.round((computedTotal > 0 ? computedTotal : employeeValue * perEmployeeValue) / employeeValue)
+      ? roundToNearestFive(rangeMedian / employeeValue)
       : 0;
     const annualTotal = Math.round(computedTotal * 12);
 
     if (budgetHelper) {
-      if (budgetMode === "total") {
-        budgetHelper.textContent = `Investment: ${fmtWholeMoney(computedPerEmployee)} / employee`;
-      } else {
-        budgetHelper.textContent = `Monthly total: ${fmtWholeMoney(computedTotal)}`;
-      }
+      budgetHelper.textContent = `Per Employee Per Month (Median): ${fmtWholeMoney(computedPerEmployee)}`;
     }
     if (annualTotalEl) {
       annualTotalEl.textContent = fmtWholeMoney(annualTotal);
     }
+    const feeAmount = Math.round(rangeHigh * 0.2);
+    if (setupPlatformFeeCopy) {
+      setupPlatformFeeCopy.textContent = `${fmtWholeMoney(rangeHigh)}/month includes our ${fmtWholeMoney(feeAmount)} fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.`;
+    }
+    if (budgetRangeExplainer) {
+      budgetRangeExplainer.textContent = "";
+      budgetRangeExplainer.classList.add("hidden");
+    }
+  };
+
+  const renderSetupRangeOptions = () => {
+    if (!setupTotalRangeOptions) return;
+    const selectedKey = String(state.landingDraft?.totalBudgetRange || getBudgetRangeKeyFromValue("total", Number(totalBudgetInput?.value || 0)) || "").trim();
+    const options = getBudgetRangeOptions("total");
+    setupTotalRangeOptions.innerHTML = options.map((option) => {
+      const isSelected = option.key === selectedKey;
+      return `<button type="button" data-setup-budget-range-key="${escapeHtml(option.key)}" class="w-full rounded-full border px-4 py-2 text-sm font-semibold ${isSelected ? "border-slate-900 bg-slate-900 text-white shadow-sm" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">${escapeHtml(option.label)}</button>`;
+    }).join("");
+
+    setupTotalRangeOptions.querySelectorAll("[data-setup-budget-range-key]").forEach((node) => {
+      const button = node;
+      if (button.dataset.setupBudgetRangeBound === "true") return;
+      button.dataset.setupBudgetRangeBound = "true";
+      button.addEventListener("click", () => {
+        if (!hasEnteredTeamSize()) {
+          if (employeeCountInput) employeeCountInput.focus();
+          return;
+        }
+        if (isCompletedStepEditBlocked(2)) {
+          showSetupSignUpPopup();
+          return;
+        }
+        const key = String(button.dataset.setupBudgetRangeKey || "").trim();
+        const range = getBudgetRangeByKey("total", key);
+        if (!range) return;
+        if (totalBudgetInput) totalBudgetInput.value = String(Math.round(Number(range.max || 0)));
+        state.landingDraft.totalBudgetRange = key;
+        state.programSettings.totalBudgetRange = key;
+        handleBudgetCalculation("totalBudget");
+        renderSetupRangeOptions();
+      });
+    });
   };
 
   const renderBudgetModeUI = () => {
@@ -7097,18 +7387,13 @@ function initializeLandingSetupFlow() {
       modePerEmployeeBtn.classList.add(...(budgetMode === "perEmployee" ? perActiveClass : perIdleClass));
     }
 
-    if (totalBudgetPanel) totalBudgetPanel.classList.toggle("hidden", budgetMode !== "total");
-    if (perEmployeePanel) perEmployeePanel.classList.toggle("hidden", budgetMode !== "perEmployee");
+    if (totalBudgetPanel) totalBudgetPanel.classList.add("hidden");
+    if (perEmployeePanel) perEmployeePanel.classList.add("hidden");
     if (budgetInputLabel) {
-      if (isRevelryMagicBudgetContext) {
-        budgetInputLabel.textContent = budgetMode === "total" ? "ALLOCATION FOR THE TEAM" : "PEPM";
-      } else {
-        budgetInputLabel.textContent = budgetMode === "total"
-          ? "Current Monthly Allocation"
-          : "Current Investment Per Employee";
-      }
+      budgetInputLabel.textContent = "Total Monthly Investment";
     }
 
+    renderSetupRangeOptions();
     applyFundingGateState();
     updateBudgetSummary();
   };
@@ -7185,27 +7470,30 @@ function initializeLandingSetupFlow() {
     const totalRaw = String(totalBudgetInput?.value || "").trim();
     const totalValue = Number(totalRaw || 0);
     const employeeValue = Number(employeeCountInput?.value || 0);
-    const perEmployeeValue = Number(perEmployeeInput?.value || 0);
-    const computedTotal = totalValue > 0 ? totalValue : Math.round(employeeValue * perEmployeeValue);
+    const computedTotal = totalValue > 0 ? totalValue : 0;
+    const perEmployeeValue = employeeValue > 0 ? Math.round(computedTotal / employeeValue) : 0;
     const budgetChanged = computedTotal !== prevTotal || employeeValue !== prevEmployee || perEmployeeValue !== prevPerEmployee;
 
     state.landingDraft.totalBudget = computedTotal;
     state.landingDraft.employeeCount = employeeValue;
     state.landingDraft.perEmployee = perEmployeeValue;
-    state.landingDraft.budgetMode = budgetMode;
+    state.landingDraft.budgetMode = "total";
     state.landingDraft.totalBudgetRange = getBudgetRangeKeyFromValue("total", computedTotal);
     state.landingDraft.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", perEmployeeValue);
-    state.landingDraft.budgetConfigured = computedTotal > 0 || employeeValue > 0 || perEmployeeValue > 0;
+    state.landingDraft.budgetConfigured = computedTotal > 0 && employeeValue > 0;
     state.programSettings.totalBudget = computedTotal;
     state.programSettings.employeeCount = employeeValue;
     state.programSettings.perEmployeeBudget = perEmployeeValue;
-    state.programSettings.budgetMode = budgetMode;
+    state.programSettings.budgetMode = "total";
     state.programSettings.totalBudgetRange = state.landingDraft.totalBudgetRange;
     state.programSettings.perEmployeeBudgetRange = state.landingDraft.perEmployeeBudgetRange;
 
     // Preserve empty state while the user clears the total field so placeholder can return.
     if (totalBudgetInput && computedTotal > 0 && totalRaw !== "") {
       totalBudgetInput.value = String(computedTotal);
+    }
+    if (perEmployeeInput) {
+      perEmployeeInput.value = perEmployeeValue > 0 ? String(perEmployeeValue) : "";
     }
     persistState();
     renderSidebar();
@@ -7218,7 +7506,6 @@ function initializeLandingSetupFlow() {
   const handleBudgetCalculation = (sourceField) => {
     let totalBudget = Number(totalBudgetInput?.value || 0);
     let employeeCount = Number(employeeCountInput?.value || 0);
-    let perEmployee = Number(perEmployeeInput?.value || 0);
     
     // Prevent negative numbers
     if (totalBudget < 0) {
@@ -7229,28 +7516,14 @@ function initializeLandingSetupFlow() {
       employeeCountInput.value = 0;
       employeeCount = 0;
     }
-    if (perEmployee < 0) {
-      perEmployeeInput.value = 0;
-      perEmployee = 0;
-    }
-    
-    // Auto-calculate counterpart field using whole-dollar rounding.
-    // Priority rule: when employee count changes and both fields exist, total budget wins.
     if (sourceField === "totalBudget" && employeeCount > 0) {
       const calculatedPerEmployee = Math.round(totalBudget / employeeCount);
       if (perEmployeeInput) perEmployeeInput.value = calculatedPerEmployee > 0 ? String(calculatedPerEmployee) : "";
-    } else if (sourceField === "perEmployee" && employeeCount > 0) {
-      const calculatedTotal = Math.round(employeeCount * perEmployee);
-      if (totalBudgetInput) totalBudgetInput.value = calculatedTotal > 0 ? String(calculatedTotal) : "";
     } else if (sourceField === "employeeCount" && employeeCount > 0) {
       const hasTotalBudget = totalBudget > 0;
-      const hasPerEmployee = perEmployee > 0;
       if (hasTotalBudget) {
         const calculatedPerEmployee = Math.round(totalBudget / employeeCount);
         if (perEmployeeInput) perEmployeeInput.value = calculatedPerEmployee > 0 ? String(calculatedPerEmployee) : "";
-      } else if (hasPerEmployee) {
-        const calculatedTotal = Math.round(employeeCount * perEmployee);
-        if (totalBudgetInput) totalBudgetInput.value = calculatedTotal > 0 ? String(calculatedTotal) : "";
       }
     }
     
@@ -7428,6 +7701,57 @@ function initializeLandingSetupFlow() {
   renderSetupStepStates();
 }
 
+function syncLandingDraftToProgramSettings() {
+  const budgetMode = "total";
+  const employeeCount = Number(state.landingDraft?.employeeCount || state.programSettings?.employeeCount || 0);
+  const totalBudget = Number(state.landingDraft?.totalBudget || 0);
+  const perEmployeeBudget = Number(state.landingDraft?.perEmployee || 0);
+  const computedMonthlyBudget = totalBudget;
+
+  state.landingDraft.budgetMode = budgetMode;
+  state.landingDraft.totalBudget = computedMonthlyBudget;
+  state.landingDraft.employeeCount = employeeCount;
+  state.landingDraft.perEmployee = perEmployeeBudget;
+  state.landingDraft.budgetConfigured = computedMonthlyBudget > 0 || employeeCount > 0 || perEmployeeBudget > 0;
+
+  state.programSettings.budgetMode = budgetMode;
+  state.programSettings.totalBudget = computedMonthlyBudget;
+  state.programSettings.totalBudgetRange = state.landingDraft.totalBudgetRange || "";
+  state.programSettings.monthlyBudget = computedMonthlyBudget;
+  state.programSettings.perEmployeeBudget = perEmployeeBudget;
+  state.programSettings.perEmployeeBudgetRange = state.landingDraft.perEmployeeBudgetRange || "";
+  state.programSettings.employeeCount = employeeCount;
+  state.programSettings.goals = Array.isArray(state.landingDraft.goals)
+    ? [...state.landingDraft.goals]
+    : [];
+  state.programSettings.preferredSchedule = Array.isArray(state.landingDraft.schedule)
+    ? [...state.landingDraft.schedule]
+    : [];
+  state.programSettings.daysSelected = Array.isArray(state.landingDraft.daysSelected)
+    ? [...state.landingDraft.daysSelected]
+    : [];
+  state.programSettings.timesSelected = Array.isArray(state.landingDraft.timesSelected)
+    ? [...state.landingDraft.timesSelected]
+    : [];
+  state.programSettings.localCity = state.landingDraft.localCity || state.programSettings.localCity;
+  state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
+    ? [...state.landingDraft.teamPreferenceEstimate]
+    : [];
+  state.programSettings.cadence = state.landingDraft.cadence || state.programSettings.cadence || "Monthly";
+  state.programSettings.admin_preference_weight = state.programSettings.admin_preference_weight || { boost: 0.22, first_cycle_only: true };
+}
+
+function buildPersonalizedProgramFromSetup() {
+  syncLandingDraftToProgramSettings();
+  generateRecommendedEvents();
+
+  if (window.generateFourMonthProgram && typeof window.generateFourMonthProgram === "function") {
+    state.fourMonthProgram = window.generateFourMonthProgram(state.programSettings);
+    state.fourMonthProgram = applyMagicLinkFourMonthOverride(state.fourMonthProgram);
+    state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
+  }
+}
+
 
 
 
@@ -7477,8 +7801,10 @@ function attachSetupStepHandlers() {
         }
         state.setupStepDirty[step] = false;
 
-        // Rebuild recommendations from updated setup answers
-        if (state.setupEventsGenerated || state.completedSetupSteps.includes(6)) {
+        // Rebuild the personalized program after setup has been completed.
+        if (state.completedSetupSteps.includes(6)) {
+          buildPersonalizedProgramFromSetup();
+        } else if (state.setupEventsGenerated) {
           generateRecommendedEvents();
         }
 
@@ -7520,35 +7846,7 @@ function attachSetupStepHandlers() {
       state.setupStepDirty[step] = false;
 
       if (step === 6) {
-        // Transfer all budget and goal settings from landing draft to programSettings
-        state.programSettings.budgetMode = state.landingDraft.budgetMode || "total";
-        state.programSettings.totalBudget = state.landingDraft.totalBudget || 3000;
-        state.programSettings.totalBudgetRange = state.landingDraft.totalBudgetRange || "";
-        state.programSettings.monthlyBudget = state.landingDraft.totalBudget || 3000; // User input is monthly budget
-        state.programSettings.perEmployeeBudget = state.landingDraft.perEmployee || 75;
-        state.programSettings.perEmployeeBudgetRange = state.landingDraft.perEmployeeBudgetRange || "";
-        state.programSettings.employeeCount = state.landingDraft.employeeCount || 40;
-        state.programSettings.goals = Array.isArray(state.landingDraft.goals)
-          ? [...state.landingDraft.goals]
-          : [];
-        state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
-          ? [...state.landingDraft.teamPreferenceEstimate]
-          : [];
-        state.programSettings.cadence = state.landingDraft.cadence || "Monthly";
-        state.programSettings.admin_preference_weight = state.programSettings.admin_preference_weight || { boost: 0.22, first_cycle_only: true };
-      }
-      
-      // Generate recommended events when advancing from final setup step
-      if (step === 6) {
-        generateRecommendedEvents();
-        
-        // Generate 4-month Employee Experience Program
-        if (window.generateFourMonthProgram && typeof window.generateFourMonthProgram === "function") {
-          state.fourMonthProgram = window.generateFourMonthProgram(state.programSettings);
-          
-          // Apply magic link overrides if applicable
-          state.fourMonthProgram = applyMagicLinkFourMonthOverride(state.fourMonthProgram);
-        }
+        buildPersonalizedProgramFromSetup();
         
         // One-time auto-collapse after final setup step is completed
         if (!state.sidebarSetupAutoCollapsed) {
@@ -7569,10 +7867,9 @@ function attachSetupStepHandlers() {
       // After setup completes (step 6), navigate to Shortlist Events (step 7) with expanded view
       if (step === 6) {
         persistState();
-        renderSetupStepStates();
+        renderAll();
         renderSidebarStepMenus();
         updateSetupStepButtonStates();
-        renderFourMonthProgram();
         return; // Skip rest of handler to avoid extra rendering
       }
 
@@ -7615,18 +7912,12 @@ function isSetupStepValid(step) {
     case 2: // Budget
       const totalBudget = Number(state.landingDraft.totalBudget || 0);
       const employees = Number(state.landingDraft.employeeCount || 0);
-      const perEmp = Number(state.landingDraft.perEmployee || 0);
-      const budgetMode = String(state.landingDraft.budgetMode || state.programSettings.budgetMode || "total").trim();
       if (isRevelryLabsReadOnlyMagicLink()) {
-        const meetsPerEmployeeMin = perEmp >= 15;
         const meetsTotalMin = totalBudget >= 585;
-        if (budgetMode === "perEmployee") {
-          return employees > 0 && meetsPerEmployeeMin;
-        }
         return employees > 0 && meetsTotalMin;
       }
-      // Employee count is required and the resulting monthly total must be at least $300.
-      return employees > 0 && (totalBudget >= 300) && (totalBudget > 0 || perEmp > 0);
+      // Employee count is required and monthly total must be at least $500.
+      return employees > 0 && totalBudget >= 500;
     
     case 3: // Cadence
       return state.landingDraft.cadence && state.landingDraft.cadence.length > 0;
@@ -8343,36 +8634,15 @@ function initLandingTypeform() {
 
 function initLtfBudget() {
   const totalRangeOptionsWrap = $("ltfTotalRangeOptions");
-  const perEmployeeRangeOptionsWrap = $("ltfPerEmployeeRangeOptions");
   const rangePrompt = $("ltfRangePrompt");
   const totalInput = $("setupTotalBudget");
   const perInput = $("setupPerEmployee");
-  const modeTotalBtn = $("ltfModeTotal");
-  const modePerEmployeeBtn = $("ltfModePerEmployee");
-  const budgetGuidanceToggle = $("ltfBudgetGuidanceToggle");
 
   const hasEnteredTeamSize = () => (parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0) > 0;
+  ltfAnswers.budgetMode = "total";
 
   const applyLtfFundingGateState = () => {
     const unlocked = hasEnteredTeamSize();
-    if (modeTotalBtn) {
-      modeTotalBtn.disabled = !unlocked;
-      modeTotalBtn.classList.toggle("opacity-50", !unlocked);
-      modeTotalBtn.classList.toggle("cursor-not-allowed", !unlocked);
-    }
-    if (modePerEmployeeBtn) {
-      modePerEmployeeBtn.disabled = !unlocked;
-      modePerEmployeeBtn.classList.toggle("opacity-50", !unlocked);
-      modePerEmployeeBtn.classList.toggle("cursor-not-allowed", !unlocked);
-    }
-    if (budgetGuidanceToggle) {
-      budgetGuidanceToggle.disabled = !unlocked;
-      budgetGuidanceToggle.classList.toggle("opacity-50", !unlocked);
-      budgetGuidanceToggle.classList.toggle("cursor-not-allowed", !unlocked);
-      if (!unlocked) {
-        $("ltfBudgetGuidanceOptions")?.classList.add("hidden");
-      }
-    }
     document.querySelectorAll("[data-ltf-budget-range-key]").forEach((node) => {
       const button = node;
       button.disabled = !unlocked;
@@ -8384,34 +8654,24 @@ function initLtfBudget() {
   const syncLtfRangeDerivedValues = () => {
     const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
     const totalOption = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
-    const perOption = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
-
-    if (ltfAnswers.budgetMode === "total") {
-      const totalValue = totalOption ? Number(totalOption.representative || 0) : 0;
-      ltfAnswers.totalBudget = totalValue;
-      ltfAnswers.perEmployee = empCount > 0 ? totalValue / empCount : 0;
-    } else {
-      const perValue = perOption ? Number(perOption.representative || 0) : 0;
-      ltfAnswers.perEmployee = perValue;
-      ltfAnswers.totalBudget = empCount > 0 ? perValue * empCount : 0;
-    }
+    const totalValue = totalOption
+      ? getBudgetRangeHighEnd("total", String(totalOption.key || ""), Number(totalOption.max || 0))
+      : 0;
+    ltfAnswers.totalBudget = totalValue;
+    ltfAnswers.perEmployee = empCount > 0 ? totalValue / empCount : 0;
+    ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
 
     if (totalInput) totalInput.value = ltfAnswers.totalBudget > 0 ? String(Math.round(ltfAnswers.totalBudget)) : "0";
     if (perInput) perInput.value = ltfAnswers.perEmployee > 0 ? String(Math.round(ltfAnswers.perEmployee)) : "0";
   };
 
   const renderLtfRangeOptions = () => {
-    const renderButtons = (mode, selectedKey, targetEl) => {
-      if (!targetEl) return;
-      const options = getBudgetRangeOptions(mode);
-      targetEl.innerHTML = options.map((option) => {
-        const isSelected = option.key === selectedKey;
-        return `<button type="button" data-ltf-budget-range-mode="${mode}" data-ltf-budget-range-key="${option.key}" class="w-full rounded-full border px-4 py-2 text-sm font-semibold ${isSelected ? "border-slate-900 bg-slate-900 text-white shadow-sm" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">${escapeHtml(option.label)}</button>`;
-      }).join("");
-    };
-
-    renderButtons("total", ltfAnswers.totalBudgetRange, totalRangeOptionsWrap);
-    renderButtons("perEmployee", ltfAnswers.perEmployeeBudgetRange, perEmployeeRangeOptionsWrap);
+    if (!totalRangeOptionsWrap) return;
+    const options = getBudgetRangeOptions("total");
+    totalRangeOptionsWrap.innerHTML = options.map((option) => {
+      const isSelected = option.key === ltfAnswers.totalBudgetRange;
+      return `<button type="button" data-ltf-budget-range-mode="total" data-ltf-budget-range-key="${option.key}" class="w-full rounded-full border px-4 py-2 text-sm font-semibold ${isSelected ? "border-slate-900 bg-slate-900 text-white shadow-sm" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">${escapeHtml(option.label)}</button>`;
+    }).join("");
 
     document.querySelectorAll("[data-ltf-budget-range-key]").forEach((node) => {
       const button = node;
@@ -8426,11 +8686,8 @@ function initLtfBudget() {
         const key = String(button.dataset.ltfBudgetRangeKey || "");
         const option = getBudgetRangeByKey(mode, key);
         if (!option) return;
-        if (mode === "total") {
-          ltfAnswers.totalBudgetRange = key;
-        } else {
-          ltfAnswers.perEmployeeBudgetRange = key;
-        }
+        if (mode !== "total") return;
+        ltfAnswers.totalBudgetRange = key;
         syncLtfRangeDerivedValues();
         updateLtfBudgetHelper();
         renderLtfRangeOptions();
@@ -8445,49 +8702,10 @@ function initLtfBudget() {
     applyLtfFundingGateState();
   };
 
-  const setLtfBudgetMode = (mode) => {
-    ltfAnswers.budgetMode = mode;
-    const isTotal = mode === "total";
-    const modeTotal = $("ltfModeTotal");
-    const modePer = $("ltfModePerEmployee");
-    if (modeTotal) {
-      modeTotal.classList.toggle("bg-white", isTotal);
-      modeTotal.classList.toggle("text-blue-700", isTotal);
-      modeTotal.classList.toggle("shadow-sm", isTotal);
-      modeTotal.classList.toggle("text-slate-600", !isTotal);
-    }
-    if (modePer) {
-      modePer.classList.toggle("bg-white", !isTotal);
-      modePer.classList.toggle("text-blue-700", !isTotal);
-      modePer.classList.toggle("shadow-sm", !isTotal);
-      modePer.classList.toggle("text-slate-600", isTotal);
-    }
-    if (totalRangeOptionsWrap) totalRangeOptionsWrap.classList.toggle("hidden", !isTotal);
-    if (perEmployeeRangeOptionsWrap) perEmployeeRangeOptionsWrap.classList.toggle("hidden", isTotal);
-    if (rangePrompt) {
-      rangePrompt.textContent = isTotal
-        ? "Choose a total monthly range:"
-        : "Choose a per-employee monthly range:";
-    }
-    syncLtfRangeDerivedValues();
-    renderLtfRangeOptions();
-    updateLtfBudgetHelper();
-  };
+  if (rangePrompt) {
+    rangePrompt.textContent = "Choose your total monthly investment range:";
+  }
 
-  $("ltfModeTotal")?.addEventListener("click", () => {
-    if (!hasEnteredTeamSize()) {
-      $("ltfEmployeeCount")?.focus();
-      return;
-    }
-    setLtfBudgetMode("total");
-  });
-  $("ltfModePerEmployee")?.addEventListener("click", () => {
-    if (!hasEnteredTeamSize()) {
-      $("ltfEmployeeCount")?.focus();
-      return;
-    }
-    setLtfBudgetMode("perEmployee");
-  });
   $("ltfEmployeeCount")?.addEventListener("input", () => {
     const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
     syncLtfRangeDerivedValues();
@@ -8501,34 +8719,14 @@ function initLtfBudget() {
     }
   });
 
-  $("ltfBudgetGuidanceToggle")?.addEventListener("click", () => {
-    if (!hasEnteredTeamSize()) {
-      $("ltfEmployeeCount")?.focus();
-      return;
-    }
-    $("ltfBudgetGuidanceOptions")?.classList.toggle("hidden");
-  });
-  document.querySelectorAll(".ltf-budget-guidance-option").forEach(btn => {
-    btn.addEventListener("click", () => {
-      setLtfBudgetMode("perEmployee");
-      ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", Number(btn.dataset.value || 0));
-      syncLtfRangeDerivedValues();
-      $("ltfBudgetGuidanceOptions")?.classList.add("hidden");
-      updateLtfBudgetHelper();
-      renderLtfRangeOptions();
-    });
-  });
-
   const startingTotal = Number(ltfAnswers.totalBudget || 0);
-  const startingPerEmployee = Number(ltfAnswers.perEmployee || 0);
   if (!ltfAnswers.totalBudgetRange) {
     ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", startingTotal);
   }
-  if (!ltfAnswers.perEmployeeBudgetRange) {
-    ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", startingPerEmployee);
-  }
+  ltfAnswers.budgetMode = "total";
   syncLtfRangeDerivedValues();
-  setLtfBudgetMode("total");
+  renderLtfRangeOptions();
+  updateLtfBudgetHelper();
   applyLtfFundingGateState();
   
   // Initialize Q4 circle indicators and lock state
@@ -8539,72 +8737,39 @@ function initLtfBudget() {
 
 function updateLtfBudgetHelper() {
   const perEmployeeDisplay = $("ltfPerEmployeeDisplay");
-  const totalDisplay = $("ltfTotalDisplay");
-  if (!perEmployeeDisplay || !totalDisplay) return;
+  const ltfPlatformFeeCopy = $("ltfPlatformFeeCopy");
+  if (!perEmployeeDisplay) return;
 
   const empCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
-  const isTotal = ltfAnswers.budgetMode === "total";
 
   const formatMoney = (value) => `$${Math.max(0, Math.round(Number(value || 0))).toLocaleString("en-US")}`;
-  const formatLessThan = (value, suffix = "") => `< ${formatMoney(value)}${suffix}`;
-  const isLowBucket = (key) => String(key || "").includes("_lt_");
-  const formatRange = (minValue, maxValue, suffix = "") => {
-    const min = Math.max(0, Math.round(Number(minValue || 0)));
-    const max = Number(maxValue);
-    if (!Number.isFinite(max)) return `${formatMoney(min)}+${suffix}`;
-    const normalizedMax = Math.max(min, Math.round(max));
-    if (normalizedMax === min) return `${formatMoney(min)}${suffix}`;
-    return `${formatMoney(min)} - ${formatMoney(normalizedMax)}${suffix}`;
-  };
 
   if (empCount <= 0) {
     perEmployeeDisplay.textContent = "—";
-    totalDisplay.textContent = "—";
-    return;
-  }
-
-  if (isTotal) {
-    const totalRange = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
-    if (!totalRange) {
-      perEmployeeDisplay.textContent = "—";
-      totalDisplay.textContent = "—";
-      return;
+    if (ltfPlatformFeeCopy) {
+      ltfPlatformFeeCopy.textContent = "$0/month includes our $0 fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.";
     }
-
-    const perEmployeeMin = totalRange.min / empCount;
-    const perEmployeeMax = Number.isFinite(totalRange.max) ? (totalRange.max / empCount) : Infinity;
-    const perEmployeeText = isLowBucket(totalRange.key)
-      ? formatLessThan(perEmployeeMax, " / mo")
-      : formatRange(perEmployeeMin, perEmployeeMax, " / mo");
-
-    const totalText = isLowBucket(totalRange.key)
-      ? formatLessThan(totalRange.max)
-      : formatRange(totalRange.min, totalRange.max);
-
-    perEmployeeDisplay.textContent = perEmployeeText;
-    totalDisplay.textContent = totalText;
     return;
   }
 
-  const perEmployeeRange = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
-  if (!perEmployeeRange) {
+  const totalRange = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
+  if (!totalRange) {
     perEmployeeDisplay.textContent = "—";
-    totalDisplay.textContent = "—";
+    if (ltfPlatformFeeCopy) {
+      ltfPlatformFeeCopy.textContent = "$0/month includes our $0 fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.";
+    }
     return;
   }
 
-  const monthlyTotalMin = perEmployeeRange.min * empCount;
-  const monthlyTotalMax = Number.isFinite(perEmployeeRange.max) ? (perEmployeeRange.max * empCount) : Infinity;
-  const monthlyTotalText = isLowBucket(perEmployeeRange.key)
-    ? formatLessThan(monthlyTotalMax)
-    : formatRange(monthlyTotalMin, monthlyTotalMax);
-
-  const perEmployeeText = isLowBucket(perEmployeeRange.key)
-    ? formatLessThan(perEmployeeRange.max, " / mo")
-    : formatRange(perEmployeeRange.min, perEmployeeRange.max, " / mo");
-
-  perEmployeeDisplay.textContent = perEmployeeText;
-  totalDisplay.textContent = monthlyTotalText;
+  const rangeLow = Number(totalRange.min || 0);
+  const monthlyTotal = Number(totalRange.max || 0);
+  const rangeMedian = Math.round((rangeLow + monthlyTotal) / 2);
+  const pepm = empCount > 0 ? Math.round((rangeMedian / empCount) / 5) * 5 : 0;
+  perEmployeeDisplay.textContent = `${formatMoney(pepm)} / mo`;
+  const feeAmount = Math.round(monthlyTotal * 0.2);
+  if (ltfPlatformFeeCopy) {
+    ltfPlatformFeeCopy.textContent = `${formatMoney(monthlyTotal)}/month includes our ${formatMoney(feeAmount)} fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.`;
+  }
 }
 
 function updateQ4CircleIndicators() {
@@ -8656,7 +8821,7 @@ function updateQ4BudgetLockState() {
       const input = $("ltfEmployeeCount");
       if (input) input.disabled = !shouldBeEnabled;
     } else if (section === "funding") {
-      document.querySelectorAll("[data-ltf-budget-range-key], #ltfModeTotal, #ltfModePerEmployee").forEach((btn) => {
+      document.querySelectorAll("[data-ltf-budget-range-key]").forEach((btn) => {
         btn.disabled = !shouldBeEnabled;
         btn.classList.toggle("opacity-50", !shouldBeEnabled);
         btn.classList.toggle("cursor-not-allowed", !shouldBeEnabled);
@@ -9132,13 +9297,17 @@ function saveLtfCurrentAnswer() {
     ltfAnswers.employeeCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
     if (ltfAnswers.budgetMode === "total") {
       const totalRange = getBudgetRangeByKey("total", ltfAnswers.totalBudgetRange);
-      ltfAnswers.totalBudget = totalRange ? Number(totalRange.representative || 0) : 0;
+      ltfAnswers.totalBudget = totalRange
+        ? getBudgetRangeHighEnd("total", String(totalRange.key || ""), Number(totalRange.max || 0))
+        : 0;
       ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", ltfAnswers.totalBudget);
       ltfAnswers.perEmployee = ltfAnswers.employeeCount > 0 ? ltfAnswers.totalBudget / ltfAnswers.employeeCount : 0;
       ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
     } else {
       const perRange = getBudgetRangeByKey("perEmployee", ltfAnswers.perEmployeeBudgetRange);
-      ltfAnswers.perEmployee = perRange ? Number(perRange.representative || 0) : 0;
+      ltfAnswers.perEmployee = perRange
+        ? getBudgetRangeHighEnd("perEmployee", String(perRange.key || ""), Number(perRange.max || 0))
+        : 0;
       ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
       ltfAnswers.totalBudget = ltfAnswers.perEmployee * ltfAnswers.employeeCount;
       ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", ltfAnswers.totalBudget);
@@ -9193,15 +9362,14 @@ function completeLtfSetup() {
   state.landingBuilderStarted = true;
   state.completedSetupSteps = [1, 2, 3, 4, 5, 6];
   state.currentSetupStep = 7;
+  buildPersonalizedProgramFromSetup();
   persistState();
 
   setTimeout(() => {
     ltfPhase = "complete";
     const root = $("landingTypeformRoot");
     if (root) root.style.display = "none";
-    renderSetupStepStates();
-    updateLandingHomeView();
-    renderSidebarVisibility();
+    renderAll();
   }, 1350);
 }
 
@@ -11837,23 +12005,26 @@ function renderPromoteEventStep() {
   const marchMadnessWeeklyLeaderboardMessage = [
     "🏀 March Madness Bracket Challenge Update",
     "",
-    "Here are the current standings after the latest round:",
+    "Here are the current standings heading into the Sweet 16...",
     "",
-    "Men's Tournament",
-    "🥇 1st — [NAME] — [POINTS]",
-    "🥈 2nd — [NAME] — [POINTS]",
-    "🥉 3rd — [NAME] — [POINTS]",
+    "Great minds think alike in the Women's tournament, with LSU or UConn set to decide who takes the Revelry crown:",
+    "🥇 1st - Nick (550 pts)",
+    "🥈 2nd - Cameron (520)",
+    "🥉 3rd - Jeff (510)",
     "",
-    "Women's Tournament",
-    "🥇 1st — [NAME] — [POINTS]",
-    "🥈 2nd — [NAME] — [POINTS]",
-    "🥉 3rd — [NAME] — [POINTS]",
+    "*Riding with odds-on title favorite UConn, Peter and Stu are still in contention.",
     "",
-    "Plenty of basketball left — the leaderboard can still change.",
+    "In the Men's tournament, only 20 points separate first and third:",
+    "🥇 1st - Cameron (500 pts)",
+    "🥈 2nd - Rebecca (490)",
+    "🥉 T-3rd - Dan (480)",
+    "🥉 T-3rd - Nik (480)",
+    "",
+    "*Can Feroz make a comeback with his champion pick Arizona, ranked by ESPN as #1 among the remaining 16 teams?  Or can Peter, Nik, and Jeff make a push with Duke (ESPN #3)?",
     "",
     "Follow the standings here:",
-    "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9",
-    "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f"
+    "Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f",
+    "Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9"
   ].join("\n");
 
   const parseDateFromContext = () => {
@@ -16743,16 +16914,7 @@ function initializePollBuilderInteractions() {
 // Generate recommended events based on user setup preferences
 // TODO: Replace this with actual backend API call when available
 function generateRecommendedEvents() {
-  state.programSettings.goals = Array.isArray(state.landingDraft.goals) ? [...state.landingDraft.goals] : [];
-  state.programSettings.preferredSchedule = Array.isArray(state.landingDraft.schedule) ? [...state.landingDraft.schedule] : [];
-  // state.programSettings.cadence = state.landingDraft.cadence || state.programSettings.cadence; // Q0 (Cadence) is disabled
-  state.programSettings.daysSelected = Array.isArray(state.landingDraft.daysSelected) ? [...state.landingDraft.daysSelected] : [];
-  state.programSettings.timesSelected = Array.isArray(state.landingDraft.timesSelected) ? [...state.landingDraft.timesSelected] : [];
-  state.programSettings.localCity = state.landingDraft.localCity || state.programSettings.localCity;
-  state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
-    ? [...state.landingDraft.teamPreferenceEstimate]
-    : [];
-  state.programSettings.admin_preference_weight = state.programSettings.admin_preference_weight || { boost: 0.22, first_cycle_only: true };
+  syncLandingDraftToProgramSettings();
   if (isRevelryBracketsMagicContext()) {
     state.eventsRecommended = getRevelryGoalBasedRecommendations(state.programSettings.goals);
   } else {

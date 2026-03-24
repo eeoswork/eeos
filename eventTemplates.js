@@ -169,7 +169,7 @@ window.EVENT_TEMPLATES = [
   {
     id: "confetti-feud",
     title: "Confetti Family Feud Style Battle",
-    description: "Team-based survey game in the style of Family Feud with creative questions.",
+    description: "Team-based: survey game in the style of Family Feud with creative questions.",
     type: "poll",
     workflowType: "poll",
     pollVariant: "event-and-datetime",
