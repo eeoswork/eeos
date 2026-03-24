@@ -150,8 +150,8 @@ Follow the standings here:
 
           <!-- Actions -->
           <div class="mt-4 flex flex-wrap items-center gap-2">
-            <button class="copy-btn" id="copyBtn" type="button">Copy message</button>
-            <button class="slack-btn" type="button">Open Slack</button>
+            <button class="copy-btn" id="copyBtn" type="button" onclick="copyMessage()">Copy message</button>
+            <button class="slack-btn" type="button" onclick="window.open('https://app.slack.com/client/', '_blank', 'noopener,noreferrer')">Open Slack</button>
             <span class="copied-label" id="copiedLabel">✓ Copied</span>
           </div>
         </div>
