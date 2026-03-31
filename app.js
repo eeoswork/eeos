@@ -308,8 +308,9 @@ Slouched posture compresses the diaphragm and reduces oxygen intake, lowering en
 Posture score
 Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!
 
-[Image included in rich-text paste]`,
-    htmlMessage: `<u>Day 3 of the 5-Day Energy Reset Challenge:</u><br><br><b>Posture Reset 🖥️</b><br><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><img src="https://eeos.work/good_posture.jpg" alt="Good posture reference" style="max-width:100%;height:auto;border-radius:12px;">`
+
+https://eeos.work/good_posture.jpg`,
+  htmlMessage: `<u>Day 3 of the 5-Day Energy Reset Challenge:</u><br><br><b>Posture Reset 🖥️</b><br><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><br><a href="https://eeos.work/good_posture.jpg" style="color:#0066cc;text-decoration:underline;">https://eeos.work/good_posture.jpg</a>`
   },
   {
     key: "day_4",
