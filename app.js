@@ -280,16 +280,16 @@ Write a word or two that describes how you feel after completing the breathing r
 
 Stretch Break 🧘‍♂️
 Today’s micro-challenge:
-👉 Stand and perform this active chest opener stretch below for 1 minute
+👉 Stand and perform this active chest opener stretch below for 1 minute.
+
+https://eeos.work/active_chest_opener_stretch.gif
 
 Why this works
 Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
 
 Have a favorite stretch?
 Share a GIF of it with us!`,
-  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`,
-    mediaUrl: "https://eeos.work/active_chest_opener_stretch.gif",
-    mediaAlt: "Active chest opener stretch"
+  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a><br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`,
   },
   {
     key: "day_3",
@@ -14502,22 +14502,12 @@ function renderRsvpStep() {
                   </div>
                   ${isActive ? `
                     <div class="p-4">
-                      <div class="${step.mediaUrl ? "grid grid-cols-1 gap-4 md:grid-cols-2" : ""}">
-                        <div>
-                          <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
-                          <div class="mt-4 flex flex-wrap items-center gap-3">
-                            <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
-                            <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-                          </div>
+                      <div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
+                        <div class="mt-4 flex flex-wrap items-center gap-3">
+                          <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
+                          <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
                         </div>
-                        ${step.mediaUrl ? `
-                          <div>
-                            <img src="${escapeHtml(step.mediaUrl)}" alt="${escapeHtml(step.mediaAlt || "Reference image")}" class="w-full rounded-lg border border-slate-200" />
-                            <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-                              To share in Slack: right-click the GIF, choose <strong>Copy Image</strong>, then paste in Slack.
-                            </div>
-                          </div>
-                        ` : ""}
                       </div>
                       <div class="mt-8">
                         <label class="flex items-center gap-2 text-sm text-slate-700">
@@ -14757,6 +14747,7 @@ function renderRsvpStep() {
         showMiniToast(`${activeEnergyResetStep.title} message copied.`);
       };
     }
+
 
     const energyResetSlackButton = panel.querySelector('[data-energy-reset-open-slack]');
     if (energyResetSlackButton) {
