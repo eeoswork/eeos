@@ -14666,6 +14666,12 @@ function renderRsvpStep() {
     const energyResetCopyButton = panel.querySelector('[data-energy-reset-copy]');
     if (energyResetCopyButton) {
       energyResetCopyButton.onclick = async () => {
+        if (activeEnergyResetStep.key === "day_2") {
+          // Slack does not preserve inline clipboard images; plain text keeps the GIF URL for preview unfurl.
+          await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.plainMessage });
+          showMiniToast("Day 2 message copied. Paste into Slack; keep the GIF URL on its own line.");
+          return;
+        }
         await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.htmlMessage });
         showMiniToast(`${activeEnergyResetStep.title} message copied.`);
       };
