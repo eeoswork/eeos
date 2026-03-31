@@ -6042,7 +6042,7 @@ renderAll();
 
 async function copyText(text, statusId) {
 try {
-  await navigator.clipboard.writeText(text);
+  await writeClipboardMessage(text);
   if (statusId && $(statusId)) {
     $(statusId).textContent = "Copied to clipboard.";
     setTimeout(() => {
@@ -6054,6 +6054,54 @@ try {
 } catch {
   alert("Copy failed.");
 }
+}
+
+function convertClipboardTextToHtml(text) {
+  const rawText = String(text || "");
+  const escape = (value) => String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+  const linkifyInlineUrls = (line) => line.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+    const safeUrl = escape(url);
+    return `<a href="${safeUrl}">${safeUrl}</a>`;
+  });
+
+  return rawText
+    .split(/\r?\n/)
+    .map((line) => {
+      const labeledLink = line.match(/^([^:\n]+):\s*(https?:\/\/\S+)$/i);
+      if (labeledLink) {
+        const label = escape(labeledLink[1].trim());
+        const url = escape(labeledLink[2].trim());
+        return `<a href="${url}">${label}</a>`;
+      }
+
+      const safeLine = escape(line)
+        .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+      return linkifyInlineUrls(safeLine);
+    })
+    .join("<br>");
+}
+
+async function writeClipboardMessage(text, options = {}) {
+  const plainText = String(text || "");
+  const htmlText = String(options.html || convertClipboardTextToHtml(plainText));
+
+  if (navigator.clipboard && window.ClipboardItem) {
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/plain": new Blob([plainText], { type: "text/plain" }),
+        "text/html": new Blob([htmlText], { type: "text/html" })
+      })
+    ]);
+    return;
+  }
+
+  await navigator.clipboard.writeText(plainText);
 }
 
 function showSaveNudge() {
@@ -12717,7 +12765,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
 
   const copyToClipboard = async (text) => {
     try {
-      await navigator.clipboard.writeText(String(text || ""));
+      await writeClipboardMessage(String(text || ""));
     } catch (error) {
       console.warn("Clipboard copy failed", error?.message || error);
     }
@@ -13362,7 +13410,7 @@ function renderRunEventStep() {
         if (action === "copy-reminder-dayof") {
           const stepKey = String(button.getAttribute("data-run-substep-step") || activeRunSubstep || "");
           const copyText = stepKey === "final_winner" ? runReminderDayOfMessage : marchMadnessWeeklyLeaderboardMessage;
-          navigator.clipboard.writeText(String(copyText || "")).catch(() => {});
+          writeClipboardMessage(String(copyText || "")).catch(() => {});
           promoteUiState.copiedAction = "copy-reminder-dayof";
           renderRunEventStep();
           setTimeout(() => {
@@ -13711,7 +13759,7 @@ function renderCollectFeedbackStep() {
 
   const copyToClipboard = async (text) => {
     try {
-      await navigator.clipboard.writeText(String(text || ""));
+      await writeClipboardMessage(String(text || ""));
     } catch (error) {
       console.warn("Copy failed", error?.message || error);
     }
@@ -14405,7 +14453,7 @@ function renderRsvpStep() {
   if (copyLinkButton) {
     copyLinkButton.onclick = async () => {
       if (!rsvpShareUrl) return;
-      await navigator.clipboard.writeText(rsvpShareUrl);
+      await writeClipboardMessage(rsvpShareUrl);
       pollUiState.rsvpShareStatus = "Copied RSVP link.";
       renderRsvpStep();
     };
@@ -14414,7 +14462,7 @@ function renderRsvpStep() {
   const copyMessageButton = document.getElementById("rsvpStepCopyMessage");
   if (copyMessageButton) {
     copyMessageButton.onclick = async () => {
-      await navigator.clipboard.writeText(`${subject}\n\n${messageBody}`);
+      await writeClipboardMessage(`${subject}\n\n${messageBody}`);
       pollUiState.rsvpShareStatus = "Copied RSVP message.";
       renderRsvpStep();
     };
@@ -16164,7 +16212,7 @@ function renderPollBuilderStep() {
         reminderCopyButton.onclick = async () => {
           if (pollUiState.reminderCopyBusy) return;
           try {
-            await navigator.clipboard.writeText(reminderMessage.bodyPlain);
+            await writeClipboardMessage(reminderMessage.bodyPlain);
             pollUiState.reminderCopyBusy = true;
             renderPollBuilderStep();
             if (pollReminderStatusTimeout) clearTimeout(pollReminderStatusTimeout);
@@ -16184,7 +16232,7 @@ function renderPollBuilderStep() {
         reminderCopySubjectButton.onclick = async () => {
           if (pollUiState.reminderSubjectCopyBusy) return;
           try {
-            await navigator.clipboard.writeText(reminderMessage.subject);
+            await writeClipboardMessage(reminderMessage.subject);
             pollUiState.reminderSubjectCopyBusy = true;
             renderPollBuilderStep();
             if (pollReminderSubjectStatusTimeout) clearTimeout(pollReminderSubjectStatusTimeout);
@@ -16399,7 +16447,7 @@ function renderPollBuilderStep() {
         rsvpCopyButton.onclick = async () => {
           if (pollUiState.rsvpCopyBusy || !isRsvpDeadlineSubmitted) return;
           try {
-            await navigator.clipboard.writeText(`${rsvpMessageSubject}\n\n${rsvpMessageBodyPlain}`);
+            await writeClipboardMessage(`${rsvpMessageSubject}\n\n${rsvpMessageBodyPlain}`);
             pollUiState.rsvpCopyBusy = true;
             pollUiState.rsvpShareStatus = "Copied to clipboard.";
             renderPollBuilderStep();
@@ -16565,7 +16613,7 @@ function renderPollBuilderStep() {
           if (!text) return;
 
           try {
-            await navigator.clipboard.writeText(text);
+            await writeClipboardMessage(text);
 
             if (pollCopyBusyTimeout) clearTimeout(pollCopyBusyTimeout);
             if (pollCopyStatusTimeout) clearTimeout(pollCopyStatusTimeout);
