@@ -245,6 +245,129 @@ function isWorkflowStepSkipped(stepNum, workflowType = getActiveWorkflowType()) 
   return !getEventWorkflowStepSequence(workflowType).includes(stepNum);
 }
 
+const ENERGY_RESET_LAUNCH_STEPS = [
+  {
+    key: "day_0",
+    title: "Day 0 (Kickoff)",
+    plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins tomorrow.
+Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being — all in under two minutes.
+
+A small shift each day can make the whole week feel lighter.
+
+We start tomorrow.
+Drop an emoji if you're in!`,
+    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins tomorrow.</b><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being — <b>all in under two minutes</b>.<br><br>A small shift each day can make the whole week feel lighter.<br><br>We start tomorrow.<br><b>Drop an emoji if you're in!</b>`
+  },
+  {
+    key: "day_1",
+    title: "Day 1",
+    plainMessage: `☀️ Day 1 of our 5-Day Energy Reset Challenge.
+Before your first task today, take one full minute to breathe: in for 4, out for 6.
+
+Notice what shifts when you slow down on purpose.
+
+Reply with one word for how you want to feel by the end of today.`,
+    htmlMessage: `☀️ <b>Day 1 of our 5-Day Energy Reset Challenge.</b><br>Before your first task today, take one full minute to breathe: in for 4, out for 6.<br><br>Notice what shifts when you slow down on purpose.<br><br>Reply with one word for how you want to feel by the end of today.`
+  },
+  {
+    key: "day_2",
+    title: "Day 2",
+    plainMessage: `💧 Day 2 reset.
+Pause for a quick body check: unclench your jaw, drop your shoulders, and take a sip of water before your next meeting.
+
+Small physical resets can help your brain reset too.
+
+React with 💧 once you've done it.`,
+    htmlMessage: `💧 <b>Day 2 reset.</b><br>Pause for a quick body check: unclench your jaw, drop your shoulders, and take a sip of water before your next meeting.<br><br>Small physical resets can help your brain reset too.<br><br>React with 💧 once you've done it.`
+  },
+  {
+    key: "day_3",
+    title: "Day 3",
+    plainMessage: `🎯 Day 3 reset.
+Pick one thing that matters most today and give it 15 focused minutes without multitasking.
+
+Silence notifications, close extra tabs, and make a clean start.
+
+Drop a 🎯 when you've chosen your focus block.`,
+    htmlMessage: `🎯 <b>Day 3 reset.</b><br>Pick one thing that matters most today and give it 15 focused minutes without multitasking.<br><br>Silence notifications, close extra tabs, and make a clean start.<br><br>Drop a 🎯 when you've chosen your focus block.`
+  },
+  {
+    key: "day_4",
+    title: "Day 4",
+    plainMessage: `🌿 Day 4 reset.
+Take a short break away from your screen — even two minutes counts.
+
+Stand up, look at something farther away, or step outside if you can.
+
+When you're back, share one thing that helped you recharge today.`,
+    htmlMessage: `🌿 <b>Day 4 reset.</b><br>Take a short break away from your screen — even two minutes counts.<br><br>Stand up, look at something farther away, or step outside if you can.<br><br>When you're back, share one thing that helped you recharge today.`
+  },
+  {
+    key: "day_5",
+    title: "Day 5",
+    plainMessage: `✨ Day 5 reset.
+Choose one boundary that will make the rest of your day feel lighter: decline a low-priority task, delay a non-urgent reply, or block time to finish what matters.
+
+Protecting your energy is part of doing great work.
+
+Reply with ✨ if you're setting a boundary today.`,
+    htmlMessage: `✨ <b>Day 5 reset.</b><br>Choose one boundary that will make the rest of your day feel lighter: decline a low-priority task, delay a non-urgent reply, or block time to finish what matters.<br><br>Protecting your energy is part of doing great work.<br><br>Reply with ✨ if you're setting a boundary today.`
+  },
+  {
+    key: "day_6",
+    title: "Day 6 (Wrap Up)",
+    plainMessage: `🎉 Wrap-up day.
+That’s a full week of small resets.
+
+Take a minute to reflect: which practice helped you most, and what’s one thing you want to carry forward into next week?
+
+Share your takeaway in the thread so we can celebrate the momentum together.`,
+    htmlMessage: `🎉 <b>Wrap-up day.</b><br>That’s a full week of small resets.<br><br>Take a minute to reflect: which practice helped you most, and what’s one thing you want to carry forward into next week?<br><br>Share your takeaway in the thread so we can celebrate the momentum together.`
+  }
+];
+
+function createDefaultEnergyResetLaunchState() {
+  return {
+    activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key,
+    completedStepKeys: []
+  };
+}
+
+function normalizeEnergyResetLaunchState(target = state.pollBuilder) {
+  if (!target || typeof target !== "object") {
+    return createDefaultEnergyResetLaunchState();
+  }
+
+  if (!target.energyResetLaunch || typeof target.energyResetLaunch !== "object") {
+    target.energyResetLaunch = createDefaultEnergyResetLaunchState();
+  }
+
+  const launchState = target.energyResetLaunch;
+  const validKeys = new Set(ENERGY_RESET_LAUNCH_STEPS.map((step) => step.key));
+  launchState.completedStepKeys = Array.isArray(launchState.completedStepKeys)
+    ? Array.from(new Set(launchState.completedStepKeys.map((key) => String(key || "")).filter((key) => validKeys.has(key))))
+    : [];
+
+  const activeStepKey = String(launchState.activeStepKey || "");
+  if (!validKeys.has(activeStepKey) || launchState.completedStepKeys.includes(activeStepKey)) {
+    const firstIncomplete = ENERGY_RESET_LAUNCH_STEPS.find((step) => !launchState.completedStepKeys.includes(step.key));
+    launchState.activeStepKey = firstIncomplete
+      ? firstIncomplete.key
+      : ENERGY_RESET_LAUNCH_STEPS[ENERGY_RESET_LAUNCH_STEPS.length - 1].key;
+  }
+
+  return launchState;
+}
+
+function syncRsvpStepLabels(isEnergyResetLaunch) {
+  const label = isEnergyResetLaunch ? "Launch Event" : "RSVP";
+  const stepHeader = document.querySelector('.setup-step[data-step="9"] .setup-step-header h3');
+  if (stepHeader) stepHeader.textContent = label;
+  document.querySelectorAll('[data-event-workflow-menu-item="rsvp"]').forEach((item) => {
+    item.textContent = label;
+  });
+}
+
 function getPreviousWorkflowStep(stepNum, workflowType = getActiveWorkflowType()) {
   const sequence = getEventWorkflowStepSequence(workflowType);
   const stepIndex = sequence.indexOf(stepNum);
@@ -1038,7 +1161,8 @@ pollBuilder: {
   rsvpDeadlineDateTime: "",
   vendorBookingUrl: "",
   bookingConfirmation: null,
-  scheduleEntries: []
+  scheduleEntries: [],
+  energyResetLaunch: null
 },
 promoteEvent: {
   activeStep: "calendar",
@@ -3157,7 +3281,8 @@ try {
       inviteMessageOverride: "",
       timeZone: "",
       voteDeadlineDateTime: "",
-      voteDeadlineTimeZone: ""
+      voteDeadlineTimeZone: "",
+      energyResetLaunch: null
     };
   }
   if (!Array.isArray(state.pollBuilder.selectedEventIds)) state.pollBuilder.selectedEventIds = [];
@@ -3191,6 +3316,7 @@ try {
   if (typeof state.pollBuilder.vendorBookingUrl !== "string") state.pollBuilder.vendorBookingUrl = "";
   if (!state.pollBuilder.bookingConfirmation || typeof state.pollBuilder.bookingConfirmation !== "object") state.pollBuilder.bookingConfirmation = null;
   if (!Array.isArray(state.pollBuilder.scheduleEntries)) state.pollBuilder.scheduleEntries = [];
+  if (state.pollBuilder.energyResetLaunch !== null && typeof state.pollBuilder.energyResetLaunch !== "object") state.pollBuilder.energyResetLaunch = null;
   normalizePromoteEventState();
   if (enforceRevelryLeaderboardLockState()) {
     shouldPersistDetectedTimeZone = true;
@@ -6465,6 +6591,9 @@ if (action === "create-event") {
   state.pollBuilder.vendorBookingUrl = String(template.url || "").trim();
   state.pollBuilder.costPerPerson = Number(template.costPerPerson ?? template.estimatedCost ?? 0);
   state.pollBuilder.eventLocationType = String(template.eventLocationType || template.locationType || "virtual").trim() || "virtual";
+  state.pollBuilder.energyResetLaunch = templateId === "5_day_energy_reset_challenge"
+    ? createDefaultEnergyResetLaunchState()
+    : null;
 
   ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.SHORTLIST);
 
@@ -10387,6 +10516,7 @@ function resetPollBuilderDraftFields() {
   state.pollBuilder.bookingConfirmation = null;
   state.pollBuilder.scheduleEntries = [];
   state.pollBuilder.inviteMessageOverride = "";
+  state.pollBuilder.energyResetLaunch = null;
 }
 const pollUiState = {
   editingIntro: false,
@@ -14146,12 +14276,20 @@ function renderRsvpStep() {
   if (!panel) return;
 
   const workflowType = getActiveWorkflowType();
+  const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
+  const pollSnapshot = getPollWorkflowSnapshot();
+  const eventName = String(state.pollBuilder?.chosenEventLabel || pollSnapshot.topEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
+  const normalizedEventName = String(eventName || "").trim().toLowerCase();
+  const isEnergyResetLaunch = chosenEventId === "5_day_energy_reset_challenge"
+    || normalizedEventName === "5-day energy reset challenge"
+    || normalizedEventName.includes("energy reset challenge");
+  syncRsvpStepLabels(isEnergyResetLaunch);
+
   if (isWorkflowStepSkipped(EVENT_WORKFLOW_STEPS.RSVP, workflowType)) {
     panel.innerHTML = "";
     return;
   }
 
-  const pollSnapshot = getPollWorkflowSnapshot();
   const pollReadyForRsvp = workflowType !== EVENT_WORKFLOW_TYPES.POLL
     || Boolean(state.completedSetupSteps.includes(EVENT_WORKFLOW_STEPS.POLL))
     || Boolean(state.pollBuilder?.showResultsPage)
@@ -14160,19 +14298,13 @@ function renderRsvpStep() {
   if (!pollReadyForRsvp) {
     panel.innerHTML = `
       <div class="rounded-lg border border-slate-200 bg-white p-4">
-        <h4 class="text-sm font-semibold text-slate-900">RSVP</h4>
+        <h4 class="text-sm font-semibold text-slate-900">${isEnergyResetLaunch ? "Launch Event" : "RSVP"}</h4>
         <p class="mt-2 text-sm text-slate-600">Complete Poll Team first, then continue here to create and share the RSVP.</p>
       </div>
     `;
     return;
   }
 
-  const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
-  const eventName = String(state.pollBuilder?.chosenEventLabel || pollSnapshot.topEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
-  const normalizedEventName = String(eventName || "").trim().toLowerCase();
-  const isEnergyResetLaunch = chosenEventId === "5_day_energy_reset_challenge"
-    || normalizedEventName === "5-day energy reset challenge"
-    || normalizedEventName.includes("energy reset challenge");
   const eventDateTimeValue = String(state.pollBuilder?.chosenDateTime || pollSnapshot.topTimeRaw || "").trim();
   const eventDateTimeDisplay = eventDateTimeValue ? (formatPollDateTime(eventDateTimeValue) || eventDateTimeValue) : "Date/time required before sending RSVP";
   const savedDeadlineIso = String(state.pollBuilder?.rsvpDeadlineDateTime || "").trim();
@@ -14238,27 +14370,46 @@ function renderRsvpStep() {
   }
 
   if (isEnergyResetLaunch) {
-    subject = "5-Day Energy Reset Challenge — Monday kickoff";
-    messageBody = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    const energyResetState = normalizeEnergyResetLaunchState();
+    const activeStepKey = String(energyResetState.activeStepKey || ENERGY_RESET_LAUNCH_STEPS[0].key);
     panel.innerHTML = `
       <div class="space-y-5">
         <article class="rounded-xl border border-slate-200 bg-white p-5">
           <h4 class="text-base font-semibold text-slate-900">5-Day Energy Reset Challenge</h4>
-          <p class="mt-1 text-sm text-slate-600">This challenge includes 5 daily messages. Monday is ready now.</p>
+          <p class="mt-1 text-sm text-slate-600">This challenge includes a series of daily Slack messages. Just copy and paste each one below and schedule it for the appropriate day.</p>
 
-          <div class="mt-4 rounded-xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <div class="text-sm font-semibold text-slate-900">Monday</div>
-              <span class="text-xs font-medium text-slate-500">Expanded</span>
-            </div>
-            <div class="space-y-3 p-4">
-              <p class="text-sm text-slate-700">Copy and paste this message into Slack and schedule it for Monday</p>
-              <textarea id="rsvpStepMondayMessage" class="min-h-[140px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800" readonly>${escapeHtml(messageBody)}</textarea>
-              <div class="flex flex-wrap items-center gap-3">
-                <button id="rsvpStepCopyMessage" type="button" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
-                <button id="rsvpStepOpenSlack" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-              </div>
-            </div>
+          <div class="mt-5 space-y-3">
+            ${ENERGY_RESET_LAUNCH_STEPS.map((step, index) => {
+              const isActive = step.key === activeStepKey;
+              const isDone = energyResetState.completedStepKeys.includes(step.key);
+              const nextStep = ENERGY_RESET_LAUNCH_STEPS[index + 1] || null;
+              const advanceLabel = nextStep
+                ? `Mark complete and advance to ${nextStep.title}`
+                : "I have scheduled all Slack messages for the 5-Day Energy Reset Challenge";
+              return `
+                <article class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <div class="flex items-center justify-between px-4 py-3 ${isActive ? "border-b border-slate-200" : ""}">
+                    <div class="text-sm font-semibold text-slate-900">${step.title}</div>
+                    ${isDone ? '<span class="text-xs font-medium text-emerald-600">✓ Complete</span>' : ""}
+                  </div>
+                  ${isActive ? `
+                    <div class="p-4">
+                      <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
+                      <div class="mt-4 flex flex-wrap items-center gap-3">
+                        <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
+                        <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+                      </div>
+                      <div class="mt-8">
+                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                          <input type="checkbox" data-energy-reset-advance="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
+                          <span>${advanceLabel}</span>
+                        </label>
+                      </div>
+                    </div>
+                  ` : ""}
+                </article>
+              `;
+            }).join("")}
           </div>
         </article>
       </div>
@@ -14473,6 +14624,55 @@ function renderRsvpStep() {
     slackButton.onclick = () => {
       window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
     };
+  }
+
+  if (isEnergyResetLaunch) {
+    const activeEnergyResetState = normalizeEnergyResetLaunchState();
+    const activeEnergyResetStep = ENERGY_RESET_LAUNCH_STEPS.find((step) => step.key === activeEnergyResetState.activeStepKey) || ENERGY_RESET_LAUNCH_STEPS[0];
+
+    const energyResetCopyButton = panel.querySelector('[data-energy-reset-copy]');
+    if (energyResetCopyButton) {
+      energyResetCopyButton.onclick = async () => {
+        await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.htmlMessage });
+        showMiniToast(`${activeEnergyResetStep.title} message copied.`);
+      };
+    }
+
+    const energyResetSlackButton = panel.querySelector('[data-energy-reset-open-slack]');
+    if (energyResetSlackButton) {
+      energyResetSlackButton.onclick = () => {
+        window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+      };
+    }
+
+    const energyResetAdvanceCheckbox = panel.querySelector('[data-energy-reset-advance]');
+    if (energyResetAdvanceCheckbox) {
+      energyResetAdvanceCheckbox.onchange = () => {
+        if (!energyResetAdvanceCheckbox.checked) return;
+
+        const launchState = normalizeEnergyResetLaunchState();
+        if (!launchState.completedStepKeys.includes(activeEnergyResetStep.key)) {
+          launchState.completedStepKeys.push(activeEnergyResetStep.key);
+        }
+
+        const currentIndex = ENERGY_RESET_LAUNCH_STEPS.findIndex((step) => step.key === activeEnergyResetStep.key);
+        const nextStep = ENERGY_RESET_LAUNCH_STEPS[currentIndex + 1] || null;
+        if (nextStep) {
+          launchState.activeStepKey = nextStep.key;
+          persistState();
+          renderRsvpStep();
+          return;
+        }
+
+        state.pollBuilder.rsvpSent = true;
+        ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.RSVP);
+        persistState();
+        const nextWorkflowStep = workflowType === EVENT_WORKFLOW_TYPES.POLL ? EVENT_WORKFLOW_STEPS.BOOK : EVENT_WORKFLOW_STEPS.PROMOTE;
+        goToEventWorkflowStep(nextWorkflowStep);
+      };
+    }
+
+    return;
   }
 
   const gmailButton = document.getElementById("rsvpStepOpenGmail");
