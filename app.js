@@ -261,57 +261,86 @@ Drop an emoji if you're in!`,
   {
     key: "day_1",
     title: "Day 1",
-    plainMessage: `☀️ Day 1 of our 5-Day Energy Reset Challenge.
-Before your first task today, take one full minute to breathe: in for 4, out for 6.
+    plainMessage: `Day 1 of our 5-Day Energy Reset Challenge:
 
-Notice what shifts when you slow down on purpose.
+**Breathing Reset** 🌬️
+👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.
 
-Reply with one word for how you want to feel by the end of today.`,
-    htmlMessage: `☀️ <b>Day 1 of our 5-Day Energy Reset Challenge.</b><br>Before your first task today, take one full minute to breathe: in for 4, out for 6.<br><br>Notice what shifts when you slow down on purpose.<br><br>Reply with one word for how you want to feel by the end of today.`
+**Why this works**
+Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.
+
+**Have something to add?**
+Write a word or two that describes how you feel after completing the breathing reset.`,
+    htmlMessage: `Day 1 of our 5-Day Energy Reset Challenge:<br><br><b>Breathing Reset</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Have something to add?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
   },
   {
     key: "day_2",
     title: "Day 2",
-    plainMessage: `💧 Day 2 reset.
-Pause for a quick body check: unclench your jaw, drop your shoulders, and take a sip of water before your next meeting.
+    plainMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge
 
-Small physical resets can help your brain reset too.
+**Stretch Break** 🧘‍♂️
+Today’s micro-challenge:
+👉 Stand up and perform this active chest opener stretch for 1 minute:
 
-React with 💧 once you've done it.`,
-    htmlMessage: `💧 <b>Day 2 reset.</b><br>Pause for a quick body check: unclench your jaw, drop your shoulders, and take a sip of water before your next meeting.<br><br>Small physical resets can help your brain reset too.<br><br>React with 💧 once you've done it.`
+https://eeos.work/active_chest_opener_stretch.gif
+
+**Why this works**
+Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
+
+**Have a favorite stretch?**
+Share a GIF of it with us!`,
+  htmlMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge<br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand up and perform this active chest opener stretch for 1 minute:<br><br><img src="https://eeos.work/active_chest_opener_stretch.gif" alt="Active chest opener stretch" style="max-width:100%;height:auto;border-radius:12px;"><br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`
   },
   {
     key: "day_3",
     title: "Day 3",
-    plainMessage: `🎯 Day 3 reset.
-Pick one thing that matters most today and give it 15 focused minutes without multitasking.
+    plainMessage: `Day 3 of the 5-Day Energy Reset Challenge:
 
-Silence notifications, close extra tabs, and make a clean start.
+**Posture Reset 🖥️**
 
-Drop a 🎯 when you've chosen your focus block.`,
-    htmlMessage: `🎯 <b>Day 3 reset.</b><br>Pick one thing that matters most today and give it 15 focused minutes without multitasking.<br><br>Silence notifications, close extra tabs, and make a clean start.<br><br>Drop a 🎯 when you've chosen your focus block.`
+Today’s micro-challenge:
+👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!
+
+**Why this works**
+Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.
+
+**Posture score**
+Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!
+
+https://eeos.work/good_posture.jpg`,
+    htmlMessage: `Day 3 of the 5-Day Energy Reset Challenge:<br><br><b>Posture Reset 🖥️</b><br><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><img src="https://eeos.work/good_posture.jpg" alt="Good posture reference" style="max-width:100%;height:auto;border-radius:12px;">`
   },
   {
     key: "day_4",
     title: "Day 4",
-    plainMessage: `🌿 Day 4 reset.
-Take a short break away from your screen — even two minutes counts.
+    plainMessage: `Day 4 of the 5-Day Energy Reset Challenge:
 
-Stand up, look at something farther away, or step outside if you can.
+**Hydration Boost** 💧
+Today’s micro-challenge:
+👉 Drink a full glass of water right now, and aim for one small glass every hour.
 
-When you're back, share one thing that helped you recharge today.`,
-    htmlMessage: `🌿 <b>Day 4 reset.</b><br>Take a short break away from your screen — even two minutes counts.<br><br>Stand up, look at something farther away, or step outside if you can.<br><br>When you're back, share one thing that helped you recharge today.`
+**Why this matters**
+On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.
+
+**Tip swap**
+Share one trick you use to remember to drink enough water during the day.`,
+    htmlMessage: `Day 4 of the 5-Day Energy Reset Challenge:<br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
   },
   {
     key: "day_5",
     title: "Day 5",
-    plainMessage: `✨ Day 5 reset.
-Choose one boundary that will make the rest of your day feel lighter: decline a low-priority task, delay a non-urgent reply, or block time to finish what matters.
+    plainMessage: `Final day of our 5-Day Energy Reset Challenge:
 
-Protecting your energy is part of doing great work.
+**Walk It Out** 🚶
+Today’s micro-challenge:
+👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.
 
-Reply with ✨ if you're setting a boundary today.`,
-    htmlMessage: `✨ <b>Day 5 reset.</b><br>Choose one boundary that will make the rest of your day feel lighter: decline a low-priority task, delay a non-urgent reply, or block time to finish what matters.<br><br>Protecting your energy is part of doing great work.<br><br>Reply with ✨ if you're setting a boundary today.`
+**Why this works**
+Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.
+
+**Walk the walk**
+Snap a photo of something interesting from your walk and drop it in the thread!`,
+    htmlMessage: `Final day of our 5-Day Energy Reset Challenge:<br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
   },
   {
     key: "day_6",
