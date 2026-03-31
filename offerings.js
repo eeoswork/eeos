@@ -706,7 +706,7 @@
     "type": "rsvp"
   },
   {
-    "id": "7_day_energy_reset_challenge",
+    "id": "5_day_energy_reset_challenge",
     "title": "5-Day Energy Reset Challenge",
     "description": "5-Day Energy Reset Challenge for teams.",
     "category": "one_off",
@@ -4931,7 +4931,7 @@
   }
 ];
   window.EVENT_OFFERINGS_META = {
-  "generatedAt": "2026-03-31T01:47:37.637Z",
+  "generatedAt": "2026-03-31T11:31:03.457Z",
   "minPopularityScore": 60,
   "report": {
     "totalRows": 125,

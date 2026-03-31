@@ -9,7 +9,7 @@ wins_of_the_week,Wins of the Week,,one_off,async_slack,async_slack,Friday,Any,FA
 idea_walk,Idea Walk,,one_off,async_slack,async_slack,Any,Any,FALSE,0,30,,employee_performance,,low,low,78,FALSE,,,,,,,,,,
 clarity_week,Clarity Week,,one_off,async_slack,async_slack,Any,Any,FALSE,0,60,,employee_performance,,low,low,82,FALSE,,,,,,,,,,
 focus_thread,Focus Thread,,one_off,async_slack,async_slack,Any,Any,FALSE,0,,,employee_performance,,high,medium,87,FALSE,,,,,,,,,,
-7_day_energy_reset_challenge,5-Day Energy Reset Challenge,,one_off,async_slack,async_slack,Any,Any,FALSE,0,,,employee_performance,,low,low,88,FALSE,,,,,,,,,,
+5_day_energy_reset_challenge,5-Day Energy Reset Challenge,,one_off,async_slack,async_slack,Any,Any,FALSE,0,,,employee_performance,,low,low,88,FALSE,,,,,,,,,,
 the_reset_hour,The Reset Hour,,one_off,async_slack,async_slack,Any,Any,FALSE,0,,,employee_performance,,low,low,84,FALSE,,,,,,,,,,
 virtual_escape_quest,Virtual Escape Quest,,one_off,remote,remote_only,Any,After_5pm,FALSE,15,90,500,team_connection,games_and_competitions,high,high,92,TRUE,,Confetti,https://withconfetti.com,,,https://www.withconfetti.com/product/virtual-escape-quest,,,,
 taboo,Taboo,,one_off,remote,remote_only,Any,After_5pm,FALSE,11,60,995,team_connection,games_and_competitions,high,high,81,TRUE,,Confetti,https://withconfetti.com,,,https://www.withconfetti.com/product/virtual-taboo,,,,

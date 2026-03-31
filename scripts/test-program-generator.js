@@ -50,7 +50,7 @@ function runFixture(windowObj, fixture) {
 
 function ensureNolaWeeks(program) {
   const FIXED_WEEK_IDS = {
-    1: "7_day_energy_reset_challenge",
+    1: "5_day_energy_reset_challenge",
     2: "coffee_meetup",
     3: "ama_teammate_edition",
     4: "wednesday_at_the_square",
@@ -106,7 +106,7 @@ function findFirstOfferingByPriority(pool, ids, predicate) {
 
 function ensureKickoffPriorities(program, offeringPool) {
   const weekOnePriority = [
-    "7_day_energy_reset_challenge",
+    "5_day_energy_reset_challenge",
     "clarity_week",
     "focus_thread",
     "ama_teammate_edition"

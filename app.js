@@ -719,8 +719,8 @@ function getRevelryGoalEventMapForBudget(monthlyBudget = 0) {
 function getSeededFreeEventTemplates() {
   return [
     {
-      id: "7_day_energy_reset_challenge",
-      templateId: "7_day_energy_reset_challenge",
+      id: "5_day_energy_reset_challenge",
+      templateId: "5_day_energy_reset_challenge",
       title: "5-Day Energy Reset Challenge",
       description: "A lightweight async Slack challenge to reset team energy with daily prompts.",
       type: "rsvp",
@@ -14170,7 +14170,7 @@ function renderRsvpStep() {
   const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
   const eventName = String(state.pollBuilder?.chosenEventLabel || pollSnapshot.topEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
   const normalizedEventName = String(eventName || "").trim().toLowerCase();
-  const isEnergyResetLaunch = chosenEventId === "7_day_energy_reset_challenge"
+  const isEnergyResetLaunch = chosenEventId === "5_day_energy_reset_challenge"
     || normalizedEventName === "5-day energy reset challenge"
     || normalizedEventName.includes("energy reset challenge");
   const eventDateTimeValue = String(state.pollBuilder?.chosenDateTime || pollSnapshot.topTimeRaw || "").trim();

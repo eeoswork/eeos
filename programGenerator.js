@@ -23,7 +23,7 @@
   };
 
   const KICKOFF_ASYNC_PRIORITY_IDS = [
-    "7_day_energy_reset_challenge",
+    "5_day_energy_reset_challenge",
     "clarity_week",
     "focus_thread",
     "ama_teammate_edition"
@@ -342,7 +342,7 @@
   // Week 12 depends on whether the team has Saturday availability.
   function buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget) {
     const fixedIds = new Set([
-      "7_day_energy_reset_challenge",
+      "5_day_energy_reset_challenge",
       "coffee_meetup",
       "ama_teammate_edition",
       "wednesday_at_the_square",
@@ -407,7 +407,7 @@
     }
 
     const slotOfferings = [
-      findById("7_day_energy_reset_challenge"), // week 1
+      findById("5_day_energy_reset_challenge"), // week 1
       findById("coffee_meetup"),                // week 2
       findById("ama_teammate_edition"),          // week 3
       findById("wednesday_at_the_square"),       // week 4
