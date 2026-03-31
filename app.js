@@ -282,14 +282,15 @@ Stretch Break 🧘‍♂️
 Today’s micro-challenge:
 👉 Stand and perform this active chest opener stretch below for 1 minute.
 
-https://eeos.work/active_chest_opener_stretch.gif
-
 Why this works
 Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
 
 Have a favorite stretch?
-Share a GIF of it with us!`,
-  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a><br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`,
+Share a GIF of it with us!
+
+
+https://eeos.work/active_chest_opener_stretch.gif`,
+  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!<br><br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a>`,
   },
   {
     key: "day_3",
