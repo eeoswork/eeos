@@ -263,13 +263,13 @@ Drop an emoji if you're in!`,
     title: "Day 1",
     plainMessage: `Day 1 of our 5-Day Energy Reset Challenge:
 
-**Breathing Reset** 🌬️
+Breathing Reset 🌬️
 👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.
 
-**Why this works**
+Why this works
 Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.
 
-**Have something to add?**
+Have something to add?
 Write a word or two that describes how you feel after completing the breathing reset.`,
     htmlMessage: `<u>Day 1 of our 5-Day Energy Reset Challenge:</u><br><br><b>Breathing Reset</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Have something to add?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
   },
@@ -278,16 +278,16 @@ Write a word or two that describes how you feel after completing the breathing r
     title: "Day 2",
     plainMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge
 
-**Stretch Break** 🧘‍♂️
+Stretch Break 🧘‍♂️
 Today’s micro-challenge:
 👉 Stand up and perform this active chest opener stretch for 1 minute:
 
-https://eeos.work/active_chest_opener_stretch.gif
+[GIF included in rich-text paste]
 
-**Why this works**
+Why this works
 Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
 
-**Have a favorite stretch?**
+Have a favorite stretch?
 Share a GIF of it with us!`,
   htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand up and perform this active chest opener stretch for 1 minute:<br><br><img src="https://eeos.work/active_chest_opener_stretch.gif" alt="Active chest opener stretch" style="max-width:100%;height:auto;border-radius:12px;"><br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`
   },
@@ -296,18 +296,18 @@ Share a GIF of it with us!`,
     title: "Day 3",
     plainMessage: `Day 3 of the 5-Day Energy Reset Challenge:
 
-**Posture Reset 🖥️**
+Posture Reset 🖥️
 
 Today’s micro-challenge:
 👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!
 
-**Why this works**
+Why this works
 Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.
 
-**Posture score**
+Posture score
 Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!
 
-https://eeos.work/good_posture.jpg`,
+[Image included in rich-text paste]`,
     htmlMessage: `<u>Day 3 of the 5-Day Energy Reset Challenge:</u><br><br><b>Posture Reset 🖥️</b><br><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><img src="https://eeos.work/good_posture.jpg" alt="Good posture reference" style="max-width:100%;height:auto;border-radius:12px;">`
   },
   {
@@ -315,14 +315,14 @@ https://eeos.work/good_posture.jpg`,
     title: "Day 4",
     plainMessage: `Day 4 of the 5-Day Energy Reset Challenge:
 
-**Hydration Boost** 💧
+Hydration Boost 💧
 Today’s micro-challenge:
 👉 Drink a full glass of water right now, and aim for one small glass every hour.
 
-**Why this matters**
+Why this matters
 On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.
 
-**Tip swap**
+Tip swap
 Share one trick you use to remember to drink enough water during the day.`,
     htmlMessage: `<u>Day 4 of the 5-Day Energy Reset Challenge:</u><br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
   },
@@ -331,28 +331,28 @@ Share one trick you use to remember to drink enough water during the day.`,
     title: "Day 5",
     plainMessage: `Final day of our 5-Day Energy Reset Challenge:
 
-**Walk It Out** 🚶
+Walk It Out 🚶
 Today’s micro-challenge:
 👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.
 
-**Why this works**
+Why this works
 Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.
 
-**Walk the walk**
+Walk the walk
 Snap a photo of something interesting from your walk and drop it in the thread!`,
     htmlMessage: `<u>Final day of our 5-Day Energy Reset Challenge:</u><br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
   },
   {
     key: "day_6",
     title: "Day 6 (Wrap Up)",
-    plainMessage: `🌟 **Day 6: Energy Reset Mini-Circuit!**
+    plainMessage: `🌟 Day 6: Energy Reset Mini-Circuit!
 Celebrate completing the 5-Day Challenge with a quick, energizing flow:
 
-1️⃣ **Breathe:** 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)
-2️⃣ **Walk:** ~5 minutes wherever you can move, preferably outdoors
-3️⃣ **Hydrate:** Drink a full glass of water
-4️⃣ **Stretch:** Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)
-5️⃣ **Posture Check:** Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis
+1️⃣ Breathe: 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)
+2️⃣ Walk: ~5 minutes wherever you can move, preferably outdoors
+3️⃣ Hydrate: Drink a full glass of water
+4️⃣ Stretch: Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)
+5️⃣ Posture Check: Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis
 
 Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
     htmlMessage: `<u>🌟 <b>Day 6: Energy Reset Mini-Circuit!</b></u><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
@@ -6246,6 +6246,27 @@ function convertClipboardTextToHtml(text) {
     .join("<br>");
 }
 
+function copyWithExecCommand(plainText, htmlText) {
+  return new Promise((resolve, reject) => {
+    const onCopy = (event) => {
+      event.preventDefault();
+      if (!event.clipboardData) return;
+      event.clipboardData.setData("text/plain", plainText);
+      event.clipboardData.setData("text/html", htmlText);
+    };
+
+    document.addEventListener("copy", onCopy);
+    const copied = document.execCommand("copy");
+    document.removeEventListener("copy", onCopy);
+
+    if (copied) {
+      resolve();
+      return;
+    }
+    reject(new Error("Legacy copy failed"));
+  });
+}
+
 async function writeClipboardMessage(text, options = {}) {
   const plainText = String(text || "");
   const htmlText = String(options.html || convertClipboardTextToHtml(plainText));
@@ -6260,7 +6281,21 @@ async function writeClipboardMessage(text, options = {}) {
     return;
   }
 
-  await navigator.clipboard.writeText(plainText);
+  if (typeof document.execCommand === "function") {
+    try {
+      await copyWithExecCommand(plainText, htmlText);
+      return;
+    } catch (_error) {
+      // Fall through to plain text clipboard path.
+    }
+  }
+
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+    await navigator.clipboard.writeText(plainText);
+    return;
+  }
+
+  throw new Error("Clipboard API unavailable");
 }
 
 function showSaveNudge() {
@@ -14666,12 +14701,6 @@ function renderRsvpStep() {
     const energyResetCopyButton = panel.querySelector('[data-energy-reset-copy]');
     if (energyResetCopyButton) {
       energyResetCopyButton.onclick = async () => {
-        if (activeEnergyResetStep.key === "day_2") {
-          // Slack does not preserve inline clipboard images; plain text keeps the GIF URL for preview unfurl.
-          await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.plainMessage });
-          showMiniToast("Day 2 message copied. Paste into Slack; keep the GIF URL on its own line.");
-          return;
-        }
         await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.htmlMessage });
         showMiniToast(`${activeEnergyResetStep.title} message copied.`);
       };
