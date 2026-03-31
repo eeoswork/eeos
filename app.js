@@ -280,16 +280,16 @@ Write a word or two that describes how you feel after completing the breathing r
 
 Stretch Break 🧘‍♂️
 Today’s micro-challenge:
-👉 Stand up and perform this active chest opener stretch for 1 minute:
-
-[GIF included in rich-text paste]
+👉 Stand and perform this active chest opener stretch below for 1 minute
 
 Why this works
 Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
 
 Have a favorite stretch?
 Share a GIF of it with us!`,
-  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand up and perform this active chest opener stretch for 1 minute:<br><br><img src="https://eeos.work/active_chest_opener_stretch.gif" alt="Active chest opener stretch" style="max-width:100%;height:auto;border-radius:12px;"><br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`
+  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!`,
+    mediaUrl: "https://eeos.work/active_chest_opener_stretch.gif",
+    mediaAlt: "Active chest opener stretch"
   },
   {
     key: "day_3",
@@ -14507,6 +14507,14 @@ function renderRsvpStep() {
                         <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
                         <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
                       </div>
+                      ${step.mediaUrl ? `
+                        <div class="mt-5">
+                          <img src="${escapeHtml(step.mediaUrl)}" alt="${escapeHtml(step.mediaAlt || "Reference image")}" class="w-full max-w-sm rounded-lg border border-slate-200" />
+                          <div class="mt-3">
+                            <button type="button" data-energy-reset-copy-media="${step.key}" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy GIF</button>
+                          </div>
+                        </div>
+                      ` : ""}
                       <div class="mt-8">
                         <label class="flex items-center gap-2 text-sm text-slate-700">
                           <input type="checkbox" data-energy-reset-advance="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
@@ -14750,6 +14758,16 @@ function renderRsvpStep() {
     if (energyResetSlackButton) {
       energyResetSlackButton.onclick = () => {
         window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+      };
+    }
+
+    const energyResetCopyMediaButton = panel.querySelector('[data-energy-reset-copy-media]');
+    if (energyResetCopyMediaButton) {
+      energyResetCopyMediaButton.onclick = async () => {
+        const mediaUrl = String(activeEnergyResetStep.mediaUrl || "").trim();
+        if (!mediaUrl) return;
+        await writeClipboardMessage(mediaUrl);
+        showMiniToast("GIF link copied.");
       };
     }
 
