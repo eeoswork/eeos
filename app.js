@@ -14502,19 +14502,23 @@ function renderRsvpStep() {
                   </div>
                   ${isActive ? `
                     <div class="p-4">
-                      <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
-                      <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
-                        <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
-                      </div>
-                      ${step.mediaUrl ? `
-                        <div class="mt-5">
-                          <img src="${escapeHtml(step.mediaUrl)}" alt="${escapeHtml(step.mediaAlt || "Reference image")}" class="w-full max-w-sm rounded-lg border border-slate-200" />
-                          <div class="mt-3">
-                            <button type="button" data-energy-reset-copy-media="${step.key}" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Copy GIF</button>
+                      <div class="${step.mediaUrl ? "grid grid-cols-1 gap-4 md:grid-cols-2" : ""}">
+                        <div>
+                          <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
+                          <div class="mt-4 flex flex-wrap items-center gap-3">
+                            <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
+                            <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
                           </div>
                         </div>
-                      ` : ""}
+                        ${step.mediaUrl ? `
+                          <div>
+                            <img src="${escapeHtml(step.mediaUrl)}" alt="${escapeHtml(step.mediaAlt || "Reference image")}" class="w-full rounded-lg border border-slate-200" />
+                            <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                              To share in Slack: right-click the GIF, choose <strong>Copy Image</strong>, then paste in Slack.
+                            </div>
+                          </div>
+                        ` : ""}
+                      </div>
                       <div class="mt-8">
                         <label class="flex items-center gap-2 text-sm text-slate-700">
                           <input type="checkbox" data-energy-reset-advance="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
@@ -14758,33 +14762,6 @@ function renderRsvpStep() {
     if (energyResetSlackButton) {
       energyResetSlackButton.onclick = () => {
         window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
-      };
-    }
-
-    const energyResetCopyMediaButton = panel.querySelector('[data-energy-reset-copy-media]');
-    if (energyResetCopyMediaButton) {
-      energyResetCopyMediaButton.onclick = async () => {
-        const mediaUrl = String(activeEnergyResetStep.mediaUrl || "").trim();
-        if (!mediaUrl) return;
-        try {
-          if (!(navigator.clipboard && window.ClipboardItem)) {
-            throw new Error("Image clipboard not supported in this browser.");
-          }
-          const response = await fetch(mediaUrl, { mode: "cors" });
-          if (!response.ok) {
-            throw new Error(`Could not load GIF (${response.status}).`);
-          }
-          const blob = await response.blob();
-          const mimeType = String(blob.type || "").startsWith("image/") ? blob.type : "image/gif";
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              [mimeType]: blob
-            })
-          ]);
-          showMiniToast("GIF copied. Paste it directly into Slack.");
-        } catch (_error) {
-          showMiniToast("Couldn’t copy GIF binary here. Right-click the GIF, copy image, then paste into Slack.");
-        }
       };
     }
 
