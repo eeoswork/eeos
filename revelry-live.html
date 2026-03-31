@@ -157,33 +157,58 @@ Everything to play for in the <b>Men's tournament</b>, with the top 3 separated 
 </div>
 
 <script>
-const MESSAGE = `🏀 **March Madness Bracket Challenge Update**
+const MESSAGE_PLAIN = `🏀 March Madness Bracket Challenge Update
 
 Here are the current standings heading into the Final Four...
 
-In the **Women's tournament**, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:
+In the Women's tournament, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:
 🥇 1st - Jeff (1,030 pts)
 🥈 2nd - Cameron (1,000)
 🥉 3rd - Peter (990)
 
-Everything to play for in the **Men's tournament**, with the top 3 separated by 20 points and each riding with a different pick for national champion:
+Everything to play for in the Men's tournament, with the top 3 separated by 20 points and each riding with a different pick for national champion:
 🥇 1st - Stu (830 pts)
 🥈 2nd - Nick (820)
 🥉 3rd - Rebecca (810)
 
-**Follow the standings here:**
-<https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f|Women's tournament>
-<https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9|Men's tournament>`;
+Follow the standings here:
+Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f
+Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9`;
 
-function copyMessage() {
-  navigator.clipboard.writeText(MESSAGE).catch(function() {
+const MESSAGE_HTML = `🏀 <b>March Madness Bracket Challenge Update</b><br><br>
+Here are the current standings heading into the Final Four...<br><br>
+In the <b>Women's tournament</b>, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:<br>
+🥇 1st - Jeff (1,030 pts)<br>
+🥈 2nd - Cameron (1,000)<br>
+🥉 3rd - Peter (990)<br><br>
+Everything to play for in the <b>Men's tournament</b>, with the top 3 separated by 20 points and each riding with a different pick for national champion:<br>
+🥇 1st - Stu (830 pts)<br>
+🥈 2nd - Nick (820)<br>
+🥉 3rd - Rebecca (810)<br><br>
+<b>Follow the standings here:</b><br>
+<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f">Women's tournament</a><br>
+<a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9">Men's tournament</a>`;
+
+async function copyMessage() {
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([MESSAGE_PLAIN], { type: 'text/plain' }),
+          'text/html': new Blob([MESSAGE_HTML], { type: 'text/html' })
+        })
+      ]);
+    } else {
+      await navigator.clipboard.writeText(MESSAGE_PLAIN);
+    }
+  } catch (e) {
     var ta = document.createElement('textarea');
-    ta.value = MESSAGE;
+    ta.value = MESSAGE_PLAIN;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-  });
+  }
   var btn = document.getElementById('copyBtn');
   var label = document.getElementById('copiedLabel');
   btn.textContent = '✓ Copied';
