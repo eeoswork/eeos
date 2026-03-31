@@ -6246,6 +6246,43 @@ function convertClipboardTextToHtml(text) {
     .join("<br>");
 }
 
+function convertHtmlToSlackPlainText(html) {
+  const root = document.createElement("div");
+  root.innerHTML = String(html || "");
+
+  const walk = (node) => {
+    if (!node) return "";
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent || "";
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return "";
+    }
+
+    const tag = String(node.tagName || "").toUpperCase();
+    if (tag === "BR") return "\n";
+    if (tag === "IMG") return "";
+
+    const childrenText = Array.from(node.childNodes || []).map(walk).join("");
+
+    if (tag === "B" || tag === "STRONG" || tag === "U") {
+      const trimmed = childrenText.trim();
+      return trimmed ? `*${trimmed}*` : "";
+    }
+    if (tag === "I" || tag === "EM") {
+      const trimmed = childrenText.trim();
+      return trimmed ? `_${trimmed}_` : "";
+    }
+
+    return childrenText;
+  };
+
+  return walk(root)
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function copyWithExecCommand(plainText, htmlText) {
   return new Promise((resolve, reject) => {
     const onCopy = (event) => {
@@ -6268,8 +6305,11 @@ function copyWithExecCommand(plainText, htmlText) {
 }
 
 async function writeClipboardMessage(text, options = {}) {
-  const plainText = String(text || "");
-  const htmlText = String(options.html || convertClipboardTextToHtml(plainText));
+  const hasHtmlOverride = typeof options.html === "string" && options.html.trim().length > 0;
+  const htmlText = String(hasHtmlOverride ? options.html : convertClipboardTextToHtml(String(text || "")));
+  const plainText = hasHtmlOverride
+    ? String(options.plainText || convertHtmlToSlackPlainText(htmlText))
+    : String(text || "");
 
   if (navigator.clipboard && window.ClipboardItem) {
     await navigator.clipboard.write([
