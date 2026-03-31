@@ -14766,8 +14766,25 @@ function renderRsvpStep() {
       energyResetCopyMediaButton.onclick = async () => {
         const mediaUrl = String(activeEnergyResetStep.mediaUrl || "").trim();
         if (!mediaUrl) return;
-        await writeClipboardMessage(mediaUrl);
-        showMiniToast("GIF link copied.");
+        try {
+          if (!(navigator.clipboard && window.ClipboardItem)) {
+            throw new Error("Image clipboard not supported in this browser.");
+          }
+          const response = await fetch(mediaUrl, { mode: "cors" });
+          if (!response.ok) {
+            throw new Error(`Could not load GIF (${response.status}).`);
+          }
+          const blob = await response.blob();
+          const mimeType = String(blob.type || "").startsWith("image/") ? blob.type : "image/gif";
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [mimeType]: blob
+            })
+          ]);
+          showMiniToast("GIF copied. Paste it directly into Slack.");
+        } catch (_error) {
+          showMiniToast("Couldn’t copy GIF binary here. Right-click the GIF, copy image, then paste into Slack.");
+        }
       };
     }
 
