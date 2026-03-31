@@ -399,9 +399,9 @@ const INTEREST_DESCRIPTIONS = {
 
 const CADENCE_OPTIONS = ["Monthly", "Every 2 months", "Quarterly"];
 const SCHEDULE_OPTIONS = [
-  "Remote",
-  "In-person",
-  "Hybrid"
+  { value: "Hybrid", label: "Both virtual and in-person" },
+  { value: "Remote", label: "Virtual only" },
+  { value: "In-person", label: "In-person only" }
 ];
 
 
@@ -719,52 +719,88 @@ function getRevelryGoalEventMapForBudget(monthlyBudget = 0) {
 function getSeededFreeEventTemplates() {
   return [
     {
-      id: "seed-lunch-listen",
-      templateId: "seed-lunch-listen",
+      id: "7_day_energy_reset_challenge",
+      templateId: "7_day_energy_reset_challenge",
+      title: "5-Day Energy Reset Challenge",
+      description: "A lightweight async Slack challenge to reset team energy with daily prompts.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "virtual"
+    },
+    {
+      id: "coffee_meetup",
+      templateId: "coffee_meetup",
+      title: "Coffee Meetup",
+      description: "A casual team coffee chat to spark connection and conversation.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "virtual"
+    },
+    {
+      id: "clarity_week",
+      templateId: "clarity_week",
+      title: "Clarity Week",
+      description: "An async Slack focus week with short prompts to improve clarity and momentum.",
+      type: "rsvp",
+      workflowType: "rsvp",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "virtual"
+    },
+    {
+      id: "lunch_and_listen",
+      templateId: "lunch_and_listen",
       title: "Lunch & Listen",
-      description: "A casual team lunch where one person shares a short story, lesson, or current project.",
+      description: "A free remote lunch session where teammates share updates and stories.",
       type: "rsvp",
       workflowType: "rsvp",
       costPerPerson: 0,
       estimatedCost: 0,
       url: "",
-      eventLocationType: "hybrid"
+      eventLocationType: "virtual"
     },
     {
-      id: "seed-coffee-break",
-      templateId: "seed-coffee-break",
-      title: "Coffee Break",
-      description: "A 20-minute informal chat break to help teammates connect across functions.",
+      id: "focus_thread",
+      templateId: "focus_thread",
+      title: "Focus Thread",
+      description: "An async Slack thread designed to protect focus and celebrate deep-work wins.",
       type: "rsvp",
       workflowType: "rsvp",
       costPerPerson: 0,
       estimatedCost: 0,
       url: "",
-      eventLocationType: "hybrid"
+      eventLocationType: "virtual"
     },
     {
-      id: "seed-wind-down",
-      templateId: "seed-wind-down",
+      id: "wind_down",
+      templateId: "wind_down",
       title: "Wind Down",
-      description: "A low-key end-of-week check-in to celebrate wins and close the week together.",
+      description: "A free remote end-of-week check-in to celebrate progress together.",
       type: "rsvp",
       workflowType: "rsvp",
       costPerPerson: 0,
       estimatedCost: 0,
       url: "",
-      eventLocationType: "hybrid"
+      eventLocationType: "virtual"
     },
     {
-      id: "seed-pet-parade",
-      templateId: "seed-pet-parade",
-      title: "Pet Parade",
-      description: "A fun show-and-tell where teammates introduce their pets and share quick stories.",
+      id: "ama_teammate_edition",
+      templateId: "ama_teammate_edition",
+      title: "AMA: Teammate Edition",
+      description: "An async Slack AMA that helps teammates connect through shared questions.",
       type: "rsvp",
       workflowType: "rsvp",
       costPerPerson: 0,
       estimatedCost: 0,
       url: "",
-      eventLocationType: "hybrid"
+      eventLocationType: "virtual"
     }
   ];
 }
@@ -4135,16 +4171,18 @@ function renderScheduleInputs(containerId, selected, onToggle) {
 const container = $(containerId);
 if (!container) return;
 container.innerHTML = "";
-SCHEDULE_OPTIONS.forEach((option) => {
-  const id = `${containerId}-${option}`.replace(/[^a-zA-Z0-9]/g, "-");
-  const checked = selected[0] === option;
+SCHEDULE_OPTIONS.forEach((optionConfig) => {
+  const optionValue = String(optionConfig?.value || "");
+  const optionLabel = String(optionConfig?.label || optionValue);
+  const id = `${containerId}-${optionValue}`.replace(/[^a-zA-Z0-9]/g, "-");
+  const checked = selected[0] === optionValue;
   const label = document.createElement("label");
   label.className = "group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition-all";
   label.innerHTML = `
-    <input id="${id}" name="${containerId}-radio" type="radio" value="${option}" ${checked ? "checked" : ""} class="h-4 w-4 accent-slate-900" />
-    <span class="text-sm font-medium text-slate-900">${option}</span>
+    <input id="${id}" name="${containerId}-radio" type="radio" value="${optionValue}" ${checked ? "checked" : ""} class="h-4 w-4 accent-slate-900" />
+    <span class="text-sm font-medium text-slate-900">${optionLabel}</span>
   `;
-  label.querySelector("input").addEventListener("change", () => onToggle(option));
+  label.querySelector("input").addEventListener("change", () => onToggle(optionValue));
   container.appendChild(label);
 });
 }
@@ -5106,13 +5144,55 @@ function getFourMonthCategoryPills() {
   ];
 }
 
-function getLaunchEventLocationPillByMonth(monthName = "") {
-  const label = String(monthName || "").trim();
-  if (label === "March") return "Remote";
-  if (label === "April") return "Remote";
-  if (label === "May") return "Hybrid";
-  if (label === "June") return "In-person";
+function getLaunchEventLocationPillFromOffering(offering = null) {
+  if (!offering || typeof offering !== "object") return "";
+
+  const mode = String(offering.formatCapability || offering.deliveryMode || "").trim().toLowerCase();
+  if (offering.inPersonOnly === true || mode === "in_person_only" || mode === "in-person") {
+    return "In-person";
+  }
+  if (mode === "hybrid") return "Hybrid";
+  if (mode === "remote_only" || mode === "remote" || mode === "virtual" || mode === "async_slack") {
+    return "Remote";
+  }
   return "";
+}
+
+function getLaunchEventLocationPill(monthEvent = {}) {
+  try {
+    const offerings = Array.isArray(window.EVENT_OFFERINGS) ? window.EVENT_OFFERINGS : [];
+    const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
+    const byId = new Map();
+
+    offerings.forEach((item) => {
+      const id = String(item?.id || "").trim();
+      if (id) byId.set(id, item);
+    });
+    templates.forEach((item) => {
+      const id = String(item?.id || "").trim();
+      if (id && !byId.has(id)) byId.set(id, item);
+    });
+
+    const labels = new Set();
+    const addLabelForId = (templateId) => {
+      const id = String(templateId || "").trim();
+      if (!id) return;
+      const entry = byId.get(id);
+      const label = getLaunchEventLocationPillFromOffering(entry);
+      if (label) labels.add(label);
+    };
+
+    if (monthEvent?.isConfettiMonth && Array.isArray(monthEvent.confettiOptions)) {
+      monthEvent.confettiOptions.forEach((option) => addLabelForId(option?.templateId || option?.id));
+    } else {
+      addLabelForId(monthEvent?.templateId || monthEvent?.id);
+    }
+
+    if (labels.size <= 1) return labels.values().next().value || "";
+    return "Mixed";
+  } catch (_error) {
+    return "";
+  }
 }
 
 function getRevelryMonthFooterText(monthName = "") {
@@ -5348,6 +5428,91 @@ function getFourMonthShortlistCandidates(monthEvent = {}) {
   return picked.slice(0, 4);
 }
 
+function renderWeeklyProgramCards(weeks, options) {
+  const isInitialRender = options.isInitialRender !== false;
+  const expandedCardIds = options.expandedCardIds instanceof Set ? options.expandedCardIds : new Set();
+  const quarterLabel = Number(options.quarterLabel || 1);
+
+  const calendarIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 text-slate-500" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 2.25v2.25m7.5-2.25v2.25M3.75 8.25h16.5M4.5 4.5h15a.75.75 0 01.75.75v14.25a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V5.25A.75.75 0 014.5 4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12h.008v.008H8.25V12zm3.75 0h.008v.008H12V12zm3.75 0h.008v.008h-.008V12zM8.25 15h.008v.008H8.25V15zm3.75 0h.008v.008H12V15zm3.75 0h.008v.008h-.008V15z" /></svg>`;
+
+  return (Array.isArray(weeks) ? weeks : []).map((weekEvent, index) => {
+    const weekNum = Number(weekEvent.week || 0);
+    const weekLabel = `Week ${weekNum}`;
+    const cardId = `week-card-${weekNum}`;
+    const isExpanded = isInitialRender ? index === 0 : expandedCardIds.has(cardId);
+    const isLaunchReady = weekEvent.isLaunchReady === true;
+    const isKickoffWeek = weekNum <= 2;
+
+    let locationPill = "";
+    try { locationPill = getLaunchEventLocationPill(weekEvent); } catch (_e) { locationPill = ""; }
+    const locationPillHtml = locationPill
+      ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
+      : "";
+    const kickoffPillHtml = isKickoffWeek
+      ? `<span style="display: inline-block; background: #ecfeff; color: #0f766e; border: 1px solid #99f6e4; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap;">Kickoff</span>`
+      : "";
+
+    const cardBorderStyle = "1px solid #e2e8f0";
+    const cardShadowStyle = index === 0
+      ? "0 6px 18px rgba(15, 23, 42, 0.10)"
+      : "0 1px 2px rgba(15, 23, 42, 0.04)";
+    const headerBackgroundStyle = index === 0 ? "#f1f5f9" : "#f8fafc";
+
+    const sectionLabel = index === 0
+      ? "KICKOFF"
+      : (weekNum === 6 ? `YOUR NEXT QUARTER (Q${quarterLabel})` : null);
+    const sectionColor = index === 0 ? "#0074ff" : "#94a3b8";
+    const lineColor = index === 0 ? "#0074ff" : "#e2e8f0";
+    const sectionHeaderHtml = sectionLabel
+      ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;${index > 0 ? " margin-top: 38px;" : ""}">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: ${sectionColor}; white-space: nowrap;">${sectionLabel}</span>
+          <div style="flex: 1; height: 1px; background: ${lineColor};"></div>
+        </div>`
+      : "";
+
+    const costDisplay = weekEvent.estimatedCost > 0
+      ? `Est. cost: ${fmtMoney(weekEvent.estimatedCost)}`
+      : "Free";
+    const eventUrl = String(weekEvent.url || "").trim();
+    const launchButtonHtml = isLaunchReady
+      ? `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(weekEvent.templateId || "")}" data-month="1">Launch this Event →</button>`
+      : (eventUrl
+          ? `<a href="${escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="rounded-lg px-4 py-2 text-xs font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 inline-block" style="text-decoration: none;">Preview ↗</a>`
+          : `<span class="text-xs text-slate-400 italic">Available after kickoff</span>`);
+
+    return sectionHeaderHtml + `
+      <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}">
+        <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px;">
+                  ${calendarIconSvg}
+                  <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(weekLabel)}</h3>
+                </div>
+                ${kickoffPillHtml}
+                ${locationPillHtml}
+              </div>
+              <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(weekEvent.title || "")}</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; line-height: 1;">${isExpanded ? "▾" : "▸"}</span>
+          </div>
+        </div>
+        <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
+          <p class="text-sm text-slate-600 mt-2">${escapeHtml(weekEvent.description || "")}</p>
+          ${isLaunchReady ? `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(costDisplay)}</div>
+            ${launchButtonHtml}
+          </div>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 function renderFourMonthProgram() {
   const container = $("monthlyEvents");
   const budgetSummary = $("fourMonthBudgetSummary");
@@ -5389,6 +5554,16 @@ function renderFourMonthProgram() {
     syncBudgetDisplaySurfaces();
   }
 
+  // If the generator produced a weeks array, render per-week cards; otherwise fall back to monthly cards.
+  const hasWeeks = Array.isArray(program.weeks) && program.weeks.length > 0;
+  if (hasWeeks) {
+    const fallbackQuarter = Math.floor(((currentMonth + 1) % 12) / 3) + 1;
+    container.innerHTML = renderWeeklyProgramCards(program.weeks, {
+      isInitialRender,
+      expandedCardIds,
+      quarterLabel: Number(program?.nextQuarter || fallbackQuarter)
+    });
+  } else {
   // Render 4 months (stacked vertically, collapsed by default)
   container.innerHTML = (program.events || []).map((monthEvent, index) => {
     const monthIndex = (currentMonth + index) % 12;
@@ -5399,7 +5574,7 @@ function renderFourMonthProgram() {
     const cardId = `month-card-${index + 1}`;
     const isExpanded = isInitialRender ? index === highlightedIndex : expandedCardIds.has(cardId);
     const categoryPill = categoryPills[index] || "Event";
-    const locationPill = getLaunchEventLocationPillByMonth(monthName);
+    const locationPill = getLaunchEventLocationPill(monthEvent);
     const locationPillHtml = locationPill
       ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
       : "";
@@ -5658,6 +5833,7 @@ function renderFourMonthProgram() {
       </div>
     `;
   }).join("");
+  } // end monthly view
 
   // Add click handlers for expand/collapse
   setTimeout(() => {
@@ -6942,13 +7118,15 @@ function initializeLandingSetupFlow() {
   // Populate step 4: Preferred Schedule
   const scheduleContainer = $("setupSchedule");
   if (scheduleContainer) {
-    scheduleContainer.innerHTML = SCHEDULE_OPTIONS.map((opt) => {
-      const id = `setupSchedule-${opt.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
-      const isSelected = state.landingDraft.schedule[0] === opt;
+    scheduleContainer.innerHTML = SCHEDULE_OPTIONS.map((optionConfig) => {
+      const optionValue = String(optionConfig?.value || "");
+      const optionLabel = String(optionConfig?.label || optionValue);
+      const id = `setupSchedule-${optionValue.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+      const isSelected = state.landingDraft.schedule[0] === optionValue;
       return `
         <label class="group flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition-all">
-          <input id="${id}" name="setupSchedule-radio" type="radio" value="${opt}" ${isSelected ? 'checked' : ''} class="h-4 w-4 accent-slate-900" />
-          <span class="text-sm font-medium text-slate-900">${opt}</span>
+          <input id="${id}" name="setupSchedule-radio" type="radio" value="${optionValue}" ${isSelected ? 'checked' : ''} class="h-4 w-4 accent-slate-900" />
+          <span class="text-sm font-medium text-slate-900">${optionLabel}</span>
         </label>
       `;
     }).join('');
@@ -13941,7 +14119,12 @@ function renderRsvpStep() {
     return;
   }
 
+  const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
   const eventName = String(state.pollBuilder?.chosenEventLabel || pollSnapshot.topEventLabel || state.eventLaunchContext?.title || "Selected event").trim() || "Selected event";
+  const normalizedEventName = String(eventName || "").trim().toLowerCase();
+  const isEnergyResetLaunch = chosenEventId === "7_day_energy_reset_challenge"
+    || normalizedEventName === "5-day energy reset challenge"
+    || normalizedEventName.includes("energy reset challenge");
   const eventDateTimeValue = String(state.pollBuilder?.chosenDateTime || pollSnapshot.topTimeRaw || "").trim();
   const eventDateTimeDisplay = eventDateTimeValue ? (formatPollDateTime(eventDateTimeValue) || eventDateTimeValue) : "Date/time required before sending RSVP";
   const savedDeadlineIso = String(state.pollBuilder?.rsvpDeadlineDateTime || "").trim();
@@ -13994,9 +14177,9 @@ function renderRsvpStep() {
   const expanded = Boolean(state.pollBuilder?.rsvpAttendeesExpanded);
   const visibleAttendees = expanded ? attendingNames : attendingNames.slice(0, previewLimit);
   const hasMoreAttendees = attendingNames.length > previewLimit;
-  const subject = `Confirm your spot — ${eventName}`;
+  let subject = `Confirm your spot — ${eventName}`;
   const eventLine = eventDateTimeValue ? (formatPollDateTime(eventDateTimeValue) || eventDateTimeValue) : "the scheduled event time";
-  const messageBody = savedDeadlineIso
+  let messageBody = savedDeadlineIso
     ? `We’re planning ${eventName} on ${eventLine}.\nPlease confirm if you’ll attend so we can finalize the headcount.\nRSVP by ${deadlineDisplayText}.\nRSVP here: ${rsvpShareUrl || "[RSVP link]"}`
     : `We’re planning ${eventName} on ${eventLine}.\nPlease confirm if you’ll attend so we can finalize the headcount.\nRSVP here: ${rsvpShareUrl || "[RSVP link]"}`;
 
@@ -14006,7 +14189,34 @@ function renderRsvpStep() {
     stopRsvpResultsPolling();
   }
 
-  panel.innerHTML = `
+  if (isEnergyResetLaunch) {
+    subject = "5-Day Energy Reset Challenge — Monday kickoff";
+    messageBody = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    panel.innerHTML = `
+      <div class="space-y-5">
+        <article class="rounded-xl border border-slate-200 bg-white p-5">
+          <h4 class="text-base font-semibold text-slate-900">5-Day Energy Reset Challenge</h4>
+          <p class="mt-1 text-sm text-slate-600">This challenge includes 5 daily messages. Monday is ready now.</p>
+
+          <div class="mt-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <div class="text-sm font-semibold text-slate-900">Monday</div>
+              <span class="text-xs font-medium text-slate-500">Expanded</span>
+            </div>
+            <div class="space-y-3 p-4">
+              <p class="text-sm text-slate-700">Copy and paste this message into Slack and schedule it for Monday</p>
+              <textarea id="rsvpStepMondayMessage" class="min-h-[140px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800" readonly>${escapeHtml(messageBody)}</textarea>
+              <div class="flex flex-wrap items-center gap-3">
+                <button id="rsvpStepCopyMessage" type="button" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
+                <button id="rsvpStepOpenSlack" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    `;
+  } else {
+    panel.innerHTML = `
     <div class="space-y-5">
       <article class="rounded-xl border border-slate-200 bg-white p-5">
         <h4 class="text-base font-semibold text-slate-900">Create RSVP</h4>
@@ -14095,6 +14305,7 @@ function renderRsvpStep() {
       ` : ""}
     </div>
   `;
+  }
 
   const eventDateTimeInput = document.getElementById("rsvpStepEventDateTime");
   if (eventDateTimeInput) {

@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="assets/styles.css" />
 <script src="config.js"></script>
 <script src="eventTemplates.js"></script>
+<script src="offerings.js"></script>
 <script src="programGenerator.js"></script>
 <script>
   // Always load the latest local app bundle during active development.
@@ -285,7 +286,7 @@
                 <div id="landingTfHero">
                   <p class="landing-tf-eyebrow">OS FOR PEOPLE LEADERS</p>
                   <h2 class="landing-tf-headline">Build your people program and launch your first company event&mdash;on us</h2>
-                  <p class="landing-tf-sub">Answer a few quick questions and see the next 4 months of your program tailored to your goals, budget, and team preferences.</p>
+                  <p class="landing-tf-sub">Answer a few quick questions and see the next 12 weeks of your program tailored to your goals, budget, and team preferences.</p>
                   <div class="landing-tf-process" aria-label="3-step process overview">
                     <div class="landing-tf-process-top" aria-hidden="true">
                       <span>Step 1</span>
@@ -421,8 +422,8 @@
 
                     <!-- Q1: Setting -->
                     <div id="ltfQ1" class="ltf-q">
-                      <h3 class="ltf-q-title">How does your team usually participate?</h3>
-                      <p class="ltf-q-sub">Check all that apply.</p>
+                      <h3 class="ltf-q-title">Which formats are possible for your team?</h3>
+                      <p class="ltf-q-sub">Selecting 'Both virtual and in-person' unlocks every experience in your people program.</p>
                       <div id="ltfScheduleGrid" class="flex flex-wrap gap-2 mt-4 mb-2"></div>
 
 
@@ -438,7 +439,7 @@
                         <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-availability-section="days">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">What days are your team typically available?</span>
+                            <span class="text-sm font-medium text-slate-700">What days work best for your team’s group events?</span>
                           </div>
                           <p class="mb-5 text-xs text-slate-500">Check all that apply</p>
                           <div class="flex flex-wrap gap-1">
@@ -452,7 +453,7 @@
                         <div class="mb-6 mt-12 border-b border-slate-200 pb-6" data-ltf-availability-section="times">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">What time of day works best?</span>
+                            <span class="text-sm font-medium text-slate-700">What time of day works best for group events?</span>
                           </div>
                           <p class="mb-5 text-xs text-slate-500">Check all that apply</p>
                           <div class="flex gap-1">
@@ -464,7 +465,7 @@
                         <div class="mb-2 mt-6" data-ltf-availability-section="weekend">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">Include weekends?</span>
+                            <span class="text-sm font-medium text-slate-700">Are weekends okay for group events?</span>
                           </div>
                           <p class="mb-5 text-xs text-slate-500">Most volunteering opportunities take place on Saturdays.</p>
                           <div class="flex gap-1">
@@ -497,7 +498,7 @@
                   <div class="ltf-loading-wrap">
                     <div class="ltf-spinner"></div>
                     <p class="ltf-loading-title">Building your program…</p>
-                    <p class="ltf-loading-sub">Tailoring 4 months of events to your team.</p>
+                    <p class="ltf-loading-sub">Tailoring 12 weeks of events to your team.</p>
                   </div>
                 </div>
 
@@ -633,7 +634,7 @@
             </div>
             <p class="landing-tf-eyebrow">OS FOR PEOPLE LEADERS</p>
             <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Create your employee experience program in minutes</h2>
-            <p class="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:text-lg">Answer a few quick questions and see the next 4 months of team events tailored to your goals, budget, and team interests.</p>
+            <p class="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:text-lg">Answer a few quick questions and see the next 12 weeks of team events tailored to your goals, budget, and team interests.</p>
             <p class="mt-3 text-sm font-medium text-slate-500">Takes about 2 minutes • No signup required</p>
             <div id="landingStartActions" class="mt-6">
               <button id="landingStartBuilder" type="button" class="inline-flex h-11 items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800">Start building →</button>
@@ -788,8 +789,8 @@
                 <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
-                <label class="block text-sm font-medium mb-1">Where should team events take place?</label>
-                <div class="text-xs text-slate-500 mb-2">Check all that apply</div>
+                <label class="block text-sm font-medium mb-1">Which formats are possible for your team?</label>
+                <div class="text-xs text-slate-500 mb-2">Selecting 'Both virtual and in-person' unlocks every experience in your people program.</div>
                 <div id="setupSchedule" class="flex flex-wrap gap-2 mb-4"></div>
                 <div id="setupLocalCityRow" class="hidden" style="margin-top: 24px; margin-bottom: 12px;">
                   <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
@@ -815,7 +816,7 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
-                      <span class="text-sm font-medium text-slate-700">What days work best for team events?</span>
+                      <span class="text-sm font-medium text-slate-700">What days work best for your team’s group events?</span>
                     </div>
                     <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
                     <section>
@@ -832,7 +833,7 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
-                      <span class="text-sm font-medium text-slate-700">What time windows on these days work best?</span>
+                      <span class="text-sm font-medium text-slate-700">What time of day works best for group events?</span>
                     </div>
                     <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
                     <section>
@@ -849,7 +850,7 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">iii</span>
-                      <span class="text-sm font-medium text-slate-700">Include weekends?</span>
+                      <span class="text-sm font-medium text-slate-700">Are weekends okay for group events?</span>
                     </div>
                     <section>
                       <button id="setupSaturdayToggle" type="button" class="flex w-full items-center justify-between rounded-sm border border-slate-200 bg-slate-50/50 p-4 text-left transition-all hover:border-slate-300">
@@ -920,7 +921,7 @@
                 <!-- 4-Month Program Overlay (shown during generation) -->
                 <div class="events-shortlist-overlay" id="fourMonthProgramOverlay" style="display: none;">
                   <div class="events-overlay-card">
-                    <p class="events-overlay-title">Generating your 4-month Employee Experience Program</p>
+                    <p class="events-overlay-title">Generating your 12-week Employee Experience Program</p>
                     <p class="events-overlay-subtitle">Based on your team's goals, budget, and preferences.</p>
                   </div>
                 </div>
@@ -929,7 +930,7 @@
                 <div id="fourMonthProgram">
                   <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 0;">
-                      <h4 class="text-base font-semibold text-slate-900">Your 4-Month Employee Experience Program</h4>
+                      <h4 class="text-base font-semibold text-slate-900">Your 12-Week Employee Experience Program</h4>
                       <p class="text-sm text-slate-600 mt-1">Designed to match your team's goals and budget</p>
                     </div>
 

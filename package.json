@@ -6,6 +6,8 @@
 "scripts": {
  "start": "electron .",
  "start:web": "python3 -m http.server 5173",
+ "offerings:build": "node scripts/build-offerings.js",
+ "offerings:test": "node scripts/test-program-generator.js",
  "cf:dev": "wrangler dev",
  "cf:deploy": "wrangler deploy",
 	"cf:d1:apply": "wrangler d1 execute eeos --remote --file cloudflare/schema.sql",
