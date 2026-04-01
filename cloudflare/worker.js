@@ -2,10 +2,10 @@ const DEFAULT_POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api";
 const SESSION_TTL_DAYS = 30;
 const APP_ORIGIN_BASE = "https://eeoswork.github.io/eeos";
 const HOME_PAGE_HOSTS = new Set([
-  "eeos.work"
+  "eeos.work",
+  "revelrylabs.eeos.work"
 ]);
 const MAGIC_LINK_HOSTS = new Set([
-  "revelrylabs.eeos.work",
   "testing.eeos.work"
 ]);
 
@@ -48,7 +48,12 @@ async function serveMagicLinkHostRequest(request) {
 }
 
 async function serveHomePageHostRequest(request) {
-  return serveStaticHostRequest(request, "/landing.html");
+  const url = new URL(request.url);
+  const host = String(url.hostname || "").toLowerCase();
+  const fallbackPath = host === "revelrylabs.eeos.work"
+    ? "/index.html"
+    : "/landing.html";
+  return serveStaticHostRequest(request, fallbackPath);
 }
 
 function resolveCorsOrigin(request, env) {
