@@ -86,7 +86,7 @@
     const first = Array.isArray(rawSchedule) && rawSchedule.length
       ? String(rawSchedule[0] || "").trim().toLowerCase()
       : "";
-    if (first === "remote" || first === "in-person" || first === "hybrid") return first;
+    if (first === "remote" || first === "hybrid") return first;
     return "hybrid";
   }
 
@@ -199,7 +199,6 @@
     const passesScheduleFilter = (offering) => {
       if (preferences.schedulePreference === "hybrid") return true;
       if (preferences.schedulePreference === "remote") return offering?.inPersonOnly !== true;
-      if (preferences.schedulePreference === "in-person") return offering?.inPersonOnly === true;
       return true;
     };
 
@@ -424,7 +423,8 @@
     return slotOfferings.map((offering, slotIndex) => ({
       week: slotIndex + 1,
       templateId: String(offering?.id || ""),
-      title: String(offering?.title || ""),
+      // Override title for week 12 trivia event
+      title: (slotIndex === 11 && String(offering?.id) === "trivia_thursday_port_orleans_7_30p") ? "Trivia Night" : String(offering?.title || ""),
       description: String(offering?.description || ""),
       estimatedCost: roundMoney(estimateTotalCost(offering || {}, teamSize)),
       goals: Array.isArray(offering?.goals) ? [...offering.goals] : [],
@@ -466,7 +466,7 @@
     );
 
     // ── NOLA preset: return fixed 12-week program for New Orleans in-person/hybrid teams ──
-    const isNolaContext = (preferences.schedulePreference === "in-person" || preferences.schedulePreference === "hybrid")
+    const isNolaContext = (preferences.schedulePreference === "hybrid")
       && isNolaCity(preferences.localCity);
     if (isNolaContext) {
       const weeks = buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget);
@@ -498,7 +498,7 @@
     let carryover = 0;
 
     const freePool = catalog.filter((item) => estimateTotalCost(item, teamSize) === 0);
-    const requiresMonthThreeInPerson = preferences.schedulePreference === "in-person" || preferences.schedulePreference === "hybrid";
+    const requiresMonthThreeInPerson = preferences.schedulePreference === "hybrid";
 
     const monthRows = months.map((monthDate, index) => {
       const weightedBudget = monthlyBudget * Number(weights[index] || 1);

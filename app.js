@@ -248,34 +248,34 @@ function isWorkflowStepSkipped(stepNum, workflowType = getActiveWorkflowType()) 
 const ENERGY_RESET_LAUNCH_STEPS = [
   {
     key: "day_0",
-    title: "Day 0 (Kickoff)",
+    title: "Day 0 - Kickoff",
     plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins tomorrow.
-Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being — all in under two minutes.
 
-A small shift each day can make the whole week feel lighter.
+  Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being.  You can fit each mini-challenge in whenever you like — each takes just a few minutes.
 
-We start tomorrow.
-Drop an emoji if you're in!`,
-    htmlMessage: `<u>🌻 <b>Our 5-Day Energy Reset Challenge begins tomorrow.</b></u><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being — <b>all in under two minutes</b>.<br><br>A small shift each day can make the whole week feel lighter.<br><br>We start tomorrow.<br><b>Drop an emoji if you're in!</b>`
+  A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.
+
+  We start tomorrow. Drop an emoji if you're in!`,
+    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins tomorrow.</b><br><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being. You can fit each mini-challenge in whenever you like — <b>each takes just a few minutes</b>.<br><br>A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.<br><br>We start tomorrow. <b>Drop an emoji if you're in!</b>`
   },
   {
     key: "day_1",
-    title: "Day 1",
+    title: "Day 1 - Take a Breath",
     plainMessage: `Day 1 of our 5-Day Energy Reset Challenge:
 
-Breathing Reset 🌬️
+Take a Breath 🌬️
 👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.
 
 Why this works
 Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.
 
-Have something to add?
+Did it help?
 Write a word or two that describes how you feel after completing the breathing reset.`,
-    htmlMessage: `<u>Day 1 of our 5-Day Energy Reset Challenge:</u><br><br><b>Breathing Reset</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Have something to add?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
+  htmlMessage: `<u>Day 1 of our 5-Day Energy Reset Challenge:</u><br><br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
   },
   {
     key: "day_2",
-    title: "Day 2",
+    title: "Day 2 - Stretch Break",
     plainMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge
 
 Stretch Break 🧘‍♂️
@@ -294,7 +294,7 @@ https://eeos.work/active_chest_opener_stretch.gif`,
   },
   {
     key: "day_3",
-    title: "Day 3",
+    title: "Day 3 - Posture Reset",
     plainMessage: `Day 3 of the 5-Day Energy Reset Challenge:
 
 Posture Reset 🖥️
@@ -313,7 +313,7 @@ https://eeos.work/good_posture.jpg`,
   },
   {
     key: "day_4",
-    title: "Day 4",
+    title: "Day 4 - Hydration Boost",
     plainMessage: `Day 4 of the 5-Day Energy Reset Challenge:
 
 Hydration Boost 💧
@@ -329,7 +329,7 @@ Share one trick you use to remember to drink enough water during the day.`,
   },
   {
     key: "day_5",
-    title: "Day 5",
+    title: "Day 5 - Walk it Out",
     plainMessage: `Final day of our 5-Day Energy Reset Challenge:
 
 Walk It Out 🚶
@@ -345,7 +345,7 @@ Snap a photo of something interesting from your walk and drop it in the thread!`
   },
   {
     key: "day_6",
-    title: "Day 6 (Wrap Up)",
+    title: "Day 6 - Wrap Up",
     plainMessage: `🌟 Day 6: Energy Reset Mini-Circuit!
 Celebrate completing the 5-Day Challenge with a quick, energizing flow:
 
@@ -353,17 +353,19 @@ Celebrate completing the 5-Day Challenge with a quick, energizing flow:
 2️⃣ Walk: ~5 minutes wherever you can move, preferably outdoors
 3️⃣ Hydrate: Drink a full glass of water
 4️⃣ Stretch: Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)
-5️⃣ Posture Check: Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis
+5️⃣ Posture Check: Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor
 
 Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
-    htmlMessage: `<u>🌟 <b>Day 6: Energy Reset Mini-Circuit!</b></u><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
+    htmlMessage: `<u>🌟 <b>Day 6: Energy Reset Mini-Circuit!</b></u><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
   }
 ];
 
 function createDefaultEnergyResetLaunchState() {
   return {
     activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key,
-    completedStepKeys: []
+    completedStepKeys: [],
+    challengeStartedAt: null,
+    reviewUnlockAt: null
   };
 }
 
@@ -381,6 +383,12 @@ function normalizeEnergyResetLaunchState(target = state.pollBuilder) {
   launchState.completedStepKeys = Array.isArray(launchState.completedStepKeys)
     ? Array.from(new Set(launchState.completedStepKeys.map((key) => String(key || "")).filter((key) => validKeys.has(key))))
     : [];
+  if (!(typeof launchState.challengeStartedAt === "string" || launchState.challengeStartedAt === null)) {
+    launchState.challengeStartedAt = null;
+  }
+  if (!(typeof launchState.reviewUnlockAt === "string" || launchState.reviewUnlockAt === null)) {
+    launchState.reviewUnlockAt = null;
+  }
 
   const activeStepKey = String(launchState.activeStepKey || "");
   if (!validKeys.has(activeStepKey) || launchState.completedStepKeys.includes(activeStepKey)) {
@@ -556,9 +564,8 @@ const INTEREST_DESCRIPTIONS = {
 
 const CADENCE_OPTIONS = ["Monthly", "Every 2 months", "Quarterly"];
 const SCHEDULE_OPTIONS = [
-  { value: "Hybrid", label: "Both virtual and in-person" },
-  { value: "Remote", label: "Virtual only" },
-  { value: "In-person", label: "In-person only" }
+  { value: "Hybrid", label: "Both virtual and in-person only" },
+  { value: "Remote", label: "Virtual only" }
 ];
 
 
@@ -5592,85 +5599,113 @@ function renderWeeklyProgramCards(weeks, options) {
   const isInitialRender = options.isInitialRender !== false;
   const expandedCardIds = options.expandedCardIds instanceof Set ? options.expandedCardIds : new Set();
   const quarterLabel = Number(options.quarterLabel || 1);
+  const weekItems = Array.isArray(weeks) ? weeks : [];
+
+  if (!weekItems.length) return "";
 
   const calendarIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 text-slate-500" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 2.25v2.25m7.5-2.25v2.25M3.75 8.25h16.5M4.5 4.5h15a.75.75 0 01.75.75v14.25a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V5.25A.75.75 0 014.5 4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12h.008v.008H8.25V12zm3.75 0h.008v.008H12V12zm3.75 0h.008v.008h-.008V12zM8.25 15h.008v.008H8.25V15zm3.75 0h.008v.008H12V15zm3.75 0h.008v.008h-.008V15z" /></svg>`;
 
-  return (Array.isArray(weeks) ? weeks : []).map((weekEvent, index) => {
-    const weekNum = Number(weekEvent.week || 0);
-    const weekLabel = `Week ${weekNum}`;
-    const cardId = `week-card-${weekNum}`;
-    const isExpanded = isInitialRender ? index === 0 : expandedCardIds.has(cardId);
-    const isLaunchReady = weekEvent.isLaunchReady === true;
-    const isKickoffWeek = weekNum <= 2;
+  const buildSectionHeaderHtml = (label, isPrimary) => {
+    const sectionColor = isPrimary ? "#0074ff" : "#94a3b8";
+    const lineColor = isPrimary ? "#0074ff" : "#e2e8f0";
+    return `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;${isPrimary ? "" : " margin-top: 22px;"}">
+      <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: ${sectionColor}; white-space: nowrap;">${label}</span>
+      <div style="flex: 1; height: 1px; background: ${lineColor};"></div>
+    </div>`;
+  };
 
-    let locationPill = "";
-    try { locationPill = getLaunchEventLocationPill(weekEvent); } catch (_e) { locationPill = ""; }
-    const locationPillHtml = locationPill
-      ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
-      : "";
-    const kickoffPillHtml = isKickoffWeek
-      ? `<span style="display: inline-block; background: #ecfeff; color: #0f766e; border: 1px solid #99f6e4; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap;">Kickoff</span>`
-      : "";
+  const primaryEvent = weekItems[0];
+  const remainingEvents = weekItems.slice(1);
+  const primaryWeekNum = Number(primaryEvent.week || 1);
+  const primaryWeekLabel = `Week ${primaryWeekNum}`;
+  const primaryCardId = `week-card-${primaryWeekNum}`;
+  const primaryIsExpanded = isInitialRender ? true : expandedCardIds.has(primaryCardId);
+  const primaryIsLaunchReady = primaryEvent.isLaunchReady === true;
+  const primaryCostDisplay = primaryEvent.estimatedCost > 0
+    ? `Est. cost: ${fmtMoney(primaryEvent.estimatedCost)}`
+    : "Free";
+  const primaryEventUrl = String(primaryEvent.url || "").trim();
+  const primaryLaunchButtonHtml = primaryIsLaunchReady
+    ? `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(primaryEvent.templateId || "")}" data-month="1">Launch this Event →</button>`
+    : (primaryEventUrl
+        ? `<a href="${escapeHtml(primaryEventUrl)}" target="_blank" rel="noopener noreferrer" class="rounded-lg px-4 py-2 text-xs font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 inline-block" style="text-decoration: none;">Preview ↗</a>`
+        : `<span class="text-xs text-slate-400 italic">Available after kickoff</span>`);
 
-    const cardBorderStyle = "1px solid #e2e8f0";
-    const cardShadowStyle = index === 0
-      ? "0 6px 18px rgba(15, 23, 42, 0.10)"
-      : "0 1px 2px rgba(15, 23, 42, 0.04)";
-    const headerBackgroundStyle = index === 0 ? "#f1f5f9" : "#f8fafc";
+  let locationPill = "";
+  try { locationPill = getLaunchEventLocationPill(primaryEvent); } catch (_e) { locationPill = ""; }
+  const locationPillHtml = locationPill
+    ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
+    : "";
 
-    const sectionLabel = index === 0
-      ? "KICKOFF"
-      : (weekNum === 6 ? `YOUR NEXT QUARTER (Q${quarterLabel})` : null);
-    const sectionColor = index === 0 ? "#0074ff" : "#94a3b8";
-    const lineColor = index === 0 ? "#0074ff" : "#e2e8f0";
-    const sectionHeaderHtml = sectionLabel
-      ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;${index > 0 ? " margin-top: 38px;" : ""}">
-          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: ${sectionColor}; white-space: nowrap;">${sectionLabel}</span>
-          <div style="flex: 1; height: 1px; background: ${lineColor};"></div>
-        </div>`
-      : "";
-
-    const costDisplay = weekEvent.estimatedCost > 0
-      ? `Est. cost: ${fmtMoney(weekEvent.estimatedCost)}`
-      : "Free";
-    const eventUrl = String(weekEvent.url || "").trim();
-    const launchButtonHtml = isLaunchReady
-      ? `<button class="rounded-lg px-4 py-2 text-xs font-medium bg-slate-800 text-white hover:bg-slate-700" data-action="create-event" data-template-id="${escapeHtml(weekEvent.templateId || "")}" data-month="1">Launch this Event →</button>`
-      : (eventUrl
-          ? `<a href="${escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="rounded-lg px-4 py-2 text-xs font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 inline-block" style="text-decoration: none;">Preview ↗</a>`
-          : `<span class="text-xs text-slate-400 italic">Available after kickoff</span>`);
-
-    return sectionHeaderHtml + `
-      <div id="${cardId}" style="border-radius: 12px; border: ${cardBorderStyle}; box-shadow: ${cardShadowStyle}; background: white; overflow: hidden;" class="four-month-card" data-expanded="${isExpanded ? "true" : "false"}">
-        <div style="padding: 16px; background: ${headerBackgroundStyle}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;" class="four-month-header">
-          <div style="flex: 1; min-width: 0;">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="display: inline-flex; align-items: center; gap: 6px;">
-                  ${calendarIconSvg}
-                  <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(weekLabel)}</h3>
-                </div>
-                ${kickoffPillHtml}
-                ${locationPillHtml}
+  const kickoffHeaderHtml = buildSectionHeaderHtml("KICKOFF", true);
+  const primaryCardHtml = `
+    <div id="${primaryCardId}" style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10); background: white; overflow: hidden;" class="four-month-card" data-expanded="${primaryIsExpanded ? "true" : "false"}">
+      <div style="padding: 16px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                ${calendarIconSvg}
+                <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(primaryWeekLabel)}</h3>
               </div>
-              <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(weekEvent.title || "")}</p>
+              <span style="display: inline-block; background: #ecfeff; color: #0f766e; border: 1px solid #99f6e4; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap;">Kickoff</span>
+              ${locationPillHtml}
             </div>
+            <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(primaryEvent.title || "")}</p>
           </div>
-          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
-            <span class="four-month-arrow" style="font-size: 18px; color: #64748b; flex-shrink: 0; line-height: 1;">${isExpanded ? "▾" : "▸"}</span>
-          </div>
-        </div>
-        <div class="four-month-content" style="display: ${isExpanded ? "block" : "none"}; padding: 16px; border-top: 1px solid #e2e8f0;">
-          <p class="text-sm text-slate-600 mt-2">${escapeHtml(weekEvent.description || "")}</p>
-          ${isLaunchReady ? `
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center;">
-            <div style="font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(costDisplay)}</div>
-            ${launchButtonHtml}
-          </div>` : ""}
         </div>
       </div>
-    `;
+      <div class="four-month-content" style="display: block; padding: 16px; border-top: 1px solid #e2e8f0;">
+        <p class="text-sm text-slate-600">${escapeHtml(primaryEvent.description || "")}</p>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+          <div style="font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(primaryCostDisplay)}</div>
+          ${primaryLaunchButtonHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const remainderRowsHtml = remainingEvents.map((weekEvent, index) => {
+    const weekNum = Number(weekEvent.week || 0);
+    const weekLabel = `Week ${weekNum}`;
+    const isLast = index === remainingEvents.length - 1;
+    const dividerHtml = weekNum === 6
+      ? `<tr><td colspan="4" style="padding: 18px 0 6px 0;">${buildSectionHeaderHtml(`YOUR NEXT QUARTER (Q${quarterLabel})`, false)}</td></tr>`
+      : "";
+
+    // Map specific event IDs to custom display names
+    let displayTitle = weekEvent.title || "";
+    if (weekEvent.id === "trivia_thursday_port_orleans_7_30p") {
+      displayTitle = "Trivia Night";
+    }
+    return `${dividerHtml}
+      <tr>
+        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
+        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}</td>
+        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${escapeHtml(weekEvent.description || "")}</td>
+        <td style="padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: right; white-space: nowrap; vertical-align: top;">${weekEvent.estimatedCost > 0 ? `Est. cost: ${escapeHtml(fmtMoney(weekEvent.estimatedCost))}` : "Free"}</td>
+      </tr>`;
   }).join("");
+
+  const timelineHtml = remainingEvents.length
+    ? `<div style="margin-top: 14px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding-left: 16px; padding-right: 16px;">
+      <table style="width: 100%; border-collapse: collapse; table-layout: auto;">
+        <thead>
+          <tr>
+            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Week</th>
+            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap; min-width: 180px;">Event</th>
+            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Description</th>
+            <th style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: right; white-space: nowrap;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${remainderRowsHtml}
+        </tbody>
+      </table>
+    </div>`
+    : "";
+
+  return `${kickoffHeaderHtml}${primaryCardHtml}${timelineHtml}`;
 }
 
 function renderFourMonthProgram() {
@@ -5856,7 +5891,6 @@ function renderFourMonthProgram() {
         ? "Prefer a team vote?"
         : "Prefer to choose the event yourself?";
       const modeToggleLabel = isBookMode ? "Generate a poll" : "Skip poll → Book now";
-      const primaryLabel = isBookMode ? "Book this event ↗" : "Let your team choose — Generate poll";
       const confettiHeaderTitle = isRevelryBracketsMagicContext() && monthName === "April"
         ? "Team-Selected Event"
         : "Choose Event";
@@ -5929,10 +5963,6 @@ function renderFourMonthProgram() {
               }).join("")}
             </div>
             ${revelryMonthFooterText ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">${escapeHtml(revelryMonthFooterText)}</div>` : ""}
-            ${isRevelryLockedFollowOnMonth ? "" : `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-              <span class="text-xs text-slate-500">Selected: <strong>${selectedIds.length}</strong> ${isBookMode ? "(choose exactly 1)" : "(choose 2-3)"}</span>
-              <button class="rounded-lg px-4 py-2 text-xs font-medium ${canContinue ? "bg-slate-800 text-white hover:bg-slate-700" : "bg-slate-300 text-slate-600 cursor-not-allowed"}" ${canContinue ? "" : "disabled"} data-action="four-month-shortlist-primary" data-month="${index + 1}">${escapeHtml(primaryLabel)}</button>
-            </div>`}
           </div>
         </div>
       `;
@@ -8443,6 +8473,14 @@ function isSetupStepValid(step) {
 function updateSetupStepButtonStates() {
   document.querySelectorAll(".setup-step-next").forEach(btn => {
     const step = parseInt(btn.dataset.step);
+
+    if (step === 7) {
+      btn.classList.add("hidden");
+      btn.disabled = true;
+      return;
+    }
+    btn.classList.remove("hidden");
+
     const isValid = isSetupStepValid(step);
     const isCompleted = state.completedSetupSteps.includes(step);
     const isDirty = !!(state.setupStepDirty && state.setupStepDirty[step]);
@@ -8455,10 +8493,6 @@ function updateSetupStepButtonStates() {
       btn.textContent = "Save";
     } else if (step === 6) {
       btn.textContent = "Get your program →";
-    } else if (step === 7) {
-      btn.textContent = state.setupShortlistMode === "book"
-        ? "Book this event ↗"
-        : "Let your team choose — Generate poll";
     } else {
       btn.textContent = btn.dataset.defaultLabel;
     }
@@ -10398,6 +10432,8 @@ function updateEventsShortlistModeUI() {
   // Poll mode: disable CTA unless at least 2 selected
   // Book mode: disable CTA unless exactly 1 selected
   if (eventsPollButton) {
+    eventsPollButton.classList.add("hidden");
+    eventsPollButton.disabled = true;
     const domSelectedCount = getShortlistSelectedIndexes().length;
     const persistedSelectedCount = normalizePollSelection(
       Array.isArray(state.setupPollSelectedEventIndexes) ? state.setupPollSelectedEventIndexes : [],
@@ -10414,7 +10450,7 @@ function updateEventsShortlistModeUI() {
       eventsPollButton.classList.add("opacity-50", "cursor-not-allowed", "bg-slate-300", "text-slate-600", "hover:bg-slate-300");
       eventsPollButton.classList.remove("bg-slate-800", "text-white", "hover:bg-slate-700");
     } else {
-      eventsPollButton.disabled = false;
+      eventsPollButton.disabled = true;
       eventsPollButton.classList.remove("opacity-50", "cursor-not-allowed", "bg-slate-300", "text-slate-600", "hover:bg-slate-300");
       eventsPollButton.classList.add("bg-slate-800", "text-white", "hover:bg-slate-700");
     }
@@ -10458,7 +10494,7 @@ function updateEventsShortlistModeUI() {
   if (eventsPollButton) {
     eventsPollButton.textContent = isBookMode
       ? "Book this event ↗"
-      : "Let your team choose — Generate poll";
+      : "Book this event ↗";
   }
   if (helperText) {
     helperText.classList.toggle("hidden", !isBookMode);
@@ -13321,6 +13357,72 @@ function renderRunEventStep() {
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isMarchMadnessEvent = isRevelryBracketsMagicContext() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const isRevelryMarchMadnessRunSubsteps = isMagicLinkContext && isMarchMadnessEvent;
+  const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
+  const normalizedRunEventName = String(eventName || "").trim().toLowerCase();
+  const isEnergyResetLaunch = chosenEventId === "5_day_energy_reset_challenge"
+    || normalizedRunEventName === "5-day energy reset challenge"
+    || normalizedRunEventName.includes("energy reset challenge");
+
+  if (isEnergyResetLaunch) {
+    const allTemplates = getSeededFreeEventTemplates();
+    const currentTemplateIndex = allTemplates.findIndex(t => String(t.id || t.templateId || "").trim() === "5_day_energy_reset_challenge");
+    const nextTemplate = currentTemplateIndex >= 0 && currentTemplateIndex + 1 < allTemplates.length ? allTemplates[currentTemplateIndex + 1] : null;
+    const nextEventTitle = nextTemplate ? String(nextTemplate.title || "").trim() : "your next event";
+    const launchState = normalizeEnergyResetLaunchState();
+    const now = new Date();
+    let launchStateChanged = false;
+
+    if (!launchState.challengeStartedAt) {
+      launchState.challengeStartedAt = now.toISOString();
+      launchStateChanged = true;
+    }
+    if (!launchState.reviewUnlockAt) {
+      launchState.reviewUnlockAt = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString();
+      launchStateChanged = true;
+    }
+
+    const unlockDate = new Date(String(launchState.reviewUnlockAt || ""));
+    const hasValidUnlockDate = !Number.isNaN(unlockDate.getTime());
+    const remainingMs = hasValidUnlockDate ? Math.max(0, unlockDate.getTime() - now.getTime()) : 0;
+    const totalHours = Math.floor(remainingMs / (60 * 60 * 1000));
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    const countdownLabel = remainingMs > 0
+      ? `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} remaining`
+      : "Countdown complete";
+    const unlockDateLabel = hasValidUnlockDate
+      ? unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
+      : "7 days from launch";
+
+    panel.innerHTML = `
+      <article class="rounded-xl border border-slate-200 bg-white p-5">
+        <h3 class="text-2xl font-semibold text-slate-900">Current Event: 5-Day Energy Reset Challenge</h3>
+        <p class="mt-2 text-sm text-slate-600">You already scheduled all Slack posts for this challenge. Nice work.</p>
+      </article>
+
+      <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+        <h4 class="text-base font-semibold text-slate-900">What to do now</h4>
+        <p class="mt-2 text-sm text-slate-700">There is nothing left to do right now while the challenge runs.</p>
+        <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div class="text-xs uppercase tracking-wide text-slate-500">Countdown to review</div>
+          <div class="mt-1 text-lg font-semibold text-slate-900">${countdownLabel}</div>
+          <div class="mt-1 text-xs text-slate-500">Review Impact unlocks around ${escapeHtml(unlockDateLabel)}.</div>
+        </div>
+      </article>
+
+      <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+        <h4 class="text-base font-semibold text-slate-900">What happens next</h4>
+        <p class="mt-2 text-sm text-slate-700">After this countdown ends, the next step is <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge (budget, participation, reactions, and notes).</p>
+        <p class="mt-2 text-sm text-slate-700">After Review Impact, the next event —<strong>${escapeHtml(nextEventTitle)}</strong>— will be ready for launch.</p>
+      </article>
+    `;
+
+    if (launchStateChanged) {
+      persistState();
+      renderSidebarStepMenus();
+    }
+    return;
+  }
 
   normalizePromoteEventState();
   const promote = state.promoteEvent;
@@ -14492,14 +14594,17 @@ function renderRsvpStep() {
               const isActive = step.key === activeStepKey;
               const isDone = energyResetState.completedStepKeys.includes(step.key);
               const nextStep = ENERGY_RESET_LAUNCH_STEPS[index + 1] || null;
+              const dayTitleMatch = step.title.match(/^(Day\s+\d+)(.*)$/);
+              const dayPrefix = dayTitleMatch ? dayTitleMatch[1] : step.title;
+              const daySuffix = dayTitleMatch ? dayTitleMatch[2] : "";
               const advanceLabel = nextStep
                 ? `Mark complete and advance to ${nextStep.title}`
                 : "I have scheduled all Slack messages for the 5-Day Energy Reset Challenge";
               return `
-                <article class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                  <div class="flex items-center justify-between px-4 py-3 ${isActive ? "border-b border-slate-200" : ""}">
-                    <div class="text-sm font-semibold text-slate-900">${step.title}</div>
-                    ${isDone ? '<span class="text-xs font-medium text-emerald-600">✓ Complete</span>' : ""}
+                <article class="overflow-hidden rounded-xl border bg-white ${isActive ? "border-slate-400 shadow-sm" : "border-slate-200"}">
+                  <div class="flex items-center justify-between px-4 py-3 ${isActive ? "border-b border-slate-700 bg-slate-800" : ""}">
+                    <div class="text-sm ${isActive ? "text-white" : "text-slate-900"}"><span class="font-semibold">${dayPrefix}</span><span class="font-normal">${daySuffix}</span></div>
+                    ${isDone ? `<span class="text-xs font-medium ${isActive ? "text-emerald-300" : "text-emerald-600"}">✓ Complete</span>` : ""}
                   </div>
                   ${isActive ? `
                     <div class="p-4">
@@ -14778,8 +14883,16 @@ function renderRsvpStep() {
 
         state.pollBuilder.rsvpSent = true;
         ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.RSVP);
+        const nowIso = new Date().toISOString();
+        if (!launchState.challengeStartedAt) {
+          launchState.challengeStartedAt = nowIso;
+        }
+        if (!launchState.reviewUnlockAt) {
+          launchState.reviewUnlockAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString();
+        }
         persistState();
-        const nextWorkflowStep = workflowType === EVENT_WORKFLOW_TYPES.POLL ? EVENT_WORKFLOW_STEPS.BOOK : EVENT_WORKFLOW_STEPS.PROMOTE;
+        ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.PROMOTE);
+        const nextWorkflowStep = workflowType === EVENT_WORKFLOW_TYPES.POLL ? EVENT_WORKFLOW_STEPS.BOOK : EVENT_WORKFLOW_STEPS.RUN;
         goToEventWorkflowStep(nextWorkflowStep);
       };
     }
@@ -17545,10 +17658,10 @@ function generateRecommendedEvents() {
     el.style.removeProperty("--total");
   });
   
-  // Show the poll button container
+  // Hide the poll button container (Program Reveal no longer uses this CTA)
   const buttonContainer = document.getElementById("eventsPollButtonContainer");
   if (buttonContainer) {
-    buttonContainer.classList.remove("hidden");
+    buttonContainer.classList.add("hidden");
   }
 
   // Show the selection hint above personalized recommendations
