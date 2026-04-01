@@ -564,7 +564,7 @@ const INTEREST_DESCRIPTIONS = {
 
 const CADENCE_OPTIONS = ["Monthly", "Every 2 months", "Quarterly"];
 const SCHEDULE_OPTIONS = [
-  { value: "Hybrid", label: "Both virtual and in-person only" },
+  { value: "Hybrid", label: "Both virtual and in-person" },
   { value: "Remote", label: "Virtual only" }
 ];
 
@@ -1451,7 +1451,6 @@ function parseMagicLinkFromHostPath() {
   }
 
   const hostDefaultTokenMap = {
-    "revelrylabs.eeos.work": "rlabs2026a1b2c3d4",
     "testing.eeos.work": "rlabs2026testa1b2c3d4"
   };
 
@@ -1469,9 +1468,6 @@ function parseMagicLinkFromHostPath() {
 }
 
 function isRevelryLabsReadOnlyMagicLink() {
-  const host = String(window.location.hostname || "").trim().toLowerCase();
-  if (host === "revelrylabs.eeos.work") return true;
-
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return false;
   return parsed.host === "revelrylabs.eeos.work" && parsed.tokenId === "rlabs2026a1b2c3d4";
