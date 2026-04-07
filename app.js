@@ -734,6 +734,15 @@ const FORCE_POLL_PRE_SHARE_VIEW = false;
 const APP_CONFIG = window.__EEOS_CONFIG__ || {};
 const POLL_API_BASE = String(APP_CONFIG.apiBaseUrl || "https://esos-polls.ajolly2.workers.dev/api").replace(/\/+$/, "");
 const POLL_PUBLIC_BASE_URL = "https://eeoswork.github.io/eeos";
+const EVENT_PAGE_LOCKS_CONFIG = (APP_CONFIG.eventPageLocks && typeof APP_CONFIG.eventPageLocks === "object")
+  ? APP_CONFIG.eventPageLocks
+  : {};
+const EVENT_PAGE_LOCK_RULES = (EVENT_PAGE_LOCKS_CONFIG.rules && typeof EVENT_PAGE_LOCKS_CONFIG.rules === "object")
+  ? EVENT_PAGE_LOCKS_CONFIG.rules
+  : {};
+const EVENT_PAGE_LOCK_DEFAULT_DURATION_HOURS = Number.isFinite(Number(EVENT_PAGE_LOCKS_CONFIG.defaultDurationHours))
+  ? Number(EVENT_PAGE_LOCKS_CONFIG.defaultDurationHours)
+  : 0;
 const MAGIC_LINK_HOST_DEFAULTS = {
   "revelrylabs.eeos.work": {
     companyName: "Revelry Labs",
@@ -824,6 +833,121 @@ const REVELRY_GOAL_EVENT_MAP_HIGH_BUDGET = {
     pills: ["Fun/Social", "Team Connection"]
   }
 };
+
+function getNestedValueByPath(source, path) {
+  if (!source || typeof source !== "object") return undefined;
+  const normalizedPath = String(path || "").trim();
+  if (!normalizedPath) return undefined;
+  return normalizedPath.split(".").reduce((cursor, part) => {
+    if (cursor === null || cursor === undefined) return undefined;
+    return cursor[part];
+  }, source);
+}
+
+function getCurrentEventTemplateIdForLocks() {
+  const fromLaunchContext = String(state?.eventLaunchContext?.templateId || "").trim();
+  if (fromLaunchContext) return fromLaunchContext;
+  return String(state?.pollBuilder?.chosenEventId || "").trim();
+}
+
+function getEventPageLockRule(templateId = "", pageKey = "") {
+  const normalizedTemplateId = String(templateId || "").trim();
+  const normalizedPageKey = String(pageKey || "").trim();
+  if (!normalizedPageKey) return null;
+
+  const exactKey = normalizedTemplateId ? `${normalizedTemplateId}:${normalizedPageKey}` : "";
+  const wildcardKey = `*:${normalizedPageKey}`;
+
+  const candidate = (exactKey && EVENT_PAGE_LOCK_RULES[exactKey]) || EVENT_PAGE_LOCK_RULES[wildcardKey] || null;
+  if (!candidate || typeof candidate !== "object") return null;
+  return candidate;
+}
+
+function getEventPageLockDurationMs(rule = null, fallbackMs = 0) {
+  if (!rule || typeof rule !== "object") {
+    return Number.isFinite(Number(fallbackMs)) ? Number(fallbackMs) : 0;
+  }
+
+  const explicitMinutes = Number(rule.durationMinutes);
+  if (Number.isFinite(explicitMinutes) && explicitMinutes > 0) {
+    return Math.round(explicitMinutes * 60 * 1000);
+  }
+
+  const explicitHours = Number(rule.durationHours);
+  if (Number.isFinite(explicitHours) && explicitHours > 0) {
+    return Math.round(explicitHours * 60 * 60 * 1000);
+  }
+
+  if (EVENT_PAGE_LOCK_DEFAULT_DURATION_HOURS > 0) {
+    return Math.round(EVENT_PAGE_LOCK_DEFAULT_DURATION_HOURS * 60 * 60 * 1000);
+  }
+
+  return Number.isFinite(Number(fallbackMs)) ? Number(fallbackMs) : 0;
+}
+
+function resolveEventPageLockAnchorIso(rule = null, explicitAnchorIso = "") {
+  const direct = String(explicitAnchorIso || "").trim();
+  if (direct) return direct;
+  if (!rule || typeof rule !== "object") return "";
+
+  const anchorPath = String(rule.anchorPath || "").trim();
+  if (!anchorPath) return "";
+  const anchoredValue = getNestedValueByPath(state, anchorPath);
+  return String(anchoredValue || "").trim();
+}
+
+function evaluateEventPageLock(options = {}) {
+  const templateId = String(options.templateId || getCurrentEventTemplateIdForLocks() || "").trim();
+  const pageKey = String(options.pageKey || "").trim();
+  const fallbackMs = Number.isFinite(Number(options.fallbackDurationMs)) ? Number(options.fallbackDurationMs) : 0;
+  const fallbackAnchorIso = String(options.anchorAt || "").trim();
+
+  const rule = getEventPageLockRule(templateId, pageKey);
+  const anchorIso = resolveEventPageLockAnchorIso(rule, fallbackAnchorIso);
+  const anchorDate = anchorIso ? new Date(anchorIso) : null;
+  const hasValidAnchor = !!anchorDate && !Number.isNaN(anchorDate.getTime());
+  if (!hasValidAnchor) {
+    return {
+      configured: Boolean(rule),
+      locked: false,
+      templateId,
+      pageKey,
+      anchorAt: "",
+      lockEndsAt: "",
+      remainingMs: 0,
+      reason: "missing_anchor"
+    };
+  }
+
+  const durationMs = getEventPageLockDurationMs(rule, fallbackMs);
+  if (!(durationMs > 0)) {
+    return {
+      configured: Boolean(rule),
+      locked: false,
+      templateId,
+      pageKey,
+      anchorAt: anchorDate.toISOString(),
+      lockEndsAt: anchorDate.toISOString(),
+      remainingMs: 0,
+      reason: "no_duration"
+    };
+  }
+
+  const lockEndsDate = new Date(anchorDate.getTime() + durationMs);
+  const now = Date.now();
+  const remainingMs = Math.max(0, lockEndsDate.getTime() - now);
+
+  return {
+    configured: Boolean(rule),
+    locked: remainingMs > 0,
+    templateId,
+    pageKey,
+    anchorAt: anchorDate.toISOString(),
+    lockEndsAt: lockEndsDate.toISOString(),
+    remainingMs,
+    reason: "ok"
+  };
+}
 const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
   "Support employee wellbeing": {
     templateId: "revelry-goal-wellbeing-mid",
@@ -14131,7 +14255,13 @@ function renderRunEventStep() {
       launchStateChanged = true;
     }
     if (!launchState.reviewUnlockAt) {
-      launchState.reviewUnlockAt = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString();
+      const reviewLock = evaluateEventPageLock({
+        templateId: "5_day_energy_reset_challenge",
+        pageKey: "review_impact",
+        anchorAt: launchState.challengeStartedAt,
+        fallbackDurationMs: 7 * 24 * 60 * 60 * 1000
+      });
+      launchState.reviewUnlockAt = reviewLock.lockEndsAt || new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString();
       launchStateChanged = true;
     }
 

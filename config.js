@@ -41,6 +41,21 @@ window.__EEOS_CONFIG__ = {
     }
   },
 
+  // Optional: time-based page locks by event template + page key.
+  // Key format: "<templateId>:<pageKey>" (or "*:<pageKey>" for wildcard).
+  // Supported rule fields:
+  // - durationHours (number)
+  // - durationMinutes (number)
+  // - anchorPath (string path in state, e.g. "pollBuilder.runEventCompletedAt")
+  eventPageLocks: {
+    defaultDurationHours: 0,
+    rules: {
+      // "5_day_energy_reset_challenge:review_impact": {
+      //   durationHours: 168
+      // }
+    }
+  },
+
   // Legacy Supabase configuration (unused in Cloudflare mode)
   supabaseUrl: '',
   supabaseAnonKey: '',

@@ -12,6 +12,14 @@ window.__EEOS_CONFIG__ = {
       }
     }
   },
+  eventPageLocks: {
+    defaultDurationHours: 0,
+    rules: {
+      // "5_day_energy_reset_challenge:review_impact": {
+      //   durationHours: 168
+      // }
+    }
+  },
   supabaseUrl: "",
   supabaseAnonKey: ""
 };
