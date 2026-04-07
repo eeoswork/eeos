@@ -1267,6 +1267,7 @@ landingDraft: {
   daysSelected: ["Th", "Sa"],
   timesSelected: ["After 5p"],
   localCity: "",
+  workEmail: "",
   surveyAnswers: {}
 },
 fourMonthProgram: null,
@@ -3320,6 +3321,9 @@ try {
   }
   if (typeof state.landingDraft?.perEmployeeBudgetRange !== "string") {
     state.landingDraft.perEmployeeBudgetRange = "";
+  }
+  if (typeof state.landingDraft?.workEmail !== "string") {
+    state.landingDraft.workEmail = "";
   }
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
     state.pollBuilder = {
@@ -5970,6 +5974,9 @@ function renderFourMonthProgram() {
     overviewMonthlyBudget.textContent = monthlyBudgetValue > 0 ? fmtMoney(monthlyBudgetValue) : "-";
   }
   if (overviewGoals) {
+    const hasFourGoals = mappedGoalLabels.length >= 4;
+    overviewGoals.style.fontSize = hasFourGoals ? "14px" : "24px";
+    overviewGoals.style.lineHeight = hasFourGoals ? "1.25" : "1";
     overviewGoals.innerHTML = mappedGoalLabels.length
       ? mappedGoalLabels.map((goal) => `<div>${escapeHtml(goal)}</div>`).join("")
       : "-";
@@ -9326,6 +9333,7 @@ const ltfAnswers = {
   cadence: "Monthly",
   schedule: [],
   localCity: "",
+  workEmail: "",
   daysSelected: [],
   timesSelected: [],
   saturdayOn: undefined,
@@ -9714,6 +9722,22 @@ function initLandingTypeform() {
       syncLtfWeek2Week3PreviewWithGeneratedProgram();
     }
   });
+
+  // Populate Q6: Save Progress (work email)
+  const workEmailInput = $("ltfWorkEmail");
+  ltfAnswers.workEmail = String(state.landingDraft?.workEmail || "").trim();
+  if (workEmailInput) {
+    workEmailInput.value = ltfAnswers.workEmail;
+    workEmailInput.addEventListener("input", () => {
+      ltfAnswers.workEmail = String(workEmailInput.value || "").trim();
+      if (ltfCurrentQ === 6) {
+        const nextBtn = $("ltfNextBtn");
+        if (nextBtn) {
+          nextBtn.disabled = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ltfAnswers.workEmail);
+        }
+      }
+    });
+  }
 
   // Bind CTA
   $("ltfStartBtn")?.addEventListener("click", startLandingTypeform);
@@ -10249,13 +10273,13 @@ function renderLtfNavButtons() {
   // Hide Back button on the initial/setting question (Q0 or Q1)
   const hideBack = ltfCurrentQ === 0 || ltfCurrentQ === 1;
   if (back) back.classList.toggle("hidden", hideBack);
-  if (next) next.textContent = ltfCurrentQ === 5 ? "See your program →" : "Next →";
+  if (next) next.textContent = ltfCurrentQ === 6 ? "See My Program" : "Next →";
 }
 
 function goLtfQuestion(targetIdx) {
   // Skip Q0 (Cadence is disabled)
   if (targetIdx === 0) targetIdx = 1;
-  if (targetIdx < 1 || targetIdx > 5) return;
+  if (targetIdx < 1 || targetIdx > 6) return;
   const isBack = targetIdx < ltfCurrentQ;
   const currentEl = $(`ltfQ${ltfCurrentQ}`);
   const targetEl = $(`ltfQ${targetIdx}`);
@@ -10305,6 +10329,12 @@ function goLtfQuestion(targetIdx) {
       const weekendHasSelection = ltfAnswers.saturdayOn !== undefined && ltfAnswers.ltfAvailabilitySectionsTouched.weekend;
       const allHaveSelections = daysHasSelection && timesHasSelection && weekendHasSelection;
       nextBtn.disabled = !allHaveSelections;
+    }
+  } else if (ltfCurrentQ === 6) {
+    const nextBtn = $("ltfNextBtn");
+    if (nextBtn) {
+      const emailValue = String(ltfAnswers.workEmail || $("ltfWorkEmail")?.value || "").trim();
+      nextBtn.disabled = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
     }
   } else {
     // Other questions: enable by default
@@ -10372,6 +10402,14 @@ function validateLtfCurrentQuestion() {
     if (ltfAnswers.teamPreferenceEstimate.length === 0) { showLtfError("Please select at least one interest."); return false; }
     return true;
   }
+  if (ltfCurrentQ === 6) {
+    const emailValue = String(ltfAnswers.workEmail || $("ltfWorkEmail")?.value || "").trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      showLtfError("Please enter a valid work email.");
+      return false;
+    }
+    return true;
+  }
   return true;
 }
 
@@ -10382,6 +10420,9 @@ function saveLtfCurrentAnswer() {
   // }
   if (ltfCurrentQ === 1) {
     ltfAnswers.localCity = ($("ltfLocalCity")?.value || "").trim();
+  }
+  if (ltfCurrentQ === 6) {
+    ltfAnswers.workEmail = String($("ltfWorkEmail")?.value || "").trim();
   }
   if (ltfCurrentQ === 4) {
     ltfAnswers.employeeCount = parseInt($("ltfEmployeeCount")?.value || "0", 10) || 0;
@@ -10408,7 +10449,7 @@ function saveLtfCurrentAnswer() {
 function advanceLtfQuestion() {
   if (!validateLtfCurrentQuestion()) return;
   saveLtfCurrentAnswer();
-  if (ltfCurrentQ < 5) {
+  if (ltfCurrentQ < 6) {
     goLtfQuestion(ltfCurrentQ + 1);
   } else {
     completeLtfSetup();
@@ -10446,6 +10487,7 @@ function completeLtfSetup() {
   ];
   state.landingDraft.timesSelected = [...ltfAnswers.timesSelected];
   state.landingDraft.teamPreferenceEstimate = [...ltfAnswers.teamPreferenceEstimate];
+  state.landingDraft.workEmail = String(ltfAnswers.workEmail || "").trim();
 
   state.landingTypeformComplete = true;
   state.landingBuilderStarted = true;

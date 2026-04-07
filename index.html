@@ -342,7 +342,7 @@
                 <!-- Phase: Builder -->
                 <div id="landingTfBuilder" class="hidden">
 
-                  <!-- 6-node progress bar (Node 0 disabled) -->
+                  <!-- 7-node progress bar (Node 0 disabled) -->
                   <nav id="landingTfProgressBar" aria-label="Setup progress" class="ltf-pb-track">
                     <!-- <div class="ltf-pb-node-wrap" data-ltf-node-wrap="0">
                       <div class="ltf-node ltf-node--active" data-ltf-node="0">
@@ -390,6 +390,14 @@
                         <span class="ltf-node-ring"></span>
                       </div>
                       <span class="ltf-node-label">Interests</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="5"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="6">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="6">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">SAVE PROGRESS</span>
                     </div>
                   </nav>
 
@@ -515,6 +523,15 @@
                       <h3 class="ltf-q-title">What activities would your team most enjoy?</h3>
                       <p class="ltf-q-sub">Check all that apply. This gets your program rolling; we'll refine it later with team input.</p>
                       <div id="ltfInterestsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
+                    </div>
+
+                    <!-- Q6: Save Progress -->
+                    <div id="ltfQ6" class="ltf-q">
+                      <h3 class="ltf-q-title">Enter your work email to save your progress</h3>
+                      <p class="ltf-q-sub">Based on your answers, we've prepared the first 12 weeks of your people program.  Launch your first event on the next page — no payment required; your first 2 events are free!</p>
+                      <div class="mt-4 mb-2">
+                        <input id="ltfWorkEmail" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="Work email address" />
+                      </div>
                     </div>
 
                   </div><!-- /landingTfQWrap -->
@@ -1029,7 +1046,7 @@
                     </div>
                     <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
                       <div style="font-size: 11px; font-weight: 500; color: #64748b;">Program Goals</div>
-                      <div id="progOverviewGoals" style="text-align: right; font-size: 14px; line-height: 1.25; font-weight: 700; color: #0f172a;">-</div>
+                      <div id="progOverviewGoals" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
                     </div>
                     <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
                       <div style="font-size: 11px; font-weight: 500; color: #64748b;">Setting</div>
