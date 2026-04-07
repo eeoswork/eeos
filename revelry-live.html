@@ -106,8 +106,8 @@
     <!-- Progress bar -->
     <div class="progress-bar mb-4">
       <div class="progress-step">Weekly Leaderboard Update #1</div>
-      <div class="progress-step active">Weekly Leaderboard Update #2</div>
-      <div class="progress-step">Final Winner Announcement</div>
+      <div class="progress-step">Weekly Leaderboard Update #2</div>
+      <div class="progress-step active">Final Winner Announcement</div>
     </div>
 
     <!-- Substep card -->
@@ -115,30 +115,32 @@
       <article class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
         <div class="flex items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">
-            <h4 class="truncate text-base font-semibold text-slate-900">Weekly Leaderboard Update #2</h4>
+            <h4 class="truncate text-base font-semibold text-slate-900">Final Winner Announcement</h4>
           </div>
         </div>
         <div class="mt-4 border-t border-slate-200 pt-4">
           <!-- Intro -->
-          <div class="mt-3 text-sm text-slate-800" style="white-space:pre-line;">Hi, Jennifer! Below is your Slack message with this week's bracket challenge leaderboard update.  Expect an email at jennifer.baldwin@revelry.co on Tuesday, April 7, with the final winner announcement.</div>
+          <div class="mt-3 text-sm text-slate-600">Send this announcement when the final winner is decided.</div>
 
           <!-- Message preview -->
           <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div class="message-pre">🏀 <b>March Madness Bracket Challenge Update</b>
+            <div class="message-pre">🏀 <b>March Madness Bracket Challenge – Final Results</b>
 
-Here are the current standings heading into the Final Four...
+The brackets are complete, and we have our Revelry champions!
 
-In the <b>Women's tournament</b>, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:
+<b>Women's Tournament 🏆</b>
 🥇 1st - Jeff (1,030 pts)
 🥈 2nd - Cameron (1,000)
 🥉 3rd - Peter (990)
 
-Everything to play for in the <b>Men's tournament</b>, with the top 3 separated by 20 points and each riding with a different pick for national champion:
+<b>Men's Tournament 🏆</b>
 🥇 1st - Stu (830 pts)
 🥈 2nd - Nick (820)
 🥉 3rd - Rebecca (810)
 
-<b>Follow the standings here:</b>
+Congrats to our winners, and thanks to everyone who played! 🎉
+
+<b>Final standings:</b>
 <a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Women's tournament</a>
 <a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Men's tournament</a></div>
           </div>
@@ -157,35 +159,38 @@ Everything to play for in the <b>Men's tournament</b>, with the top 3 separated 
 </div>
 
 <script>
-const MESSAGE_PLAIN = `🏀 March Madness Bracket Challenge Update
+const MESSAGE_PLAIN = `🏀 March Madness Bracket Challenge – Final Results
 
-Here are the current standings heading into the Final Four...
+The brackets are complete, and we have our Revelry champions!
 
-In the Women's tournament, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:
+Women's Tournament 🏆
 🥇 1st - Jeff (1,030 pts)
 🥈 2nd - Cameron (1,000)
 🥉 3rd - Peter (990)
 
-Everything to play for in the Men's tournament, with the top 3 separated by 20 points and each riding with a different pick for national champion:
+Men's Tournament 🏆
 🥇 1st - Stu (830 pts)
 🥈 2nd - Nick (820)
 🥉 3rd - Rebecca (810)
 
-Follow the standings here:
+Congrats to our winners, and thanks to everyone who played! 🎉
+
+Final standings:
 Women's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f
 Men's tournament: https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9`;
 
-const MESSAGE_HTML = `🏀 <b>March Madness Bracket Challenge Update</b><br><br>
-Here are the current standings heading into the Final Four...<br><br>
-In the <b>Women's tournament</b>, each of our leaders corrrectly picked the four teams who punched their ticket to Phoenix:<br>
+const MESSAGE_HTML = `🏀 <b>March Madness Bracket Challenge – Final Results</b><br><br>
+The brackets are complete, and we have our Revelry champions!<br><br>
+<b>Women's Tournament 🏆</b><br>
 🥇 1st - Jeff (1,030 pts)<br>
 🥈 2nd - Cameron (1,000)<br>
 🥉 3rd - Peter (990)<br><br>
-Everything to play for in the <b>Men's tournament</b>, with the top 3 separated by 20 points and each riding with a different pick for national champion:<br>
+<b>Men's Tournament 🏆</b><br>
 🥇 1st - Stu (830 pts)<br>
 🥈 2nd - Nick (820)<br>
 🥉 3rd - Rebecca (810)<br><br>
-<b>Follow the standings here:</b><br>
+Congrats to our winners, and thanks to everyone who played! 🎉<br><br>
+<b>Final standings:</b><br>
 <a href="https://fantasy.espn.com/games/tournament-challenge-bracket-women-2026/group?id=78b3bbb5-8736-4875-baf0-58474afc995f">Women's tournament</a><br>
 <a href="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=fed14992-c909-4761-a5d0-63093b6f93f9">Men's tournament</a>`;
 
