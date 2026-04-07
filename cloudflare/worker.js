@@ -16,7 +16,7 @@ function shouldProxyAsStaticAsset(pathname) {
   if (!path || path === "/") return false;
   if (path.startsWith("/api/")) return false;
   if (path.startsWith("/assets/")) return true;
-  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/landing.html" || path === "/poll.html" || path === "/rsvp.html") {
+  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/landing.html" || path === "/poll.html" || path === "/rsvp.html" || path === "/onboarding-dashboard.html") {
     return true;
   }
   return /\.[a-zA-Z0-9]+$/.test(path);
@@ -124,6 +124,25 @@ async function readJson(request) {
 
 function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function parsePositiveInt(value, fallback, { min = 1, max = 100 } = {}) {
+  const parsed = Number.parseInt(String(value || "").trim(), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, parsed));
+}
+
+function parseJsonValue(raw, fallback) {
+  if (raw === null || raw === undefined) return fallback;
+  if (typeof raw === "object") return raw;
+  const asString = String(raw || "").trim();
+  if (!asString) return fallback;
+  try {
+    const parsed = JSON.parse(asString);
+    return parsed === null || parsed === undefined ? fallback : parsed;
+  } catch (_error) {
+    return fallback;
+  }
 }
 
 function nowIso() {
@@ -819,6 +838,83 @@ async function handleOnboardingEmailSave(request, env) {
   });
 }
 
+async function handleAdminOnboardingDashboard(request, env) {
+  const expectedReadKey = String(env.DASHBOARD_READ_KEY || "").trim();
+  if (!expectedReadKey) {
+    return errorResponse("DASHBOARD_NOT_CONFIGURED", "Dashboard read key is not configured.", 503);
+  }
+
+  const url = new URL(request.url);
+  const providedReadKey = String(request.headers.get("x-dashboard-key") || "").trim();
+  if (!providedReadKey || providedReadKey !== expectedReadKey) {
+    return errorResponse("UNAUTHORIZED", "Dashboard read key is invalid.", 401);
+  }
+
+  const limit = parsePositiveInt(url.searchParams.get("limit"), 25, { min: 1, max: 100 });
+  const rowsResult = await env.DB.prepare(
+    `SELECT company_id,
+            email,
+            company_name,
+            admin_name,
+            updated_at,
+            json_extract(state_blob, '$.landingDraft.employeeCount') AS employee_count,
+            json_extract(state_blob, '$.landingDraft.goals') AS goals,
+            json_extract(state_blob, '$.landingDraft.setting') AS setting,
+            json_extract(state_blob, '$.landingDraft.schedule') AS schedule,
+            json_extract(state_blob, '$.landingDraft.daysSelected') AS days_selected,
+            json_extract(state_blob, '$.landingDraft.timesSelected') AS times_selected,
+            json_extract(state_blob, '$.landingDraft.teamPreferenceEstimate') AS interests,
+            json_extract(state_blob, '$.landingDraft.budgetMode') AS budget_mode,
+            json_extract(state_blob, '$.landingDraft.totalBudget') AS total_budget,
+            json_extract(state_blob, '$.landingDraft.perEmployee') AS per_employee_budget,
+            json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks
+     FROM accounts
+     ORDER BY updated_at DESC
+     LIMIT ?1`
+  ).bind(limit).all();
+
+  const rows = Array.isArray(rowsResult?.results) ? rowsResult.results : [];
+  const users = rows.map((row) => {
+    const programWeeks = parseJsonValue(row.saved_program_weeks, []);
+    const normalizedProgram = Array.isArray(programWeeks)
+      ? programWeeks
+        .map((item, index) => ({
+          week: Number(item?.week || index + 1),
+          eventName: String(item?.eventName || item?.name || item?.title || "").trim()
+        }))
+        .filter((item) => item.week > 0 && item.eventName)
+      : [];
+
+    return {
+      companyId: String(row.company_id || "").trim(),
+      email: String(row.email || "").trim(),
+      companyName: String(row.company_name || "").trim(),
+      adminName: String(row.admin_name || "").trim(),
+      updatedAt: String(row.updated_at || "").trim(),
+      answers: {
+        employeeCount: Number(row.employee_count || 0) || 0,
+        goals: parseJsonValue(row.goals, []),
+        setting: String(row.setting || "").trim(),
+        schedule: parseJsonValue(row.schedule, []),
+        daysSelected: parseJsonValue(row.days_selected, []),
+        timesSelected: parseJsonValue(row.times_selected, []),
+        interests: parseJsonValue(row.interests, []),
+        budgetMode: String(row.budget_mode || "").trim(),
+        totalBudget: Number(row.total_budget || 0) || 0,
+        perEmployeeBudget: Number(row.per_employee_budget || 0) || 0
+      },
+      program: normalizedProgram
+    };
+  });
+
+  return jsonResponse({
+    users,
+    count: users.length,
+    limit,
+    fetchedAt: nowIso()
+  });
+}
+
 async function handleAuthMagicLinkRequest(request, env) {
   const body = await readJson(request);
   const email = normalizeEmail(body.email);
@@ -944,6 +1040,7 @@ export default {
       if (method === "POST" && path === "/auth/login") return withCors(await handleLogin(request, env), request, env);
       if (method === "POST" && path === "/auth/magic-link/request") return withCors(await handleAuthMagicLinkRequest(request, env), request, env);
       if (method === "POST" && path === "/auth/magic-link/redeem") return withCors(await handleAuthMagicLinkRedeem(request, env), request, env);
+      if (method === "GET" && path === "/admin/onboarding-dashboard") return withCors(await handleAdminOnboardingDashboard(request, env), request, env);
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
       if (method === "POST" && path === "/state") return withCors(await handleStatePost(request, env), request, env);
       if (method === "POST" && path === "/onboarding/email-save") return withCors(await handleOnboardingEmailSave(request, env), request, env);

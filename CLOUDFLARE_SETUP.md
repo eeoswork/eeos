@@ -165,3 +165,36 @@ Open `config.js` and ensure:
 - Monitor worker logs in Cloudflare dashboard for API errors.
 - Back up D1 periodically.
 - Reset only testing workspace data when needed: `npm run cf:d1:reset:revelry-test`.
+
+## 15. Onboarding Dashboard (read-only)
+
+This project includes a minimal dashboard page to view each saved user's onboarding answers and program summary (week + event name) without manual SQL every time.
+
+1. Set a Worker secret for dashboard read access:
+
+```bash
+npx wrangler secret put DASHBOARD_READ_KEY
+```
+
+Enter a long random value when prompted.
+
+2. Deploy the Worker and static files:
+
+```bash
+npm run cf:deploy
+```
+
+3. Open dashboard page:
+
+- `https://eeos.work/onboarding-dashboard.html`
+
+4. In the page:
+
+- API Base URL: `https://api.eeos.work/api`
+- Dashboard Read Key: value you set via `DASHBOARD_READ_KEY`
+- Click `Load`
+
+Cost notes:
+- Endpoint reads only selected JSON fields, not full raw blobs.
+- Query is limited (`limit` defaults to 25, max 100).
+- `accounts.updated_at` is indexed for efficient ordering.

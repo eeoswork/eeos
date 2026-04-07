@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS accounts (
   updated_at TEXT NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_accounts_updated_at ON accounts(updated_at);
+
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
   company_id TEXT NOT NULL,
