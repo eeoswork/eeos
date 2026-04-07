@@ -1460,6 +1460,27 @@ async function authLogin(email, password) {
   });
 }
 
+async function authMagicLinkRequest(email) {
+  return apiRequest("/auth/magic-link/request", {
+    method: "POST",
+    body: { email }
+  });
+}
+
+async function authMagicLinkRedeem(token) {
+  return apiRequest("/auth/magic-link/redeem", {
+    method: "POST",
+    body: { token }
+  });
+}
+
+async function onboardingEmailSave(payload) {
+  return apiRequest("/onboarding/email-save", {
+    method: "POST",
+    body: payload
+  });
+}
+
 async function fetchCloudState() {
   return apiRequest("/state", { method: "GET" });
 }
@@ -1975,6 +1996,56 @@ function normalizeRecommendedEvent(rawEvent, index = 0) {
     score: Number(rawEvent.score || 0),
     rank: Number(rawEvent.rank || (index + 1))
   };
+}
+
+function buildProgramWeekSummary(program = state.fourMonthProgram) {
+  if (!program || typeof program !== "object") return [];
+
+  if (Array.isArray(program.weeks) && program.weeks.length) {
+    return program.weeks.map((item, index) => ({
+      week: Number(item?.week || (index + 1)),
+      id: String(item?.templateId || item?.id || "").trim(),
+      eventName: String(item?.title || item?.name || "").trim()
+    }));
+  }
+
+  if (Array.isArray(program.events) && program.events.length) {
+    return program.events.map((item, index) => ({
+      week: Number(index + 1),
+      id: String(item?.templateId || item?.id || "").trim(),
+      eventName: String(item?.title || item?.name || "").trim()
+    }));
+  }
+
+  return [];
+}
+
+async function redeemMagicLoginFromQueryIfPresent() {
+  const params = new URLSearchParams(window.location.search || "");
+  const oneTimeToken = String(params.get("magicLoginToken") || "").trim();
+  if (!oneTimeToken) return null;
+
+  try {
+    const response = await authMagicLinkRedeem(oneTimeToken);
+    const root = (response?.data && typeof response.data === "object") ? response.data : response;
+    const token = String(root?.token || "").trim();
+    const companyId = String(root?.companyId || "").trim();
+    if (!token || !companyId) return null;
+
+    setAuthSession(token, companyId);
+    state.accountId = companyId;
+    await hydrateCloudStateForSession(companyId);
+
+    params.delete("magicLoginToken");
+    const nextQuery = params.toString();
+    const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", nextUrl);
+    showMiniToast("Logged in with magic link.");
+    return companyId;
+  } catch (error) {
+    console.warn("Magic login redeem failed", error?.message || error);
+    return null;
+  }
 }
 
 async function syncWorkflowStateToDraft() {
@@ -10456,7 +10527,7 @@ function advanceLtfQuestion() {
   }
 }
 
-function completeLtfSetup() {
+async function completeLtfSetup() {
   ltfPhase = "loading";
   const root = $("landingTypeformRoot");
   if (root) root.classList.add("ltf-loading-fullscreen");
@@ -10495,6 +10566,42 @@ function completeLtfSetup() {
   state.currentSetupStep = 7;
   buildPersonalizedProgramFromSetup();
   persistState();
+
+  const enteredEmail = String(ltfAnswers.workEmail || state.landingDraft.workEmail || "").trim().toLowerCase();
+  const hasValidWorkEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enteredEmail);
+  if (hasValidWorkEmail) {
+    try {
+      const emailSaveResponse = await onboardingEmailSave({
+        email: enteredEmail,
+        identity: {
+          companyName: String(state.companyName || "").trim(),
+          adminName: String(state.adminName || "").trim()
+        },
+        draft: buildDraftPayload(state),
+        stateBlob: clone(state),
+        programSummary: buildProgramWeekSummary(state.fourMonthProgram)
+      });
+
+      const rootResponse = (emailSaveResponse?.data && typeof emailSaveResponse.data === "object")
+        ? emailSaveResponse.data
+        : emailSaveResponse;
+      const token = String(rootResponse?.token || "").trim();
+      const companyId = String(rootResponse?.companyId || "").trim();
+      if (token && companyId) {
+        setAuthSession(token, companyId);
+        state.accountId = companyId;
+      }
+
+      const magicLinkUrl = String(rootResponse?.magicLogin?.url || "").trim();
+      if (magicLinkUrl) {
+        state.landingDraft.magicLoginUrl = magicLinkUrl;
+      }
+      showMiniToast("Progress saved to your account.");
+    } catch (error) {
+      console.warn("Email save failed", error?.message || error);
+      showMiniToast("We couldn’t save to account right now. Your progress is still on this device.");
+    }
+  }
 
   setTimeout(() => {
     ltfPhase = "complete";
@@ -10931,6 +11038,7 @@ async function bootstrap() {
   state.sidebarSetupExpanded = false;
   applyTestingResetFromQueryBeforeLoad();
   applyMagicLinkPageTitleFromCurrentPath();
+  await redeemMagicLoginFromQueryIfPresent();
   bindSidebarSetupEditPrefs();
   bindMainSetupEditPrefs();
   logIdentityDebug("bootstrap:start");

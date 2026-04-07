@@ -70,3 +70,16 @@ CREATE TABLE IF NOT EXISTS events_recommended (
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_recommended_company_cycle ON events_recommended(company_id, cycle_id);
+
+CREATE TABLE IF NOT EXISTS user_magic_login_links (
+  token TEXT PRIMARY KEY,
+  company_id TEXT NOT NULL,
+  email TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
+  FOREIGN KEY (company_id) REFERENCES accounts(company_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_email ON user_magic_login_links(email);
+CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_expires_at ON user_magic_login_links(expires_at);

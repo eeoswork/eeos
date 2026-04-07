@@ -1,6 +1,8 @@
 const DEFAULT_POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api";
 const SESSION_TTL_DAYS = 30;
+const MAGIC_LOGIN_TTL_HOURS = 48;
 const APP_ORIGIN_BASE = "https://eeoswork.github.io/eeos";
+const DEFAULT_MAGIC_LOGIN_ORIGIN = "https://eeos.work";
 const HOME_PAGE_HOSTS = new Set([
   "eeos.work",
   "revelrylabs.eeos.work"
@@ -134,6 +136,12 @@ function addDaysIso(days) {
   return date.toISOString();
 }
 
+function addHoursIso(hours) {
+  const date = new Date();
+  date.setUTCHours(date.getUTCHours() + Number(hours || 0));
+  return date.toISOString();
+}
+
 function randomToken(size = 32) {
   const bytes = new Uint8Array(size);
   crypto.getRandomValues(bytes);
@@ -190,6 +198,41 @@ function toJsonString(value, fallback = {}) {
   } catch (_error) {
     return JSON.stringify(fallback);
   }
+}
+
+function deepMergeState(baseValue, incomingValue) {
+  if (Array.isArray(incomingValue)) return [...incomingValue];
+  if (incomingValue === null || typeof incomingValue !== "object") return incomingValue;
+
+  const base = (baseValue && typeof baseValue === "object" && !Array.isArray(baseValue))
+    ? baseValue
+    : {};
+  const merged = { ...base };
+
+  for (const [key, value] of Object.entries(incomingValue)) {
+    merged[key] = deepMergeState(base[key], value);
+  }
+  return merged;
+}
+
+function buildMagicLoginUrl(env, token) {
+  const base = String(env.MAGIC_LOGIN_ORIGIN || DEFAULT_MAGIC_LOGIN_ORIGIN).trim().replace(/\/+$/, "");
+  return `${base}/?magicLoginToken=${encodeURIComponent(String(token || ""))}`;
+}
+
+async function issueMagicLoginToken(env, companyId, email) {
+  const token = randomToken(24);
+  const createdAt = nowIso();
+  const expiresAt = addHoursIso(MAGIC_LOGIN_TTL_HOURS);
+  await env.DB.prepare(
+    `INSERT INTO user_magic_login_links (token, company_id, email, created_at, expires_at, used_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, NULL)`
+  ).bind(token, companyId, email, createdAt, expiresAt).run();
+  return {
+    token,
+    expiresAt,
+    url: buildMagicLoginUrl(env, token)
+  };
 }
 
 function getBudgetTotal(settings = {}) {
@@ -690,6 +733,158 @@ async function handleRecommendationsGenerate(request, env) {
   });
 }
 
+async function handleOnboardingEmailSave(request, env) {
+  const body = await readJson(request);
+  const email = normalizeEmail(body.email);
+  if (!email) {
+    return errorResponse("INVALID_EMAIL", "A valid email is required.", 422);
+  }
+
+  const draft = body.draft && typeof body.draft === "object" ? body.draft : {};
+  const identity = body.identity && typeof body.identity === "object" ? body.identity : {};
+  const incomingStateBlob = body.stateBlob && typeof body.stateBlob === "object" ? body.stateBlob : {};
+  const programSummary = Array.isArray(body.programSummary)
+    ? body.programSummary.filter((item) => item && typeof item === "object")
+    : [];
+
+  const companyName = String(identity.companyName || incomingStateBlob.companyName || "").trim();
+  const adminName = String(identity.adminName || incomingStateBlob.adminName || "").trim();
+
+  const existingAccount = await env.DB.prepare(
+    "SELECT company_id, email, state_blob, state_version, company_name, admin_name FROM accounts WHERE email = ?1 LIMIT 1"
+  ).bind(email).first();
+
+  const timestamp = nowIso();
+  let companyId = "";
+  let existingState = {};
+
+  if (!existingAccount) {
+    companyId = crypto.randomUUID();
+    await env.DB.prepare(
+      `INSERT INTO accounts (company_id, email, password_hash, company_name, admin_name, state_blob, state_version, created_at, updated_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, 1, ?7, ?7)`
+    ).bind(
+      companyId,
+      email,
+      `pending:${randomToken(12)}`,
+      companyName,
+      adminName,
+      toJsonString({}, {}),
+      timestamp
+    ).run();
+  } else {
+    companyId = String(existingAccount.company_id || "").trim();
+    existingState = parseJsonField(existingAccount.state_blob, {});
+  }
+
+  let mergedState = mergeDraftState(existingState, draft, "if-empty-or-newer");
+  mergedState = deepMergeState(mergedState, incomingStateBlob);
+  mergedState.accountId = companyId;
+  if (!mergedState.user || typeof mergedState.user !== "object") {
+    mergedState.user = {};
+  }
+  mergedState.user.email = email;
+  if (programSummary.length) {
+    mergedState.savedProgramWeeks = programSummary.map((item, index) => ({
+      week: Number(item.week || (index + 1)),
+      id: String(item.id || item.eventId || item.templateId || "").trim(),
+      eventName: String(item.eventName || item.name || item.title || "").trim()
+    }));
+  }
+
+  await env.DB.prepare(
+    `UPDATE accounts
+     SET company_name = COALESCE(NULLIF(?1, ''), company_name),
+         admin_name = COALESCE(NULLIF(?2, ''), admin_name),
+         state_blob = ?3,
+         state_version = COALESCE(state_version, 0) + 1,
+         updated_at = ?4
+     WHERE company_id = ?5`
+  ).bind(companyName, adminName, toJsonString(mergedState, {}), timestamp, companyId).run();
+
+  const sessionToken = randomToken(24);
+  const sessionExpiresAt = addDaysIso(SESSION_TTL_DAYS);
+  await env.DB.prepare(
+    "INSERT INTO sessions (token, company_id, email, created_at, expires_at) VALUES (?1, ?2, ?3, ?4, ?5)"
+  ).bind(sessionToken, companyId, email, timestamp, sessionExpiresAt).run();
+
+  const magicLogin = await issueMagicLoginToken(env, companyId, email);
+
+  return jsonResponse({
+    token: sessionToken,
+    companyId,
+    email,
+    magicLogin,
+    stateBlob: mergedState
+  });
+}
+
+async function handleAuthMagicLinkRequest(request, env) {
+  const body = await readJson(request);
+  const email = normalizeEmail(body.email);
+  if (!email) {
+    return errorResponse("INVALID_EMAIL", "A valid email is required.", 422);
+  }
+
+  const account = await env.DB.prepare(
+    "SELECT company_id FROM accounts WHERE email = ?1 LIMIT 1"
+  ).bind(email).first();
+
+  if (!account?.company_id) {
+    return errorResponse("ACCOUNT_NOT_FOUND", "No account found for this email.", 404);
+  }
+
+  const magicLogin = await issueMagicLoginToken(env, String(account.company_id), email);
+  return jsonResponse({
+    companyId: String(account.company_id),
+    email,
+    magicLogin
+  });
+}
+
+async function handleAuthMagicLinkRedeem(request, env) {
+  const body = await readJson(request);
+  const oneTimeToken = String(body.token || "").trim();
+  if (!oneTimeToken) {
+    return errorResponse("INVALID_TOKEN", "Magic login token is required.", 422);
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT token, company_id, email, expires_at, used_at
+     FROM user_magic_login_links
+     WHERE token = ?1
+     LIMIT 1`
+  ).bind(oneTimeToken).first();
+
+  if (!row) {
+    return errorResponse("TOKEN_NOT_FOUND", "Magic login token is invalid.", 404);
+  }
+  if (String(row.used_at || "").trim()) {
+    return errorResponse("TOKEN_ALREADY_USED", "Magic login token has already been used.", 410);
+  }
+  if (String(row.expires_at || "") <= nowIso()) {
+    return errorResponse("TOKEN_EXPIRED", "Magic login token has expired.", 410);
+  }
+
+  const sessionToken = randomToken(24);
+  const timestamp = nowIso();
+  const expiresAt = addDaysIso(SESSION_TTL_DAYS);
+
+  await env.DB.prepare(
+    "INSERT INTO sessions (token, company_id, email, created_at, expires_at) VALUES (?1, ?2, ?3, ?4, ?5)"
+  ).bind(sessionToken, row.company_id, row.email, timestamp, expiresAt).run();
+
+  await env.DB.prepare(
+    "UPDATE user_magic_login_links SET used_at = ?1 WHERE token = ?2"
+  ).bind(timestamp, oneTimeToken).run();
+
+  return jsonResponse({
+    token: sessionToken,
+    companyId: String(row.company_id || ""),
+    email: String(row.email || "")
+  });
+}
+
 async function handleTestingResetWorkspace(request, env) {
   const session = await getSessionFromRequest(request, env);
   if (!session) {
@@ -747,8 +942,11 @@ export default {
       }
       if (method === "POST" && path === "/auth/signup") return withCors(await handleSignup(request, env), request, env);
       if (method === "POST" && path === "/auth/login") return withCors(await handleLogin(request, env), request, env);
+      if (method === "POST" && path === "/auth/magic-link/request") return withCors(await handleAuthMagicLinkRequest(request, env), request, env);
+      if (method === "POST" && path === "/auth/magic-link/redeem") return withCors(await handleAuthMagicLinkRedeem(request, env), request, env);
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
       if (method === "POST" && path === "/state") return withCors(await handleStatePost(request, env), request, env);
+      if (method === "POST" && path === "/onboarding/email-save") return withCors(await handleOnboardingEmailSave(request, env), request, env);
       if (method === "POST" && path === "/magic-links/resolve") return withCors(await handleMagicLinkResolve(request, env), request, env);
       if (method === "POST" && path === "/onboarding/migrate-draft") return withCors(await handleOnboardingMigrateDraft(request, env), request, env);
       if (method === "POST" && path === "/recommendations/generate") return withCors(await handleRecommendationsGenerate(request, env), request, env);
