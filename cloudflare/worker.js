@@ -915,6 +915,52 @@ async function handleAdminOnboardingDashboard(request, env) {
   });
 }
 
+async function handleAdminDeleteAccount(request, env) {
+  const expectedReadKey = String(env.DASHBOARD_READ_KEY || "").trim();
+  if (!expectedReadKey) {
+    return errorResponse("DASHBOARD_NOT_CONFIGURED", "Dashboard read key is not configured.", 503);
+  }
+
+  const providedReadKey = String(request.headers.get("x-dashboard-key") || "").trim();
+  if (!providedReadKey || providedReadKey !== expectedReadKey) {
+    return errorResponse("UNAUTHORIZED", "Dashboard read key is invalid.", 401);
+  }
+
+  const body = await readJson(request);
+  const email = normalizeEmail(body.email);
+  const companyId = String(body.companyId || "").trim();
+  if (!email && !companyId) {
+    return errorResponse("INVALID_TARGET", "Email or companyId is required.", 422);
+  }
+
+  const account = companyId
+    ? await env.DB.prepare(
+      "SELECT company_id, email FROM accounts WHERE company_id = ?1 LIMIT 1"
+    ).bind(companyId).first()
+    : await env.DB.prepare(
+      "SELECT company_id, email FROM accounts WHERE email = ?1 LIMIT 1"
+    ).bind(email).first();
+
+  if (!account?.company_id) {
+    return errorResponse("ACCOUNT_NOT_FOUND", "Account not found.", 404);
+  }
+
+  const resolvedCompanyId = String(account.company_id || "").trim();
+  const resolvedEmail = normalizeEmail(account.email);
+
+  await env.DB.prepare("DELETE FROM user_magic_login_links WHERE company_id = ?1 OR email = ?2").bind(resolvedCompanyId, resolvedEmail).run();
+  await env.DB.prepare("DELETE FROM sessions WHERE company_id = ?1 OR email = ?2").bind(resolvedCompanyId, resolvedEmail).run();
+  await env.DB.prepare("DELETE FROM events_recommended WHERE company_id = ?1").bind(resolvedCompanyId).run();
+  await env.DB.prepare("DELETE FROM magic_links WHERE company_id = ?1").bind(resolvedCompanyId).run();
+  await env.DB.prepare("DELETE FROM accounts WHERE company_id = ?1").bind(resolvedCompanyId).run();
+
+  return jsonResponse({
+    deleted: true,
+    companyId: resolvedCompanyId,
+    email: resolvedEmail
+  });
+}
+
 async function handleAuthMagicLinkRequest(request, env) {
   const body = await readJson(request);
   const email = normalizeEmail(body.email);
@@ -1041,6 +1087,7 @@ export default {
       if (method === "POST" && path === "/auth/magic-link/request") return withCors(await handleAuthMagicLinkRequest(request, env), request, env);
       if (method === "POST" && path === "/auth/magic-link/redeem") return withCors(await handleAuthMagicLinkRedeem(request, env), request, env);
       if (method === "GET" && path === "/admin/onboarding-dashboard") return withCors(await handleAdminOnboardingDashboard(request, env), request, env);
+      if (method === "DELETE" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminDeleteAccount(request, env), request, env);
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
       if (method === "POST" && path === "/state") return withCors(await handleStatePost(request, env), request, env);
       if (method === "POST" && path === "/onboarding/email-save") return withCors(await handleOnboardingEmailSave(request, env), request, env);

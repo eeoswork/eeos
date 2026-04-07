@@ -98,6 +98,17 @@
       color: #1a57be;
     }
 
+    button.danger {
+      background: #fff1f2;
+      color: #b42318;
+      border: 1px solid #fecdd3;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .status {
       font-size: 13px;
       margin: 8px 2px 2px;
@@ -139,6 +150,12 @@
     .small {
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .headActions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .grid {
@@ -289,7 +306,10 @@
               <div class="email">${escapeHtml(user.email || "-")}</div>
               <div class="small">Company: ${escapeHtml(user.companyName || "-")} | Admin: ${escapeHtml(user.adminName || "-")}</div>
             </div>
-            <div class="small">Updated: ${escapeHtml(formatDate(user.updatedAt))}</div>
+            <div class="headActions">
+              <div class="small">Updated: ${escapeHtml(formatDate(user.updatedAt))}</div>
+              <button class="danger delete-account-btn" type="button" data-email="${escapeHtml(user.email || "")}" data-company-id="${escapeHtml(user.companyId || "")}">Delete account</button>
+            </div>
           </div>
           <div class="grid">
             <section class="box">
@@ -320,6 +340,14 @@
         `;
 
         refs.results.appendChild(card);
+      }
+
+      for (const button of refs.results.querySelectorAll(".delete-account-btn")) {
+        button.addEventListener("click", () => {
+          const email = String(button.getAttribute("data-email") || "").trim();
+          const companyId = String(button.getAttribute("data-company-id") || "").trim();
+          deleteAccount({ email, companyId, button });
+        });
       }
     }
 
@@ -374,6 +402,45 @@
       } finally {
         refs.loadBtn.disabled = false;
         refs.refreshBtn.disabled = false;
+      }
+    }
+
+    async function deleteAccount({ email, companyId, button }) {
+      const apiBase = String(refs.apiBase.value || "").trim().replace(/\/+$/, "");
+      const readKey = String(refs.readKey.value || "").trim();
+      if (!apiBase || !readKey) {
+        setStatus("API base URL and dashboard key are required.", "err");
+        return;
+      }
+
+      const label = email || companyId || "this account";
+      const confirmed = window.confirm(`Delete ${label}? This permanently removes the account, saved answers, sessions, and saved program data.`);
+      if (!confirmed) return;
+
+      button.disabled = true;
+      setStatus(`Deleting ${label}...`, "");
+
+      try {
+        const response = await fetch(`${apiBase}/admin/onboarding-dashboard/account`, {
+          method: "DELETE",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "x-dashboard-key": readKey
+          },
+          body: JSON.stringify({ email, companyId })
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload?.ok) {
+          throw new Error(payload?.error?.message || "Delete request failed.");
+        }
+
+        setStatus(`Deleted ${label}.`, "ok");
+        await loadDashboard();
+      } catch (error) {
+        setStatus(error.message || "Failed to delete account.", "err");
+        button.disabled = false;
       }
     }
 

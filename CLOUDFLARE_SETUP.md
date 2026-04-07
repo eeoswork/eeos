@@ -193,6 +193,7 @@ npm run cf:deploy
 - API Base URL: `https://api.eeos.work/api`
 - Dashboard Read Key: value you set via `DASHBOARD_READ_KEY`
 - Click `Load`
+- Use `Delete account` on any user card to remove that test account and its related saved data
 
 Cost notes:
 - Endpoint reads only selected JSON fields, not full raw blobs.
