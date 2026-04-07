@@ -161,11 +161,7 @@ function addHoursIso(hours) {
   return date.toISOString();
 }
 
-function addDaysIsoCustom(days) {
-  const date = new Date();
-  date.setUTCDate(date.getUTCDate() + Number(days || 0));
-  return date.toISOString();
-}
+
 
 function randomToken(size = 32) {
   const bytes = new Uint8Array(size);
@@ -1001,76 +997,7 @@ async function handleAdminDeleteAccount(request, env) {
   });
 }
 
-async function handleEventLaunch(request, env) {
-  const body = await readJson(request);
-  const companyId = String(body.companyId || "").trim();
-  const eventId = String(body.eventId || "").trim();
-  const weekNumber = Number.isInteger(body.weekNumber) ? body.weekNumber : 1;
 
-  if (!companyId || !eventId) {
-    return errorResponse("INVALID_PARAMS", "companyId and eventId are required.", 422);
-  }
-
-  const token = randomToken(32);
-  const createdAt = nowIso();
-  const expiresAt = addDaysIsoCustom(7);
-
-  await env.DB.prepare(
-    `INSERT INTO event_access_tokens (token, company_id, event_id, week_number, created_at, expires_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6)`
-  ).bind(token, companyId, eventId, weekNumber, createdAt, expiresAt).run();
-
-  const eventPageUrl = `https://eeos.work/event-locked.html?token=${encodeURIComponent(token)}`;
-
-  return jsonResponse({
-    token,
-    url: eventPageUrl,
-    expiresAt,
-    weekNumber
-  });
-}
-
-async function handleEventValidate(request, env) {
-  const url = new URL(request.url);
-  const token = String(url.searchParams.get("token") || "").trim();
-
-  if (!token) {
-    return errorResponse("INVALID_TOKEN", "Token is required.", 422);
-  }
-
-  const row = await env.DB.prepare(
-    `SELECT token, company_id, event_id, week_number, expires_at, accessed_at
-     FROM event_access_tokens
-     WHERE token = ?1
-     LIMIT 1`
-  ).bind(token).first();
-
-  if (!row) {
-    return errorResponse("TOKEN_NOT_FOUND", "Event access token is invalid or expired.", 404);
-  }
-
-  const expiresAt = String(row.expires_at || "").trim();
-  if (expiresAt && expiresAt <= nowIso()) {
-    return errorResponse("TOKEN_EXPIRED", "Event access has expired.", 410);
-  }
-
-  const timestamp = nowIso();
-  if (!row.accessed_at) {
-    await env.DB.prepare(
-      "UPDATE event_access_tokens SET accessed_at = ?1 WHERE token = ?2"
-    ).bind(timestamp, token).run();
-  }
-
-  return jsonResponse({
-    valid: true,
-    token: String(row.token || "").trim(),
-    companyId: String(row.company_id || "").trim(),
-    eventId: String(row.event_id || "").trim(),
-    weekNumber: Number(row.week_number || 1),
-    expiresAt,
-    accessedAt: String(row.accessed_at || "").trim()
-  });
-}
 
 async function handleAuthMagicLinkRequest(request, env) {
   const body = await readJson(request);
@@ -1199,8 +1126,7 @@ export default {
       if (method === "POST" && path === "/auth/magic-link/redeem") return withCors(await handleAuthMagicLinkRedeem(request, env), request, env);
       if (method === "GET" && path === "/admin/onboarding-dashboard") return withCors(await handleAdminOnboardingDashboard(request, env), request, env);
       if (method === "DELETE" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminDeleteAccount(request, env), request, env);
-      if (method === "POST" && path === "/event/launch") return withCors(await handleEventLaunch(request, env), request, env);
-      if (method === "GET" && path === "/event/validate") return withCors(await handleEventValidate(request, env), request, env);
+
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
       if (method === "POST" && path === "/state") return withCors(await handleStatePost(request, env), request, env);
       if (method === "POST" && path === "/onboarding/email-save") return withCors(await handleOnboardingEmailSave(request, env), request, env);
