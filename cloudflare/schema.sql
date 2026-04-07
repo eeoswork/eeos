@@ -86,3 +86,17 @@ CREATE TABLE IF NOT EXISTS user_magic_login_links (
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_email ON user_magic_login_links(email);
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_expires_at ON user_magic_login_links(expires_at);
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_company_created_at ON user_magic_login_links(company_id, created_at);
+
+CREATE TABLE IF NOT EXISTS event_access_tokens (
+  token TEXT PRIMARY KEY,
+  company_id TEXT NOT NULL,
+  event_id TEXT NOT NULL,
+  week_number INTEGER DEFAULT 1,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  accessed_at TEXT,
+  FOREIGN KEY (company_id) REFERENCES accounts(company_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_event_access_tokens_company_event ON event_access_tokens(company_id, event_id);
+CREATE INDEX IF NOT EXISTS idx_event_access_tokens_expires_at ON event_access_tokens(expires_at);
