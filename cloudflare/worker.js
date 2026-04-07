@@ -74,7 +74,7 @@ function withCors(response, request, env) {
   const origin = resolveCorsOrigin(request, env);
   headers.set("access-control-allow-origin", origin);
   headers.set("access-control-allow-methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  headers.set("access-control-allow-headers", "authorization,content-type,idempotency-key");
+  headers.set("access-control-allow-headers", "authorization,content-type,idempotency-key,x-dashboard-key");
   headers.set("access-control-max-age", "86400");
   if (origin !== "*") {
     headers.set("vary", "origin");
