@@ -948,6 +948,42 @@ function evaluateEventPageLock(options = {}) {
     reason: "ok"
   };
 }
+
+function formatLockDateLabel(lockEndsAtIso = "") {
+  const iso = String(lockEndsAtIso || "").trim();
+  if (!iso) return "";
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function getRuleDrivenStepLockMeta(stepKey = "", options = {}) {
+  const normalizedStepKey = String(stepKey || "").trim();
+  if (!normalizedStepKey) {
+    return { locked: false, dateLabel: "", configured: false, pageKey: "", lockEndsAt: "" };
+  }
+
+  const pageScope = String(options.pageScope || "").trim();
+  const alreadyDone = Boolean(options.alreadyDone);
+  const pageKey = pageScope ? `${pageScope}_${normalizedStepKey}` : normalizedStepKey;
+  const lockResult = evaluateEventPageLock({ pageKey });
+  const dateLabel = formatLockDateLabel(lockResult.lockEndsAt);
+
+  return {
+    locked: Boolean(lockResult.configured && lockResult.locked && !alreadyDone),
+    dateLabel,
+    configured: Boolean(lockResult.configured),
+    pageKey,
+    lockEndsAt: String(lockResult.lockEndsAt || "")
+  };
+}
+
 const REVELRY_GOAL_EVENT_MAP_MID_BUDGET = {
   "Support employee wellbeing": {
     templateId: "revelry-goal-wellbeing-mid",
@@ -2468,28 +2504,6 @@ function getBudgetRangeHighEnd(mode = "total", rangeKey = "", fallbackValue = 0)
 }
 
 const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof", "reminder_dayof_2"];
-const REVELRY_LEADERBOARD_RELEASE_DATE_BY_STEP = {
-  reminder_dayof: "2026-03-24",
-  reminder_dayof_2: "2026-03-31"
-};
-const REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP = {
-  reminder_dayof: false,
-  reminder_dayof_2: false,
-  ...((APP_CONFIG.revelryLeaderboardUnlockByStep && typeof APP_CONFIG.revelryLeaderboardUnlockByStep === "object")
-    ? APP_CONFIG.revelryLeaderboardUnlockByStep
-    : {})
-};
-
-function getLocalDateKey(date = new Date()) {
-  const d = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function isRevelryLeaderboardStepUnlocked(stepKey) {
-  if (!(stepKey in REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP)) return true;
-  return Boolean(REVELRY_LEADERBOARD_MANUAL_UNLOCK_BY_STEP[stepKey]);
-}
 
 function normalizePromoteEventState() {
   if (!state.promoteEvent || typeof state.promoteEvent !== "object") {
@@ -13519,18 +13533,11 @@ function renderPromoteEventStep() {
 
   const getLeaderboardLockMeta = (stepKey) => {
     if (!isRevelryBracketsPromoteFlow) return { locked: false, dateLabel: "" };
-    const dateMap = {
-      reminder_dayof: { key: "2026-03-24", label: "March 24" },
-      reminder_dayof_2: { key: "2026-03-31", label: "March 31" }
-    };
-    const target = dateMap[stepKey];
-    if (!target) return { locked: false, dateLabel: "" };
-    const unlocked = isRevelryLeaderboardStepUnlocked(stepKey);
     const alreadyDone = Boolean(doneFlags[stepKey]);
-    return {
-      locked: !unlocked && !alreadyDone,
-      dateLabel: target.label
-    };
+    return getRuleDrivenStepLockMeta(stepKey, {
+      pageScope: "promote",
+      alreadyDone
+    });
   };
 
   const isAnnouncementGateActive = isRevelryBracketsPromoteFlow && !doneFlags.announcement;
@@ -13841,7 +13848,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       <div class="mt-3 text-sm text-slate-600" style="white-space: pre-line;">${escapeHtml(reminderDayOfIntroMessage)}</div>
       <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" style="white-space: pre-line;">${reminderDayOfCardHtml}</div>
       ${isRevelryBracketsPromoteFlow && isWeeklyLeaderboardStep && leaderboardLockMeta.locked && !allowTestingStepNavigation
-        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. This step is currently locked and will be enabled manually (${leaderboardLockMeta.dateLabel} target). No action is required right now.</div>`
+        ? `<div class="mt-4 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-600">Read-only stage. This step is currently locked by the configured lock rules.${leaderboardLockMeta.dateLabel ? ` It unlocks around ${escapeHtml(leaderboardLockMeta.dateLabel)}.` : ""} No action is required right now.</div>`
         : `<div class="mt-4 flex flex-wrap items-center gap-2">
             <button type="button" data-promote-action="copy-reminder-dayof" class="rounded-lg px-3 py-2 text-sm font-medium text-white" style="background-color: #546373;">${promoteUiState.copiedAction === "copy-reminder-dayof" ? "✓ Copied" : "Copy message"}</button>
             <button type="button" data-promote-action="open-slack" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
@@ -14258,10 +14265,9 @@ function renderRunEventStep() {
       const reviewLock = evaluateEventPageLock({
         templateId: "5_day_energy_reset_challenge",
         pageKey: "review_impact",
-        anchorAt: launchState.challengeStartedAt,
-        fallbackDurationMs: 7 * 24 * 60 * 60 * 1000
+        anchorAt: launchState.challengeStartedAt
       });
-      launchState.reviewUnlockAt = reviewLock.lockEndsAt || new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString();
+      launchState.reviewUnlockAt = reviewLock.lockEndsAt || String(launchState.challengeStartedAt || now.toISOString());
       launchStateChanged = true;
     }
 
@@ -14322,18 +14328,11 @@ function renderRunEventStep() {
   };
   const getRunSubstepLockMeta = (stepKey) => {
     if (!isRevelryMarchMadnessRunSubsteps) return { locked: false, dateLabel: "" };
-    const dateMap = {
-      reminder_dayof: { key: "2026-03-24", label: "March 24" },
-      reminder_dayof_2: { key: "2026-03-31", label: "March 31" }
-    };
-    const target = dateMap[stepKey];
-    if (!target) return { locked: false, dateLabel: "" };
-    const unlocked = isRevelryLeaderboardStepUnlocked(stepKey);
     const alreadyDone = Boolean(runSubstepDoneFlags[stepKey]);
-    return {
-      locked: !unlocked && !alreadyDone,
-      dateLabel: target.label
-    };
+    return getRuleDrivenStepLockMeta(stepKey, {
+      pageScope: "run",
+      alreadyDone
+    });
   };
   const isRunSubstepLocked = (stepKey) => {
     if (allowTestingStepNavigation) return false;

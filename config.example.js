@@ -15,6 +15,12 @@ window.__EEOS_CONFIG__ = {
   eventPageLocks: {
     defaultDurationHours: 0,
     rules: {
+      // Wired page keys:
+      // - review_impact
+      // - promote_reminder_dayof
+      // - promote_reminder_dayof_2
+      // - run_reminder_dayof
+      // - run_reminder_dayof_2
       // "5_day_energy_reset_challenge:review_impact": {
       //   durationHours: 168
       // }

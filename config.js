@@ -43,6 +43,12 @@ window.__EEOS_CONFIG__ = {
 
   // Optional: time-based page locks by event template + page key.
   // Key format: "<templateId>:<pageKey>" (or "*:<pageKey>" for wildcard).
+  // Current wired page keys:
+  // - review_impact
+  // - promote_reminder_dayof
+  // - promote_reminder_dayof_2
+  // - run_reminder_dayof
+  // - run_reminder_dayof_2
   // Supported rule fields:
   // - durationHours (number)
   // - durationMinutes (number)
