@@ -205,6 +205,36 @@
 
     th { color: var(--muted); font-weight: 600; }
 
+    .linkBlock {
+      display: grid;
+      gap: 8px;
+    }
+
+    .linkUrl {
+      display: block;
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 12px;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .linkMeta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .actionsRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .empty {
       padding: 14px;
       font-size: 13px;
@@ -299,6 +329,7 @@
 
         const answers = user.answers || {};
         const program = Array.isArray(user.program) ? user.program : [];
+        const magicLink = user.magicLink || null;
 
         card.innerHTML = `
           <div class="cardHead">
@@ -335,6 +366,21 @@
                   </tbody>
                 </table>
               ` : '<div class="small">No saved program rows.</div>'}
+              <div style="height:10px"></div>
+              <h3>Latest Magic Link</h3>
+              ${magicLink?.url ? `
+                <div class="linkBlock">
+                  <a class="linkUrl" href="${escapeHtml(magicLink.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(magicLink.url)}</a>
+                  <div class="actionsRow">
+                    <button class="ghost copy-link-btn" type="button" data-link="${escapeHtml(magicLink.url)}">Copy link</button>
+                  </div>
+                  <div class="linkMeta">
+                    Created: ${escapeHtml(formatDate(magicLink.createdAt))}<br>
+                    Expires: ${escapeHtml(formatDate(magicLink.expiresAt))}<br>
+                    Used: ${escapeHtml(magicLink.usedAt ? formatDate(magicLink.usedAt) : "Not used yet")}
+                  </div>
+                </div>
+              ` : '<div class="small">No magic link found for this account.</div>'}
             </section>
           </div>
         `;
@@ -347,6 +393,19 @@
           const email = String(button.getAttribute("data-email") || "").trim();
           const companyId = String(button.getAttribute("data-company-id") || "").trim();
           deleteAccount({ email, companyId, button });
+        });
+      }
+
+      for (const button of refs.results.querySelectorAll(".copy-link-btn")) {
+        button.addEventListener("click", async () => {
+          const link = String(button.getAttribute("data-link") || "").trim();
+          if (!link) return;
+          try {
+            await navigator.clipboard.writeText(link);
+            setStatus("Magic link copied.", "ok");
+          } catch (_error) {
+            setStatus("Could not copy link. You can still open it directly.", "err");
+          }
         });
       }
     }

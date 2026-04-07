@@ -867,7 +867,35 @@ async function handleAdminOnboardingDashboard(request, env) {
             json_extract(state_blob, '$.landingDraft.budgetMode') AS budget_mode,
             json_extract(state_blob, '$.landingDraft.totalBudget') AS total_budget,
             json_extract(state_blob, '$.landingDraft.perEmployee') AS per_employee_budget,
-            json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks
+            json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks,
+            (
+              SELECT token
+              FROM user_magic_login_links uml
+              WHERE uml.company_id = accounts.company_id
+              ORDER BY uml.created_at DESC
+              LIMIT 1
+            ) AS latest_magic_token,
+            (
+              SELECT created_at
+              FROM user_magic_login_links uml
+              WHERE uml.company_id = accounts.company_id
+              ORDER BY uml.created_at DESC
+              LIMIT 1
+            ) AS latest_magic_created_at,
+            (
+              SELECT expires_at
+              FROM user_magic_login_links uml
+              WHERE uml.company_id = accounts.company_id
+              ORDER BY uml.created_at DESC
+              LIMIT 1
+            ) AS latest_magic_expires_at,
+            (
+              SELECT used_at
+              FROM user_magic_login_links uml
+              WHERE uml.company_id = accounts.company_id
+              ORDER BY uml.created_at DESC
+              LIMIT 1
+            ) AS latest_magic_used_at
      FROM accounts
      ORDER BY updated_at DESC
      LIMIT ?1`
@@ -891,6 +919,12 @@ async function handleAdminOnboardingDashboard(request, env) {
       companyName: String(row.company_name || "").trim(),
       adminName: String(row.admin_name || "").trim(),
       updatedAt: String(row.updated_at || "").trim(),
+      magicLink: String(row.latest_magic_token || "").trim() ? {
+        url: buildMagicLoginUrl(env, String(row.latest_magic_token || "").trim()),
+        createdAt: String(row.latest_magic_created_at || "").trim(),
+        expiresAt: String(row.latest_magic_expires_at || "").trim(),
+        usedAt: String(row.latest_magic_used_at || "").trim()
+      } : null,
       answers: {
         employeeCount: Number(row.employee_count || 0) || 0,
         goals: parseJsonValue(row.goals, []),

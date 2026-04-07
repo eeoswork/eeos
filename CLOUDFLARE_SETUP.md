@@ -193,9 +193,11 @@ npm run cf:deploy
 - API Base URL: `https://api.eeos.work/api`
 - Dashboard Read Key: value you set via `DASHBOARD_READ_KEY`
 - Click `Load`
+- Each user card also shows the latest generated magic login link, along with created/expires/used status
 - Use `Delete account` on any user card to remove that test account and its related saved data
 
 Cost notes:
 - Endpoint reads only selected JSON fields, not full raw blobs.
+- Latest magic link lookup uses an index on `(company_id, created_at)`.
 - Query is limited (`limit` defaults to 25, max 100).
 - `accounts.updated_at` is indexed for efficient ordering.

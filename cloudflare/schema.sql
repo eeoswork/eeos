@@ -85,3 +85,4 @@ CREATE TABLE IF NOT EXISTS user_magic_login_links (
 
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_email ON user_magic_login_links(email);
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_expires_at ON user_magic_login_links(expires_at);
+CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_company_created_at ON user_magic_login_links(company_id, created_at);
