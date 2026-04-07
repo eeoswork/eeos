@@ -130,22 +130,7 @@
 
   function getCatalog() {
     const fromRepository = Array.isArray(window.EVENT_OFFERINGS) ? window.EVENT_OFFERINGS : [];
-    if (fromRepository.length) return fromRepository;
-
-    const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
-    return templates.map((template) => ({
-      id: String(template?.id || "").trim(),
-      title: String(template?.title || "").trim() || "Team Event",
-      description: String(template?.description || "").trim() || "Featured event selected for this month.",
-      costPerPerson: Math.max(0, Number(template?.costPerPerson || template?.estimatedCost || 0)),
-      goalKeys: [],
-      interestKeys: [],
-      popularityScore: 70,
-      workflowType: String(template?.workflowType || "rsvp"),
-      type: String(template?.type || "rsvp"),
-      registrationLink: String(template?.url || ""),
-      vendorUrl: String(template?.url || "")
-    })).filter((item) => item.id);
+    return fromRepository;
   }
 
   function findFirstByPriority(catalog, priorityIds, predicate = null) {
@@ -195,6 +180,18 @@
     const monthIndex = Number(options.monthIndex || 0);
     const forceInPersonOnly = options.forceInPersonOnly === true;
     const allowUsedIds = options.allowUsedIds === true;
+    const previousOffering = options.previousOffering || null;
+    const weekendsAllowed = preferences.weekendsAllowed === true;
+
+    const isBlockedFocusPair = (candidate) => {
+      const previousId = String(previousOffering?.id || "").trim();
+      const candidateId = String(candidate?.id || "").trim();
+      if (!previousId || !candidateId) return false;
+      return (
+        (previousId === "focus_thread" && candidateId === "focus_hour") ||
+        (previousId === "focus_hour" && candidateId === "focus_thread")
+      );
+    };
 
     const passesScheduleFilter = (offering) => {
       if (preferences.schedulePreference === "hybrid") return true;
@@ -238,7 +235,12 @@
       const pass = filterPasses[i];
       candidates = catalog.filter((offering) => {
         const offeringId = String(offering?.id || "").trim();
+        const offeringDay = normalizeKey(offering?.day);
+        const isSaturdayEvent = offeringDay === "saturday";
+        const isWeekendFlagged = offering?.includeWeekends === true;
         if (!allowUsedIds && offeringId && preferences.usedIds.has(offeringId)) return false;
+        if (isBlockedFocusPair(offering)) return false;
+        if (!weekendsAllowed && (isSaturdayEvent || isWeekendFlagged)) return false;
         const totalCost = estimateTotalCost(offering, preferences.teamSize);
         if (requireFree && totalCost > 0) return false;
         if (!requireFree && maxBudget > 0 && totalCost > (maxBudget * 1.15)) return false;
@@ -336,16 +338,173 @@
     );
   }
 
-  // Builds the fixed 12-week NOLA program.  Weeks 5 and 8 are dynamically
-  // chosen from the catalog based on the team's goals/interests.
-  // Week 12 depends on whether the team has Saturday availability.
+  function buildWeeksProgramResult(weeks, monthlyBudget, teamSize, now) {
+    const pepm = teamSize > 0 ? monthlyBudget / teamSize : 0;
+    const totalEstimatedCost = weeks.reduce((sum, week) => sum + Math.max(0, Number(week.estimatedCost || 0)), 0);
+    return {
+      monthlyBudget: roundMoney(monthlyBudget),
+      pepm,
+      weeks,
+      nextQuarter: getQuarter((now.getMonth() + 1) % 12),
+      totalBudget: roundMoney(monthlyBudget * 3),
+      totalEstimatedCost,
+      remainingBudget: Math.max(0, roundMoney(monthlyBudget * 3) - totalEstimatedCost),
+      teamSize,
+      months: [],
+      events: [],
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  function toWeekEvent(offering, weekNumber, teamSize) {
+    return {
+      week: weekNumber,
+      templateId: String(offering?.id || ""),
+      title: String(offering?.title || ""),
+      description: String(offering?.description || ""),
+      estimatedCost: roundMoney(estimateTotalCost(offering || {}, teamSize)),
+      goals: Array.isArray(offering?.goals) ? [...offering.goals] : [],
+      workflowType: toWorkflowType(offering),
+      url: String(offering?.registrationLink || offering?.vendorUrl || ""),
+      isLaunchReady: weekNumber === 1,
+      formatCapability: String(offering?.formatCapability || ""),
+      inPersonOnly: offering?.inPersonOnly === true,
+      adminLoad: String(offering?.adminLoad || ""),
+      deliveryMode: String(offering?.deliveryMode || ""),
+      durationMinutes: Number(offering?.durationMinutes || 0)
+    };
+  }
+
+  function buildVirtualOnlyWeeks(catalog, preferences, teamSize, monthlyBudget) {
+    const asyncFreePool = catalog.filter(
+      (o) => normalizeKey(o.formatCapability) === "async_slack" && estimateTotalCost(o, teamSize) === 0
+    );
+    const remoteFreePool = catalog.filter(
+      (o) => normalizeKey(o.formatCapability) === "remote_only" && estimateTotalCost(o, teamSize) === 0
+    );
+    const remotePaidPool = catalog.filter((o) => {
+      const fmt = normalizeKey(o.formatCapability);
+      const totalCost = estimateTotalCost(o, teamSize);
+      return fmt === "remote_only" && totalCost > 0 && totalCost <= monthlyBudget;
+    });
+
+    const pickAsyncFree = (usedIds, monthIndex, previousOffering = null, preferredIds = []) => {
+      const prioritized = findFirstByPriority(asyncFreePool, preferredIds, (item) => !usedIds.has(String(item?.id || "")));
+      if (prioritized) return prioritized;
+      const prefs = { ...preferences, usedIds: new Set(usedIds) };
+      let pick = chooseOffering(asyncFreePool, prefs, {
+        requireFree: true,
+        monthIndex,
+        previousOffering
+      });
+      if (!pick?.offering) {
+        pick = chooseOffering(asyncFreePool, prefs, {
+          requireFree: true,
+          monthIndex,
+          allowUsedIds: true,
+          previousOffering
+        });
+      }
+      return pick?.offering || prioritized || asyncFreePool[0] || null;
+    };
+
+    const pickRemoteFree = (usedIds, monthIndex, preferredIds = []) => {
+      const prioritized = findFirstByPriority(remoteFreePool, preferredIds, (item) => !usedIds.has(String(item?.id || "")));
+      if (prioritized) return prioritized;
+      const prefs = { ...preferences, usedIds: new Set(usedIds) };
+      let pick = chooseOffering(remoteFreePool, prefs, {
+        requireFree: true,
+        monthIndex
+      });
+      if (!pick?.offering) {
+        pick = chooseOffering(remoteFreePool, prefs, {
+          requireFree: true,
+          monthIndex,
+          allowUsedIds: true
+        });
+      }
+      return pick?.offering || prioritized || remoteFreePool[0] || null;
+    };
+
+    const pickRemotePaid = (usedIds, monthIndex) => {
+      const prefs = { ...preferences, usedIds: new Set(usedIds) };
+      let pick = chooseOffering(remotePaidPool, prefs, {
+        requireFree: false,
+        maxBudget: monthlyBudget,
+        monthIndex
+      });
+      if (!pick?.offering) {
+        pick = chooseOffering(remotePaidPool, prefs, {
+          requireFree: false,
+          maxBudget: monthlyBudget,
+          monthIndex,
+          allowUsedIds: true
+        });
+      }
+      return pick?.offering || remotePaidPool[0] || null;
+    };
+
+    const usedIds = new Set();
+    const slotOfferings = [];
+    const week1 = pickAsyncFree(usedIds, 0, null, KICKOFF_ASYNC_PRIORITY_IDS);
+    if (week1?.id) usedIds.add(String(week1.id));
+    slotOfferings.push(week1);
+
+    const week2 = pickRemoteFree(usedIds, 1, KICKOFF_REMOTE_PRIORITY_IDS);
+    if (week2?.id) usedIds.add(String(week2.id));
+    slotOfferings.push(week2);
+
+    const week3 = pickAsyncFree(usedIds, 2, week1, ["ama_teammate_edition", "focus_thread", "the_reset_hour"]);
+    if (week3?.id) usedIds.add(String(week3.id));
+    slotOfferings.push(week3);
+
+    const week4 = pickRemotePaid(usedIds, 3);
+    if (week4?.id) usedIds.add(String(week4.id));
+    slotOfferings.push(week4);
+
+    const week5 = pickAsyncFree(usedIds, 4, week3, ["clarity_week", "wins_of_the_week", "show_and_tell"]);
+    if (week5?.id) usedIds.add(String(week5.id));
+    slotOfferings.push(week5);
+
+    const week6 = pickRemoteFree(usedIds, 5, ["lunch_and_listen", "friday_wind_down", "throwback_thursday"]);
+    if (week6?.id) usedIds.add(String(week6.id));
+    slotOfferings.push(week6);
+
+    const week7 = pickAsyncFree(usedIds, 6, week5, ["pet_parade", "idea_walk", "show_and_tell"]);
+    if (week7?.id) usedIds.add(String(week7.id));
+    slotOfferings.push(week7);
+
+    const week8 = pickRemotePaid(usedIds, 7);
+    if (week8?.id) usedIds.add(String(week8.id));
+    slotOfferings.push(week8);
+
+    const week9 = pickAsyncFree(usedIds, 8, week7, ["clarity_week", "wins_of_the_week", "the_reset_hour"]);
+    if (week9?.id) usedIds.add(String(week9.id));
+    slotOfferings.push(week9);
+
+    const week10 = pickRemoteFree(usedIds, 9, ["lunch_and_listen", "friday_wind_down", "throwback_thursday"]);
+    if (week10?.id) usedIds.add(String(week10.id));
+    slotOfferings.push(week10);
+
+    const week11 = pickAsyncFree(usedIds, 10, week9, ["idea_walk", "show_and_tell", "wins_of_the_week"]);
+    if (week11?.id) usedIds.add(String(week11.id));
+    slotOfferings.push(week11);
+
+    const week12 = pickRemotePaid(usedIds, 11);
+    slotOfferings.push(week12);
+
+    return slotOfferings.map((offering, index) => toWeekEvent(offering, index + 1, teamSize));
+  }
+
+  // Builds the fixed 12-week NOLA program.
+  // Hybrid keeps the existing in-person pattern; remote keeps the same cadence
+  // but uses premium remote paid events in weeks 4, 8, and 12.
   function buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget) {
     const fixedIds = new Set([
       "5_day_energy_reset_challenge",
       "coffee_meetup",
       "ama_teammate_edition",
-      "wednesday_at_the_square",
-      "focus_hour",
+      "wats_may6",
       "pet_parade",
       "clarity_week",
       "lunch_and_listen",
@@ -361,21 +520,65 @@
       return catalog.find((o) => String(o.id || "") === id) || null;
     }
 
+    const remoteFreePool = catalog.filter(
+      (o) => normalizeKey(o.formatCapability) === "remote_only" && estimateTotalCost(o, teamSize) === 0
+    );
+
+    const pickFreeRemoteOffering = (usedIds, monthIndex, preferredIds = []) => {
+      const prioritized = findFirstByPriority(remoteFreePool, preferredIds, (item) => !usedIds.has(String(item?.id || "")));
+      if (prioritized) return prioritized;
+      const prefs = { ...preferences, usedIds: new Set(usedIds || []) };
+      let pick = chooseOffering(remoteFreePool, prefs, {
+        requireFree: true,
+        monthIndex
+      });
+      if (!pick?.offering) {
+        pick = chooseOffering(remoteFreePool, prefs, {
+          requireFree: true,
+          monthIndex,
+          allowUsedIds: true
+        });
+      }
+      return pick?.offering || remoteFreePool[0] || null;
+    };
+
     // Week 5: async event, goals-aligned, not already a fixed slot
     const asyncPool = catalog.filter(
       (o) => normalizeKey(o.formatCapability) === "async_slack" && !fixedIds.has(String(o.id || ""))
     );
     const week5Prefs = { ...preferences, usedIds: new Set(fixedIds) };
-    const week5Pick = chooseOffering(asyncPool, week5Prefs, { requireFree: true, monthIndex: 4 });
+    const week5Pick = chooseOffering(asyncPool, week5Prefs, {
+      requireFree: true,
+      monthIndex: 4
+    });
     const week5Offering = week5Pick?.offering || null;
+    const isRemoteOnlyNola = preferences.schedulePreference === "remote";
 
-    // Week 8: premium remote event, goals-aligned, in budget
+    // Premium remote event helper for fixed premium weeks.
+    const pickPremiumRemoteOffering = (usedIds, monthIndex) => {
+      const pool = catalog.filter((o) => {
+        const fmt = normalizeKey(o.formatCapability);
+        const cost = Number(o.costPerPerson || 0);
+        const totalCost = estimateTotalCost(o, teamSize);
+        return fmt === "remote_only" && cost > 0 && totalCost <= monthlyBudget;
+      });
+      const prefs = { ...preferences, usedIds: new Set(usedIds || []) };
+      const pick = chooseOffering(pool, prefs, {
+        requireFree: false,
+        maxBudget: monthlyBudget,
+        monthIndex
+      });
+      return pick?.offering || null;
+    };
+
     const remotePremiumPool = catalog.filter((o) => {
       const fmt = normalizeKey(o.formatCapability);
       const cost = Number(o.costPerPerson || 0);
       const totalCost = estimateTotalCost(o, teamSize);
       return fmt === "remote_only" && cost > 0 && totalCost <= monthlyBudget;
     });
+
+    // Week 8: premium remote event, goals-aligned, in budget
     const week8UsedIds = new Set(fixedIds);
     if (week5Offering?.id) week8UsedIds.add(String(week5Offering.id));
     const week8Prefs = { ...preferences, usedIds: week8UsedIds };
@@ -386,7 +589,6 @@
     });
     const week8Offering = week8Pick?.offering || null;
 
-    // Week 12: Saturday available → Green Light volunteer; else → day-matched trivia
     const hasSaturday = preferences.selectedDays instanceof Set && preferences.selectedDays.has("saturday");
     let week12Offering;
     if (hasSaturday) {
@@ -405,35 +607,71 @@
       week12Offering = findById(matchedDay ? triviaByDay[matchedDay] : "trivia_thursday_port_orleans_7_30p");
     }
 
+    const week6UsedIds = new Set(fixedIds);
+    if (week5Offering?.id) week6UsedIds.add(String(week5Offering.id));
+    const week6Offering = pickFreeRemoteOffering(week6UsedIds, 5, ["lunch_and_listen", "friday_wind_down", "throwback_thursday"]);
+
+    const week9UsedIds = new Set(week6UsedIds);
+    if (week6Offering?.id) week9UsedIds.add(String(week6Offering.id));
+    if (week8Offering?.id) week9UsedIds.add(String(week8Offering.id));
+    const week9Prefs = { ...preferences, usedIds: week9UsedIds };
+    let week9Pick = chooseOffering(asyncPool, week9Prefs, {
+      requireFree: true,
+      monthIndex: 8,
+      previousOffering: findById("pet_parade")
+    });
+    if (!week9Pick?.offering) {
+      week9Pick = chooseOffering(asyncPool, week9Prefs, {
+        requireFree: true,
+        monthIndex: 8,
+        allowUsedIds: true,
+        previousOffering: findById("pet_parade")
+      });
+    }
+    const week9Offering = week9Pick?.offering || findById("clarity_week") || null;
+
+    const week10UsedIds = new Set(week9UsedIds);
+    if (week9Offering?.id) week10UsedIds.add(String(week9Offering.id));
+    const week10Offering = pickFreeRemoteOffering(week10UsedIds, 9, ["lunch_and_listen", "friday_wind_down", "throwback_thursday"]);
+
+    const week11UsedIds = new Set(week10UsedIds);
+    if (week10Offering?.id) week11UsedIds.add(String(week10Offering.id));
+    let week11Pick = chooseOffering(asyncPool, { ...preferences, usedIds: week11UsedIds }, {
+      requireFree: true,
+      monthIndex: 10,
+      previousOffering: week9Offering
+    });
+    if (!week11Pick?.offering) {
+      week11Pick = chooseOffering(asyncPool, { ...preferences, usedIds: week11UsedIds }, {
+        requireFree: true,
+        monthIndex: 10,
+        allowUsedIds: true,
+        previousOffering: week9Offering
+      });
+    }
+    const week11Offering = week11Pick?.offering || findById("idea_walk") || null;
+
+    let week4Offering = findById("wats_may6");
+    if (isRemoteOnlyNola) {
+      return buildVirtualOnlyWeeks(catalog, preferences, teamSize, monthlyBudget);
+    }
+
     const slotOfferings = [
       findById("5_day_energy_reset_challenge"), // week 1
       findById("coffee_meetup"),                // week 2
       findById("ama_teammate_edition"),          // week 3
-      findById("wednesday_at_the_square"),       // week 4
+      week4Offering,                             // week 4
       week5Offering,                             // week 5 — dynamic async
-      findById("focus_hour"),                    // week 6
+      week6Offering,                             // week 6 — remote free
       findById("pet_parade"),                    // week 7
       week8Offering,                             // week 8 — dynamic premium remote
-      findById("clarity_week"),                  // week 9
-      findById("lunch_and_listen"),              // week 10
-      findById("throwback_thursday"),            // week 11
-      week12Offering                             // week 12 — weekend-conditional
+      week9Offering,                             // week 9 — dynamic async
+      week10Offering,                            // week 10 — remote free
+      week11Offering,                            // week 11 — dynamic async
+      week12Offering                             // week 12 — in-person event
     ];
 
-    return slotOfferings.map((offering, slotIndex) => ({
-      week: slotIndex + 1,
-      templateId: String(offering?.id || ""),
-      // Override title for week 12 trivia event
-      title: (slotIndex === 11 && String(offering?.id) === "trivia_thursday_port_orleans_7_30p") ? "Trivia Night" : String(offering?.title || ""),
-      description: String(offering?.description || ""),
-      estimatedCost: roundMoney(estimateTotalCost(offering || {}, teamSize)),
-      goals: Array.isArray(offering?.goals) ? [...offering.goals] : [],
-      workflowType: toWorkflowType(offering),
-      url: String(offering?.registrationLink || offering?.vendorUrl || ""),
-      isLaunchReady: slotIndex === 0,
-      formatCapability: String(offering?.formatCapability || ""),
-      inPersonOnly: offering?.inPersonOnly === true
-    }));
+    return slotOfferings.map((offering, slotIndex) => toWeekEvent(offering, slotIndex + 1, teamSize));
   }
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -442,14 +680,16 @@
     const teamSize = Math.max(1, Number(setupData.employeeCount || setupData.teamSize || 1));
     const monthlyBudget = Math.max(0, Number(setupData.monthlyBudget || setupData.totalBudget || 0));
     const catalog = getCatalog();
+    const selectedDays = normalizeSelectedDays(setupData.daysSelected);
     const preferences = {
       teamSize,
       goalKeys: toGoalKeys(Array.isArray(setupData.goals) ? setupData.goals : []),
       interestKeys: toInterestKeys(Array.isArray(setupData.interests) ? setupData.interests : []),
       schedulePreference: normalizeSchedulePreference(setupData.preferredSchedule),
-      selectedDays: normalizeSelectedDays(setupData.daysSelected),
+      selectedDays,
       selectedTimes: normalizeSelectedTimes(setupData.timesSelected),
       localCity: String(setupData.localCity || "").trim(),
+      weekendsAllowed: selectedDays.has("saturday"),
       remotePreferred: true,
       usedIds: new Set()
     };
@@ -465,26 +705,14 @@
       (item) => estimateTotalCost(item, teamSize) === 0 && normalizeKey(item?.formatCapability) === "remote_only"
     );
 
-    // ── NOLA preset: return fixed 12-week program for New Orleans in-person/hybrid teams ──
-    const isNolaContext = (preferences.schedulePreference === "hybrid")
-      && isNolaCity(preferences.localCity);
+    if (preferences.schedulePreference === "remote") {
+      return buildWeeksProgramResult(buildVirtualOnlyWeeks(catalog, preferences, teamSize, monthlyBudget), monthlyBudget, teamSize, now);
+    }
+
+    // ── NOLA preset: return fixed 12-week program for New Orleans hybrid teams ──
+    const isNolaContext = preferences.schedulePreference === "hybrid" && isNolaCity(preferences.localCity);
     if (isNolaContext) {
-      const weeks = buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget);
-      const pepm = teamSize > 0 ? monthlyBudget / teamSize : 0;
-      const totalEstimatedCost = weeks.reduce((s, w) => s + Math.max(0, Number(w.estimatedCost || 0)), 0);
-      return {
-        monthlyBudget: roundMoney(monthlyBudget),
-        pepm,
-        weeks,
-        nextQuarter: getQuarter((now.getMonth() + 1) % 12),
-        totalBudget: roundMoney(monthlyBudget * 3),
-        totalEstimatedCost,
-        remainingBudget: Math.max(0, roundMoney(monthlyBudget * 3) - totalEstimatedCost),
-        teamSize,
-        months: [],
-        events: [],
-        timestamp: new Date().toISOString()
-      };
+      return buildWeeksProgramResult(buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget), monthlyBudget, teamSize, now);
     }
     // ─────────────────────────────────────────────────────────────────────────────
 
@@ -623,11 +851,13 @@
     for (let w = 3; w <= 12; w++) {
       const forceInPerson = requiresMonthThreeInPerson && w === 10;
       const weekPrefs = { ...preferences, usedIds: weeklyUsedIds };
+      const previousOffering = weeklySelections.length ? weeklySelections[weeklySelections.length - 1] : null;
       let pick = chooseOffering(catalog, weekPrefs, {
         requireFree: false,
         maxBudget: monthlyBudget,
         monthIndex: w - 1,
-        forceInPersonOnly: forceInPerson
+        forceInPersonOnly: forceInPerson,
+        previousOffering
       });
       if (!pick) {
         pick = chooseOffering(catalog, weekPrefs, {
@@ -635,7 +865,8 @@
           maxBudget: monthlyBudget,
           monthIndex: w - 1,
           forceInPersonOnly: forceInPerson,
-          allowUsedIds: true
+          allowUsedIds: true,
+          previousOffering
         });
       }
       if (pick?.offering) {
@@ -655,7 +886,10 @@
       url: String(offering?.registrationLink || offering?.vendorUrl || ""),
       isLaunchReady: slotIndex === 0,
       formatCapability: String(offering?.formatCapability || ""),
-      inPersonOnly: offering?.inPersonOnly === true
+      inPersonOnly: offering?.inPersonOnly === true,
+      adminLoad: String(offering?.adminLoad || ""),
+      deliveryMode: String(offering?.deliveryMode || ""),
+      durationMinutes: Number(offering?.durationMinutes || 0)
     }));
 
     return {

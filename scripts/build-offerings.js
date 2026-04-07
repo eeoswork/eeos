@@ -152,6 +152,7 @@ function normalizeRow(row) {
       },
       remoteCompatible: String(row.format_capability || "").trim().toLowerCase() !== "in_person_only",
       inPersonOnly: String(row.format_capability || "").trim().toLowerCase() === "in_person_only",
+      adminLoad: String(row.admin_load || "").trim(),
       workflowType: "rsvp",
       type: "rsvp"
     }
@@ -207,6 +208,8 @@ function run() {
     }
 
     if (item.popularityScore > existing.popularityScore) {
+      deduped.set(item.id, item);
+    } else if (item.popularityScore === existing.popularityScore) {
       deduped.set(item.id, item);
     }
     report.duplicatesDropped += 1;

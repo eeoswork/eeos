@@ -105,6 +105,11 @@ function updateSidebarEventWorkflowCollapseUI() {
   const expanded = !!state.sidebarEventWorkflowExpanded;
   collapseWrap.style.maxHeight = expanded ? "500px" : "0px";
   collapseWrap.style.overflow = expanded ? "visible" : "hidden";
+  const toggleBtn = document.getElementById("sidebarEventWorkflowToggle");
+  if (toggleBtn) {
+    toggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    toggleBtn.classList.toggle("is-expanded", expanded);
+  }
 }
 /*
  * JOLLY HR - Employee Experience OS
@@ -175,6 +180,21 @@ const EVENT_WORKFLOW_STEP_SEQUENCE = [
   EVENT_WORKFLOW_STEPS.FEEDBACK,
   EVENT_WORKFLOW_STEPS.REVIEW
 ];
+
+const SIDEBAR_WORKFLOW_STEP_CONFIG = {
+  [EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE]: [
+    { menuKey: "events-shortlist", stepNum: EVENT_WORKFLOW_STEPS.SHORTLIST, label: "Launch Event" },
+    { menuKey: "run-event", stepNum: EVENT_WORKFLOW_STEPS.RUN, label: "Run Event" },
+    { menuKey: "review-impact", stepNum: EVENT_WORKFLOW_STEPS.REVIEW, label: "Review Impact" }
+  ]
+};
+
+function getSidebarWorkflowStepConfig(workflowType = getActiveWorkflowType()) {
+  const resolvedType = String(workflowType || "").trim().toLowerCase();
+  const configured = SIDEBAR_WORKFLOW_STEP_CONFIG[resolvedType];
+  if (Array.isArray(configured) && configured.length) return configured;
+  return SIDEBAR_WORKFLOW_STEP_CONFIG[EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE];
+}
 
 function getEventWorkflowConfig(eventLike = {}) {
   const templateId = String(eventLike?.templateId || eventLike?.id || "").trim().toLowerCase();
@@ -976,8 +996,13 @@ function getSeededFreeEventTemplateById(templateId = "") {
   return seeded.find((item) => String(item.templateId || item.id || "").trim() === normalizedTemplateId) || null;
 }
 
+function hasFixedProgramWeekLayout(program) {
+  return Boolean(program && Array.isArray(program.weeks) && program.weeks.length > 0);
+}
+
 function seedFirstMonthFreeEvents(program) {
   if (!program || typeof program !== "object") return program;
+  if (hasFixedProgramWeekLayout(program)) return program;
   const seededEvents = getSeededFreeEventTemplates();
   const existingEvents = Array.isArray(program.events) ? [...program.events] : [];
   const firstSeed = seededEvents[0];
@@ -1146,6 +1171,7 @@ toolPreferences: {
 settings: {
   expenseToolUrl: ""
 },
+mainView: "dashboard",
 browserTabs: [],
 activeBrowserTabId: null,
 landingIdentityMode: "generic",
@@ -1153,6 +1179,7 @@ landingIdentityCommitted: false,
 appIdentityCommitted: false,
 landingBuilderStarted: false,
 landingFirstEventLaunched: false,
+programLaunchMonday: null,
 setupCompleted: true,
 setupMenuExpanded: false,
 sidebarSetupAutoCollapsed: false, // triggers one-time auto-collapse after final setup step
@@ -4290,6 +4317,7 @@ container.innerHTML = "";
 const selectedValues = Array.isArray(selected) ? selected : [];
 
 GOALS.forEach((goal) => {
+  const goalLabel = goal === "Boost morale" ? "Boost morale and retention" : goal;
   const id = `${containerId}-${goal}`.replace(/[^a-zA-Z0-9]/g, "-");
   const checked = selectedValues.includes(goal);
   const wrapper = document.createElement("label");
@@ -4297,7 +4325,7 @@ GOALS.forEach((goal) => {
   wrapper.innerHTML = `
     <input id="${id}" type="checkbox" ${checked ? "checked" : ""} />
     <span>
-      <div class="goal-title">${goal}</div>
+      <div class="goal-title">${goalLabel}</div>
     </span>
   `;
   wrapper.querySelector("input").addEventListener("change", (event) => onToggle(goal, event.target));
@@ -4490,7 +4518,9 @@ if (isElectron()) {
   const tab = { id: uid(), title, url };
   state.browserTabs.push(tab);
   state.activeBrowserTabId = tab.id;
+  state.mainView = "browser";
   renderBrowserPanel();
+  applySidebarSetupPhaseState();
   persistState();
   return;
 }
@@ -4744,6 +4774,10 @@ function forceExpandSetupStep(stepNum) {
 
 function renderSidebarStepMenus() {
   normalizeSidebarAccordionState();
+  const activeWorkflowType = getActiveWorkflowType();
+  if (state.currentSetupStep >= EVENT_WORKFLOW_STEPS.SHORTLIST && activeWorkflowType === EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE) {
+    state.sidebarEventWorkflowExpanded = true;
+  }
   updateSidebarSetupCollapseUI();
   updateSidebarEventWorkflowCollapseUI();
 const setupItems = document.querySelectorAll("[data-setup-menu-item]");
@@ -4753,9 +4787,8 @@ const eventWorkflowSection = $("sidebarEventWorkflowSection");
 const landingView = $("landingView");
 const isLandingActive = landingView && !landingView.classList.contains("hidden");
 const allCoreSetupComplete = isAllCoreSetupComplete();
-const activeSidebarStepBg = "#E0E7FF";
-const activeSidebarStepText = "#1F2937";
-const activeWorkflowType = getActiveWorkflowType();
+const activeSidebarStepBg = "#EEF3FF";
+const activeSidebarStepText = "#3478F6";
 const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
 const activeSetupKey = isLandingActive ? SETUP_STEP_TO_MENU_ITEM[state.currentSetupStep] : null;
 const wf = getWorkflowState();
@@ -4815,7 +4848,7 @@ setupItems.forEach((item) => {
 });
 
 if (eventWorkflowSection) {
-  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST;
+  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST && !hasLandingFirstEventLaunchStarted();
   eventWorkflowSection.style.display = isOnProgramRevealPage ? "none" : "block";
 
   const sidebarNavWorkflowEventSubtitle = document.getElementById("sidebarNavWorkflowEventSubtitle");
@@ -4823,18 +4856,18 @@ if (eventWorkflowSection) {
     const _navEventName = getSidebarWorkflowEventName();
     sidebarNavWorkflowEventSubtitle.textContent = _navEventName;
       const shouldShowNavEventName = allCoreSetupComplete && _navEventName;
-      sidebarNavWorkflowEventSubtitle.style.display = shouldShowNavEventName ? "inline-block" : "none";
+      sidebarNavWorkflowEventSubtitle.style.display = shouldShowNavEventName ? "block" : "none";
       if (shouldShowNavEventName) {
-        sidebarNavWorkflowEventSubtitle.style.alignItems = "";
         sidebarNavWorkflowEventSubtitle.style.maxWidth = "100%";
-        sidebarNavWorkflowEventSubtitle.style.padding = "2px 10px";
-        sidebarNavWorkflowEventSubtitle.style.borderRadius = "9999px";
-        sidebarNavWorkflowEventSubtitle.style.border = "1px solid #cbd5e1";
-        sidebarNavWorkflowEventSubtitle.style.background = "#f8fafc";
-        sidebarNavWorkflowEventSubtitle.style.fontSize = "11px";
+        sidebarNavWorkflowEventSubtitle.style.padding = "0";
+        sidebarNavWorkflowEventSubtitle.style.borderRadius = "0";
+        sidebarNavWorkflowEventSubtitle.style.border = "none";
+        sidebarNavWorkflowEventSubtitle.style.background = "transparent";
+        sidebarNavWorkflowEventSubtitle.style.fontSize = "13px";
         sidebarNavWorkflowEventSubtitle.style.fontWeight = "600";
         sidebarNavWorkflowEventSubtitle.style.lineHeight = "1.35";
-        sidebarNavWorkflowEventSubtitle.style.color = "#0f172a";
+        sidebarNavWorkflowEventSubtitle.style.color = "#334155";
+        sidebarNavWorkflowEventSubtitle.style.margin = "2px 2px 10px";
         sidebarNavWorkflowEventSubtitle.style.whiteSpace = "normal";
         sidebarNavWorkflowEventSubtitle.style.overflow = "visible";
         sidebarNavWorkflowEventSubtitle.style.textOverflow = "clip";
@@ -4844,17 +4877,18 @@ if (eventWorkflowSection) {
 }
 
 eventWorkflowItems.forEach((item) => {
-  const stepKeyToNum = {
-    "events-shortlist": 7,
-    poll: 8,
-    rsvp: 9,
-    "book-event": 10,
-    "tell-team": 11,
-    "run-event": 12,
-    "track-results": 13,
-    "review-impact": 14
-  };
-  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST;
+  const sidebarStepConfig = getSidebarWorkflowStepConfig(activeWorkflowType);
+  const sidebarSequence = sidebarStepConfig.map((entry) => entry.stepNum);
+  const stepKeyToNum = sidebarStepConfig.reduce((acc, entry) => {
+    acc[entry.menuKey] = entry.stepNum;
+    return acc;
+  }, {});
+  const configForItem = sidebarStepConfig.find((entry) => entry.menuKey === item.dataset.eventWorkflowMenuItem);
+  const labelEl = item.querySelector(".sidebar-workflow-item-label");
+  if (labelEl && configForItem?.label) {
+    labelEl.textContent = configForItem.label;
+  }
+  const isOnProgramRevealPage = state.currentSetupStep === EVENT_WORKFLOW_STEPS.SHORTLIST && !hasLandingFirstEventLaunchStarted();
   if (isOnProgramRevealPage) {
     item.style.display = "none";
     return;
@@ -4879,32 +4913,48 @@ eventWorkflowItems.forEach((item) => {
   }
   item.style.display = "";
   const processCurrentStep = getEventWorkflowProcessStep();
-  const isBookEventDebugOverride = Boolean(state.debugMode) && item.dataset.eventWorkflowMenuItem === "book-event";
+  const currentSetupStepNum = Number(state.currentSetupStep || 0);
+  const nearestSidebarStepFor = (sourceStep) => {
+    const source = Number(sourceStep || 0);
+    if (!sidebarSequence.length) return null;
+    if (sidebarSequence.includes(source)) return source;
+    const previousVisible = sidebarSequence.filter((candidate) => candidate <= source);
+    if (previousVisible.length) return previousVisible[previousVisible.length - 1];
+    return sidebarSequence[0];
+  };
+  const activeSidebarStep = nearestSidebarStepFor(currentSetupStepNum);
+  const activeProcessSidebarStep = nearestSidebarStepFor(processCurrentStep);
   const shouldIgnoreWorkflowSkipForSidebar = forceRevelrySidebarSet && revelryVisibleSidebarSteps.has(stepNum);
   const isConceptualInactive = !shouldIgnoreWorkflowSkipForSidebar && isSkippedByWorkflowType && hasEnteredEventWorkflow;
-  const isActive = !isConceptualInactive && state.currentSetupStep === stepNum;
-  const isProcessCurrent = !isConceptualInactive && stepNum === processCurrentStep;
+  const isActive = !isConceptualInactive && stepNum === activeSidebarStep;
+  const isProcessCurrent = !isConceptualInactive && stepNum === activeProcessSidebarStep;
   const isCompleted = !isConceptualInactive && state.completedSetupSteps.includes(stepNum) && stepNum < processCurrentStep;
   const isFutureStep = isConceptualInactive || (!isCompleted && stepNum > processCurrentStep);
   const isLockedCompletedWorkflowStep = isCompleted && stepNum < processCurrentStep;
-  const previousStep = getPreviousWorkflowStep(stepNum, activeWorkflowType);
-  const isLocked = isConceptualInactive || !allCoreSetupComplete || (!allowTestingStepNavigation && !isBookEventDebugOverride && (
+  const stepSequenceIndex = sidebarSequence.indexOf(stepNum);
+  const previousStep = stepSequenceIndex > 0 ? sidebarSequence[stepSequenceIndex - 1] : null;
+  const isLocked = isConceptualInactive || !allCoreSetupComplete || (!allowTestingStepNavigation && (
     isLockedCompletedWorkflowStep
     || isFutureStep
     || (!isCompleted && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST && previousStep !== null && !state.completedSetupSteps.includes(previousStep))
   ));
   const iconStateClass = isCompleted ? "sidebar-step-completed" : (isProcessCurrent ? "sidebar-step-current" : "sidebar-step-future");
-  item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current");
+  item.classList.remove("sidebar-step-current", "sidebar-step-completed", "sidebar-step-future", "sidebar-step-process-current", "sidebar-step-active", "sidebar-step-in-progress", "sidebar-step-not-started");
   item.classList.add(iconStateClass);
+  item.classList.toggle("sidebar-step-active", isActive);
+  item.classList.toggle("sidebar-step-in-progress", isProcessCurrent);
+  item.classList.toggle("sidebar-step-not-started", !isCompleted && !isProcessCurrent);
   item.classList.toggle("sidebar-step-process-current", isProcessCurrent);
   item.classList.toggle("sidebar-step-locked", isLocked && !isActive);
   item.style.background = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
-  item.style.borderColor = allCoreSetupComplete && isActive ? activeSidebarStepBg : "transparent";
+  item.style.borderColor = "transparent";
+  item.style.borderLeftColor = allCoreSetupComplete && isActive ? activeSidebarStepText : "transparent";
   item.style.color = allCoreSetupComplete
     ? (isActive ? activeSidebarStepText : (isLockedCompletedWorkflowStep ? "#94a3b8" : (isCompleted ? "#64748b" : "#1e293b")))
     : "#94a3b8";
   item.style.opacity = isLocked && !isActive ? "0.58" : "1";
   item.style.cursor = isLocked ? "not-allowed" : "pointer";
+  item.tabIndex = isLocked ? -1 : 0;
   item.onclick = () => {
     if (!allCoreSetupComplete || !stepNum) return;
     if (isLocked) return;
@@ -4917,6 +4967,24 @@ eventWorkflowItems.forEach((item) => {
     renderSidebarStepMenus();
     forceExpandSetupStep(stepNum);
     scrollSetupStepIntoView(stepNum, "smooth", true);
+  };
+  item.onkeydown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      item.click();
+      return;
+    }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const visibleItems = Array.from(document.querySelectorAll("[data-event-workflow-menu-item]"))
+      .filter((workflowItem) => workflowItem.style.display !== "none");
+    const currentIndex = visibleItems.indexOf(item);
+    if (currentIndex < 0) return;
+    const nextIndex = e.key === "ArrowDown"
+      ? Math.min(visibleItems.length - 1, currentIndex + 1)
+      : Math.max(0, currentIndex - 1);
+    const nextItem = visibleItems[nextIndex];
+    if (nextItem) nextItem.focus();
   };
 });
 
@@ -4935,6 +5003,7 @@ workflowItems.forEach((item) => {
   }
 });
 
+  renderSidebarProgram();
   applySidebarSetupPhaseState();
 }
 
@@ -5438,6 +5507,7 @@ function getMagicLinkFourMonthOverride() {
 }
 
 function applyMagicLinkFourMonthOverride(program) {
+  if (hasFixedProgramWeekLayout(program)) return program;
   const override = getMagicLinkFourMonthOverride();
   if (!override) return program;
   
@@ -5451,6 +5521,7 @@ function applyMagicLinkFourMonthOverride(program) {
 }
 
 function normalizeRevelryMarchCardCopy(program) {
+  if (hasFixedProgramWeekLayout(program)) return program;
   if (!isRevelryBracketsMagicContext()) return program;
   if (!program || typeof program !== "object") return program;
   if (!Array.isArray(program.events)) return program;
@@ -5546,8 +5617,6 @@ function getFourMonthShortlistCandidates(monthEvent = {}) {
     }));
   }
 
-  const templates = Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : [];
-  const byId = new Map(templates.map((template) => [String(template.id || ""), template]));
   const picked = [];
   const seen = new Set();
 
@@ -5555,14 +5624,13 @@ function getFourMonthShortlistCandidates(monthEvent = {}) {
   confettiOptions.forEach((option) => {
     const templateId = String(option?.templateId || option?.id || "").trim();
     if (!templateId || seen.has(templateId)) return;
-    const template = byId.get(templateId);
     picked.push({
       templateId,
-      title: String(option?.title || template?.title || "").trim(),
-      description: String(option?.description || template?.description || "").trim(),
-      estimatedCost: Number(option?.estimatedCost ?? template?.estimatedCost ?? 0),
-      url: String(template?.url || option?.url || "").trim(),
-      type: String(template?.type || option?.type || "poll").trim().toLowerCase()
+      title: String(option?.title || "").trim(),
+      description: String(option?.description || "").trim(),
+      estimatedCost: Number(option?.estimatedCost ?? 0),
+      url: String(option?.url || "").trim(),
+      type: String(option?.type || "poll").trim().toLowerCase()
     });
     seen.add(templateId);
   });
@@ -5610,6 +5678,10 @@ function renderWeeklyProgramCards(weeks, options) {
     </div>`;
   };
 
+  function resolveProgramRevealDescription(templateId, fallbackDescription) {
+    return String(fallbackDescription || "").trim();
+  }
+
   const primaryEvent = weekItems[0];
   const remainingEvents = weekItems.slice(1);
   const primaryWeekNum = Number(primaryEvent.week || 1);
@@ -5627,13 +5699,16 @@ function renderWeeklyProgramCards(weeks, options) {
         ? `<a href="${escapeHtml(primaryEventUrl)}" target="_blank" rel="noopener noreferrer" class="rounded-lg px-4 py-2 text-xs font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 inline-block" style="text-decoration: none;">Preview ↗</a>`
         : `<span class="text-xs text-slate-400 italic">Available after kickoff</span>`);
 
-  let locationPill = "";
-  try { locationPill = getLaunchEventLocationPill(primaryEvent); } catch (_e) { locationPill = ""; }
-  const locationPillHtml = locationPill
-    ? `<span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(locationPill)}</span>`
+  const primaryCostPillsHtml = primaryCostDisplay === "Free"
+    ? `<span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;">performance</span><span style="display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;">async</span>`
     : "";
 
   const kickoffHeaderHtml = buildSectionHeaderHtml("KICKOFF", true);
+  const primaryTemplateId = String(primaryEvent.templateId || primaryEvent.id || "");
+  const primaryDisplayTitle = String(primaryEvent.title || "").trim();
+  const primaryDisplayDescription = primaryTemplateId === "5_day_energy_reset_challenge"
+    ? "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come. Admin load: Schedule 7 daily Slack posts (~5 min total)."
+    : resolveProgramRevealDescription(primaryTemplateId, primaryEvent.description || "");
   const primaryCardHtml = `
     <div id="${primaryCardId}" style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10); background: white; overflow: hidden;" class="four-month-card" data-expanded="${primaryIsExpanded ? "true" : "false"}">
       <div style="padding: 16px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
@@ -5644,44 +5719,183 @@ function renderWeeklyProgramCards(weeks, options) {
                 ${calendarIconSvg}
                 <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(primaryWeekLabel)}</h3>
               </div>
-              <span style="display: inline-block; background: #ecfeff; color: #0f766e; border: 1px solid #99f6e4; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap;">Kickoff</span>
-              ${locationPillHtml}
             </div>
-            <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(primaryEvent.title || "")}</p>
+            <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(primaryDisplayTitle)}</p>
           </div>
         </div>
       </div>
       <div class="four-month-content" style="display: block; padding: 16px; border-top: 1px solid #e2e8f0;">
-        <p class="text-sm text-slate-600">${escapeHtml(primaryEvent.description || "")}</p>
+        <p class="text-sm text-slate-600">${escapeHtml(primaryDisplayDescription)}</p>
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-          <div style="font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(primaryCostDisplay)}</div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(primaryCostDisplay)}${primaryCostPillsHtml}</div>
           ${primaryLaunchButtonHtml}
         </div>
       </div>
     </div>
   `;
 
-  const remainderRowsHtml = remainingEvents.map((weekEvent, index) => {
+  // Calculate the actual calendar quarter for the "next quarter" label.
+  // Week 2 starts on the Monday after the launch week — use that date's quarter.
+  const _launchMon = state.programLaunchMonday
+    ? new Date(state.programLaunchMonday)
+    : getProgramLaunchMonday();
+  const _week2Date = new Date(_launchMon);
+  _week2Date.setDate(_launchMon.getDate() + 7);
+  const nextQuarterNum = Math.floor(_week2Date.getMonth() / 3) + 1;
+  const totalEmployees = Math.max(0, Number(state?.fourMonthProgram?.teamSize || state?.programSettings?.employeeCount || 0));
+
+  const ADMIN_LOAD_MAP = {
+    one_slack_post:       { time: "~2 min",  task: "Schedule 1 Slack post" },
+    week_of_slack_posts:  { time: "~5 min",  task: "Schedule 5 daily Slack posts" },
+    rsvp_and_book:        { time: "<10 min", task: "Schedule 2 Slack posts; book event" },
+    rsvp_only:            { time: "~2 min",  task: "Schedule 2 Slack posts" }
+  };
+
+  const offeringById = (() => {
+    const map = new Map();
+    const pool = Array.isArray(window.EVENT_OFFERINGS) ? window.EVENT_OFFERINGS : [];
+    pool.forEach((item) => {
+      const id = String(item?.id || "").trim();
+      if (id) map.set(id, item);
+    });
+    return map;
+  })();
+
+  function buildAdminLoadHtml(adminLoadKey) {
+    const entry = ADMIN_LOAD_MAP[String(adminLoadKey || "").trim()];
+    if (!entry) return "";
+    return `<span style="font-weight: 700; color: #475569;">${escapeHtml(entry.time)}</span><span style="color: #475569; margin: 0 5px;">·</span><span style="color: #475569;">${escapeHtml(entry.task)}</span>`;
+  }
+
+  function getDeliveryModePillLabel(weekEvent) {
+    const mode = String(weekEvent?.deliveryMode || "").trim().toLowerCase();
+    if (mode === "async_slack") return "async";
+    if (mode === "in_person") return "in-person";
+    if (mode === "remote") return "remote";
+    return "";
+  }
+
+  function getGoalPillLabel(roiPrimary) {
+    const key = String(roiPrimary || "").trim().toLowerCase();
+    if (key === "employee_performance") return "performance";
+    if (key === "team_connection") return "connection";
+    if (key === "morale") return "morale";
+    if (key === "wellbeing") return "wellbeing";
+    return "";
+  }
+
+  function buildDescriptionPillsHtml(weekEvent) {
+    const pills = [];
+    const goalLabel = getGoalPillLabel(weekEvent?.roiPrimary);
+    if (goalLabel) {
+      pills.push({
+        label: goalLabel,
+        style: "display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;"
+      });
+    }
+    const deliveryModeLabel = getDeliveryModePillLabel(weekEvent);
+    if (deliveryModeLabel) {
+      pills.push({
+        label: deliveryModeLabel,
+        style: "display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;"
+      });
+    }
+    const mode = String(weekEvent?.deliveryMode || "").trim().toLowerCase();
+    const durationMinutes = Number(weekEvent?.durationMinutes || 0);
+    if (mode !== "async_slack" && Number.isFinite(durationMinutes) && durationMinutes > 0) {
+      pills.push({
+        label: `${Math.round(durationMinutes)} min`,
+        style: "display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;"
+      });
+    }
+    if (!pills.length) return "";
+    return `<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">${pills.map((pill) => `<span style="${pill.style}">${escapeHtml(pill.label)}</span>`).join("")}</div>`;
+  }
+
+  function buildHardcodedRangeCostDisplay(maxPerPerson) {
+    const rawUpperBound = Math.max(0, Number(maxPerPerson || 0) * (0.45 * totalEmployees));
+    const roundedUpperBound = Math.round(rawUpperBound / 100) * 100;
+    const upperBoundLabel = fmtMoney(roundedUpperBound).replace(/^\$/, "");
+    return `$0-${upperBoundLabel}`;
+  }
+
+  function buildRow(weekEvent, isLast, extraStyle) {
     const weekNum = Number(weekEvent.week || 0);
     const weekLabel = `Week ${weekNum}`;
-    const isLast = index === remainingEvents.length - 1;
-    const dividerHtml = weekNum === 6
-      ? `<tr><td colspan="4" style="padding: 18px 0 6px 0;">${buildSectionHeaderHtml(`YOUR NEXT QUARTER (Q${quarterLabel})`, false)}</td></tr>`
-      : "";
-
-    // Map specific event IDs to custom display names
-    let displayTitle = weekEvent.title || "";
-    if (weekEvent.id === "trivia_thursday_port_orleans_7_30p") {
-      displayTitle = "Trivia Night";
-    }
-    return `${dividerHtml}
-      <tr>
-        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
-        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}</td>
-        <td style="padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${escapeHtml(weekEvent.description || "")}</td>
-        <td style="padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: right; white-space: nowrap; vertical-align: top;">${weekEvent.estimatedCost > 0 ? `Est. cost: ${escapeHtml(fmtMoney(weekEvent.estimatedCost))}` : "Free"}</td>
+    const templateId = String(weekEvent.templateId || weekEvent.id || "");
+    const offeringMeta = offeringById.get(templateId) || null;
+    const displayTitle = String(weekEvent.title || "").trim();
+    const displayDescription = resolveProgramRevealDescription(templateId, weekEvent.description || "");
+    const isPremium = [4, 8, 12].includes(weekNum);
+    const rowBg = isPremium ? "background: #fffbeb;" : "";
+    const weekLabelColor = isPremium ? "#b45309" : "#64748b";
+    const isTriviaNight = /^trivia_/i.test(templateId);
+    const resolvedAdminLoad = String(weekEvent.adminLoad || offeringMeta?.adminLoad || "").trim();
+    const resolvedDeliveryMode = String(weekEvent.deliveryMode || offeringMeta?.deliveryMode || "").trim();
+    const resolvedDurationMinutes = Number(weekEvent.durationMinutes || offeringMeta?.durationMinutes || 0);
+    const resolvedCostDisplay = templateId === "wats_may6"
+      ? buildHardcodedRangeCostDisplay(20)
+      : isTriviaNight
+        ? buildHardcodedRangeCostDisplay(25)
+      : (weekEvent.estimatedCost > 0 ? escapeHtml(fmtMoney(weekEvent.estimatedCost)) : "Free");
+    const resolvedRoiPrimary = String(
+      weekEvent.roiPrimary
+      || (Array.isArray(weekEvent.goalKeys) && weekEvent.goalKeys.length ? weekEvent.goalKeys[0] : "")
+      || offeringMeta?.roiPrimary
+      || (Array.isArray(offeringMeta?.goalKeys) && offeringMeta.goalKeys.length ? offeringMeta.goalKeys[0] : "")
+      || ""
+    ).trim();
+    const adminLoadHtml = buildAdminLoadHtml(resolvedAdminLoad);
+    const descriptionPillsHtml = buildDescriptionPillsHtml({
+      deliveryMode: resolvedDeliveryMode,
+      durationMinutes: resolvedDurationMinutes,
+      roiPrimary: resolvedRoiPrimary
+    });
+    const style = extraStyle || "";
+    return `
+      <tr style="${style}">
+        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: ${weekLabelColor}; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
+        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}</td>
+        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}</td>
+        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; line-height: 1.35; vertical-align: top; white-space: nowrap;">${adminLoadHtml}</td>
+        <td style="${rowBg}padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: center; white-space: nowrap; vertical-align: top;">${resolvedCostDisplay}</td>
       </tr>`;
+  }
+
+  // Split remaining events into weeks 2-6 (visible) and weeks 7-12 (hidden behind toggle)
+  const visibleEvents = remainingEvents.filter((e) => Number(e.week || 0) <= 6);
+  const hiddenEvents = remainingEvents.filter((e) => Number(e.week || 0) > 6);
+
+  const visibleRowsHtml = visibleEvents.map((weekEvent, index) => {
+    const isLast = index === visibleEvents.length - 1 && hiddenEvents.length === 0;
+    return buildRow(weekEvent, isLast, "");
   }).join("");
+
+  const hiddenRowsHtml = hiddenEvents.map((weekEvent, index) => {
+    const isLast = index === hiddenEvents.length - 1;
+    return buildRow(weekEvent, isLast, "display: none;").replace("<tr style=\"display: none;\">", "<tr class=\"programRevealHiddenRow\" style=\"display: none;\">");
+  }).join("");
+
+  const toggleRowHtml = hiddenEvents.length
+    ? `<tr id="programRevealToggleRow">
+        <td colspan="5" style="padding: 14px 0; text-align: center; border-top: 1px solid #e2e8f0;">
+          <button id="programRevealToggleBtn" onclick="(function(){
+            var rows = document.querySelectorAll('.programRevealHiddenRow');
+            var btn = document.getElementById('programRevealToggleBtn');
+            if (!rows.length || !btn) return;
+            var hidden = rows[0].style.display === 'none';
+            rows.forEach(function(row){ row.style.display = hidden ? '' : 'none'; });
+            btn.textContent = hidden ? 'Hide weeks 7–12 ▲' : 'See weeks 7–12 ▼';
+          })()" style="background: none; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; transition: background 0.15s;">See weeks 7–12 ▼</button>
+        </td>
+      </tr>
+      ${hiddenRowsHtml}`
+    : "";
+
+  // const nextQuarterHeaderHtml = remainingEvents.length
+  //   ? `<div style="margin-top: 22px;">${buildSectionHeaderHtml("COMING UP", false)}</div>`
+  //   : "";
+  const nextQuarterHeaderHtml = "";
 
   const timelineHtml = remainingEvents.length
     ? `<div style="margin-top: 14px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding-left: 16px; padding-right: 16px;">
@@ -5691,26 +5905,29 @@ function renderWeeklyProgramCards(weeks, options) {
             <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Week</th>
             <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap; min-width: 180px;">Event</th>
             <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Description</th>
-            <th style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: right; white-space: nowrap;">Cost</th>
+            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Admin time to launch event</th>
+            <th style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: center; white-space: nowrap;">Est. Cost</th>
           </tr>
         </thead>
         <tbody>
-          ${remainderRowsHtml}
+          ${visibleRowsHtml}
+          ${toggleRowHtml}
         </tbody>
       </table>
     </div>`
     : "";
 
-  return `${kickoffHeaderHtml}${primaryCardHtml}${timelineHtml}`;
+  return `${kickoffHeaderHtml}${primaryCardHtml}${nextQuarterHeaderHtml}${timelineHtml}`;
 }
 
 function renderFourMonthProgram() {
   const container = $("monthlyEvents");
-  const budgetSummary = $("fourMonthBudgetSummary");
   if (!container || !state.fourMonthProgram) return;
 
-  state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
-  state.fourMonthProgram = normalizeRevelryMarchCardCopy(state.fourMonthProgram);
+  if (!hasFixedProgramWeekLayout(state.fourMonthProgram)) {
+    state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
+    state.fourMonthProgram = normalizeRevelryMarchCardCopy(state.fourMonthProgram);
+  }
 
   const existingCards = Array.from(container.querySelectorAll(".four-month-card"));
   const isInitialRender = existingCards.length === 0;
@@ -5721,16 +5938,44 @@ function renderFourMonthProgram() {
   );
 
   const program = state.fourMonthProgram;
-  const programHeader = document.querySelector("#fourMonthProgram h4");
-  const programSubtitle = document.querySelector("#fourMonthProgram h4 + p");
   const teamSize = Math.max(0, Number(program?.teamSize || state.programSettings?.employeeCount || 0));
-  if (programHeader) {
-    programHeader.textContent = "Your Team Engagement Program";
+  const overviewEmployees = $("progOverviewEmployees");
+  const overviewMonthlyBudget = $("progOverviewMonthlyBudget");
+  const overviewGoals = $("progOverviewGoals");
+  const overviewSetting = $("progOverviewSetting");
+
+  const monthlyBudgetValue = Math.max(0, Number(program?.monthlyBudget || state?.programSettings?.totalBudget || state?.programSettings?.monthlyBudget || 0));
+  const selectedGoals = Array.isArray(state?.programSettings?.goals)
+    ? state.programSettings.goals.map((goal) => String(goal || "").trim()).filter(Boolean)
+    : [];
+  const mappedGoalLabels = selectedGoals.map((goal) => {
+    const key = String(goal || "").trim().toLowerCase();
+    if (key === "strengthen team connection") return "Connection";
+    if (key === "improve employee performance") return "Performance";
+    if (key === "boost morale and retention" || key === "boost morale") return "Morale";
+    if (key === "support employee wellbeing") return "Wellbeing";
+    return goal;
+  });
+  const rawScheduleSetting = Array.isArray(state?.programSettings?.preferredSchedule)
+    ? String(state.programSettings.preferredSchedule[0] || "").trim().toLowerCase()
+    : String(state?.programSettings?.preferredSchedule || "").trim().toLowerCase();
+  const settingLabelHtml = rawScheduleSetting === "remote"
+    ? "Virtual"
+    : "Virtual<br>In-person";
+
+  if (overviewEmployees) {
+    overviewEmployees.textContent = teamSize > 0 ? Number(teamSize).toLocaleString("en-US") : "-";
   }
-  if (programSubtitle) {
-    programSubtitle.textContent = teamSize > 0
-      ? `Built for ${teamSize} employees`
-      : "Built for your team";
+  if (overviewMonthlyBudget) {
+    overviewMonthlyBudget.textContent = monthlyBudgetValue > 0 ? fmtMoney(monthlyBudgetValue) : "-";
+  }
+  if (overviewGoals) {
+    overviewGoals.innerHTML = mappedGoalLabels.length
+      ? mappedGoalLabels.map((goal) => `<div>${escapeHtml(goal)}</div>`).join("")
+      : "-";
+  }
+  if (overviewSetting) {
+    overviewSetting.innerHTML = settingLabelHtml;
   }
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
@@ -5740,10 +5985,7 @@ function renderFourMonthProgram() {
   const nextEventIndex = (program.events || []).findIndex((eventItem) => !eventItem?.completed && !eventItem?.created);
   const highlightedIndex = nextEventIndex >= 0 ? nextEventIndex : 0;
 
-  // Update budget summary using the same source as the fixed sidebar card
-  if (budgetSummary) {
-    syncBudgetDisplaySurfaces();
-  }
+  syncBudgetDisplaySurfaces();
 
   // If the generator produced a weeks array, render per-week cards; otherwise fall back to monthly cards.
   const hasWeeks = Array.isArray(program.weeks) && program.weeks.length > 0;
@@ -6050,14 +6292,22 @@ const tabs = $("browserTabs");
 const host = $("browserHost");
 const placeholder = $("browserPlaceholder");
 
+if (state.mainView !== "browser") {
+  panel.classList.add("hidden");
+  applySidebarSetupPhaseState();
+  return;
+}
+
 
 
 
 if (!isElectron() || !state.browserTabs.length) {
+  state.mainView = "dashboard";
   panel.classList.add("hidden");
   if (host.querySelector("webview")) {
     host.querySelector("webview").remove();
   }
+  applySidebarSetupPhaseState();
   return;
 }
 
@@ -6098,6 +6348,30 @@ webview.src = activeTab.url;
 webview.style.width = "100%";
 webview.style.height = "100%";
 host.appendChild(webview);
+applySidebarSetupPhaseState();
+}
+
+function openDashboardMainView(options = {}) {
+  state.mainView = "dashboard";
+  const browserPanel = $("browserPanel");
+  if (browserPanel) browserPanel.classList.add("hidden");
+  showLanding();
+  // Navigate to the program overview (step 7) so the 12-week grid is shown,
+  // not whichever event workflow step the user was just on.
+  if (isAllCoreSetupComplete() && hasLandingFirstEventLaunchStarted()) {
+    state.currentSetupStep = EVENT_WORKFLOW_STEPS.SHORTLIST;
+    renderSetupStepStates();
+    forceExpandSetupStep(EVENT_WORKFLOW_STEPS.SHORTLIST);
+    renderSidebarStepMenus();
+  }
+  applySidebarSetupPhaseState();
+  persistState();
+  if (options.scroll !== false) {
+    const mainEl = document.querySelector(".eeos-main");
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: options.behavior || "smooth" });
+    }
+  }
 }
 
 
@@ -6716,6 +6990,9 @@ if (action === "create-event") {
   const workflowConfig = getEventWorkflowConfig(template);
   setEventLaunchContextFromTemplate(template);
   state.landingFirstEventLaunched = true;
+  if (!state.programLaunchMonday) {
+    state.programLaunchMonday = getProgramLaunchMonday().toISOString();
+  }
 
   if (!state.pollBuilder || typeof state.pollBuilder !== "object") state.pollBuilder = {};
   if (!state.pollBuilder.eventLabelOverrides) state.pollBuilder.eventLabelOverrides = {};
@@ -7244,6 +7521,71 @@ function renderLandingProgressBar() {
   });
 }
 
+function getProgramLaunchMonday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay(); // 0=Sun, 1=Mon
+  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+  return d;
+}
+
+const SIDEBAR_EVENT_DISPLAY_NAMES = {
+  throwback_thursday: "#TBT",
+  virtual_escape_quest: "Escape Quest",
+  wednesday_at_the_square: "WATS",
+  ama_teammate_edition: "AMA",
+  green_light_new_orleans: "Green Light",
+  "5_day_energy_reset_challenge": "Energy Reset Challenge"
+};
+
+function renderSidebarProgram() {
+  const section = document.getElementById("sidebarProgramSection");
+  const tableEl = document.getElementById("sidebarProgramTable");
+  if (!section || !tableEl) return;
+
+  const weeks = state.fourMonthProgram?.weeks;
+  if (!state.landingFirstEventLaunched || !Array.isArray(weeks) || weeks.length === 0) {
+    section.classList.add("hidden");
+    return;
+  }
+  section.classList.remove("hidden");
+
+  const launchMonday = state.programLaunchMonday
+    ? new Date(state.programLaunchMonday)
+    : getProgramLaunchMonday();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysSinceLaunch = Math.max(0, Math.floor((today - launchMonday) / 86400000));
+  const currentWeekIndex = Math.min(weeks.length - 1, Math.floor(daysSinceLaunch / 7));
+
+  const headerHtml = `<div style="display:flex;gap:2px;align-items:center;padding:2px 8px 5px;margin-bottom:2px;border-bottom:1px solid #e2e8f0;">
+    <span style="flex:0 0 40px;font-size:8px;font-weight:400;color:#94a3b8;white-space:nowrap;">WK. OF</span>
+    <span style="flex:1;font-size:8px;font-weight:400;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;">Event</span>
+  </div>`;
+
+  const rowsHtml = weeks.map((week, i) => {
+    const weekNum = Number(week.week || 0);
+    const weekMonday = new Date(launchMonday);
+    weekMonday.setDate(launchMonday.getDate() + i * 7);
+    const dateLabel = `${weekMonday.getMonth() + 1}/${weekMonday.getDate()}`;
+    const isCurrent = i === currentWeekIndex;
+    const isPast = i < currentWeekIndex;
+    const isPremiumWeek = [4, 8, 12].includes(weekNum);
+    const rowBg = isCurrent ? "background:#EFF6FF;border-radius:5px;" : "";
+    const dateColor = isCurrent ? "color:#1d4ed8;font-weight:700;" : isPast ? "color:#cbd5e1;" : "color:#64748b;font-weight:500;";
+    const titleColor = isCurrent ? "color:#1e293b;font-weight:700;" : isPast ? "color:#cbd5e1;" : "color:#475569;";
+    const premiumWeight = isPremiumWeek ? "font-weight:700;" : "";
+    const displayName = SIDEBAR_EVENT_DISPLAY_NAMES[String(week.templateId || "")] || (week.title || "");
+    return `<div style="display:flex;gap:2px;align-items:flex-start;padding:3px 8px;${rowBg}">
+      <span style="flex:0 0 40px;font-size:11px;font-variant-numeric:tabular-nums;${dateColor}${premiumWeight}">${dateLabel}</span>
+      <span style="flex:1;font-size:11px;line-height:1.4;${titleColor}${premiumWeight}">${escapeHtml(displayName)}</span>
+    </div>`;
+  }).join("");
+
+  tableEl.innerHTML = headerHtml + rowsHtml;
+}
+
 function applySidebarSetupPhaseState() {
   const allCoreSetupComplete = isAllCoreSetupComplete();
   const dashboardSection = $("sidebarDashboardSection");
@@ -7255,6 +7597,9 @@ function applySidebarSetupPhaseState() {
 
   if (dashboardSection) {
     dashboardSection.classList.add("sidebar-nav--home-locked");
+    dashboardSection.classList.remove("sidebar-top-nav-item--active");
+    dashboardSection.setAttribute("aria-disabled", "true");
+    dashboardSection.tabIndex = -1;
     dashboardSection.style.cursor = "default";
   }
 
@@ -7264,7 +7609,7 @@ function applySidebarSetupPhaseState() {
   }
 
   if (eventWorkflowHeading) {
-    eventWorkflowHeading.style.cursor = allCoreSetupComplete ? "pointer" : "default";
+    eventWorkflowHeading.style.cursor = "default";
   }
 
   if (eventWorkflowSection) {
@@ -7658,9 +8003,8 @@ function initializeLandingSetupFlow() {
   }
 
   // Populate step 6: Interests
-  if (Array.isArray(state.landingDraft.teamPreferenceEstimate) && state.landingDraft.teamPreferenceEstimate.length > 3) {
-    state.landingDraft.teamPreferenceEstimate = state.landingDraft.teamPreferenceEstimate.slice(0, 3);
-    persistState();
+  if (!Array.isArray(state.landingDraft.teamPreferenceEstimate)) {
+    state.landingDraft.teamPreferenceEstimate = [];
   }
   renderInterestInputs("landingInterestsSetup", state.landingDraft.teamPreferenceEstimate || [], (interest, inputEl) => {
     if (isCompletedStepEditBlocked(6)) {
@@ -7675,11 +8019,9 @@ function initializeLandingSetupFlow() {
     if (state.landingDraft.teamPreferenceEstimate.includes(interest)) {
       state.landingDraft.teamPreferenceEstimate = state.landingDraft.teamPreferenceEstimate.filter((item) => item !== interest);
       changed = true;
-    } else if (state.landingDraft.teamPreferenceEstimate.length < 3) {
+    } else {
       state.landingDraft.teamPreferenceEstimate.push(interest);
       changed = true;
-    } else if (inputEl) {
-      inputEl.checked = false;
     }
     if (!changed) return;
     state.programSettings.teamPreferenceEstimate = [...state.landingDraft.teamPreferenceEstimate];
@@ -7820,7 +8162,7 @@ function initializeLandingSetupFlow() {
     }
     const feeAmount = Math.round(rangeHigh * 0.2);
     if (setupPlatformFeeCopy) {
-      setupPlatformFeeCopy.textContent = `${fmtWholeMoney(rangeHigh)}/month includes our ${fmtWholeMoney(feeAmount)} fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.`;
+      setupPlatformFeeCopy.textContent = "Total investment includes our fee.";
     }
     if (budgetRangeExplainer) {
       budgetRangeExplainer.textContent = "";
@@ -8237,8 +8579,10 @@ function buildPersonalizedProgramFromSetup() {
 
   if (window.generateFourMonthProgram && typeof window.generateFourMonthProgram === "function") {
     state.fourMonthProgram = window.generateFourMonthProgram(state.programSettings);
-    state.fourMonthProgram = applyMagicLinkFourMonthOverride(state.fourMonthProgram);
-    state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
+    if (!hasFixedProgramWeekLayout(state.fourMonthProgram)) {
+      state.fourMonthProgram = applyMagicLinkFourMonthOverride(state.fourMonthProgram);
+      state.fourMonthProgram = seedFirstMonthFreeEvents(state.fourMonthProgram);
+    }
   }
 }
 
@@ -8442,8 +8786,7 @@ function isSetupStepValid(step) {
 
     case 6: // Interests
       return Array.isArray(state.landingDraft.teamPreferenceEstimate)
-        && state.landingDraft.teamPreferenceEstimate.length >= 1
-        && state.landingDraft.teamPreferenceEstimate.length <= 3;
+        && state.landingDraft.teamPreferenceEstimate.length >= 1;
 
     case 7: { // Events shortlist -> Poll
       if (state.setupShortlistMode === "book") {
@@ -8887,8 +9230,8 @@ function renderSetupStepStates() {
       numberCircle.style.color = "#0f172a";
       numberCircle.style.border = "1px solid #e2e8f0";
       numberCircle.style.fontWeight = "600";
-      numberCircle.style.fontSize = "16px";
-      numberCircle.textContent = "🎉";
+      numberCircle.style.fontSize = "";
+      numberCircle.innerHTML = '<img src="clipboard.png" alt="" aria-hidden="true" style="width: 16px; height: 16px; object-fit: contain;" />';
     } else if (stepNum === 8) {
       numberCircle.style.visibility = "visible";
       numberCircle.style.background = "#ffffff";
@@ -9000,14 +9343,268 @@ const ltfAnswers = {
 let ltfCurrentQ = 0;
 let ltfPhase = "hero"; // "hero" | "builder" | "loading" | "complete"
 
+const LTF_PREVIEW_PART_IDS = [
+  "ltfOverviewCoreContent",
+  "ltfWeek2Label",
+  "ltfWeek2Name",
+  "ltfWeek2Desc",
+  "ltfWeek2PillGoal",
+  "ltfWeek2PillMode",
+  "ltfWeek2PillCost",
+  "ltfWeek3Label",
+  "ltfWeek3Name",
+  "ltfWeek3Desc",
+  "ltfWeek3PillGoal",
+  "ltfWeek3PillMode",
+  "ltfWeek3PillCost",
+  "ltfWeek4Label",
+  "ltfWeek4Name",
+  "ltfWeek4Desc",
+  "ltfWeek4PillGoal",
+  "ltfWeek4PillMode",
+  "ltfWeek4PillDuration",
+  "ltfWeek4PillCost",
+  "ltfWeek5Label",
+  "ltfWeek5Name",
+  "ltfWeek5Desc",
+  "ltfWeek5PillGoal",
+  "ltfWeek5PillMode",
+  "ltfWeek5PillCost",
+  "ltfWeek5PillPrice",
+  "ltfWeek6Label",
+  "ltfWeek6Name",
+  "ltfWeek6Desc",
+  "ltfWeek6PillGoal",
+  "ltfWeek6PillMode",
+  "ltfWeek6PillDuration",
+  "ltfWeek6PillCost",
+  "ltfGoalPillPerformance",
+  "ltfGoalPillMorale",
+  "ltfGoalPillWellbeing",
+  "ltfGoalPillConnection"
+];
+
+function toggleLtfPreviewPartBlur(id, blurred) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.toggle("ltf-blurred", Boolean(blurred));
+}
+
+function blurAllLtfPreviewParts() {
+  LTF_PREVIEW_PART_IDS.forEach((id) => toggleLtfPreviewPartBlur(id, true));
+}
+
+function revealLtfPreviewParts(ids = []) {
+  ids.forEach((id) => toggleLtfPreviewPartBlur(id, false));
+}
+
+function setLtfWeekPillAlignment(weekNum, alignLeft) {
+  const metaCell = $(`ltfWeek${weekNum}MetaCell`);
+  const pillsWrap = $(`ltfWeek${weekNum}PillsWrap`);
+  if (metaCell) metaCell.style.textAlign = alignLeft ? "left" : "right";
+  if (pillsWrap) pillsWrap.style.justifyContent = alignLeft ? "flex-start" : "flex-end";
+}
+
+function updateLtfProgramGoalPillsFromAnswers() {
+  const goalToPillId = {
+    "Improve employee performance": "ltfGoalPillPerformance",
+    "Boost morale": "ltfGoalPillMorale",
+    "Support employee wellbeing": "ltfGoalPillWellbeing",
+    "Strengthen team connection": "ltfGoalPillConnection"
+  };
+
+  [
+    "ltfGoalPillPerformance",
+    "ltfGoalPillMorale",
+    "ltfGoalPillWellbeing",
+    "ltfGoalPillConnection"
+  ].forEach((pillId) => {
+    const pillEl = $(pillId);
+    if (!pillEl) return;
+    pillEl.classList.add("ltf-goal-pill-hidden");
+    pillEl.classList.add("ltf-blurred");
+  });
+
+  const selected = new Set(Array.isArray(ltfAnswers.goals) ? ltfAnswers.goals : []);
+  Object.entries(goalToPillId).forEach(([goal, pillId]) => {
+    if (!selected.has(goal)) return;
+    const pillEl = $(pillId);
+    if (!pillEl) return;
+    pillEl.classList.remove("ltf-goal-pill-hidden");
+    pillEl.classList.remove("ltf-blurred");
+  });
+}
+
+function mapLtfGoalToPillLabel(goalValue) {
+  const key = String(goalValue || "").trim().toLowerCase();
+  if (key === "improve employee performance") return "Performance";
+  if (key === "boost morale") return "Morale";
+  if (key === "support employee wellbeing") return "Wellbeing";
+  if (key === "strengthen team connection") return "Connection";
+  return "Connection";
+}
+
+function mapLtfFormatToPillLabel(eventLike) {
+  const formatCapability = String(eventLike?.formatCapability || "").trim().toLowerCase();
+  const inPersonOnly = eventLike?.inPersonOnly === true;
+  if (inPersonOnly || formatCapability.includes("in_person") || formatCapability.includes("in-person")) return "In-person";
+  if (formatCapability.includes("async")) return "Async";
+  if (formatCapability.includes("remote") || formatCapability.includes("virtual")) return "Remote";
+  return "Remote";
+}
+
+function getLtfProgramRevealDisplayName(templateId, fallbackTitle) {
+  return String(fallbackTitle || "").trim();
+}
+
+function getLtfProgramRevealDescription(templateId, fallbackDescription) {
+  return String(fallbackDescription || "").trim();
+}
+
+function buildLtfGeneratedProgramPreview() {
+  if (!window.generateFourMonthProgram || typeof window.generateFourMonthProgram !== "function") return null;
+
+  const employeeCount = Math.max(1, Number(ltfAnswers.employeeCount || $("ltfEmployeeCount")?.value || 1));
+  const selectedDays = [
+    ...(Array.isArray(ltfAnswers.daysSelected) ? ltfAnswers.daysSelected : []),
+    ...(ltfAnswers.saturdayOn ? ["Sa"] : [])
+  ];
+
+  const setupData = {
+    goals: Array.isArray(ltfAnswers.goals) ? [...ltfAnswers.goals] : [],
+    interests: Array.isArray(ltfAnswers.teamPreferenceEstimate) ? [...ltfAnswers.teamPreferenceEstimate] : [],
+    preferredSchedule: Array.isArray(ltfAnswers.schedule) ? [...ltfAnswers.schedule] : [],
+    daysSelected: selectedDays,
+    timesSelected: Array.isArray(ltfAnswers.timesSelected) ? [...ltfAnswers.timesSelected] : [],
+    localCity: String(ltfAnswers.localCity || "").trim(),
+    employeeCount,
+    totalBudget: Number(ltfAnswers.totalBudget || 0),
+    monthlyBudget: Number(ltfAnswers.totalBudget || 0)
+  };
+
+  let generated = window.generateFourMonthProgram(setupData);
+  if (!hasFixedProgramWeekLayout(generated)) {
+    if (typeof applyMagicLinkFourMonthOverride === "function") {
+      generated = applyMagicLinkFourMonthOverride(generated);
+    }
+    if (typeof seedFirstMonthFreeEvents === "function") {
+      generated = seedFirstMonthFreeEvents(generated);
+    }
+  }
+  return generated;
+}
+
+function updateLtfWeekPreviewRowFromEvent(weekNumber, weekEvent) {
+  if (!weekEvent || typeof weekEvent !== "object") return;
+  const templateId = String(weekEvent.templateId || "").trim();
+  const title = getLtfProgramRevealDisplayName(templateId, weekEvent.title || "");
+  const description = getLtfProgramRevealDescription(templateId, weekEvent.description || "");
+  const goals = Array.isArray(weekEvent.goals) ? weekEvent.goals : [];
+  const goalLabel = mapLtfGoalToPillLabel(goals[0]);
+  const modeLabel = mapLtfFormatToPillLabel(weekEvent);
+  const estimatedCost = Number(weekEvent.estimatedCost || 0);
+  const costLabel = estimatedCost <= 0 ? "Free" : "$" + Math.max(0, Math.round(estimatedCost / Math.max(1, Number(ltfAnswers.employeeCount || 1)))).toLocaleString("en-US") + "/pp";
+
+  const nameEl = $(`ltfWeek${weekNumber}Name`);
+  const descEl = $(`ltfWeek${weekNumber}Desc`);
+  const goalPillEl = $(`ltfWeek${weekNumber}PillGoal`);
+  const modePillEl = $(`ltfWeek${weekNumber}PillMode`);
+  const costPillEl = $(`ltfWeek${weekNumber}PillCost`);
+
+  if (nameEl) nameEl.textContent = title;
+  if (descEl) descEl.textContent = description;
+  if (goalPillEl) goalPillEl.textContent = goalLabel;
+  if (modePillEl) modePillEl.textContent = modeLabel;
+  if (costPillEl) costPillEl.textContent = costLabel;
+}
+
+function syncLtfWeek2Week3PreviewWithGeneratedProgram() {
+  const generated = buildLtfGeneratedProgramPreview();
+  const weeks = Array.isArray(generated?.weeks) ? generated.weeks : [];
+  if (!weeks.length) return;
+
+  const week2 = weeks.find((item) => Number(item?.week) === 2) || weeks[1] || null;
+  const week3 = weeks.find((item) => Number(item?.week) === 3) || weeks[2] || null;
+
+  if (week2) updateLtfWeekPreviewRowFromEvent(2, week2);
+  if (week3) updateLtfWeekPreviewRowFromEvent(3, week3);
+}
+
+function updateLtfSamplePreviewRevealState() {
+  const overviewCard = $("ltfOverviewCard");
+  const expandedCard = document.querySelector(".ltf-preview-card--expanded");
+  const scheduleList = document.querySelector(".ltf-preview-schedule-list");
+
+  if (ltfPhase !== "builder") return;
+
+  // Keep all sample areas blurred on Q1 entry.
+  if (overviewCard) overviewCard.classList.toggle("ltf-blurred", ltfCurrentQ < 4);
+  if (expandedCard) expandedCard.classList.add("ltf-blurred");
+  if (scheduleList) scheduleList.classList.toggle("ltf-blurred", ltfCurrentQ < 2);
+
+  blurAllLtfPreviewParts();
+  setLtfWeekPillAlignment(2, false);
+  setLtfWeekPillAlignment(3, false);
+  updateLtfProgramGoalPillsFromAnswers();
+
+  // After Q1 (Setting) submission, reveal conditional schedule hints.
+  if (ltfCurrentQ >= 2) {
+    const setting = String(ltfAnswers.schedule?.[0] || "").trim();
+    if (setting === "Remote") {
+      revealLtfPreviewParts([
+        "ltfWeek2Label",
+        "ltfWeek5Label",
+        "ltfWeek2PillMode",
+        "ltfWeek2PillCost",
+        "ltfWeek5PillMode",
+        "ltfWeek5PillCost"
+      ]);
+    } else if (setting === "Hybrid" || setting === "In-person") {
+      revealLtfPreviewParts([
+        "ltfWeek4Label",
+        "ltfWeek4PillMode",
+        "ltfWeek4PillDuration"
+      ]);
+    }
+  }
+
+  // After Q3 (Goals) submission, reveal selected Program Goals pills.
+  if (ltfCurrentQ >= 4) {
+    updateLtfProgramGoalPillsFromAnswers();
+  }
+
+  // After Q4 (Investment) submission, reveal full Week 2 + Week 3 and left-align pills.
+  if (ltfCurrentQ >= 5) {
+    syncLtfWeek2Week3PreviewWithGeneratedProgram();
+    revealLtfPreviewParts([
+      "ltfWeek2Label",
+      "ltfWeek2Name",
+      "ltfWeek2Desc",
+      "ltfWeek2PillGoal",
+      "ltfWeek2PillMode",
+      "ltfWeek2PillCost",
+      "ltfWeek3Label",
+      "ltfWeek3Name",
+      "ltfWeek3Desc",
+      "ltfWeek3PillGoal",
+      "ltfWeek3PillMode",
+      "ltfWeek3PillCost"
+    ]);
+    setLtfWeekPillAlignment(2, true);
+    setLtfWeekPillAlignment(3, true);
+  }
+}
+
 function initLandingTypeform() {
   const root = $("landingTypeformRoot");
   if (!root) return;
 
   const cyclePill = $("ltfOverviewCyclePill");
   if (cyclePill) {
-    const currentMonth = new Date().toLocaleString("en-US", { month: "long" });
-    cyclePill.textContent = `Period ending ${currentMonth}`;
+    const previousMonthDate = new Date();
+    previousMonthDate.setMonth(previousMonthDate.getMonth() - 1);
+    const previousMonth = previousMonthDate.toLocaleString("en-US", { month: "long" });
+    cyclePill.textContent = `Period ending ${previousMonth}`;
   }
 
   const previewMonthOffsets = [
@@ -9109,10 +9706,12 @@ function initLandingTypeform() {
   // Populate Q5: Interests
   renderInterestInputs("ltfInterestsGrid", ltfAnswers.teamPreferenceEstimate, (interest, inputEl) => {
     if (inputEl.checked) {
-      if (ltfAnswers.teamPreferenceEstimate.length >= 3) { inputEl.checked = false; return; }
       ltfAnswers.teamPreferenceEstimate.push(interest);
     } else {
       ltfAnswers.teamPreferenceEstimate = ltfAnswers.teamPreferenceEstimate.filter(o => o !== interest);
+    }
+    if (ltfCurrentQ >= 5) {
+      syncLtfWeek2Week3PreviewWithGeneratedProgram();
     }
   });
 
@@ -9241,7 +9840,7 @@ function updateLtfBudgetHelper() {
   if (empCount <= 0) {
     perEmployeeDisplay.textContent = "—";
     if (ltfPlatformFeeCopy) {
-      ltfPlatformFeeCopy.textContent = "$0/month includes our $0 fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.";
+      ltfPlatformFeeCopy.textContent = "Total investment includes our fee.";
     }
     return;
   }
@@ -9250,7 +9849,7 @@ function updateLtfBudgetHelper() {
   if (!totalRange) {
     perEmployeeDisplay.textContent = "—";
     if (ltfPlatformFeeCopy) {
-      ltfPlatformFeeCopy.textContent = "$0/month includes our $0 fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.";
+      ltfPlatformFeeCopy.textContent = "Total investment includes our fee.";
     }
     return;
   }
@@ -9262,7 +9861,7 @@ function updateLtfBudgetHelper() {
   perEmployeeDisplay.textContent = `${formatMoney(pepm)} / mo`;
   const feeAmount = Math.round(monthlyTotal * 0.2);
   if (ltfPlatformFeeCopy) {
-    ltfPlatformFeeCopy.textContent = `${formatMoney(monthlyTotal)}/month includes our ${formatMoney(feeAmount)} fee. We run your entire people program end-to-end: events, comms, vendors, and tracking—no planning, coordination, or follow-ups on your side.`;
+    ltfPlatformFeeCopy.textContent = "Total investment includes our fee.";
   }
 }
 
@@ -9582,6 +10181,8 @@ function initLtfAvailability() {
 }
 
 function startLandingTypeform() {
+  const root = $("landingTypeformRoot");
+  if (root) root.classList.remove("ltf-loading-fullscreen");
   ltfPhase = "builder";
   ltfCurrentQ = 0;
   $("landingTfHero")?.classList.add("hidden");
@@ -9598,8 +10199,8 @@ function startLandingTypeform() {
   if (previewPanel) {
     previewPanel.querySelector(".ltf-preview-panel")?.classList.add("ltf-preview-panel--active");
   }
-  // Blur all preview cards and the cycle label — reveal progressively as questions are answered.
-  document.querySelectorAll(".ltf-preview-card, .ltf-events-cycle-label").forEach((node) => node.classList.add("ltf-blurred"));
+  // Blur all preview cards, schedule list, and the cycle label — reveal progressively as questions are answered.
+  document.querySelectorAll(".ltf-preview-card, .ltf-preview-schedule-list, .ltf-events-cycle-label").forEach((node) => node.classList.add("ltf-blurred"));
   const previewTitle = $("ltfPreviewTitle");
   const previewSub = $("ltfPreviewSubtitle");
   if (previewTitle) previewTitle.textContent = "Your program is building...";
@@ -9618,6 +10219,8 @@ function startLandingTypeform() {
   if (nextBtn) {
     nextBtn.disabled = true;
   }
+
+  updateLtfSamplePreviewRevealState();
 }
 
 function renderLtfProgressBar() {
@@ -9713,14 +10316,7 @@ function goLtfQuestion(targetIdx) {
   const errEl = $("ltfErrorMsg");
   if (errEl) errEl.classList.add("hidden");
 
-  // Reveal preview card when moving forward (one card per question answered)
-  if (!isBack) {
-    const revealIdx = ltfCurrentQ - 1;
-    if (revealIdx >= 0) {
-      const card = document.querySelector(`.ltf-preview-card[data-preview-month="${revealIdx + 1}"]`);
-      if (card) card.classList.remove("ltf-blurred");
-    }
-  }
+  updateLtfSamplePreviewRevealState();
 }
 
 function showLtfError(msg) {
@@ -9821,11 +10417,10 @@ function advanceLtfQuestion() {
 
 function completeLtfSetup() {
   ltfPhase = "loading";
+  const root = $("landingTypeformRoot");
+  if (root) root.classList.add("ltf-loading-fullscreen");
   $("landingTfBuilder")?.classList.add("hidden");
   $("landingTfLoading")?.classList.remove("hidden");
-
-  // Reveal all preview cards and the cycle label
-  document.querySelectorAll(".ltf-preview-card, .ltf-events-cycle-label").forEach((node) => node.classList.remove("ltf-blurred"));
 
   // Write answers to state.landingDraft
   state.landingDraft.goals = [...ltfAnswers.goals];
@@ -9861,8 +10456,8 @@ function completeLtfSetup() {
 
   setTimeout(() => {
     ltfPhase = "complete";
-    const root = $("landingTypeformRoot");
     if (root) root.style.display = "none";
+    if (root) root.classList.remove("ltf-loading-fullscreen");
     renderAll();
   }, 1350);
 }
@@ -10030,26 +10625,39 @@ if (sidebarSetupHeading) {
 
 const sidebarDashboardSection = $("sidebarDashboardSection");
 if (sidebarDashboardSection) {
-  sidebarDashboardSection.style.cursor = "default";
+  const handleDashboardOverviewActivate = (e) => {
+    e.preventDefault();
+    return;
+  };
+  sidebarDashboardSection.addEventListener("click", handleDashboardOverviewActivate);
+  sidebarDashboardSection.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    handleDashboardOverviewActivate(e);
+  });
 }
 
 const sidebarEventWorkflowHeading = $("sidebarEventWorkflowHeading");
 if (sidebarEventWorkflowHeading) {
-  sidebarEventWorkflowHeading.addEventListener("click", () => {
+  sidebarEventWorkflowHeading.style.cursor = "default";
+}
+
+const sidebarEventWorkflowToggle = $("sidebarEventWorkflowToggle");
+if (sidebarEventWorkflowToggle) {
+  sidebarEventWorkflowToggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!isAllCoreSetupComplete()) return;
-    setSidebarActiveSection("event-workflow");
-    const workflowType = getActiveWorkflowType();
-    const workflowSteps = getEventWorkflowStepSequence(workflowType);
-    const processStep = deriveEventWorkflowProcessStep();
-    const fallbackStep = workflowSteps[workflowSteps.length - 1] || EVENT_WORKFLOW_STEPS.REVIEW;
-    const targetStep = workflowSteps.includes(processStep) ? processStep : fallbackStep;
-    collapseSetupViewsForWorkflowStep();
-    state.eventWorkflowProcessStep = processStep;
-    state.currentSetupStep = targetStep;
+    state.sidebarEventWorkflowExpanded = !state.sidebarEventWorkflowExpanded;
+    if (state.sidebarEventWorkflowExpanded) {
+      setSidebarActiveSection("event-workflow");
+    }
     persistState();
     renderSidebarStepMenus();
-    renderSetupStepStates();
-    scrollSetupStepIntoView(state.currentSetupStep, "smooth", true);
+  });
+  sidebarEventWorkflowToggle.addEventListener("keydown", (e) => {
+    if (e.key !== " " && e.key !== "Enter") return;
+    e.preventDefault();
+    sidebarEventWorkflowToggle.click();
   });
 }
 
@@ -10072,7 +10680,7 @@ $("budgetFooter").addEventListener("click", () => {
 
 
 $("btnCloseBrowserPanel").addEventListener("click", () => {
-  $("browserPanel").classList.add("hidden");
+  openDashboardMainView({ behavior: "auto" });
 });
 
 
@@ -14846,7 +15454,15 @@ function renderRsvpStep() {
     if (energyResetCopyButton) {
       energyResetCopyButton.onclick = async () => {
         await writeClipboardMessage(activeEnergyResetStep.plainMessage, { html: activeEnergyResetStep.htmlMessage });
-        showMiniToast(`${activeEnergyResetStep.title} message copied.`);
+        const originalLabel = "Copy message";
+        energyResetCopyButton.textContent = "✓ Copied";
+        if (energyResetCopyButton._copiedResetTimer) {
+          clearTimeout(energyResetCopyButton._copiedResetTimer);
+        }
+        energyResetCopyButton._copiedResetTimer = setTimeout(() => {
+          energyResetCopyButton.textContent = originalLabel;
+          energyResetCopyButton._copiedResetTimer = null;
+        }, 1200);
       };
     }
 

@@ -2,9 +2,189 @@
 (function initEventOfferings() {
   window.EVENT_OFFERINGS = [
   {
+    "id": "wats_apr15",
+    "title": "Wednesday at the Square",
+    "description": "Get outdoors and enjoy a free concert with your co-workers",
+    "category": "one_off",
+    "deliveryMode": "in_person",
+    "formatCapability": "in_person_only",
+    "day": "Wednesday",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 180,
+    "maxParticipants": null,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 98,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "New Orleans",
+      "state": "LA",
+      "country": "USA"
+    },
+    "remoteCompatible": false,
+    "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "wats_apr22",
+    "title": "Wednesday at the Square",
+    "description": "Get outdoors and enjoy a free concert with your co-workers",
+    "category": "one_off",
+    "deliveryMode": "in_person",
+    "formatCapability": "in_person_only",
+    "day": "Wednesday",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 180,
+    "maxParticipants": null,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 98,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "New Orleans",
+      "state": "LA",
+      "country": "USA"
+    },
+    "remoteCompatible": false,
+    "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "wats_apr29",
+    "title": "Wednesday at the Square",
+    "description": "Get outdoors and enjoy a free concert with your co-workers",
+    "category": "one_off",
+    "deliveryMode": "in_person",
+    "formatCapability": "in_person_only",
+    "day": "Wednesday",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 180,
+    "maxParticipants": null,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 98,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "New Orleans",
+      "state": "LA",
+      "country": "USA"
+    },
+    "remoteCompatible": false,
+    "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "wats_may6",
+    "title": "Wednesday at the Square",
+    "description": "Get outdoors and enjoy a free concert with your co-workers",
+    "category": "one_off",
+    "deliveryMode": "in_person",
+    "formatCapability": "in_person_only",
+    "day": "Wednesday",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 180,
+    "maxParticipants": null,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 98,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "New Orleans",
+      "state": "LA",
+      "country": "USA"
+    },
+    "remoteCompatible": false,
+    "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
     "id": "nosoc_hands_on_class",
     "title": "NOSOC hands-on class",
-    "description": "NOSOC hands-on class for teams.",
+    "description": "Team up in the kitchen for a fun culinary experience",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -42,13 +222,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "cocktail_tour",
     "title": "Cocktail tour",
-    "description": "Cocktail tour for teams.",
+    "description": "Sip, stroll, and enjoy a relaxed cocktail adventure together",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -86,13 +267,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "nosoc_demo_class",
     "title": "NOSOC demo class",
-    "description": "NOSOC demo class for teams.",
+    "description": "Learn techniques and recipes while watching skilled chefs at work",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -130,13 +312,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "the_escape_game",
     "title": "The Escape Game",
-    "description": "The Escape Game for teams.",
+    "description": "Put your heads together for a thrilling group challenge",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -174,13 +357,59 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "focus_hour",
+    "title": "Focus Hour",
+    "description": "One hour of co-working focus",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Any",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 0,
+    "maxParticipants": null,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "low",
+    "interactionLevel": "low",
+    "popularityScore": 93,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "magazine_st_foodie_tour",
     "title": "Magazine St Foodie Tour",
-    "description": "Magazine St Foodie Tour for teams.",
+    "description": "Taste local dishes, share bites, and explore together",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -218,13 +447,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "common_ground_native_plant_nursery_day",
     "title": "Common Ground Native Plant Nursery Day",
-    "description": "Common Ground Native Plant Nursery Day for teams.",
+    "description": "Volunteer event supporting local ecology and community resilience",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -262,13 +492,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "hot_one_on_ones",
     "title": "Hot One-on-Ones",
-    "description": "Hot One-on-Ones for teams.",
+    "description": "Hot sauces, icebreakers, and team fun in every bite",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -306,13 +537,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "songwriting_lab",
     "title": "Songwriting Lab",
-    "description": "Songwriting Lab for teams.",
+    "description": "Team-focused workshop for music and connection",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -350,13 +582,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "virtual_escape_quest",
     "title": "Virtual Escape Quest",
-    "description": "Virtual Escape Quest for teams.",
+    "description": "Collaborative adventure that tests teamwork and problem-solving",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -394,13 +627,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "common_ground_relief_free_pantry",
     "title": "Common Ground Relief Free Pantry",
-    "description": "Common Ground Relief Free Pantry for teams.",
+    "description": "Support community food access through hands-on group volunteering",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -438,13 +672,59 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "emporium_arcade_bar",
+    "title": "Emporium Arcade Bar",
+    "description": "Trade desks for joysticks at our company arcade outing for high scores and bonding",
+    "category": "one_off",
+    "deliveryMode": "in_person",
+    "formatCapability": "in_person_only",
+    "day": "Thursday",
+    "timeSlot": "After_5pm",
+    "includeWeekends": true,
+    "costPerPerson": 20,
+    "durationMinutes": 180,
+    "maxParticipants": null,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Games & competitions"
+    ],
+    "interestKeys": [
+      "games_and_competitions"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 91,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Emporium Arcade Bar",
+    "vendorUrl": "https://emporiumarcadebar.com",
+    "registrationLink": "https://www.emporiumarcadebar.com/group-bookings/",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": false,
+    "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "byo_pet_treat_making_class",
     "title": "BYO Pet Treat Making Class",
-    "description": "BYO Pet Treat Making Class for teams.",
+    "description": "Connect with teammates and pamper your pets",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -482,13 +762,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "coffee_meetup",
     "title": "Coffee Meetup",
-    "description": "Casual team coffee chat",
+    "description": "Relaxed hangout to help the team bond",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -526,13 +807,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "five_o_fore",
     "title": "Five O Fore",
-    "description": "Five O Fore for teams.",
+    "description": "Practice your drive and bond over friendly competition",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -570,13 +852,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "green_light_new_orleans",
     "title": "Green Light New Orleans",
-    "description": "Green Light New Orleans for teams.",
+    "description": "Volunteer outing preparing rain barrels for Green Light",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -614,13 +897,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "navigating_stress_in_the_workplace",
     "title": "Navigating Stress in the Workplace",
-    "description": "Navigating Stress in the Workplace for teams.",
+    "description": "Practical strategies for handling workplace pressure and staying balanced",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -658,13 +942,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "boulder_climbing_at_nobl",
     "title": "Boulder climbing at NOBL",
-    "description": "Boulder climbing at NOBL for teams.",
+    "description": "Scale walls, build confidence, and support each other as a group",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -702,13 +987,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "5_day_energy_reset_challenge",
     "title": "5-Day Energy Reset Challenge",
-    "description": "5-Day Energy Reset Challenge for teams.",
+    "description": "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come.",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -746,13 +1032,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "week_of_slack_posts",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "happy_hour_mcyc",
     "title": "Happy hour @ MCYC",
-    "description": "Happy hour @ MCYC for teams.",
+    "description": "Relax, unwind, and connect over drinks, apps, and conversation",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -790,13 +1077,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "spyre_day_pass_personal_package",
     "title": "Spyre day pass personal package",
-    "description": "Spyre day pass personal package for teams.",
+    "description": "Reconnect with yourself and teammates at a serene wellness retreat",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -834,27 +1122,28 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
-    "id": "wednesday_at_the_square",
-    "title": "Wednesday at the Square",
-    "description": "Free outdoor concert series held in Lafayette Square. A beloved New Orleans tradition where your team can unwind together with live music after work.",
+    "id": "wednesday_wind_down",
+    "title": "Wednesday Wind Down",
+    "description": "Drop-in meditation session for EOD de-stress",
     "category": "one_off",
-    "deliveryMode": "in_person",
-    "formatCapability": "in_person_only",
-    "day": "Wednesday",
-    "timeSlot": "After_5pm",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Any",
     "includeWeekends": false,
-    "costPerPerson": 0,
-    "durationMinutes": 180,
+    "costPerPerson": 50,
+    "durationMinutes": 30,
     "maxParticipants": null,
     "goals": [
-      "Strengthen team connection"
+      "Support employee wellbeing"
     ],
     "goalKeys": [
-      "team_connection"
+      "wellbeing"
     ],
     "interestCategories": [
       "Social meetups"
@@ -862,29 +1151,30 @@
     "interestKeys": [
       "social_meetups"
     ],
-    "energyLevel": "medium",
-    "interactionLevel": "high",
+    "energyLevel": "low",
+    "interactionLevel": "low",
     "popularityScore": 88,
     "registrationRequired": false,
     "instructions": "",
     "vendorName": "",
     "vendorUrl": "",
-    "registrationLink": "600 Camp St",
+    "registrationLink": "",
     "location": {
-      "address": "New Orleans",
-      "city": "LA",
-      "state": "USA",
+      "address": "",
+      "city": "",
+      "state": "",
       "country": ""
     },
-    "remoteCompatible": false,
-    "inPersonOnly": true,
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "focus_thread",
     "title": "Focus Thread",
-    "description": "Focus Thread for teams.",
+    "description": "Slack thread for task accountability: post a goal, work, then update results",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -922,13 +1212,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "loop_ropes_course",
     "title": "Loop ropes course",
-    "description": "Loop ropes course for teams.",
+    "description": "Bond with teammates while navigating adventurous ropes challenges",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -966,13 +1257,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "trivia_monday_second_line_7p",
-    "title": "Trivia Monday: Second Line 7p",
-    "description": "Trivia Monday: Second Line 7p for teams.",
+    "title": "Trivia Night",
+    "description": "Work together, laugh together, and crush trivia as a team",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -1010,13 +1302,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "trivia_thursday_port_orleans_7_30p",
-    "title": "Trivia Thursday: Port Orleans 7:30p",
-    "description": "Trivia Thursday: Port Orleans 7:30p for teams.",
+    "title": "Trivia Night",
+    "description": "Team up, bond, and tackle trivia challenges together",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -1054,13 +1347,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "trivia_tuesday_urban_south_6_30p",
-    "title": "Trivia Tuesday: Urban South 6:30p",
-    "description": "Trivia Tuesday: Urban South 6:30p for teams.",
+    "title": "Trivia Night",
+    "description": "Strengthen your team while solving questions and having fun",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -1098,13 +1392,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "trivia_wednesday_mcyc_7_30p",
-    "title": "Trivia Wednesday: MCYC 7:30p",
-    "description": "Trivia Wednesday: MCYC 7:30p for teams.",
+    "title": "Trivia Night",
+    "description": "Build teamwork while having fun with group trivia",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -1142,13 +1437,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_only",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "ama_teammate_edition",
     "title": "AMA: Teammate Edition",
-    "description": "AMA: Teammate Edition for teams.",
+    "description": "Learn teammate stories, skills, and quirks",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -1186,13 +1482,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bowling_at_fulton_alley",
     "title": "Bowling at Fulton Alley",
-    "description": "Bowling at Fulton Alley for teams.",
+    "description": "Team-friendly night of bowling, laughs, and friendly competition",
     "category": "one_off",
     "deliveryMode": "in_person",
     "formatCapability": "in_person_only",
@@ -1230,13 +1527,14 @@
     },
     "remoteCompatible": false,
     "inPersonOnly": true,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "culture_club_self_doubt_to_confidence",
     "title": "Culture Club: Self-Doubt to Confidence",
-    "description": "Culture Club: Self-Doubt to Confidence for teams.",
+    "description": "Practical tips to build confidence and overcome workplace insecurity",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1274,57 +1572,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "focus_hour",
-    "title": "Focus Hour",
-    "description": "A structured team focus block designed to help everyone lock in deep work at the same time. No meetings, no interruptions—just shared momentum.",
-    "category": "one_off",
-    "deliveryMode": "async_slack",
-    "formatCapability": "async_slack",
-    "day": "Any",
-    "timeSlot": "Any",
-    "includeWeekends": false,
-    "costPerPerson": 0,
-    "durationMinutes": 60,
-    "maxParticipants": null,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Social meetups"
-    ],
-    "interestKeys": [
-      "social_meetups"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "low",
-    "popularityScore": 85,
-    "registrationRequired": false,
-    "instructions": "",
-    "vendorName": "",
-    "vendorUrl": "",
-    "registrationLink": "",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "workplace_gratitude",
     "title": "Workplace Gratitude",
-    "description": "Workplace Gratitude for teams.",
+    "description": "Practice gratitude together to strengthen team morale and wellbeing",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1362,13 +1617,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "youre_on_mute",
     "title": "You’re on Mute!",
-    "description": "You’re on Mute! for teams.",
+    "description": "Supercharge presentation skills for clear and impactful interactions",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1406,13 +1662,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "maximizing_time_management",
     "title": "Maximizing Time Management",
-    "description": "Maximizing Time Management for teams.",
+    "description": "Practical tips to get more done without stress",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1450,13 +1707,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "relaxation_class",
     "title": "Relaxation Class",
-    "description": "Relaxation Class for teams.",
+    "description": "Relax and recharge with coworkers in a soothing session",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1494,13 +1752,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "the_reset_hour",
     "title": "The Reset Hour",
-    "description": "The Reset Hour for teams.",
+    "description": "A choose-your-own reset hour to refresh focus and energy",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -1538,13 +1797,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "lets_do_something_impossible",
     "title": "Let’s do something impossible!",
-    "description": "Let’s do something impossible! for teams.",
+    "description": "Collaborate to achieve something unexpected and exciting",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1582,13 +1842,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "meditation_class",
     "title": "Meditation Class",
-    "description": "Meditation Class for teams.",
+    "description": "Clear your mind while connecting with colleagues",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1626,13 +1887,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "pictionary",
     "title": "Pictionary",
-    "description": "Pictionary for teams.",
+    "description": "Creative session that strengthens communication skills",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1670,13 +1932,59 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "throwback_thursday",
+    "title": "Throwback Thursday",
+    "description": "Nostalgic photo-sharing to bond over past memories and milestones",
+    "category": "one_off",
+    "deliveryMode": "async_slack",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Any",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": 0,
+    "maxParticipants": null,
+    "goals": [
+      "Strengthen team connection"
+    ],
+    "goalKeys": [
+      "team_connection"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 83,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "wins_of_the_week",
     "title": "Wins of the Week",
-    "description": "Wins of the Week for teams.",
+    "description": "Team shares their Wins of the Week",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -1714,13 +2022,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "boba_tea_making_class",
     "title": "Boba Tea Making Class",
-    "description": "Boba Tea Making Class for teams.",
+    "description": "Hands-on, tasty team activity",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1758,13 +2067,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "clarity_week",
     "title": "Clarity Week",
-    "description": "Clarity Week for teams.",
+    "description": "A week of eliminating distractions",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -1802,13 +2112,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "week_of_slack_posts",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "stress_management_workshop",
     "title": "Stress Management Workshop",
-    "description": "Stress Management Workshop for teams.",
+    "description": "Discover tools to reduce stress individually and as a team",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1819,10 +2130,10 @@
     "durationMinutes": 75,
     "maxParticipants": 495,
     "goals": [
-      "Improve employee performance"
+      "Support employee wellbeing"
     ],
     "goalKeys": [
-      "employee_performance"
+      "wellbeing"
     ],
     "interestCategories": [
       "Learning events"
@@ -1831,7 +2142,7 @@
       "learning_events"
     ],
     "energyLevel": "low",
-    "interactionLevel": "high",
+    "interactionLevel": "low",
     "popularityScore": 82,
     "registrationRequired": true,
     "instructions": "",
@@ -1846,57 +2157,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "throwback_thursday",
-    "title": "Throwback Thursday",
-    "description": "Teammates share a throwback photo or memory in Slack. Light-touch, high-engagement, and always a crowd-pleaser.",
-    "category": "one_off",
-    "deliveryMode": "async_slack",
-    "formatCapability": "async_slack",
-    "day": "Thursday",
-    "timeSlot": "Any",
-    "includeWeekends": false,
-    "costPerPerson": 0,
-    "durationMinutes": 30,
-    "maxParticipants": null,
-    "goals": [
-      "Boost morale"
-    ],
-    "goalKeys": [
-      "morale"
-    ],
-    "interestCategories": [
-      "Social meetups"
-    ],
-    "interestKeys": [
-      "social_meetups"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "high",
-    "popularityScore": 82,
-    "registrationRequired": false,
-    "instructions": "",
-    "vendorName": "",
-    "vendorUrl": "",
-    "registrationLink": "",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "traitorous_trivia",
     "title": "Traitorous Trivia",
-    "description": "Traitorous Trivia for teams.",
+    "description": "Trivia with a twist where teamwork and strategy matter",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1934,13 +2202,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "deskercise_class",
     "title": "Deskercise Class",
-    "description": "Deskercise Class for teams.",
+    "description": "Simple routines to boost activity and focus together",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -1978,13 +2247,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "escape_the_80s",
     "title": "Escape the 80s",
-    "description": "Escape the 80s for teams.",
+    "description": "Team problem-solving with a playful, vintage vibe",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2022,13 +2292,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "lets_stand_up_to_stress",
     "title": "Let’s Stand Up to Stress!",
-    "description": "Let’s Stand Up to Stress! for teams.",
+    "description": "Group exercises to reduce workplace stress",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2066,13 +2337,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "mixology_class",
     "title": "Mixology Class",
-    "description": "Mixology Class for teams.",
+    "description": "Mix drinks, share stories, and toast together",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2110,13 +2382,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "success_supercharge",
     "title": "Success Supercharge",
-    "description": "Success Supercharge for teams.",
+    "description": "Boost your skills and mindset for workplace success",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2154,13 +2427,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "taboo",
     "title": "Taboo",
-    "description": "Taboo for teams.",
+    "description": "Challenge your team to communicate creatively under pressure",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2198,13 +2472,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "the_art_of_bonsai_workshop",
     "title": "The Art of Bonsai Workshop",
-    "description": "The Art of Bonsai Workshop for teams.",
+    "description": "Slow, mindful workshop for relaxing as a group",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2242,13 +2517,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "trivia_kickball",
     "title": "Trivia Kickball",
-    "description": "Trivia Kickball for teams.",
+    "description": "Collaborate and strategize while having an energetic experience",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2286,13 +2562,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "virtually_impossible",
     "title": "Virtually Impossible: Interactive Magic and Mindreading",
-    "description": "Virtually Impossible: Interactive Magic and Mindreading for teams.",
+    "description": "Amaze and engage coworkers in a live virtual magic show",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2330,13 +2607,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "communication_skills_workshop",
     "title": "Communication Skills Workshop",
-    "description": "Communication Skills Workshop for teams.",
+    "description": "Enhance collaboration through stronger communication skills",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2374,13 +2652,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "coworker_clash_game_show",
     "title": "Coworker Clash Game Show",
-    "description": "Coworker Clash Game Show for teams.",
+    "description": "Friendly games that encourage collaboration and bonding",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2418,13 +2697,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "culture_club_work_community",
     "title": "Culture Club: Work Community",
-    "description": "Culture Club: Work Community for teams.",
+    "description": "Connect, share, and strengthen the sense of community at work",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2462,409 +2742,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
-    "id": "get_comfy_outside_your_comfort_zone",
-    "title": "Get Comfy Outside Your Comfort Zone",
-    "description": "Get Comfy Outside Your Comfort Zone for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "Lunch",
-    "includeWeekends": false,
-    "costPerPerson": 120,
-    "durationMinutes": 60,
-    "maxParticipants": null,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "low",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "KraftyLab",
-    "vendorUrl": "https://kraftylab.com",
-    "registrationLink": "https://www.kraftylab.com/activities/get-comfy-outside-your-comfort-zone",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "magic_class",
-    "title": "Magic Class",
-    "description": "Magic Class for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "After_5pm",
-    "includeWeekends": false,
-    "costPerPerson": 70,
-    "durationMinutes": 45,
-    "maxParticipants": 50,
-    "goals": [
-      "Boost morale"
-    ],
-    "goalKeys": [
-      "morale"
-    ],
-    "interestCategories": [
-      "Social meetups"
-    ],
-    "interestKeys": [
-      "social_meetups"
-    ],
-    "energyLevel": "high",
-    "interactionLevel": "medium",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "Confetti",
-    "vendorUrl": "https://withconfetti.com",
-    "registrationLink": "https://www.withconfetti.com/product/magic-class",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "manifest_a_positive_mindset",
-    "title": "Manifest a Positive Mindset",
-    "description": "Manifest a Positive Mindset for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "Lunch",
-    "includeWeekends": false,
-    "costPerPerson": 95,
-    "durationMinutes": 60,
-    "maxParticipants": null,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "low",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "KraftyLab",
-    "vendorUrl": "https://kraftylab.com",
-    "registrationLink": "https://www.kraftylab.com/activities/manifest-a-positive-mindset",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "murder_mystery_party",
-    "title": "Murder Mystery Party",
-    "description": "Murder Mystery Party for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "After_5pm",
-    "includeWeekends": false,
-    "costPerPerson": 160,
-    "durationMinutes": 90,
-    "maxParticipants": 300,
-    "goals": [
-      "Strengthen team connection"
-    ],
-    "goalKeys": [
-      "team_connection"
-    ],
-    "interestCategories": [
-      "Games & competitions"
-    ],
-    "interestKeys": [
-      "games_and_competitions"
-    ],
-    "energyLevel": "high",
-    "interactionLevel": "high",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "Confetti",
-    "vendorUrl": "https://withconfetti.com",
-    "registrationLink": "https://www.withconfetti.com/product/virtual-murder-mystery-party",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "navigating_work_while_parenting_at_home",
-    "title": "Navigating Work While Parenting at Home",
-    "description": "Navigating Work While Parenting at Home for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "Lunch",
-    "includeWeekends": false,
-    "costPerPerson": 40,
-    "durationMinutes": 60,
-    "maxParticipants": 150,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "low",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "Confetti",
-    "vendorUrl": "https://withconfetti.com",
-    "registrationLink": "https://www.withconfetti.com/product/virtual-working-parents-workshop",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "speak_up_public_speaking_workshop",
-    "title": "Speak Up! Public Speaking Workshop",
-    "description": "Speak Up! Public Speaking Workshop for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "Lunch",
-    "includeWeekends": false,
-    "costPerPerson": 85,
-    "durationMinutes": 60,
-    "maxParticipants": 25,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "medium",
-    "interactionLevel": "medium",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "KraftyLab",
-    "vendorUrl": "https://kraftylab.com",
-    "registrationLink": "https://www.kraftylab.com/activities/speak-up-public-speaking-workshop",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "sushi_making_class",
-    "title": "Sushi Making Class",
-    "description": "Sushi Making Class for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "After_5pm",
-    "includeWeekends": false,
-    "costPerPerson": 110,
-    "durationMinutes": 60,
-    "maxParticipants": 495,
-    "goals": [
-      "Boost morale"
-    ],
-    "goalKeys": [
-      "morale"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "medium",
-    "interactionLevel": "low",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "Confetti",
-    "vendorUrl": "https://withconfetti.com",
-    "registrationLink": "https://www.withconfetti.com/product/virtual-sushi-making",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "the_art_of_self_leadership",
-    "title": "The Art of Self-Leadership",
-    "description": "The Art of Self-Leadership for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "Lunch",
-    "includeWeekends": false,
-    "costPerPerson": 95,
-    "durationMinutes": 60,
-    "maxParticipants": null,
-    "goals": [
-      "Improve employee performance"
-    ],
-    "goalKeys": [
-      "employee_performance"
-    ],
-    "interestCategories": [
-      "Learning events"
-    ],
-    "interestKeys": [
-      "learning_events"
-    ],
-    "energyLevel": "low",
-    "interactionLevel": "low",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "KraftyLab",
-    "vendorUrl": "https://kraftylab.com",
-    "registrationLink": "https://www.kraftylab.com/activities/art-of-self-leadership",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "the_corporate_mindbender_show",
-    "title": "The Corporate Mindbender Show",
-    "description": "The Corporate Mindbender Show for teams.",
-    "category": "one_off",
-    "deliveryMode": "remote",
-    "formatCapability": "remote_only",
-    "day": "Any",
-    "timeSlot": "After_5pm",
-    "includeWeekends": false,
-    "costPerPerson": 190,
-    "durationMinutes": 55,
-    "maxParticipants": 300,
-    "goals": [
-      "Strengthen team connection"
-    ],
-    "goalKeys": [
-      "team_connection"
-    ],
-    "interestCategories": [
-      "Games & competitions"
-    ],
-    "interestKeys": [
-      "games_and_competitions"
-    ],
-    "energyLevel": "high",
-    "interactionLevel": "high",
-    "popularityScore": 80,
-    "registrationRequired": true,
-    "instructions": "",
-    "vendorName": "Elevent",
-    "vendorUrl": "https://bookelevent.com",
-    "registrationLink": "https://www.bookelevent.com/p/virtual/the-corporate-mindbender-show",
-    "location": {
-      "address": "",
-      "city": "",
-      "state": "",
-      "country": ""
-    },
-    "remoteCompatible": true,
-    "inPersonOnly": false,
-    "workflowType": "rsvp",
-    "type": "rsvp"
-  },
-  {
-    "id": "wind_down",
-    "title": "Wind Down",
-    "description": "Wind Down for teams.",
+    "id": "friday_wind_down",
+    "title": "Friday Wind Down",
+    "description": "Recharge as a group and enjoy some quiet time",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2902,13 +2787,419 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "get_comfy_outside_your_comfort_zone",
+    "title": "Get Comfy Outside Your Comfort Zone",
+    "description": "Learn, grow, and build confidence as a team",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Lunch",
+    "includeWeekends": false,
+    "costPerPerson": 120,
+    "durationMinutes": 60,
+    "maxParticipants": null,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "low",
+    "interactionLevel": "low",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "KraftyLab",
+    "vendorUrl": "https://kraftylab.com",
+    "registrationLink": "https://www.kraftylab.com/activities/get-comfy-outside-your-comfort-zone",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "magic_class",
+    "title": "Magic Class",
+    "description": "Fun, hands-on session to amaze each other",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 70,
+    "durationMinutes": 45,
+    "maxParticipants": 50,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Social meetups"
+    ],
+    "interestKeys": [
+      "social_meetups"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "medium",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Confetti",
+    "vendorUrl": "https://withconfetti.com",
+    "registrationLink": "https://www.withconfetti.com/product/magic-class",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "manifest_a_positive_mindset",
+    "title": "Manifest a Positive Mindset",
+    "description": "Shift perspective and boost workplace positivity",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Lunch",
+    "includeWeekends": false,
+    "costPerPerson": 95,
+    "durationMinutes": 60,
+    "maxParticipants": null,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "low",
+    "interactionLevel": "low",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "KraftyLab",
+    "vendorUrl": "https://kraftylab.com",
+    "registrationLink": "https://www.kraftylab.com/activities/manifest-a-positive-mindset",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "murder_mystery_party",
+    "title": "Murder Mystery Party",
+    "description": "Collaborate with teammates for a thrilling experience",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 160,
+    "durationMinutes": 90,
+    "maxParticipants": 300,
+    "goals": [
+      "Strengthen team connection"
+    ],
+    "goalKeys": [
+      "team_connection"
+    ],
+    "interestCategories": [
+      "Games & competitions"
+    ],
+    "interestKeys": [
+      "games_and_competitions"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Confetti",
+    "vendorUrl": "https://withconfetti.com",
+    "registrationLink": "https://www.withconfetti.com/product/virtual-murder-mystery-party",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "navigating_work_while_parenting_at_home",
+    "title": "Navigating Work While Parenting at Home",
+    "description": "Master high-impact work and parenting with tools for boundaries and focus",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Lunch",
+    "includeWeekends": false,
+    "costPerPerson": 40,
+    "durationMinutes": 60,
+    "maxParticipants": 150,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "low",
+    "interactionLevel": "low",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Confetti",
+    "vendorUrl": "https://withconfetti.com",
+    "registrationLink": "https://www.withconfetti.com/product/virtual-working-parents-workshop",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "speak_up_public_speaking_workshop",
+    "title": "Speak Up! Public Speaking Workshop",
+    "description": "Learn techniques to present ideas clearly and confidently",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Lunch",
+    "includeWeekends": false,
+    "costPerPerson": 85,
+    "durationMinutes": 60,
+    "maxParticipants": 25,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "medium",
+    "interactionLevel": "medium",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "KraftyLab",
+    "vendorUrl": "https://kraftylab.com",
+    "registrationLink": "https://www.kraftylab.com/activities/speak-up-public-speaking-workshop",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "sushi_making_class",
+    "title": "Sushi Making Class",
+    "description": "Learn sushi skills and enjoy the results together",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 110,
+    "durationMinutes": 60,
+    "maxParticipants": 495,
+    "goals": [
+      "Boost morale"
+    ],
+    "goalKeys": [
+      "morale"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "medium",
+    "interactionLevel": "low",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Confetti",
+    "vendorUrl": "https://withconfetti.com",
+    "registrationLink": "https://www.withconfetti.com/product/virtual-sushi-making",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "the_art_of_self_leadership",
+    "title": "The Art of Self-Leadership",
+    "description": "Practical strategies to boost self-motivation and focus",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "Lunch",
+    "includeWeekends": false,
+    "costPerPerson": 95,
+    "durationMinutes": 60,
+    "maxParticipants": null,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "low",
+    "interactionLevel": "low",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "KraftyLab",
+    "vendorUrl": "https://kraftylab.com",
+    "registrationLink": "https://www.kraftylab.com/activities/art-of-self-leadership",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
+    "id": "the_corporate_mindbender_show",
+    "title": "The Corporate Mindbender Show",
+    "description": "Engage your team in fun, mind-bending exercises",
+    "category": "one_off",
+    "deliveryMode": "remote",
+    "formatCapability": "remote_only",
+    "day": "Any",
+    "timeSlot": "After_5pm",
+    "includeWeekends": false,
+    "costPerPerson": 190,
+    "durationMinutes": 55,
+    "maxParticipants": 300,
+    "goals": [
+      "Strengthen team connection"
+    ],
+    "goalKeys": [
+      "team_connection"
+    ],
+    "interestCategories": [
+      "Games & competitions"
+    ],
+    "interestKeys": [
+      "games_and_competitions"
+    ],
+    "energyLevel": "high",
+    "interactionLevel": "high",
+    "popularityScore": 80,
+    "registrationRequired": true,
+    "instructions": "",
+    "vendorName": "Elevent",
+    "vendorUrl": "https://bookelevent.com",
+    "registrationLink": "https://www.bookelevent.com/p/virtual/the-corporate-mindbender-show",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "workplace_mental_health_workshop",
     "title": "Workplace Mental Health Workshop",
-    "description": "Workplace Mental Health Workshop for teams.",
+    "description": "Build awareness and habits that promote mental wellbeing at work",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2946,13 +3237,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "classic_trivia",
     "title": "Classic Trivia",
-    "description": "Classic Trivia for teams.",
+    "description": "Learn something new while connecting with coworkers",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -2990,13 +3282,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "laughter_yoga",
     "title": "Laughter Yoga",
-    "description": "Laughter Yoga for teams.",
+    "description": "Connect with coworkers through laughter and movement",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3034,13 +3327,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "show_and_tell",
     "title": "Show & Tell",
-    "description": "Show & Tell for teams.",
+    "description": "Team gives a peek into their workspace",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -3078,13 +3372,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "tie_dye_workshop",
     "title": "Tie Dye Workshop",
-    "description": "Tie Dye Workshop for teams.",
+    "description": "Create vibrant tie-dye designs together and share laughs",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3122,13 +3417,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bingo_party",
     "title": "Bingo Party",
-    "description": "Bingo Party for teams.",
+    "description": "Friendly competition and laughs for the whole team",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3166,13 +3462,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "calm_and_create",
     "title": "Calm and Create",
-    "description": "Calm and Create for teams.",
+    "description": "Relax while making art together in a fun, low-pressure session",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3210,13 +3507,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "champion_mindset_for_professionals",
     "title": "Champion Mindset for Professionals",
-    "description": "Champion Mindset for Professionals for teams.",
+    "description": "Empower yourself to succeed and lead with confidence",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3254,13 +3552,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "idea_walk",
     "title": "Idea Walk",
-    "description": "Idea Walk for teams.",
+    "description": "Take a question you want answered and go on a walk with it",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -3298,13 +3597,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "leader_of_the_pack",
     "title": "Leader of the Pack",
-    "description": "Leader of the Pack for teams.",
+    "description": "Work together to see who can guide the team to success",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3342,13 +3642,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "supercharge_your_squad",
     "title": "Supercharge Your Squad",
-    "description": "Supercharge Your Squad for teams.",
+    "description": "Energize your team and tackle challenges together",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3386,13 +3687,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "team_discovery_challenge",
     "title": "Team Discovery Challenge",
-    "description": "Team Discovery Challenge for teams.",
+    "description": "Discover strengths and skills through collaborative games",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3430,13 +3732,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "time_to_reclaim_your_life",
     "title": "Time to Reclaim Your Life",
-    "description": "Time to Reclaim Your Life for teams.",
+    "description": "Reflect and plan ways to regain balance and focus",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3474,13 +3777,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "totem_personality_card_game",
     "title": "Totem: Personality Card Game",
-    "description": "Totem: Personality Card Game for teams.",
+    "description": "Discover team dynamics and explore personalities together",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3518,13 +3822,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "empathy_water_cooler",
     "title": "Empathy Water Cooler",
-    "description": "Empathy Water Cooler for teams.",
+    "description": "Listen, share, and strengthen understanding across your team",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3562,13 +3867,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "magic_and_mentalism_show",
     "title": "Magic & Mentalism Show",
-    "description": "Magic & Mentalism Show for teams.",
+    "description": "Interactive magic entertainment for a group experience",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3606,13 +3912,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "tai_chi_class",
     "title": "Tai Chi Class",
-    "description": "Tai Chi Class for teams.",
+    "description": "Slow, meditative movements to calm and connect",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3650,13 +3957,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "two_truths_and_a_lie",
     "title": "Two Truths and a Lie",
-    "description": "Two Truths and a Lie for teams.",
+    "description": "Learn about your coworkers through an interactive icebreaker",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3694,13 +4002,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "pet_parade",
     "title": "Pet Parade",
-    "description": "Pet Parade for teams.",
+    "description": "Share-your-pet thread that boosts mood and sparks team interaction",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -3738,13 +4047,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "power_of_the_pause_create_a_desktop_tropical_garden",
     "title": "Power of the Pause: Create a Desktop Tropical Garden",
-    "description": "Power of the Pause: Create a Desktop Tropical Garden for teams.",
+    "description": "Group-friendly activity to refresh focus and mood",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3782,13 +4092,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bullet_journaling_and_calendars_for_beginners",
     "title": "Bullet Journaling & Calendars for Beginners",
-    "description": "Bullet Journaling & Calendars for Beginners for teams.",
+    "description": "Track goals, projects, and ideas with beginner-friendly journaling tips",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3826,13 +4137,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "think_faster",
     "title": "Think Faster",
-    "description": "Think Faster for teams.",
+    "description": "Sharpen your thinking and decision-making under pressure",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3870,13 +4182,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "water_cooler_icebreaker_game",
     "title": "Water Cooler icebreaker game",
-    "description": "Water Cooler icebreaker game for teams.",
+    "description": "Quick, playful activities for team connection",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3914,13 +4227,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "daily_connect",
     "title": "Daily Connect",
-    "description": "Daily Connect for teams.",
+    "description": "Build camaraderie with a simple group connection ritual",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -3958,13 +4272,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "self_care_fun_and_games",
     "title": "Self-Care Fun & Games",
-    "description": "Self-Care Fun & Games for teams.",
+    "description": "Connect, laugh, and recharge as a team",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4002,13 +4317,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "wine_tasting",
     "title": "Wine Tasting",
-    "description": "Wine Tasting for teams.",
+    "description": "Relax and bond over a shared tasting experience",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4046,13 +4362,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "gratitude_journaling",
     "title": "Gratitude Journaling",
-    "description": "Gratitude Journaling for teams.",
+    "description": "Group exercises to foster positivity and connection",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4090,13 +4407,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "zero_waste_cooking",
     "title": "Zero Waste Cooking",
-    "description": "Zero Waste Cooking for teams.",
+    "description": "Learn to cook delicious meals and minimize food waste",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4134,13 +4452,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "goal_setting_and_goal_getting",
     "title": "Goal Setting & Goal Getting",
-    "description": "Goal Setting & Goal Getting for teams.",
+    "description": "Practical tips to reach your personal and work goals",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4178,13 +4497,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "lunch_and_listen",
     "title": "Lunch & Listen",
-    "description": "DJ Lunch",
+    "description": "Midday session to eat and work while a volunteer DJs focus-friendly music",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4222,13 +4542,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bootcamp_class",
     "title": "Bootcamp Class",
-    "description": "Bootcamp Class for teams.",
+    "description": "Push limits together in a dynamic group workout",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4266,13 +4587,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "mindful_leadership_workshop",
     "title": "Mindful Leadership Workshop",
-    "description": "Mindful Leadership Workshop for teams.",
+    "description": "Develop mindful habits to lead with clarity and empathy",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4310,13 +4632,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "strength_training_class",
     "title": "Strength Training Clas",
-    "description": "Strength Training Clas for teams.",
+    "description": "Guided exercises that challenge and energize the group",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4354,13 +4677,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bollywood_workout",
     "title": "Bollywood Workout",
-    "description": "Bollywood Workout for teams.",
+    "description": "Dance, sweat, and have fun together in a high-energy session",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4398,13 +4722,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "yoga_class",
     "title": "Yoga Class",
-    "description": "Yoga Class for teams.",
+    "description": "Mindful movement to relax and refresh with colleagues",
     "category": "recurring_one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4442,13 +4767,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "zendoodling_for_teams",
     "title": "Zendoodling for Teams",
-    "description": "Zendoodling for Teams for teams.",
+    "description": "Spark creativity while bonding with coworkers",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4486,13 +4812,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "learn_ceramic_painting_llama",
     "title": "Learn Ceramic Panting: Llama",
-    "description": "Learn Ceramic Panting: Llama for teams.",
+    "description": "Team-friendly creative workshop for fun and bonding",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4530,13 +4857,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "make_a_succulent_arrangement",
     "title": "Make a Succulent Arrangement",
-    "description": "Make a Succulent Arrangement for teams.",
+    "description": "Relax and create greenery together",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4574,13 +4902,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "pretzel_making_class",
     "title": "Pretzel Making Class",
-    "description": "Pretzel Making Class for teams.",
+    "description": "Hands-on cooking fun for colleagues",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4618,13 +4947,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "bucket_list_workshop",
     "title": "Bucket List Workshop",
-    "description": "Bucket List Workshop for teams.",
+    "description": "Reflect, dream, and plan meaningful goals together",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4662,13 +4992,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "confetti_pub",
     "title": "Confetti Pub",
-    "description": "Confetti Pub for teams.",
+    "description": "Socialize with your team in a casual, celebratory setting",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4706,13 +5037,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "toy_brick_terrarium_workshop",
     "title": "Toy Brick Terrarium Workshop",
-    "description": "Toy Brick Terrarium Workshop for teams.",
+    "description": "Team bonding through craft and imagination",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4750,13 +5082,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "oregon_trail",
     "title": "Oregon Trail",
-    "description": "Oregon Trail for teams.",
+    "description": "Experience teamwork and strategy in a fun, nostalgic setting",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4794,13 +5127,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "virtual_harry_potter_magic_in_edinburgh",
     "title": "Virtual Harry Potter Magic in Edinburgh",
-    "description": "Virtual Harry Potter Magic in Edinburgh for teams.",
+    "description": "Live wizarding fun with colleagues online",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4838,13 +5172,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "make_a_birdhouse",
     "title": "Make a Birdhouse",
-    "description": "Make a Birdhouse for teams.",
+    "description": "Hands-on crafting while connecting with your team",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4882,13 +5217,14 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
   {
     "id": "the_power_of_vulnerability",
     "title": "The Power of Vulnerability",
-    "description": "The Power of Vulnerability for teams.",
+    "description": "Build trust by embracing vulnerability in teams",
     "category": "one_off",
     "deliveryMode": "remote",
     "formatCapability": "remote_only",
@@ -4926,16 +5262,17 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
+    "adminLoad": "rsvp_and_book",
     "workflowType": "rsvp",
     "type": "rsvp"
   }
 ];
   window.EVENT_OFFERINGS_META = {
-  "generatedAt": "2026-03-31T11:31:03.457Z",
+  "generatedAt": "2026-04-06T22:08:38.233Z",
   "minPopularityScore": 60,
   "report": {
-    "totalRows": 125,
-    "acceptedRows": 112,
+    "totalRows": 130,
+    "acceptedRows": 117,
     "rejectedRows": 12,
     "rejectedByReason": {
       "popularity below threshold (60)": 12
