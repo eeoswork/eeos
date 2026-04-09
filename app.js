@@ -761,6 +761,10 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
     perEmployee: 15,
     localCity: "New Orleans"
   },
+  "susco.eeos.work/susco2026a7d4k9m2": {
+    localCity: "New Orleans",
+    forceLocalCity: true
+  },
   "testing.eeos.work/rlabs2026testa1b2c3d4": {
     totalBudget: 390,
     employeeCount: 39,
@@ -1742,7 +1746,7 @@ function applyMagicLinkSetupDefaults(parsedMagicLink = null) {
 
   const currentLocalCity = String(state?.landingDraft?.localCity || "").trim();
 
-  const shouldSetCity = !currentLocalCity;
+  const shouldSetCity = defaults.forceLocalCity === true || !currentLocalCity;
 
   if (shouldSetCity) {
     state.landingDraft.localCity = String(defaults.localCity || "").trim();
@@ -1763,6 +1767,33 @@ function getMagicLinkSetupDefaultsForCurrentPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return null;
   return MAGIC_LINK_SETUP_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
+}
+
+function isSuscoMagicLinkContext() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return false;
+  return `${parsed.host}/${parsed.tokenId}` === "susco.eeos.work/susco2026a7d4k9m2";
+}
+
+function applySuscoLandingHeaderBranding() {
+  const landingHeaderSignIn = $("landingHeaderSignIn");
+  if (!landingHeaderSignIn) return;
+
+  if (isSuscoMagicLinkContext()) {
+    landingHeaderSignIn.textContent = "Susco";
+    landingHeaderSignIn.style.fontWeight = "700";
+    landingHeaderSignIn.style.cursor = "default";
+    landingHeaderSignIn.removeAttribute("onclick");
+    landingHeaderSignIn.onclick = null;
+    landingHeaderSignIn.setAttribute("aria-disabled", "true");
+    return;
+  }
+
+  landingHeaderSignIn.textContent = "Log in";
+  landingHeaderSignIn.style.fontWeight = "";
+  landingHeaderSignIn.style.cursor = "";
+  landingHeaderSignIn.setAttribute("onclick", "openAuthGateWithContext('signin')");
+  landingHeaderSignIn.removeAttribute("aria-disabled");
 }
 
 function getMagicLinkAuthDefaultsForCurrentPath() {
@@ -7902,8 +7933,9 @@ function updateLandingHomeView() {
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const showSidebar = isMagicLinkContext || Number(state.currentSetupStep || 1) >= 7;
-  const showGenericLandingHeader = !isMagicLinkContext && !showSidebar;
+  const useGenericLandingFlow = isSuscoMagicLinkContext();
+  const showSidebar = (!useGenericLandingFlow && isMagicLinkContext) || Number(state.currentSetupStep || 1) >= 7;
+  const showGenericLandingHeader = !showSidebar;
   if (landingTopHeader) {
     landingTopHeader.classList.toggle("hidden", !showGenericLandingHeader);
     landingTopHeader.classList.toggle("flex", showGenericLandingHeader);
@@ -7911,9 +7943,9 @@ function updateLandingHomeView() {
   if (landingView) {
     landingView.style.paddingTop = showGenericLandingHeader ? "84px" : "";
   }
-  // Show the typeform for generic (non-magic-link) landing when not yet complete
+  // Show the typeform for generic landing contexts (including Susco magic link) when not yet complete.
   const typeformRoot = $("landingTypeformRoot");
-  const showTypeform = !isMagicLinkContext && !state.landingTypeformComplete && !state.landingBuilderStarted;
+  const showTypeform = (!isMagicLinkContext || useGenericLandingFlow) && !state.landingTypeformComplete && !state.landingBuilderStarted;
   if (typeformRoot) typeformRoot.style.display = showTypeform ? "" : "none";
 
   // The original hero card is only shown for magic-link contexts that need it
@@ -9992,7 +10024,8 @@ function initLandingTypeform() {
   }
 
   const isMagic = Boolean(parseMagicLinkFromHostPath());
-  if (isMagic || state.landingTypeformComplete || state.landingBuilderStarted) {
+  const useGenericLandingFlow = !isMagic || isSuscoMagicLinkContext();
+  if (!useGenericLandingFlow || state.landingTypeformComplete || state.landingBuilderStarted) {
     root.style.display = "none";
     return;
   }
@@ -11401,6 +11434,7 @@ async function bootstrap() {
   } else {
     showLanding();
   }
+  applySuscoLandingHeaderBranding();
   renderAll();
   updateMobileSidebarToggleOffset();
 }
