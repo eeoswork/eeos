@@ -9608,7 +9608,9 @@ function renderSidebarVisibility() {
   const appShell = document.getElementById('appShell');
   if (!appShell) return;
   const isMagicLink = parseMagicLinkFromHostPath() !== null;
-  const showSidebar = isMagicLink || Number(state.currentSetupStep || 1) >= 7;
+  const useGenericLandingFlow = isSuscoMagicLinkContext();
+  const showSidebar = (!useGenericLandingFlow && isMagicLink)
+    || (!useGenericLandingFlow && Number(state.currentSetupStep || 1) >= 7);
   appShell.classList.toggle('sidebar-hidden', !showSidebar);
   const hamburger = document.getElementById('mobileSidebarToggle');
   if (hamburger) hamburger.classList.toggle('hidden', !showSidebar);
