@@ -1777,23 +1777,28 @@ function isSuscoMagicLinkContext() {
 
 function applySuscoLandingHeaderBranding() {
   const landingHeaderSignIn = $("landingHeaderSignIn");
+  const ltfStartBtn = $("ltfStartBtn");
   if (!landingHeaderSignIn) return;
 
   if (isSuscoMagicLinkContext()) {
-    landingHeaderSignIn.textContent = "Susco";
-    landingHeaderSignIn.style.fontWeight = "700";
+    landingHeaderSignIn.textContent = "";
+    landingHeaderSignIn.style.display = "none";
+    landingHeaderSignIn.style.fontWeight = "";
     landingHeaderSignIn.style.cursor = "default";
     landingHeaderSignIn.removeAttribute("onclick");
     landingHeaderSignIn.onclick = null;
     landingHeaderSignIn.setAttribute("aria-disabled", "true");
+    if (ltfStartBtn) ltfStartBtn.textContent = "Build Susco's People Plan";
     return;
   }
 
   landingHeaderSignIn.textContent = "Log in";
+  landingHeaderSignIn.style.display = "";
   landingHeaderSignIn.style.fontWeight = "";
   landingHeaderSignIn.style.cursor = "";
   landingHeaderSignIn.setAttribute("onclick", "openAuthGateWithContext('signin')");
   landingHeaderSignIn.removeAttribute("aria-disabled");
+  if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
 }
 
 function enforceSuscoGenericLandingMode() {
