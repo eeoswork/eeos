@@ -9948,14 +9948,6 @@ function updateLtfSamplePreviewRevealState() {
   if (ltfCurrentQ >= 3) {
     const selectedGoalPillIds = getSelectedLtfGoalPillIds();
     revealLtfPreviewParts(selectedGoalPillIds);
-    if (selectedGoalPillIds.length > 0) {
-      const goalsOverlayLabel = $("ltfOverviewGoalsOverlayLabel");
-      if (goalsOverlayLabel) goalsOverlayLabel.classList.remove("ltf-goal-pill-hidden");
-      revealLtfPreviewParts(["ltfOverviewGoalsOverlayLabel"]);
-    } else {
-      const goalsOverlayLabel = $("ltfOverviewGoalsOverlayLabel");
-      if (goalsOverlayLabel) goalsOverlayLabel.classList.add("ltf-goal-pill-hidden");
-    }
   }
 
   // After Investment submission (ltfCurrentQ >= 5).
