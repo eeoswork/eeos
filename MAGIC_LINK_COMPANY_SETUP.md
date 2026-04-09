@@ -6,6 +6,13 @@ Goal:
 - Company link format: https://<slug>.eeos.work/<token>
 - Full generic landing flow, scoped to that company
 
+Default behavior (important):
+- Magic links now mirror the generic landing page behavior by default.
+- Any future generic landing UI/copy change should automatically appear on magic links too.
+- Two intentional overrides remain per magic link:
+  - Q1 city input can be prefilled via token defaults.
+  - Home CTA text is branded as: Build <Company>'s People Plan ->
+
 ---
 
 ## 0) Fill in launch variables
