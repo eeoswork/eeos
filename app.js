@@ -1769,27 +1769,46 @@ function getMagicLinkSetupDefaultsForCurrentPath() {
   return MAGIC_LINK_SETUP_DEFAULTS[`${parsed.host}/${parsed.tokenId}`] || null;
 }
 
-function isSuscoMagicLinkContext() {
-  const parsed = parseMagicLinkFromHostPath();
-  if (!parsed) return false;
-  return `${parsed.host}/${parsed.tokenId}` === "susco.eeos.work/susco2026a7d4k9m2";
+function getMagicLinkContextKey(parsedMagicLink = null) {
+  const parsed = parsedMagicLink || parseMagicLinkFromHostPath();
+  if (!parsed) return "";
+  const host = String(parsed.host || "").trim().toLowerCase();
+  const tokenId = String(parsed.tokenId || "").trim();
+  if (!host || !tokenId) return "";
+  return `${host}/${tokenId}`;
 }
 
-function applySuscoLandingHeaderBranding() {
+function isGenericLandingMirrorMagicContext() {
+  const parsed = parseMagicLinkFromHostPath();
+  if (!parsed) return false;
+  const key = getMagicLinkContextKey(parsed);
+  if (!key) return false;
+  if (isRevelryLabsReadOnlyMagicLink()) return false;
+  if (REVELRY_BRACKETS_MAGIC_LINK_KEYS.has(key)) return false;
+  return true;
+}
+
+function toPossessiveLabel(name = "") {
+  const base = String(name || "").trim();
+  if (!base) return "";
+  return /s$/i.test(base) ? `${base}'` : `${base}'s`;
+}
+
+function applyMagicLandingHeaderBranding() {
   const landingHeaderSignIn = $("landingHeaderSignIn");
   const ltfStartBtn = $("ltfStartBtn");
   if (!landingHeaderSignIn) return;
 
-  if (isSuscoMagicLinkContext()) {
-    landingHeaderSignIn.textContent = "";
-    landingHeaderSignIn.style.display = "none";
-    landingHeaderSignIn.style.fontWeight = "";
-    landingHeaderSignIn.style.cursor = "default";
-    landingHeaderSignIn.removeAttribute("onclick");
-    landingHeaderSignIn.onclick = null;
-    landingHeaderSignIn.setAttribute("aria-disabled", "true");
-    if (ltfStartBtn) ltfStartBtn.textContent = "Build Susco's People Plan \u2192";
-    return;
+  if (isGenericLandingMirrorMagicContext()) {
+    const parsed = parseMagicLinkFromHostPath();
+    const host = String(parsed?.host || "").trim().toLowerCase();
+    const slug = host.split(".")[0] || "";
+    const fallbackName = slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Your Company";
+    const companyName = String(state.companyName || MAGIC_LINK_HOST_DEFAULTS[host]?.companyName || fallbackName).trim() || fallbackName;
+    const possessive = toPossessiveLabel(companyName) || "Your Company's";
+    if (ltfStartBtn) ltfStartBtn.textContent = `Build ${possessive} People Plan \u2192`;
+  } else {
+    if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
   }
 
   landingHeaderSignIn.textContent = "Log in";
@@ -1798,11 +1817,10 @@ function applySuscoLandingHeaderBranding() {
   landingHeaderSignIn.style.cursor = "";
   landingHeaderSignIn.setAttribute("onclick", "openAuthGateWithContext('signin')");
   landingHeaderSignIn.removeAttribute("aria-disabled");
-  if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
 }
 
-function enforceSuscoGenericLandingMode() {
-  if (!isSuscoMagicLinkContext()) return;
+function enforceGenericLandingMagicMode() {
+  if (!isGenericLandingMirrorMagicContext()) return;
   state.landingBuilderStarted = false;
   state.landingTypeformComplete = false;
   state.setupEventsGenerated = false;
@@ -7947,7 +7965,7 @@ function updateLandingHomeView() {
   const startActions = $("landingStartActions");
   const showHome = shouldShowLandingHome();
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
-  const useGenericLandingFlow = isSuscoMagicLinkContext();
+  const useGenericLandingFlow = isGenericLandingMirrorMagicContext();
   const showSidebar = (!useGenericLandingFlow && isMagicLinkContext)
     || (!useGenericLandingFlow && Number(state.currentSetupStep || 1) >= 7);
   const showGenericLandingHeader = !showSidebar;
@@ -9613,7 +9631,7 @@ function renderSidebarVisibility() {
   const appShell = document.getElementById('appShell');
   if (!appShell) return;
   const isMagicLink = parseMagicLinkFromHostPath() !== null;
-  const useGenericLandingFlow = isSuscoMagicLinkContext();
+  const useGenericLandingFlow = isGenericLandingMirrorMagicContext();
   const showSidebar = (!useGenericLandingFlow && isMagicLink)
     || (!useGenericLandingFlow && Number(state.currentSetupStep || 1) >= 7);
   appShell.classList.toggle('sidebar-hidden', !showSidebar);
@@ -9948,6 +9966,9 @@ function updateLtfSamplePreviewRevealState() {
   if (ltfCurrentQ >= 3) {
     const selectedGoalPillIds = getSelectedLtfGoalPillIds();
     revealLtfPreviewParts(selectedGoalPillIds);
+    if (selectedGoalPillIds.length > 0) {
+      revealLtfPreviewParts(["ltfOverviewGoalsOverlayLabel"]);
+    }
   }
 
   // After Investment submission (ltfCurrentQ >= 5).
@@ -10033,7 +10054,7 @@ function initLandingTypeform() {
   }
 
   const isMagic = Boolean(parseMagicLinkFromHostPath());
-  const useGenericLandingFlow = !isMagic || isSuscoMagicLinkContext();
+  const useGenericLandingFlow = !isMagic || isGenericLandingMirrorMagicContext();
   if (!useGenericLandingFlow || state.landingTypeformComplete || state.landingBuilderStarted) {
     root.style.display = "none";
     return;
@@ -11408,7 +11429,7 @@ async function bootstrap() {
   applyTestingMagicProfileFromQuery();
   applyPinnedIdentity();
   inferLandingBuilderStartedState();
-  enforceSuscoGenericLandingMode();
+  enforceGenericLandingMagicMode();
   logIdentityDebug("bootstrap:afterIdentityHydration");
   renderLandingIdentityView();
   renderAppIdentityView();
@@ -11446,7 +11467,7 @@ async function bootstrap() {
   } else {
     showLanding();
   }
-  applySuscoLandingHeaderBranding();
+  applyMagicLandingHeaderBranding();
   renderAll();
   updateMobileSidebarToggleOffset();
 }
