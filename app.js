@@ -1788,7 +1788,7 @@ function applySuscoLandingHeaderBranding() {
     landingHeaderSignIn.removeAttribute("onclick");
     landingHeaderSignIn.onclick = null;
     landingHeaderSignIn.setAttribute("aria-disabled", "true");
-    if (ltfStartBtn) ltfStartBtn.textContent = "Build Susco's People Plan";
+    if (ltfStartBtn) ltfStartBtn.textContent = "Build Susco's People Plan \u2192";
     return;
   }
 
