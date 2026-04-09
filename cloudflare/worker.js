@@ -8,6 +8,7 @@ const HOME_PAGE_HOSTS = new Set([
   "revelrylabs.eeos.work"
 ]);
 const MAGIC_LINK_HOSTS = new Set([
+  "susco.eeos.work",
   "testing.eeos.work"
 ]);
 

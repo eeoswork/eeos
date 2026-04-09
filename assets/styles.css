@@ -1439,9 +1439,10 @@ font-size: 11px;
 .ltf-loading-wrap {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 14px;
-  padding-top: 24px;
+  padding: 0 16px;
+  width: min(400px, calc(100vw - 32px));
 }
 
 .ltf-spinner {
@@ -1460,11 +1461,73 @@ font-size: 11px;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.2;
+  margin: 0;
 }
 
 .ltf-loading-sub {
   font-size: 0.9375rem;
   color: #64748b;
+}
+
+.ltf-loading-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.ltf-loading-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.8rem 0;
+  color: #6b7280;
+  opacity: 0.72;
+  transform: translateX(-12px);
+  transition: opacity 240ms ease, color 240ms ease, transform 280ms ease;
+}
+
+.ltf-loading-item.is-complete {
+  color: #1f2937;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ltf-loading-check {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+}
+
+.ltf-loading-check svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0;
+  transform: scale(0.68);
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1.1);
+}
+
+.ltf-loading-item.is-complete .ltf-loading-check {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.ltf-loading-item.is-complete .ltf-loading-check svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ltf-loading-item-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 #landingTypeformRoot.ltf-loading-fullscreen .landing-tf-grid {
@@ -1484,6 +1547,7 @@ font-size: 11px;
 }
 
 #landingTypeformRoot.ltf-loading-fullscreen #landingTfLoading {
+  background: transparent;
   width: 100%;
   max-width: none;
   margin: 0;
@@ -1492,8 +1556,8 @@ font-size: 11px;
 }
 
 #landingTypeformRoot.ltf-loading-fullscreen .ltf-loading-wrap {
-  align-items: center;
-  text-align: center;
+  align-items: stretch;
+  text-align: left;
   padding-top: 0;
 }
 
@@ -1731,6 +1795,31 @@ font-size: 11px;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
   padding: 0 12px 10px;
+  position: relative;
+}
+
+#ltfOverviewGoalsMiniCard {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ltf-overview-goals-pills-overlay {
+  position: absolute;
+  left: calc(50% + 3px);
+  right: 12px;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+}
+
+.ltf-overview-goals-pills-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 5px;
 }
 
 .ltf-overview-block {
@@ -1744,7 +1833,8 @@ font-size: 11px;
   padding: 5px 8px;
   min-height: 28px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .ltf-overview-label {

@@ -1811,35 +1811,68 @@ function isRevelryBracketsMagicContext() {
 }
 
 function getRevelryGoalBasedRecommendations(rawGoals = []) {
+  // Parse selected goals
   const selectedGoals = Array.isArray(rawGoals)
     ? rawGoals.map((goal) => String(goal || "").trim()).filter(Boolean)
     : [];
   const selectedGoalSet = new Set(selectedGoals);
-  const monthlyBudget = getRevelryMonthlyBudgetInput();
-  const activeGoalMap = getRevelryGoalEventMapForBudget(monthlyBudget);
 
-  return REVELRY_GOAL_PRIORITY_ORDER
-    .filter((goal) => selectedGoalSet.has(goal))
-    .map((goal) => {
-      const mapped = activeGoalMap[goal];
-      if (!mapped) return null;
+  if (selectedGoalSet.size === 0) return [];
+
+  // Get budget and team info from current program settings
+  const monthlyBudget = getRevelryMonthlyBudgetInput();
+  const teamSize = Number(state?.programSettings?.employeeCount || 1);
+
+  // Safety checks
+  if (!(monthlyBudget > 0) || !(teamSize > 0)) return [];
+
+  // Get offerings catalog
+  const offerings = Array.isArray(window.EVENT_OFFERINGS) ? window.EVENT_OFFERINGS : [];
+  if (offerings.length === 0) return [];
+
+  // Filter offerings: match goals AND fit within budget
+  const budgetFitOfferings = offerings
+    .filter((offering) => {
+      // Check if this offering matches any of the selected goals
+      const offeringGoalKeys = Array.isArray(offering.goalKeys)
+        ? offering.goalKeys.map((k) => String(k || "").trim().toLowerCase())
+        : [];
+      if (offeringGoalKeys.length === 0) return false;
+
+      const hasGoalMatch = offeringGoalKeys.some((goalKey) => {
+        // Compare normalized
+        return selectedGoalSet.has(goalKey) || selectedGoalSet.has(goalKey.replace(/_/g, " "));
+      });
+      return hasGoalMatch;
+    })
+    .filter((offering) => {
+      // Check if cost fits within budget
+      const costPerPerson = Number(offering.costPerPerson || 0);
+      const totalEventCost = costPerPerson * teamSize;
+      // Be conservative: a single event should not exceed the monthly budget
+      return totalEventCost <= monthlyBudget;
+    })
+    .map((offering) => {
+      const costPerPerson = Number(offering.costPerPerson || 0);
+      const totalEventCost = costPerPerson * teamSize;
       return {
-        id: mapped.templateId,
-        templateId: mapped.templateId,
-        name: mapped.title,
-        title: mapped.title,
-        description: mapped.description,
-        url: mapped.url,
-        imageUrl: mapped.imageUrl,
+        id: offering.id,
+        templateId: offering.id,
+        name: offering.title,
+        title: offering.title,
+        description: offering.description,
+        url: offering.registrationLink || offering.vendorUrl || "",
+        imageUrl: "",
         type: "external",
-        cost_per_person: 0,
-        estimatedCost: 0,
-        goals: [goal],
-        recommendationPills: Array.isArray(mapped.pills) ? [...mapped.pills] : []
+        cost_per_person: costPerPerson,
+        estimatedCost: totalEventCost,
+        goals: Array.isArray(offering.goalKeys) ? [...offering.goalKeys] : [],
+        recommendationPills: []
       };
     })
-    .filter(Boolean)
     .slice(0, 3);
+
+  return budgetFitOfferings;
 }
 
 function getActiveTestingMagicContext() {
@@ -2450,9 +2483,10 @@ function isValidHttpUrl(value) {
 
 const INVESTMENT_RANGE_OPTIONS = {
   total: [
+    { key: "total_under_500", label: "Less than $500", min: 1, max: 499, representative: 499 },
     { key: "total_500_2k", label: "$500 - $2K", min: 500, max: 2000, representative: 2000 },
     { key: "total_2k_5k", label: "$2K - $5K", min: 2001, max: 5000, representative: 5000 },
-    { key: "total_5k_10k", label: "$5K - $10K", min: 5001, max: 10000, representative: 10000 }
+    { key: "total_5k_10k", label: "$5K - $10K", min: 5001, max: 10000, representative: 7500 }
   ],
   perEmployee: [
     { key: "per_up_40", label: "Up to $40", min: 1, max: 40, representative: 40 },
@@ -2462,12 +2496,14 @@ const INVESTMENT_RANGE_OPTIONS = {
 };
 
 const LEGACY_BUDGET_RANGE_KEY_MAP = {
+  total_under_500: "total_under_500",
   total_up_2k: "total_500_2k",
   total_up_5k: "total_2k_5k",
   total_up_10k: "total_5k_10k",
   total_1k_3k: "total_500_2k",
   total_3k_5k: "total_2k_5k",
   total_5k_plus: "total_5k_10k",
+  total_5k_10k: "total_5k_10k",
   per_25_50: "per_up_40",
   per_50_75: "per_up_75",
   per_75_plus: "per_up_150"
@@ -2496,6 +2532,9 @@ function getBudgetRangeKeyFromValue(mode = "total", value = 0) {
 
 function getBudgetRangeHighEnd(mode = "total", rangeKey = "", fallbackValue = 0) {
   const matchedRange = getBudgetRangeByKey(mode, rangeKey);
+  if (matchedRange && Number.isFinite(Number(matchedRange.representative)) && Number(matchedRange.representative) > 0) {
+    return Math.round(Number(matchedRange.representative));
+  }
   if (matchedRange && Number.isFinite(Number(matchedRange.max)) && Number(matchedRange.max) > 0) {
     return Math.round(Number(matchedRange.max));
   }
@@ -6192,6 +6231,15 @@ function renderFourMonthProgram() {
   }
   if (overviewSetting) {
     overviewSetting.innerHTML = settingLabelHtml;
+    const platformFeeAmount = Math.max(
+      (Number(state?.programSettings?.employeeCount || 0)) * 10,
+      250
+    );
+    const feeBadge = $("progPlatformFee");
+    if (feeBadge) {
+      feeBadge.textContent = `$${platformFeeAmount.toLocaleString()}`;
+    }
+
   }
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
@@ -9560,41 +9608,50 @@ const ltfAnswers = {
 let ltfCurrentQ = 0;
 let ltfPhase = "hero"; // "hero" | "builder" | "loading" | "complete"
 
+const LTF_LOADING_STEPS = [
+  { key: "event_recommendations", label: "Event recommendations" },
+  { key: "planning_scheduling", label: "Automated planning & scheduling" },
+  { key: "engagement_reporting", label: "Engagement & feedback reporting" },
+  { key: "copy_prompts_announcements", label: "Copy, prompts, and announcements" },
+  { key: "slack_email_automations", label: "Slack + Email automations" },
+  { key: "admin_rollout_guidance", label: "Admin rollout guidance" }
+];
+
 const LTF_PREVIEW_PART_IDS = [
-  "ltfOverviewCoreContent",
+  "ltfOverviewTop",
+  "ltfOverviewGrid",
+  "ltfOverviewMiniSentiment",
+  "ltfOverviewGoalsMiniCard",
+  "ltfOverviewGoalsLabel",
+  "ltfOverviewGoalsOverlayLabel",
   "ltfWeek2Label",
   "ltfWeek2Name",
   "ltfWeek2Desc",
   "ltfWeek2PillGoal",
   "ltfWeek2PillMode",
-  "ltfWeek2PillCost",
   "ltfWeek3Label",
   "ltfWeek3Name",
   "ltfWeek3Desc",
   "ltfWeek3PillGoal",
   "ltfWeek3PillMode",
-  "ltfWeek3PillCost",
+  "ltfWeek3PillDuration",
   "ltfWeek4Label",
   "ltfWeek4Name",
   "ltfWeek4Desc",
   "ltfWeek4PillGoal",
   "ltfWeek4PillMode",
-  "ltfWeek4PillDuration",
-  "ltfWeek4PillCost",
   "ltfWeek5Label",
   "ltfWeek5Name",
   "ltfWeek5Desc",
   "ltfWeek5PillGoal",
   "ltfWeek5PillMode",
-  "ltfWeek5PillCost",
-  "ltfWeek5PillPrice",
+  "ltfWeek5PillDuration",
   "ltfWeek6Label",
   "ltfWeek6Name",
   "ltfWeek6Desc",
   "ltfWeek6PillGoal",
   "ltfWeek6PillMode",
   "ltfWeek6PillDuration",
-  "ltfWeek6PillCost",
   "ltfGoalPillPerformance",
   "ltfGoalPillMorale",
   "ltfGoalPillWellbeing",
@@ -9650,6 +9707,17 @@ function updateLtfProgramGoalPillsFromAnswers() {
     pillEl.classList.remove("ltf-goal-pill-hidden");
     pillEl.classList.remove("ltf-blurred");
   });
+}
+
+function getSelectedLtfGoalPillIds() {
+  const goalToPillId = {
+    "Improve employee performance": "ltfGoalPillPerformance",
+    "Boost morale": "ltfGoalPillMorale",
+    "Support employee wellbeing": "ltfGoalPillWellbeing",
+    "Strengthen team connection": "ltfGoalPillConnection"
+  };
+  const selected = Array.isArray(ltfAnswers.goals) ? ltfAnswers.goals : [];
+  return selected.map((goal) => goalToPillId[goal]).filter(Boolean);
 }
 
 function mapLtfGoalToPillLabel(goalValue) {
@@ -9747,6 +9815,61 @@ function syncLtfWeek2Week3PreviewWithGeneratedProgram() {
   if (week3) updateLtfWeekPreviewRowFromEvent(3, week3);
 }
 
+function resetLtfBuilderRevealPreviewToOriginalSample() {
+  const weekDefaults = {
+    2: {
+      label: "Week 2",
+      name: "Coffee Meetup",
+      desc: "Relaxed hangout to help the team bond",
+      goal: "connection",
+      mode: "remote"
+    },
+    3: {
+      label: "Week 3",
+      name: "AMA: Teammate Edition",
+      desc: "Learn teammate stories, skills, and quirks",
+      goal: "performance",
+      mode: "async"
+    },
+    4: {
+      label: "Week 4",
+      name: "Workspace Show & Tell",
+      desc: "Team gives a peek into their workspace",
+      goal: "connection",
+      mode: "async"
+    },
+    5: {
+      label: "Week 5",
+      name: "Arcade Night",
+      desc: "Games, drinks, music, and social fun together",
+      goal: "morale",
+      mode: "async"
+    },
+    6: {
+      label: "Week 6",
+      name: "Wednesday Wind Down",
+      desc: "Drop-in meditation session for EOD de-stress",
+      goal: "wellbeing",
+      mode: "remote"
+    }
+  };
+
+  [2, 3, 4, 5, 6].forEach((weekNum) => {
+    const defaults = weekDefaults[weekNum];
+    if (!defaults) return;
+    const labelEl = $(`ltfWeek${weekNum}Label`);
+    const nameEl = $(`ltfWeek${weekNum}Name`);
+    const descEl = $(`ltfWeek${weekNum}Desc`);
+    const goalEl = $(`ltfWeek${weekNum}PillGoal`);
+    const modeEl = $(`ltfWeek${weekNum}PillMode`);
+    if (labelEl) labelEl.textContent = defaults.label;
+    if (nameEl) nameEl.textContent = defaults.name;
+    if (descEl) descEl.textContent = defaults.desc;
+    if (goalEl) goalEl.textContent = defaults.goal;
+    if (modeEl) modeEl.textContent = defaults.mode;
+  });
+}
+
 function updateLtfSamplePreviewRevealState() {
   const overviewCard = $("ltfOverviewCard");
   const expandedCard = document.querySelector(".ltf-preview-card--expanded");
@@ -9754,61 +9877,60 @@ function updateLtfSamplePreviewRevealState() {
 
   if (ltfPhase !== "builder") return;
 
-  // Keep all sample areas blurred on Q1 entry.
-  if (overviewCard) overviewCard.classList.toggle("ltf-blurred", ltfCurrentQ < 4);
-  if (expandedCard) expandedCard.classList.add("ltf-blurred");
-  if (scheduleList) scheduleList.classList.toggle("ltf-blurred", ltfCurrentQ < 2);
+  // Builder flow uses the original Week 2-6 sample, independent of the generic landing preview.
+  resetLtfBuilderRevealPreviewToOriginalSample();
 
+  // Base: keep schedule cards blurred and blur revealable preview parts.
+  if (overviewCard) overviewCard.classList.remove("ltf-blurred");
+  if (expandedCard) expandedCard.classList.add("ltf-blurred");
+  if (scheduleList) scheduleList.classList.add("ltf-blurred");
   blurAllLtfPreviewParts();
-  setLtfWeekPillAlignment(2, false);
-  setLtfWeekPillAlignment(3, false);
   updateLtfProgramGoalPillsFromAnswers();
 
-  // After Q1 (Setting) submission, reveal conditional schedule hints.
+  [2, 3, 4, 5, 6].forEach((weekNum) => setLtfWeekPillAlignment(weekNum, false));
+
+  // After Setting submission (ltfCurrentQ >= 2).
   if (ltfCurrentQ >= 2) {
-    const setting = String(ltfAnswers.schedule?.[0] || "").trim();
-    if (setting === "Remote") {
-      revealLtfPreviewParts([
-        "ltfWeek2Label",
-        "ltfWeek5Label",
-        "ltfWeek2PillMode",
-        "ltfWeek2PillCost",
-        "ltfWeek5PillMode",
-        "ltfWeek5PillCost"
-      ]);
-    } else if (setting === "Hybrid" || setting === "In-person") {
-      revealLtfPreviewParts([
-        "ltfWeek4Label",
-        "ltfWeek4PillMode",
-        "ltfWeek4PillDuration"
-      ]);
+    if (scheduleList) scheduleList.classList.remove("ltf-blurred");
+    revealLtfPreviewParts(["ltfWeek3Label", "ltfWeek4Label", "ltfWeek5Label"]);
+  }
+
+  // During/after Goals step (ltfCurrentQ >= 3).
+  if (ltfCurrentQ >= 3) {
+    const selectedGoalPillIds = getSelectedLtfGoalPillIds();
+    revealLtfPreviewParts(selectedGoalPillIds);
+    if (selectedGoalPillIds.length > 0) {
+      const goalsOverlayLabel = $("ltfOverviewGoalsOverlayLabel");
+      if (goalsOverlayLabel) goalsOverlayLabel.classList.remove("ltf-goal-pill-hidden");
+      revealLtfPreviewParts(["ltfOverviewGoalsOverlayLabel"]);
+    } else {
+      const goalsOverlayLabel = $("ltfOverviewGoalsOverlayLabel");
+      if (goalsOverlayLabel) goalsOverlayLabel.classList.add("ltf-goal-pill-hidden");
     }
   }
 
-  // After Q3 (Goals) submission, reveal selected Program Goals pills.
-  if (ltfCurrentQ >= 4) {
-    updateLtfProgramGoalPillsFromAnswers();
-  }
-
-  // After Q4 (Investment) submission, reveal full Week 2 + Week 3 and left-align pills.
+  // After Investment submission (ltfCurrentQ >= 5).
   if (ltfCurrentQ >= 5) {
-    syncLtfWeek2Week3PreviewWithGeneratedProgram();
     revealLtfPreviewParts([
       "ltfWeek2Label",
+      "ltfWeek6Label",
+      "ltfWeek2PillMode",
+      "ltfWeek6PillMode",
+      "ltfWeek3PillMode",
+      "ltfWeek5PillMode"
+    ]);
+  }
+
+  // After Interests submission (ltfCurrentQ >= 6).
+  if (ltfCurrentQ >= 6) {
+    revealLtfPreviewParts([
       "ltfWeek2Name",
       "ltfWeek2Desc",
-      "ltfWeek2PillGoal",
-      "ltfWeek2PillMode",
-      "ltfWeek2PillCost",
-      "ltfWeek3Label",
       "ltfWeek3Name",
       "ltfWeek3Desc",
-      "ltfWeek3PillGoal",
-      "ltfWeek3PillMode",
-      "ltfWeek3PillCost"
+      "ltfWeek2PillGoal",
+      "ltfWeek3PillMode"
     ]);
-    setLtfWeekPillAlignment(2, true);
-    setLtfWeekPillAlignment(3, true);
   }
 }
 
@@ -9823,6 +9945,23 @@ function initLandingTypeform() {
     const previousMonth = previousMonthDate.toLocaleString("en-US", { month: "long" });
     cyclePill.textContent = `Period ending ${previousMonth}`;
   }
+
+  // Set Week 2-6 labels to actual upcoming dates (1–5 weeks from today),
+  // snapped to the nearest Mon–Thu (Fri → Thu, Sat → Mon, Sun → Mon).
+  [2, 3, 4, 5, 6].forEach((weekNum, i) => {
+    const el = $(`ltfWeek${weekNum}Label`);
+    if (!el) return;
+    const d = new Date();
+    d.setDate(d.getDate() + (i + 1) * 7);
+    const day = d.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+    if (day === 5) d.setDate(d.getDate() - 1);       // Fri → Thu
+    else if (day === 6) d.setDate(d.getDate() + 2);  // Sat → Mon
+    else if (day === 0) d.setDate(d.getDate() + 1);  // Sun → Mon
+    // Mon–Thu: no change
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    el.textContent = `${mm}/${dd}`;
+  });
 
   const previewMonthOffsets = [
     { previewMonth: 2, offset: 1 },
@@ -9866,6 +10005,7 @@ function initLandingTypeform() {
     } else {
       ltfAnswers.goals = ltfAnswers.goals.filter(g => g !== goal);
     }
+    updateLtfSamplePreviewRevealState();
   });
 
   // Populate Q1: Investment
@@ -9926,9 +10066,6 @@ function initLandingTypeform() {
       ltfAnswers.teamPreferenceEstimate.push(interest);
     } else {
       ltfAnswers.teamPreferenceEstimate = ltfAnswers.teamPreferenceEstimate.filter(o => o !== interest);
-    }
-    if (ltfCurrentQ >= 5) {
-      syncLtfWeek2Week3PreviewWithGeneratedProgram();
     }
   });
 
@@ -10665,12 +10802,47 @@ function advanceLtfQuestion() {
   }
 }
 
+function waitForMs(ms = 0) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, Math.max(0, Number(ms || 0)));
+  });
+}
+
+function resetLtfLoadingChecklist() {
+  const checklistItems = document.querySelectorAll("#ltfLoadingChecklist .ltf-loading-item");
+  checklistItems.forEach((item) => {
+    item.classList.remove("is-complete");
+  });
+  const announcer = $("ltfLoadingAnnouncer");
+  if (announcer) announcer.textContent = "";
+}
+
+async function runLtfLoadingChecklistSequence() {
+  resetLtfLoadingChecklist();
+
+  for (let index = 0; index < LTF_LOADING_STEPS.length; index += 1) {
+    const step = LTF_LOADING_STEPS[index];
+    await waitForMs(index === 0 ? 560 : 620);
+
+    const row = document.querySelector(`#ltfLoadingChecklist .ltf-loading-item[data-loading-key="${step.key}"]`);
+    if (row) row.classList.add("is-complete");
+
+    const announcer = $("ltfLoadingAnnouncer");
+    if (announcer) announcer.textContent = `${step.label} completed.`;
+  }
+
+  await waitForMs(260);
+}
+
 async function completeLtfSetup() {
   ltfPhase = "loading";
   const root = $("landingTypeformRoot");
+  const landingHeaderSignIn = $("landingHeaderSignIn");
   if (root) root.classList.add("ltf-loading-fullscreen");
+  if (landingHeaderSignIn) landingHeaderSignIn.style.visibility = "hidden";
   $("landingTfBuilder")?.classList.add("hidden");
   $("landingTfLoading")?.classList.remove("hidden");
+  const loadingSequencePromise = runLtfLoadingChecklistSequence();
 
   // Write answers to state.landingDraft
   state.landingDraft.goals = [...ltfAnswers.goals];
@@ -10708,45 +10880,48 @@ async function completeLtfSetup() {
   const enteredEmail = String(ltfAnswers.workEmail || state.landingDraft.workEmail || "").trim().toLowerCase();
   const hasValidWorkEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enteredEmail);
   if (hasValidWorkEmail) {
-    try {
-      const emailSaveResponse = await onboardingEmailSave({
-        email: enteredEmail,
-        identity: {
-          companyName: String(state.companyName || "").trim(),
-          adminName: String(state.adminName || "").trim()
-        },
-        draft: buildDraftPayload(state),
-        stateBlob: clone(state),
-        programSummary: buildProgramWeekSummary(state.fourMonthProgram)
-      });
+    (async () => {
+      try {
+        const emailSaveResponse = await onboardingEmailSave({
+          email: enteredEmail,
+          identity: {
+            companyName: String(state.companyName || "").trim(),
+            adminName: String(state.adminName || "").trim()
+          },
+          draft: buildDraftPayload(state),
+          stateBlob: clone(state),
+          programSummary: buildProgramWeekSummary(state.fourMonthProgram)
+        });
 
-      const rootResponse = (emailSaveResponse?.data && typeof emailSaveResponse.data === "object")
-        ? emailSaveResponse.data
-        : emailSaveResponse;
-      const token = String(rootResponse?.token || "").trim();
-      const companyId = String(rootResponse?.companyId || "").trim();
-      if (token && companyId) {
-        setAuthSession(token, companyId);
-        state.accountId = companyId;
-      }
+        const rootResponse = (emailSaveResponse?.data && typeof emailSaveResponse.data === "object")
+          ? emailSaveResponse.data
+          : emailSaveResponse;
+        const token = String(rootResponse?.token || "").trim();
+        const companyId = String(rootResponse?.companyId || "").trim();
+        if (token && companyId) {
+          setAuthSession(token, companyId);
+          state.accountId = companyId;
+        }
 
-      const magicLinkUrl = String(rootResponse?.magicLogin?.url || "").trim();
-      if (magicLinkUrl) {
-        state.landingDraft.magicLoginUrl = magicLinkUrl;
+        const magicLinkUrl = String(rootResponse?.magicLogin?.url || "").trim();
+        if (magicLinkUrl) {
+          state.landingDraft.magicLoginUrl = magicLinkUrl;
+        }
+        showMiniToast("Progress saved to your account.");
+      } catch (error) {
+        console.warn("Email save failed", error?.message || error);
+        showMiniToast("We couldn’t save to account right now. Your progress is still on this device.");
       }
-      showMiniToast("Progress saved to your account.");
-    } catch (error) {
-      console.warn("Email save failed", error?.message || error);
-      showMiniToast("We couldn’t save to account right now. Your progress is still on this device.");
-    }
+    })();
   }
 
-  setTimeout(() => {
-    ltfPhase = "complete";
-    if (root) root.style.display = "none";
-    if (root) root.classList.remove("ltf-loading-fullscreen");
-    renderAll();
-  }, 1350);
+  await loadingSequencePromise;
+
+  ltfPhase = "complete";
+  if (root) root.style.display = "none";
+  if (root) root.classList.remove("ltf-loading-fullscreen");
+  if (landingHeaderSignIn) landingHeaderSignIn.style.visibility = "";
+  renderAll();
 }
 
 // ================================================================
@@ -14249,6 +14424,18 @@ function renderRunEventStep() {
     || normalizedRunEventName.includes("energy reset challenge");
 
   if (isEnergyResetLaunch) {
+    const programWeekSummary = buildProgramWeekSummary(state.fourMonthProgram);
+    const upcomingWeekRows = programWeekSummary
+      .filter((item) => Number(item?.week || 0) >= 3 && Number(item?.week || 0) <= 12)
+      .sort((a, b) => Number(a.week || 0) - Number(b.week || 0))
+      .map((item) => {
+        const weekNumber = Number(item?.week || 0);
+        const weekLabel = weekNumber > 0 ? `Week ${weekNumber}` : "Week";
+        const eventName = String(item?.eventName || "").trim() || "TBD";
+        return `<li class="text-sm text-slate-700">${escapeHtml(weekLabel)} - ${escapeHtml(eventName)}</li>`;
+      })
+      .join("");
+
     const allTemplates = getSeededFreeEventTemplates();
     const currentTemplateIndex = allTemplates.findIndex(t => String(t.id || t.templateId || "").trim() === "5_day_energy_reset_challenge");
     const nextTemplate = currentTemplateIndex >= 0 && currentTemplateIndex + 1 < allTemplates.length ? allTemplates[currentTemplateIndex + 1] : null;
@@ -14302,8 +14489,16 @@ function renderRunEventStep() {
 
       <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
         <h4 class="text-base font-semibold text-slate-900">What happens next</h4>
-        <p class="mt-2 text-sm text-slate-700">After this countdown ends, the next step is <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge (budget, participation, reactions, and notes).</p>
-        <p class="mt-2 text-sm text-slate-700">After Review Impact, the next event —<strong>${escapeHtml(nextEventTitle)}</strong>— will be ready for launch.</p>
+        <p class="mt-2 text-sm text-slate-700">When this countdown ends, you&rsquo;ll move on to <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge&mdash;covering budget, participation, reactions, and notes.</p>
+        <p class="mt-2 text-sm text-slate-700">Once you complete Review Impact, your dashboard (engagement, budget, and employee sentiment tracking) will unlock.</p>
+        <p class="mt-2 text-sm text-slate-700">After that, your next event&mdash;<strong>${escapeHtml(nextEventTitle)}</strong>&mdash;will be ready to launch.</p>
+      </article>
+
+      <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+        <h4 class="text-base font-semibold text-slate-900">What&apos;s after that</h4>
+        <ul class="mt-2 space-y-1">
+          ${upcomingWeekRows}
+        </ul>
       </article>
     `;
 

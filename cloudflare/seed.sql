@@ -55,6 +55,50 @@ INSERT OR IGNORE INTO accounts (
   created_at,
   updated_at
 ) VALUES (
+  'susco',
+  'admin@susco.example',
+  'seed:replace-this-after-real-signup',
+  'Susco',
+  '',
+  '{"companyName":"Susco","adminName":""}',
+  1,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
+INSERT OR IGNORE INTO magic_links (
+  id,
+  host,
+  token_id,
+  company_id,
+  company_name_default,
+  admin_name_default,
+  active,
+  expires_at,
+  created_at
+) VALUES (
+  'magic-susco-1',
+  'susco.eeos.work',
+  'susco2026a7d4k9m2',
+  'susco',
+  'Susco',
+  '',
+  1,
+  NULL,
+  CURRENT_TIMESTAMP
+);
+
+INSERT OR IGNORE INTO accounts (
+  company_id,
+  email,
+  password_hash,
+  company_name,
+  admin_name,
+  state_blob,
+  state_version,
+  created_at,
+  updated_at
+) VALUES (
   'revelry-labs-testing',
   'admin+testing@revelrylabs.example',
   'seed:replace-this-after-real-signup',

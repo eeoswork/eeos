@@ -34,6 +34,10 @@ window.__EEOS_CONFIG__ = {
         companyName: 'Revelry Labs',
         adminName: 'Jennifer Baldwin'
       },
+      'susco.eeos.work': {
+        companyName: 'Susco',
+        adminName: ''
+      },
       'testing.eeos.work': {
         companyName: 'Revelry Labs (Testing)',
         adminName: 'Jennifer Baldwin'
