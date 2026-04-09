@@ -1796,6 +1796,15 @@ function applySuscoLandingHeaderBranding() {
   landingHeaderSignIn.removeAttribute("aria-disabled");
 }
 
+function enforceSuscoGenericLandingMode() {
+  if (!isSuscoMagicLinkContext()) return;
+  state.landingBuilderStarted = false;
+  state.landingTypeformComplete = false;
+  state.setupEventsGenerated = false;
+  state.currentSetupStep = 1;
+  state.completedSetupSteps = [];
+}
+
 function getMagicLinkAuthDefaultsForCurrentPath() {
   const parsed = parseMagicLinkFromHostPath();
   if (!parsed) return null;
@@ -7934,7 +7943,8 @@ function updateLandingHomeView() {
   const showHome = shouldShowLandingHome();
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
   const useGenericLandingFlow = isSuscoMagicLinkContext();
-  const showSidebar = (!useGenericLandingFlow && isMagicLinkContext) || Number(state.currentSetupStep || 1) >= 7;
+  const showSidebar = (!useGenericLandingFlow && isMagicLinkContext)
+    || (!useGenericLandingFlow && Number(state.currentSetupStep || 1) >= 7);
   const showGenericLandingHeader = !showSidebar;
   if (landingTopHeader) {
     landingTopHeader.classList.toggle("hidden", !showGenericLandingHeader);
@@ -10083,7 +10093,9 @@ function initLandingTypeform() {
 
   // Bind city input for real-time updates
   const cityInput = $("ltfLocalCity");
+  ltfAnswers.localCity = String(state.landingDraft?.localCity || ltfAnswers.localCity || "").trim();
   if (cityInput) {
+    cityInput.value = ltfAnswers.localCity;
     cityInput.addEventListener("input", () => {
       ltfAnswers.localCity = (cityInput.value || "").trim();
       updateNextButtonStateForSchedule();
@@ -11397,6 +11409,7 @@ async function bootstrap() {
   applyTestingMagicProfileFromQuery();
   applyPinnedIdentity();
   inferLandingBuilderStartedState();
+  enforceSuscoGenericLandingMode();
   logIdentityDebug("bootstrap:afterIdentityHydration");
   renderLandingIdentityView();
   renderAppIdentityView();
