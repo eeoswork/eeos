@@ -2546,7 +2546,7 @@ function isValidHttpUrl(value) {
 
 const INVESTMENT_RANGE_OPTIONS = {
   total: [
-    { key: "total_under_500", label: "Less than $500", min: 1, max: 499, representative: 499 },
+    { key: "total_under_500", label: "Less than $500", min: 1, max: 499, representative: 500 },
     { key: "total_500_2k", label: "$500 - $2K", min: 500, max: 2000, representative: 2000 },
     { key: "total_2k_5k", label: "$2K - $5K", min: 2001, max: 5000, representative: 5000 },
     { key: "total_5k_10k", label: "$5K - $10K", min: 5001, max: 10000, representative: 7500 }
@@ -2556,6 +2556,13 @@ const INVESTMENT_RANGE_OPTIONS = {
     { key: "per_up_75", label: "Up to $75", min: 41, max: 75, representative: 75 },
     { key: "per_up_150", label: "Up to $150", min: 76, max: 150, representative: 150 }
   ]
+};
+
+const PLATFORM_FEE_BY_TOTAL_RANGE = {
+  total_under_500: 125,
+  total_500_2k: 250,
+  total_2k_5k: 500,
+  total_5k_10k: 750
 };
 
 const LEGACY_BUDGET_RANGE_KEY_MAP = {
@@ -2603,6 +2610,13 @@ function getBudgetRangeHighEnd(mode = "total", rangeKey = "", fallbackValue = 0)
   }
   const fallback = Number(fallbackValue || 0);
   return fallback > 0 ? Math.round(fallback) : 0;
+}
+
+function getPlatformFeeForTotalBudgetRange(rangeKey = "", fallbackTotal = 0) {
+  const normalizedRangeKey = String(rangeKey || "").trim();
+  const resolvedKey = normalizedRangeKey || getBudgetRangeKeyFromValue("total", Number(fallbackTotal || 0));
+  const mappedFee = Number(PLATFORM_FEE_BY_TOTAL_RANGE[resolvedKey] || 0);
+  return mappedFee > 0 ? mappedFee : 0;
 }
 
 const PROMOTE_STEP_ORDER = ["calendar", "announcement", "reminder_week", "reminder_dayof", "reminder_dayof_2"];
@@ -6294,10 +6308,9 @@ function renderFourMonthProgram() {
   }
   if (overviewSetting) {
     overviewSetting.innerHTML = settingLabelHtml;
-    const platformFeeAmount = Math.max(
-      (Number(state?.programSettings?.employeeCount || 0)) * 10,
-      250
-    );
+    const selectedTotalRangeKey = String(state?.landingDraft?.totalBudgetRange || state?.programSettings?.totalBudgetRange || "").trim();
+    const fallbackTotalBudget = Number(monthlyBudgetValue || state?.programSettings?.totalBudget || 0);
+    const platformFeeAmount = getPlatformFeeForTotalBudgetRange(selectedTotalRangeKey, fallbackTotalBudget);
     const feeBadge = $("progPlatformFee");
     if (feeBadge) {
       feeBadge.textContent = `$${platformFeeAmount.toLocaleString()}`;
@@ -8524,7 +8537,8 @@ function initializeLandingSetupFlow() {
         const key = String(button.dataset.setupBudgetRangeKey || "").trim();
         const range = getBudgetRangeByKey("total", key);
         if (!range) return;
-        if (totalBudgetInput) totalBudgetInput.value = String(Math.round(Number(range.max || 0)));
+        const rangeBudgetValue = getBudgetRangeHighEnd("total", String(range.key || ""), Number(range.max || 0));
+        if (totalBudgetInput) totalBudgetInput.value = String(rangeBudgetValue);
         state.landingDraft.totalBudgetRange = key;
         state.programSettings.totalBudgetRange = key;
         handleBudgetCalculation("totalBudget");
