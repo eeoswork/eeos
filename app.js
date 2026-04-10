@@ -1838,11 +1838,55 @@ function applyMagicLandingHeaderBranding() {
 
 function enforceGenericLandingMagicMode() {
   if (!isGenericLandingMirrorMagicContext()) return;
+
+  const checkpointStep = getGenericMagicLinkResumeCheckpointStep();
+  if (checkpointStep === EVENT_WORKFLOW_STEPS.SHORTLIST) {
+    state.landingBuilderStarted = true;
+    state.setupEventsGenerated = true;
+    state.currentSetupStep = EVENT_WORKFLOW_STEPS.SHORTLIST;
+    state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.SHORTLIST;
+    return;
+  }
+
+  if (checkpointStep === EVENT_WORKFLOW_STEPS.RUN || checkpointStep === EVENT_WORKFLOW_STEPS.REVIEW) {
+    state.landingBuilderStarted = true;
+    state.setupEventsGenerated = true;
+    state.landingFirstEventLaunched = true;
+    state.currentSetupStep = checkpointStep;
+    state.eventWorkflowProcessStep = checkpointStep;
+    state.sidebarActiveSection = "event-workflow";
+    return;
+  }
+
   state.landingBuilderStarted = false;
   state.landingTypeformComplete = false;
   state.setupEventsGenerated = false;
   state.currentSetupStep = 1;
   state.completedSetupSteps = [];
+}
+
+function getGenericMagicLinkResumeCheckpointStep() {
+  if (!isGenericLandingMirrorMagicContext()) return null;
+
+  const chosenEventId = String(state.pollBuilder?.chosenEventId || state.eventLaunchContext?.templateId || "").trim();
+  const isEnergyResetLaunch = chosenEventId === "5_day_energy_reset_challenge";
+
+  if (isEnergyResetLaunch) {
+    const launchState = normalizeEnergyResetLaunchState();
+    const challengeStartedAt = String(launchState.challengeStartedAt || "").trim();
+    const reviewUnlockAt = String(launchState.reviewUnlockAt || "").trim();
+    if (challengeStartedAt || reviewUnlockAt) {
+      const unlockDate = new Date(reviewUnlockAt);
+      const unlockExpired = !Number.isNaN(unlockDate.getTime()) && unlockDate.getTime() <= Date.now();
+      return unlockExpired ? EVENT_WORKFLOW_STEPS.REVIEW : EVENT_WORKFLOW_STEPS.RUN;
+    }
+  }
+
+  if (Boolean(state.setupEventsGenerated) && !hasLandingFirstEventLaunchStarted()) {
+    return EVENT_WORKFLOW_STEPS.SHORTLIST;
+  }
+
+  return null;
 }
 
 function getMagicLinkAuthDefaultsForCurrentPath() {
@@ -3594,7 +3638,7 @@ try {
   if (!state.settings.expenseToolUrl && typeof state.programSettings?.expenseToolUrl === "string") {
     state.settings.expenseToolUrl = String(state.programSettings.expenseToolUrl || "").trim();
   }
-  if (state.currentSetupStep !== null && (typeof state.currentSetupStep !== "number" || state.currentSetupStep < 1 || state.currentSetupStep > 13)) {
+  if (state.currentSetupStep !== null && (typeof state.currentSetupStep !== "number" || state.currentSetupStep < 1 || state.currentSetupStep > EVENT_WORKFLOW_STEPS.REVIEW)) {
     state.currentSetupStep = 1;
   }
   if (typeof state.setupEventsGenerated !== "boolean") {
@@ -3606,7 +3650,7 @@ try {
   if (state.setupShortlistMode !== "poll" && state.setupShortlistMode !== "book") {
     state.setupShortlistMode = "poll";
   }
-  if (!Number.isInteger(state.eventWorkflowProcessStep) || state.eventWorkflowProcessStep < 7 || state.eventWorkflowProcessStep > 13) {
+  if (!Number.isInteger(state.eventWorkflowProcessStep) || state.eventWorkflowProcessStep < 7 || state.eventWorkflowProcessStep > EVENT_WORKFLOW_STEPS.REVIEW) {
     state.eventWorkflowProcessStep = deriveEventWorkflowProcessStep();
   }
   if (!Array.isArray(state.setupPollSelectedEventIndexes)) {

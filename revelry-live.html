@@ -4,222 +4,274 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>EEOS | Revelry Labs</title>
-<!-- Default for browsers that do NOT support prefers-color-scheme -->
 <link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
 <link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
-
-<!-- Light mode -->
 <link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
-
-<!-- Dark mode -->
 <link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="assets/tailwind.css" />
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  .sidebar { width: 240px; min-width: 240px; }
-  .main-scroll { height: 100vh; overflow-y: auto; }
-  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #475569; cursor: default; }
-  .nav-item.active { background: #E0E7FF; color: #1F2937; }
-  .nav-item.done { color: #94a3b8; }
-  .nav-item .check { color: #22c55e; font-size: 12px; }
-  .progress-bar { display: flex; gap: 0; align-items: center; }
-  .progress-step { flex: 1; padding: 8px 10px; font-size: 12px; font-weight: 500; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; text-align: center; }
-  .progress-step:first-child { border-radius: 8px 0 0 8px; }
-  .progress-step:last-child { border-radius: 0 8px 8px 0; }
-  .progress-step + .progress-step { border-left: none; }
-  .progress-step.active { background: #1e293b; color: #fff; border-color: #1e293b; }
-  .message-pre { white-space: pre-line; font-size: 13px; line-height: 1.6; color: #334155; }
-  .copy-btn { background: #546373; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
-  .copy-btn:hover { background: #3d4f5e; }
-  .slack-btn { background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
-  .slack-btn:hover { background: #f8fafc; }
-  .copied-label { color: #10B981; font-size: 13px; font-weight: 500; display: none; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .eeos-shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+    background: #f1f5f9;
+  }
+
+  .eeos-sidebar {
+    border-right: 1px solid #dbe2ea;
+    background: #f8fafc;
+    padding: 16px 12px 12px;
+  }
+
+  .sidebar-block {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .workflow-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: #475569;
+  }
+
+  .workflow-item.active {
+    background: #eef3ff;
+    color: #0f172a;
+  }
+
+  .workflow-item.locked {
+    color: #94a3b8;
+  }
+
+  .workflow-pill {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .workflow-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: #cbd5e1;
+  }
+
+  .workflow-item.active .workflow-icon {
+    background: #6366f1;
+  }
+
+  .workflow-check {
+    color: #22c55e;
+    font-size: 13px;
+    font-weight: 700;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .main-scroll {
+    overflow-y: auto;
+  }
+
+  .page-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+
+  @media (max-width: 900px) {
+    .eeos-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .eeos-sidebar {
+      border-right: none;
+      border-bottom: 1px solid #dbe2ea;
+    }
+
+    .page-wrap {
+      padding: 20px 16px 32px;
+    }
+  }
 </style>
 </head>
-<body class="bg-slate-100 text-slate-900" style="display:flex;height:100vh;overflow:hidden;">
-
-<!-- Sidebar -->
-<aside class="sidebar bg-white border-r border-slate-200 flex flex-col" style="height:100vh;overflow-y:auto;">
-  <!-- Logo / Identity -->
-  <div class="px-4 pt-5 pb-3 border-b border-slate-100">
-    <img src="assets/eeos.svg" alt="EEOS" style="height:18px; width:auto; margin-bottom:6px;" />
-    <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
-    <div class="text-xs text-slate-500 mt-0.5">Jennifer Baldwin</div>
-  </div>
-
-  <!-- Setup section (completed, collapsed) -->
-  <div class="px-3 pt-4">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;">
-      <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Setup</span>
-      <span style="color:#22c55e;font-size:13px;font-weight:600;">✓</span>
-    </div>
-  </div>
-
-  <!-- Event Workflow section -->
-  <div class="px-3 pt-3">
-    <div style="padding:4px 8px;margin-bottom:4px;">
-      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Event Workflow</span>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:2px;">
-      <!-- March Madness subtitle -->
-      <div style="padding:2px 12px 6px;">
-        <span style="display:inline-block;background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-weight:600;padding:3px 8px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;">March Madness Bracket Challenge</span>
+<body>
+  <div class="eeos-shell">
+    <aside class="eeos-sidebar">
+      <div class="sidebar-block">
+        <img src="eeos-logo-svg-black.svg" alt="EEOS" style="height:18px;width:auto;margin-bottom:8px;" />
+        <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
+        <div class="mt-0.5 text-xs text-slate-500">Jennifer Baldwin</div>
       </div>
-      <div class="nav-item done">
-        <span class="check">✓</span>
-        <span>Launch Event</span>
-      </div>
-      <div class="nav-item done">
-        <span class="check">✓</span>
-        <span>Promote Event</span>
-      </div>
-      <div class="nav-item active">
-        <span style="width:14px;height:14px;border-radius:4px;background:#6366f1;display:inline-block;flex-shrink:0;"></span>
-        <span>Run Event</span>
-      </div>
-      <div class="nav-item done" style="color:#94a3b8;">
-        <span style="width:14px;height:14px;border-radius:4px;background:#cbd5e1;display:inline-block;flex-shrink:0;"></span>
-        <span>Collect Feedback</span>
-      </div>
-      <div class="nav-item done" style="color:#94a3b8;">
-        <span style="width:14px;height:14px;border-radius:4px;background:#cbd5e1;display:inline-block;flex-shrink:0;"></span>
-        <span>Review Impact</span>
-      </div>
-    </div>
-  </div>
-</aside>
 
-<!-- Main Content -->
-<div class="main-scroll flex-1 bg-slate-100">
-  <div style="max-width:720px;margin:0 auto;padding:32px 24px;">
-
-    <!-- Header card -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 md:p-6 mb-3">
-      <div>
-        <h3 class="text-2xl font-semibold text-slate-900 md:text-3xl">March Madness Bracket Challenge</h3>
-        <p class="mt-2 text-xs text-slate-700">March 19 - April 7</p>
+      <div class="px-2 pt-3">
+        <div class="flex items-center justify-between px-1 py-1">
+          <span class="sidebar-label">Setup</span>
+          <span class="text-sm font-semibold text-emerald-500">✓</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Progress bar -->
-    <div class="progress-bar mb-4">
-      <div class="progress-step">Weekly Leaderboard Update #1</div>
-      <div class="progress-step">Weekly Leaderboard Update #2</div>
-      <div class="progress-step active">Final Winner Announcement</div>
-    </div>
-
-    <!-- Substep card -->
-    <div class="space-y-3">
-      <article class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-2">
-            <h4 class="truncate text-base font-semibold text-slate-900">Final Winner Announcement</h4>
+      <div class="px-2 pt-3">
+        <div class="px-1 pb-2">
+          <span class="sidebar-label">Event Workflow</span>
+        </div>
+        <div class="sidebar-block">
+          <div class="pb-2">
+            <span class="workflow-pill">5-Day Energy Reset Challenge</span>
+          </div>
+          <div class="workflow-item">
+            <span class="workflow-check">✓</span>
+            <span>Launch Event</span>
+          </div>
+          <div class="workflow-item active">
+            <span class="workflow-icon"></span>
+            <span>Run Event</span>
+          </div>
+          <div class="workflow-item locked">
+            <span class="workflow-icon"></span>
+            <span>Review Impact</span>
           </div>
         </div>
-        <div class="mt-4 border-t border-slate-200 pt-4">
+      </div>
+    </aside>
 
-          <!-- Step 1 -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e293b;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">1</span>
-            <span class="text-sm font-semibold text-slate-700">Copy the message and paste into Slack</span>
+    <main class="main-scroll">
+      <div class="page-wrap">
+        <article class="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 class="text-2xl font-semibold text-slate-900">Current Event: 5-Day Energy Reset Challenge</h3>
+          <p class="mt-2 text-sm text-slate-600">You already scheduled all Slack posts for this challenge. Nice work.</p>
+        </article>
+
+        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+          <h4 class="text-base font-semibold text-slate-900">What to do now</h4>
+          <p class="mt-2 text-sm text-slate-700">There is nothing left to do right now while the challenge runs.</p>
+          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div class="text-xs uppercase tracking-wide text-slate-500">Countdown to review</div>
+            <div id="countdownLabel" class="mt-1 text-lg font-semibold text-slate-900">Calculating...</div>
+            <div id="unlockDateLabel" class="mt-1 text-xs text-slate-500">Review Impact unlocks around ...</div>
           </div>
-          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div class="message-pre">🎉 Huge congratulations to our 2026 March Madness Bracket Challenge winners!  Enjoy your bragging rights until next March.</div>
-          </div>
-          <div class="mt-3 flex flex-wrap items-center gap-2">
-            <button class="copy-btn" id="copyBtn" type="button" onclick="copyMessage()">Copy message</button>
-            <button class="slack-btn" type="button" onclick="window.open('https://app.slack.com/client/', '_blank', 'noopener,noreferrer')">Open Slack</button>
-            <span class="copied-label" id="copiedLabel">✓ Copied</span>
-          </div>
+        </article>
 
-          <!-- Step 2 -->
-          <br><br>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:24px;margin-bottom:10px;">
-            <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1e293b;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">2</span>
-            <span class="text-sm font-semibold text-slate-700">Copy each image and paste into Slack</span>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+          <h4 class="text-base font-semibold text-slate-900">What happens next</h4>
+          <p class="mt-2 text-sm text-slate-700">When this countdown ends, you&rsquo;ll move on to <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge&mdash;covering budget, participation, reactions, and notes.</p>
+          <p class="mt-2 text-sm text-slate-700">Once you complete Review Impact, your dashboard (engagement, budget, and employee sentiment tracking) will unlock.</p>
+          <p class="mt-2 text-sm text-slate-700">After that, your next event&mdash;<strong>Coffee Meetup</strong>&mdash;will be ready to launch.</p>
+        </article>
 
-            <!-- Women's Champion -->
-            <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;">
-              <img src="Women's%20Champion.png" alt="Women's Champion" style="width:100%;display:block;" />
-              <div style="padding:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-                <span style="font-size:12px;font-weight:600;color:#475569;flex:1;">Women's Champion</span>
-                <button class="copy-btn" id="copyWomenBtn" type="button" onclick="copyImg(&quot;Women's%20Champion.png&quot;,'copyWomenBtn','copiedWomenLabel')" style="padding:6px 12px;font-size:12px;">Copy image</button>
-                <span class="copied-label" id="copiedWomenLabel">✓ Copied</span>
-              </div>
-            </div>
-
-            <!-- Men's Champion -->
-            <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;">
-              <img src="Men's%20Champion.png" alt="Men's Champion" style="width:100%;display:block;" />
-              <div style="padding:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-                <span style="font-size:12px;font-weight:600;color:#475569;flex:1;">Men's Champion</span>
-                <button class="copy-btn" id="copyMenBtn" type="button" onclick="copyImg(&quot;Men's%20Champion.png&quot;,'copyMenBtn','copiedMenLabel')" style="padding:6px 12px;font-size:12px;">Copy image</button>
-                <span class="copied-label" id="copiedMenLabel">✓ Copied</span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </article>
-    </div>
-
+        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+          <h4 class="text-base font-semibold text-slate-900">What&apos;s after that</h4>
+          <ul class="mt-2 space-y-1">
+            <li class="text-sm text-slate-700">Week 3 - Clarity Week</li>
+            <li class="text-sm text-slate-700">Week 4 - Lunch &amp; Listen</li>
+            <li class="text-sm text-slate-700">Week 5 - Focus Thread</li>
+            <li class="text-sm text-slate-700">Week 6 - Wind Down</li>
+            <li class="text-sm text-slate-700">Week 7 - AMA: Teammate Edition</li>
+          </ul>
+        </article>
+      </div>
+    </main>
   </div>
-</div>
 
-<script>
-const MESSAGE_PLAIN = `� Huge congratulations to our 2026 March Madness Bracket Challenge winners!  Enjoy your bragging rights until next March.`;
-const MESSAGE_HTML = `🎉 Huge congratulations to our 2026 March Madness Bracket Challenge winners!  Enjoy your bragging rights until next March.`;
+  <script>
+    const STORAGE_KEY = "revelryLive.energyResetLaunch";
 
-async function copyMessage() {
-  try {
-    if (navigator.clipboard && window.ClipboardItem) {
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          'text/plain': new Blob([MESSAGE_PLAIN], { type: 'text/plain' }),
-          'text/html': new Blob([MESSAGE_HTML], { type: 'text/html' })
-        })
-      ]);
-    } else {
-      await navigator.clipboard.writeText(MESSAGE_PLAIN);
+    function getEnergyResetReviewUnlockAt(startedAtIso = "") {
+      const startedAt = new Date(String(startedAtIso || "").trim());
+      if (Number.isNaN(startedAt.getTime())) return "";
+
+      const launchWeekday = startedAt.getDay();
+      const offsetDays = launchWeekday >= 1 && launchWeekday <= 3
+        ? 9
+        : (launchWeekday === 4 ? 12 : (launchWeekday === 5 ? 11 : 9));
+
+      const unlockAt = new Date(startedAt);
+      unlockAt.setDate(unlockAt.getDate() + offsetDays);
+      unlockAt.setHours(9, 0, 0, 0);
+      return unlockAt.toISOString();
     }
-  } catch (e) {
-    var ta = document.createElement('textarea');
-    ta.value = MESSAGE_PLAIN;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
-  var btn = document.getElementById('copyBtn');
-  var label = document.getElementById('copiedLabel');
-  btn.textContent = '✓ Copied';
-  label.style.display = 'inline';
-  setTimeout(function() {
-    btn.textContent = 'Copy message';
-    label.style.display = 'none';
-  }, 3000);
-}
 
-async function copyImg(filename, btnId, labelId) {
-  var btn = document.getElementById(btnId);
-  var lbl = document.getElementById(labelId);
-  try {
-    var res = await fetch(filename);
-    var blob = await res.blob();
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    btn.textContent = '✓ Copied';
-    lbl.style.display = 'inline';
-    setTimeout(function() { btn.textContent = 'Copy image'; lbl.style.display = 'none'; }, 3000);
-  } catch(e) {
-    btn.textContent = 'Right-click → Copy Image';
-    setTimeout(function() { btn.textContent = 'Copy image'; }, 4000);
-  }
-}
-</script>
+    function getLaunchState() {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && typeof parsed === "object") {
+          return parsed;
+        }
+      } catch (_error) {
+        // Ignore invalid local state and reset below.
+      }
+
+      const challengeStartedAt = new Date().toISOString();
+      const reviewUnlockAt = getEnergyResetReviewUnlockAt(challengeStartedAt) || challengeStartedAt;
+      const nextState = { challengeStartedAt, reviewUnlockAt };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+      return nextState;
+    }
+
+    function formatCountdown() {
+      const countdownEl = document.getElementById("countdownLabel");
+      const unlockLabelEl = document.getElementById("unlockDateLabel");
+      if (!countdownEl || !unlockLabelEl) return;
+
+      const launchState = getLaunchState();
+      const unlockDate = new Date(String(launchState.reviewUnlockAt || ""));
+      const hasValidUnlockDate = !Number.isNaN(unlockDate.getTime());
+      const now = new Date();
+      const remainingMs = hasValidUnlockDate ? Math.max(0, unlockDate.getTime() - now.getTime()) : 0;
+      const totalHours = Math.floor(remainingMs / (60 * 60 * 1000));
+      const days = Math.floor(totalHours / 24);
+      const hours = totalHours % 24;
+      const countdownLabel = remainingMs > 0
+        ? `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} remaining`
+        : "Countdown complete";
+      const unlockDateLabel = hasValidUnlockDate
+        ? `Review Impact unlocks around ${unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}.`
+        : "Review Impact unlocks around 7 days from launch.";
+
+      countdownEl.textContent = countdownLabel;
+      unlockLabelEl.textContent = unlockDateLabel;
+    }
+
+    formatCountdown();
+    window.setInterval(formatCountdown, 60000);
+  </script>
 </body>
 </html>
