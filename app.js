@@ -2629,6 +2629,19 @@ function getBudgetRangeHighEnd(mode = "total", rangeKey = "", fallbackValue = 0)
   return fallback > 0 ? Math.round(fallback) : 0;
 }
 
+function resolveTotalBudgetRangeKey(totalValue = 0, preferredRangeKey = "") {
+  const roundedTotal = Math.round(Number(totalValue || 0));
+  const normalizedPreferredKey = String(preferredRangeKey || "").trim();
+  const preferredRange = getBudgetRangeByKey("total", normalizedPreferredKey);
+  if (preferredRange && roundedTotal > 0) {
+    const preferredRepresentative = getBudgetRangeHighEnd("total", String(preferredRange.key || ""), Number(preferredRange.max || 0));
+    if (preferredRepresentative === roundedTotal) {
+      return String(preferredRange.key || "");
+    }
+  }
+  return getBudgetRangeKeyFromValue("total", roundedTotal);
+}
+
 function getPlatformFeeForTotalBudgetRange(rangeKey = "", fallbackTotal = 0) {
   const normalizedRangeKey = String(rangeKey || "").trim();
   const resolvedKey = normalizedRangeKey || getBudgetRangeKeyFromValue("total", Number(fallbackTotal || 0));
@@ -8723,7 +8736,7 @@ function initializeLandingSetupFlow() {
     state.landingDraft.employeeCount = employeeValue;
     state.landingDraft.perEmployee = perEmployeeValue;
     state.landingDraft.budgetMode = "total";
-    state.landingDraft.totalBudgetRange = getBudgetRangeKeyFromValue("total", computedTotal);
+    state.landingDraft.totalBudgetRange = resolveTotalBudgetRangeKey(computedTotal, state.landingDraft.totalBudgetRange);
     state.landingDraft.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", perEmployeeValue);
     state.landingDraft.budgetConfigured = computedTotal > 0 && employeeValue > 0;
     state.programSettings.totalBudget = computedTotal;
@@ -10926,7 +10939,7 @@ function saveLtfCurrentAnswer() {
       ltfAnswers.totalBudget = totalRange
         ? getBudgetRangeHighEnd("total", String(totalRange.key || ""), Number(totalRange.max || 0))
         : 0;
-      ltfAnswers.totalBudgetRange = getBudgetRangeKeyFromValue("total", ltfAnswers.totalBudget);
+      ltfAnswers.totalBudgetRange = resolveTotalBudgetRangeKey(ltfAnswers.totalBudget, ltfAnswers.totalBudgetRange);
       ltfAnswers.perEmployee = ltfAnswers.employeeCount > 0 ? ltfAnswers.totalBudget / ltfAnswers.employeeCount : 0;
       ltfAnswers.perEmployeeBudgetRange = getBudgetRangeKeyFromValue("perEmployee", ltfAnswers.perEmployee);
     } else {
