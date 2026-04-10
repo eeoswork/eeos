@@ -1079,8 +1079,11 @@
                       <div id="progOverviewEmployees" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
                     </div>
                     <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                      <div style="font-size: 13px; font-weight: 700; color: #64748b;">Monthly Budget</div>
-                      <div style="font-size: 13px; font-weight: 500; color: #64748b;">Includes the cost of all events and our platform fee (<span id="progPlatformFee">$0</span>/mo)</div>
+                      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #64748b;">Monthly Budget</div>
+                        <button type="button" data-action="open-program-budget-info" style="margin-left: auto; border: none; background: transparent; padding: 0; font-size: 13px; font-weight: 400; color: #94a3b8; cursor: pointer;">Edit</button>
+                      </div>
+                      <div style="font-size: 13px; font-weight: 500; color: #64748b;">Includes the cost of all events and our platform fee of <span id="progPlatformFee">$0</span></div>
                       <div id="progOverviewMonthlyBudget" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
                     </div>
                     <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -1460,6 +1463,17 @@
     <button id="setupSignUpPopupClose" type="button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">Close</button>
   </div>
 </div>
+<section id="programBudgetInfoModal" class="hidden fixed inset-0 z-[1100] bg-slate-900/35 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="programBudgetInfoTitle">
+  <div class="mx-auto mt-10 max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm" style="position: relative;">
+    <button id="programBudgetInfoModalClose" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-xl leading-none text-slate-500 transition hover:border-slate-300 hover:text-slate-700" aria-label="Close budget info modal" style="position: absolute; top: 16px; right: 16px;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <div class="pr-12">
+      <h2 id="programBudgetInfoTitle" class="text-base font-semibold text-slate-900">Monthly Budget</h2>
+      <p class="mt-3 text-sm text-slate-600">You can update your exact budget later—no need to set a precise amount yet since your first two events are free.</p>
+    </div>
+  </div>
+</section>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();

@@ -269,14 +269,14 @@ const ENERGY_RESET_LAUNCH_STEPS = [
   {
     key: "day_0",
     title: "Day 0 - Kickoff",
-    plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins tomorrow.
+    plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins next week.
 
   Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being.  You can fit each mini-challenge in whenever you like — each takes just a few minutes.
 
   A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.
 
-  We start tomorrow. Drop an emoji if you're in!`,
-    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins tomorrow.</b><br><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being. You can fit each mini-challenge in whenever you like — <b>each takes just a few minutes</b>.<br><br>A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.<br><br>We start tomorrow. <b>Drop an emoji if you're in!</b>`
+  We start next week. Drop an emoji if you're in!`,
+    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins next week.</b><br><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being. You can fit each mini-challenge in whenever you like — <b>each takes just a few minutes</b>.<br><br>A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.<br><br>We start next week. <b>Drop an emoji if you're in!</b>`
   },
   {
     key: "day_1",
@@ -419,6 +419,23 @@ function normalizeEnergyResetLaunchState(target = state.pollBuilder) {
   }
 
   return launchState;
+}
+
+function getEnergyResetReviewUnlockAt(startedAtIso = "") {
+  const startedAt = new Date(String(startedAtIso || "").trim());
+  if (Number.isNaN(startedAt.getTime())) return "";
+
+  const launchWeekday = startedAt.getDay();
+  const offsetDays = launchWeekday >= 1 && launchWeekday <= 3
+    ? 9
+    : (launchWeekday === 4
+      ? 12
+      : (launchWeekday === 5 ? 11 : 9));
+
+  const unlockAt = new Date(startedAt);
+  unlockAt.setDate(unlockAt.getDate() + offsetDays);
+  unlockAt.setHours(9, 0, 0, 0);
+  return unlockAt.toISOString();
 }
 
 function syncRsvpStepLabels(isEnergyResetLaunch) {
@@ -6148,6 +6165,25 @@ function renderWeeklyProgramCards(weeks, options) {
     return `$0-${upperBoundLabel}`;
   }
 
+  function getTriviaNightVendorNameByAvailability() {
+    const candidateDays = Array.isArray(state?.landingDraft?.daysSelected) && state.landingDraft.daysSelected.length
+      ? state.landingDraft.daysSelected
+      : (Array.isArray(state?.programSettings?.daysSelected) ? state.programSettings.daysSelected : []);
+    const weekdayDays = candidateDays
+      .map((day) => String(day || "").trim())
+      .filter((day) => ["M", "T", "W", "Th", "F"].includes(day));
+
+    // If multiple days are selected, default to Thursday's vendor.
+    if (weekdayDays.length !== 1) return "Port Orleans";
+
+    const day = weekdayDays[0];
+    if (day === "M") return "Second Line Brewing";
+    if (day === "T") return "Urban South";
+    if (day === "W") return "MCYC";
+    if (day === "Th") return "Port Orleans";
+    return "Port Orleans";
+  }
+
   function buildRow(weekEvent, isLast, extraStyle) {
     const weekNum = Number(weekEvent.week || 0);
     const weekLabel = `Week ${weekNum}`;
@@ -6159,6 +6195,13 @@ function renderWeeklyProgramCards(weeks, options) {
     const rowBg = isPremium ? "background: #fffbeb;" : "";
     const weekLabelColor = isPremium ? "#b45309" : "#64748b";
     const isTriviaNight = /^trivia_/i.test(templateId);
+    const isWednesdayAtTheSquare = /^wednesday at the square$/i.test(displayTitle);
+    const isTriviaNightByTitle = /\btrivia night\b/i.test(displayTitle);
+    const resolvedVendorName = isWednesdayAtTheSquare
+      ? "YLC"
+      : ((isTriviaNight || isTriviaNightByTitle)
+        ? getTriviaNightVendorNameByAvailability()
+        : String(weekEvent.vendorName || offeringMeta?.vendorName || "").trim());
     const resolvedAdminLoad = String(weekEvent.adminLoad || offeringMeta?.adminLoad || "").trim();
     const resolvedDeliveryMode = String(weekEvent.deliveryMode || offeringMeta?.deliveryMode || "").trim();
     const resolvedDurationMinutes = Number(weekEvent.durationMinutes || offeringMeta?.durationMinutes || 0);
@@ -6180,11 +6223,14 @@ function renderWeeklyProgramCards(weeks, options) {
       durationMinutes: resolvedDurationMinutes,
       roiPrimary: resolvedRoiPrimary
     });
+    const vendorNameHtml = resolvedVendorName
+      ? `<div style="margin-top: 2px; font-size: 12px; font-weight: 500; color: #94a3b8; line-height: 1.2;">${escapeHtml(resolvedVendorName)}</div>`
+      : "";
     const style = extraStyle || "";
     return `
       <tr style="${style}">
         <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: ${weekLabelColor}; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
-        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}</td>
+        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}${vendorNameHtml}</td>
         <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}</td>
         <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; line-height: 1.35; vertical-align: top; white-space: nowrap;">${adminLoadHtml}</td>
         <td style="${rowBg}padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: center; white-space: nowrap; vertical-align: top;">${resolvedCostDisplay}</td>
@@ -6228,7 +6274,14 @@ function renderWeeklyProgramCards(weeks, options) {
 
   const timelineHtml = remainingEvents.length
     ? `<div style="margin-top: 14px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding-left: 16px; padding-right: 16px;">
-      <table style="width: 100%; border-collapse: collapse; table-layout: auto;">
+      <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+        <colgroup>
+          <col style="width: 80px;">
+          <col style="width: 190px;">
+          <col>
+          <col style="width: 220px;">
+          <col style="width: 90px;">
+        </colgroup>
         <thead>
           <tr>
             <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Week</th>
@@ -7137,6 +7190,11 @@ if (action === "open-gmail") {
   return;
 }
 
+if (action === "open-program-budget-info") {
+  showProgramBudgetInfoModal();
+  return;
+}
+
 
 
 
@@ -7799,6 +7857,18 @@ function hideSetupSignUpPopup() {
   if (!popup) return;
   popup.classList.add("hidden");
   popup.style.display = "none";
+}
+
+function showProgramBudgetInfoModal() {
+  const modal = $("programBudgetInfoModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+}
+
+function hideProgramBudgetInfoModal() {
+  const modal = $("programBudgetInfoModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
 }
 
 function isCompletedStepEditBlocked(stepNum) {
@@ -11022,6 +11092,8 @@ try {
 const setupSignUpPopup = $("setupSignUpPopup");
 const setupSignUpPopupClose = $("setupSignUpPopupClose");
 const setupSignUpPopupCloseX = $("setupSignUpPopupCloseX");
+const programBudgetInfoModal = $("programBudgetInfoModal");
+const programBudgetInfoModalClose = $("programBudgetInfoModalClose");
 if (setupSignUpPopupClose) {
   setupSignUpPopupClose.addEventListener("click", hideSetupSignUpPopup);
 }
@@ -11033,6 +11105,16 @@ if (setupSignUpPopup) {
   setupSignUpPopup.addEventListener("click", (event) => {
     if (event.target === setupSignUpPopup) {
       hideSetupSignUpPopup();
+    }
+  });
+}
+if (programBudgetInfoModalClose) {
+  programBudgetInfoModalClose.addEventListener("click", hideProgramBudgetInfoModal);
+}
+if (programBudgetInfoModal) {
+  programBudgetInfoModal.addEventListener("click", (event) => {
+    if (event.target === programBudgetInfoModal) {
+      hideProgramBudgetInfoModal();
     }
   });
 }
@@ -11139,6 +11221,10 @@ $("btnSaveProgramSetup").addEventListener("click", () => {
 
 $("workflowStepper").addEventListener("click", handleWorkflowAction);
 $("browserPanel").addEventListener("click", handleWorkflowAction);
+const programOverviewCards = $("programOverviewCards");
+if (programOverviewCards) {
+  programOverviewCards.addEventListener("click", handleWorkflowAction);
+}
 const monthlyEventsContainer = $("monthlyEvents");
 if (monthlyEventsContainer) {
   monthlyEventsContainer.addEventListener("click", handleWorkflowAction);
@@ -14525,17 +14611,17 @@ function renderRunEventStep() {
     const now = new Date();
     let launchStateChanged = false;
 
-    if (!launchState.challengeStartedAt) {
+    // Check if timestamps are missing OR already expired (stale from a previous test run)
+    const existingUnlockDate = new Date(String(launchState.reviewUnlockAt || ""));
+    const unlockAlreadyExpired = !Number.isNaN(existingUnlockDate.getTime()) && existingUnlockDate.getTime() <= now.getTime();
+
+    if (!launchState.challengeStartedAt || unlockAlreadyExpired) {
       launchState.challengeStartedAt = now.toISOString();
       launchStateChanged = true;
     }
-    if (!launchState.reviewUnlockAt) {
-      const reviewLock = evaluateEventPageLock({
-        templateId: "5_day_energy_reset_challenge",
-        pageKey: "review_impact",
-        anchorAt: launchState.challengeStartedAt
-      });
-      launchState.reviewUnlockAt = reviewLock.lockEndsAt || String(launchState.challengeStartedAt || now.toISOString());
+    if (!launchState.reviewUnlockAt || unlockAlreadyExpired) {
+      launchState.reviewUnlockAt = getEnergyResetReviewUnlockAt(launchState.challengeStartedAt)
+        || String(launchState.challengeStartedAt || now.toISOString());
       launchStateChanged = true;
     }
 
@@ -16051,12 +16137,9 @@ function renderRsvpStep() {
         state.pollBuilder.rsvpSent = true;
         ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.RSVP);
         const nowIso = new Date().toISOString();
-        if (!launchState.challengeStartedAt) {
-          launchState.challengeStartedAt = nowIso;
-        }
-        if (!launchState.reviewUnlockAt) {
-          launchState.reviewUnlockAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString();
-        }
+        // Always overwrite on final step completion so a fresh run never inherits stale timestamps
+        launchState.challengeStartedAt = nowIso;
+        launchState.reviewUnlockAt = getEnergyResetReviewUnlockAt(nowIso) || nowIso;
         persistState();
         ensureCompletedSetupStep(EVENT_WORKFLOW_STEPS.PROMOTE);
         const nextWorkflowStep = workflowType === EVENT_WORKFLOW_TYPES.POLL ? EVENT_WORKFLOW_STEPS.BOOK : EVENT_WORKFLOW_STEPS.RUN;
