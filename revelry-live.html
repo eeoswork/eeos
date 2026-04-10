@@ -16,25 +16,19 @@
     height: 100%;
     margin: 0;
     font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #f1f5f9;
   }
-
-  * {
-    box-sizing: border-box;
-  }
-
+  * { box-sizing: border-box; }
   .eeos-shell {
     display: grid;
     grid-template-columns: 280px 1fr;
     min-height: 100vh;
-    background: #f1f5f9;
   }
-
   .eeos-sidebar {
     border-right: 1px solid #dbe2ea;
     background: #f8fafc;
     padding: 16px 12px 12px;
   }
-
   .sidebar-block {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -42,7 +36,6 @@
     padding: 12px;
     margin-bottom: 10px;
   }
-
   .sidebar-label {
     font-size: 10px;
     font-weight: 700;
@@ -50,7 +43,6 @@
     text-transform: uppercase;
     color: #94a3b8;
   }
-
   .workflow-item {
     display: flex;
     align-items: center;
@@ -58,45 +50,21 @@
     padding: 8px 10px;
     border-radius: 10px;
     font-size: 14px;
-    line-height: 1.35;
     color: #475569;
   }
-
   .workflow-item.active {
     background: #eef3ff;
     color: #0f172a;
   }
-
-  .workflow-item.locked {
-    color: #94a3b8;
-  }
-
-  .workflow-pill {
-    display: inline-block;
-    background: #f1f5f9;
-    color: #0f172a;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    line-height: 1.35;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
+  .workflow-item.locked { color: #94a3b8; }
   .workflow-icon {
     width: 14px;
     height: 14px;
     border-radius: 4px;
-    flex-shrink: 0;
     background: #cbd5e1;
+    flex-shrink: 0;
   }
-
-  .workflow-item.active .workflow-icon {
-    background: #6366f1;
-  }
-
+  .workflow-item.active .workflow-icon { background: #6366f1; }
   .workflow-check {
     color: #22c55e;
     font-size: 13px;
@@ -105,29 +73,65 @@
     text-align: center;
     flex-shrink: 0;
   }
-
-  .main-scroll {
-    overflow-y: auto;
-  }
-
+  .main-scroll { overflow-y: auto; }
   .page-wrap {
-    max-width: 820px;
+    max-width: 880px;
     margin: 0 auto;
-    padding: 32px 24px 48px;
+    padding: 28px 20px 40px;
   }
-
+  .step-card { overflow: hidden; }
+  .step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+  .step-header.active {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    color: #ffffff;
+  }
+  .step-body { padding: 16px; }
+  .step-message {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #334155;
+  }
+  .btn {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-primary {
+    border: 1px solid #334155;
+    background: #334155;
+    color: #ffffff;
+  }
+  .btn-secondary {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+  }
+  .complete-pill {
+    font-size: 12px;
+    font-weight: 500;
+    color: #16a34a;
+  }
   @media (max-width: 900px) {
-    .eeos-shell {
-      grid-template-columns: 1fr;
-    }
-
+    .eeos-shell { grid-template-columns: 1fr; }
     .eeos-sidebar {
       border-right: none;
       border-bottom: 1px solid #dbe2ea;
     }
-
     .page-wrap {
-      padding: 20px 16px 32px;
+      padding: 16px;
+      max-width: none;
     }
   }
 </style>
@@ -149,25 +153,11 @@
       </div>
 
       <div class="px-2 pt-3">
-        <div class="px-1 pb-2">
-          <span class="sidebar-label">Event Workflow</span>
-        </div>
+        <div class="px-1 pb-2"><span class="sidebar-label">Event Workflow</span></div>
         <div class="sidebar-block">
-          <div class="pb-2">
-            <span class="workflow-pill">5-Day Energy Reset Challenge</span>
-          </div>
-          <div class="workflow-item">
-            <span class="workflow-check">✓</span>
-            <span>Launch Event</span>
-          </div>
-          <div class="workflow-item active">
-            <span class="workflow-icon"></span>
-            <span>Run Event</span>
-          </div>
-          <div class="workflow-item locked">
-            <span class="workflow-icon"></span>
-            <span>Review Impact</span>
-          </div>
+          <div class="workflow-item active"><span class="workflow-icon"></span><span>Launch Event</span></div>
+          <div class="workflow-item locked"><span class="workflow-icon"></span><span>Run Event</span></div>
+          <div class="workflow-item locked"><span class="workflow-icon"></span><span>Review Impact</span></div>
         </div>
       </div>
     </aside>
@@ -175,103 +165,185 @@
     <main class="main-scroll">
       <div class="page-wrap">
         <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="text-2xl font-semibold text-slate-900">Current Event: 5-Day Energy Reset Challenge</h3>
-          <p class="mt-2 text-sm text-slate-600">You already scheduled all Slack posts for this challenge. Nice work.</p>
-        </article>
-
-        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">What to do now</h4>
-          <p class="mt-2 text-sm text-slate-700">There is nothing left to do right now while the challenge runs.</p>
-          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div class="text-xs uppercase tracking-wide text-slate-500">Countdown to review</div>
-            <div id="countdownLabel" class="mt-1 text-lg font-semibold text-slate-900">Calculating...</div>
-            <div id="unlockDateLabel" class="mt-1 text-xs text-slate-500">Review Impact unlocks around ...</div>
-          </div>
-        </article>
-
-        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">What happens next</h4>
-          <p class="mt-2 text-sm text-slate-700">When this countdown ends, you&rsquo;ll move on to <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge&mdash;covering budget, participation, reactions, and notes.</p>
-          <p class="mt-2 text-sm text-slate-700">Once you complete Review Impact, your dashboard (engagement, budget, and employee sentiment tracking) will unlock.</p>
-          <p class="mt-2 text-sm text-slate-700">After that, your next event&mdash;<strong>Coffee Meetup</strong>&mdash;will be ready to launch.</p>
-        </article>
-
-        <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">What&apos;s after that</h4>
-          <ul class="mt-2 space-y-1">
-            <li class="text-sm text-slate-700">Week 3 - Clarity Week</li>
-            <li class="text-sm text-slate-700">Week 4 - Lunch &amp; Listen</li>
-            <li class="text-sm text-slate-700">Week 5 - Focus Thread</li>
-            <li class="text-sm text-slate-700">Week 6 - Wind Down</li>
-            <li class="text-sm text-slate-700">Week 7 - AMA: Teammate Edition</li>
-          </ul>
+          <h4 class="text-base font-semibold text-slate-900">5-Day Energy Reset Challenge</h4>
+          <p class="mt-1 text-sm text-slate-600">This challenge includes a series of daily Slack messages. Just copy and paste each one below and schedule it for the appropriate day.</p>
+          <div id="stepsRoot" class="mt-5 space-y-3"></div>
         </article>
       </div>
     </main>
   </div>
 
-  <script>
-    const STORAGE_KEY = "revelryLive.energyResetLaunch";
+<script>
+const STORAGE_KEY = "revelryLive.energyResetLaunchState";
 
-    function getEnergyResetReviewUnlockAt(startedAtIso = "") {
-      const startedAt = new Date(String(startedAtIso || "").trim());
-      if (Number.isNaN(startedAt.getTime())) return "";
+const ENERGY_RESET_LAUNCH_STEPS = [
+  {
+    key: "day_0",
+    title: "Day 0 - Kickoff",
+    plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins next week.\n\n  Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being.  You can fit each mini-challenge in whenever you like — each takes just a few minutes.\n\n  A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.\n\n  We start next week. Drop an emoji if you're in!`,
+    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins next week.</b><br><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being. You can fit each mini-challenge in whenever you like — <b>each takes just a few minutes</b>.<br><br>A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.<br><br>We start next week. <b>Drop an emoji if you're in!</b>`
+  },
+  {
+    key: "day_1",
+    title: "Day 1 - Take a Breath",
+    plainMessage: `Day 1 of our 5-Day Energy Reset Challenge:\n\nTake a Breath 🌬️\n👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.\n\nWhy this works\nLong exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.\n\nDid it help?\nWrite a word or two that describes how you feel after completing the breathing reset.`,
+    htmlMessage: `<u>Day 1 of our 5-Day Energy Reset Challenge:</u><br><br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
+  },
+  {
+    key: "day_2",
+    title: "Day 2 - Stretch Break",
+    plainMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge\n\nStretch Break 🧘‍♂️\nToday’s micro-challenge:\n👉 Stand and perform this active chest opener stretch below for 1 minute.\n\nWhy this works\nSitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.\n\nHave a favorite stretch?\nShare a GIF of it with us!\n\n\nhttps://eeos.work/active_chest_opener_stretch.gif`,
+    htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!<br><br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a>`
+  },
+  {
+    key: "day_3",
+    title: "Day 3 - Posture Reset",
+    plainMessage: `Day 3 of the 5-Day Energy Reset Challenge:\n\nPosture Reset 🖥️\nToday’s micro-challenge:\n👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!\n\nWhy this works\nSlouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.\n\nPosture score\nLook at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!\n\n\nhttps://eeos.work/good_posture.jpg`,
+    htmlMessage: `<u>Day 3 of the 5-Day Energy Reset Challenge:</u><br><br><b>Posture Reset 🖥️</b><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><br><a href="https://eeos.work/good_posture.jpg" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/good_posture.jpg</a>`
+  },
+  {
+    key: "day_4",
+    title: "Day 4 - Hydration Boost",
+    plainMessage: `Day 4 of the 5-Day Energy Reset Challenge:\n\nHydration Boost 💧\nToday’s micro-challenge:\n👉 Drink a full glass of water right now, and aim for one small glass every hour.\n\nWhy this matters\nOn average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.\n\nTip swap\nShare one trick you use to remember to drink enough water during the day.`,
+    htmlMessage: `<u>Day 4 of the 5-Day Energy Reset Challenge:</u><br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
+  },
+  {
+    key: "day_5",
+    title: "Day 5 - Walk it Out",
+    plainMessage: `Final day of our 5-Day Energy Reset Challenge:\n\nWalk It Out 🚶\nToday’s micro-challenge:\n👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.\n\nWhy this works\nStanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.\n\nWalk the walk\nSnap a photo of something interesting from your walk and drop it in the thread!`,
+    htmlMessage: `<u>Final day of our 5-Day Energy Reset Challenge:</u><br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
+  },
+  {
+    key: "day_6",
+    title: "Day 6 - Wrap Up",
+    plainMessage: `🌟 Day 6: Energy Reset Mini-Circuit!\nCelebrate completing the 5-Day Challenge with a quick, energizing flow:\n\n1️⃣ Breathe: 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)\n2️⃣ Walk: ~5 minutes wherever you can move, preferably outdoors\n3️⃣ Hydrate: Drink a full glass of water\n4️⃣ Stretch: Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)\n5️⃣ Posture Check: Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor\n\nKeep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
+    htmlMessage: `<u>🌟 <b>Day 6: Energy Reset Mini-Circuit!</b></u><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
+  }
+];
 
-      const launchWeekday = startedAt.getDay();
-      const offsetDays = launchWeekday >= 1 && launchWeekday <= 3
-        ? 9
-        : (launchWeekday === 4 ? 12 : (launchWeekday === 5 ? 11 : 9));
+function readState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") throw new Error("invalid");
+    const activeStepKey = String(parsed.activeStepKey || ENERGY_RESET_LAUNCH_STEPS[0].key);
+    const completedStepKeys = Array.isArray(parsed.completedStepKeys)
+      ? parsed.completedStepKeys.map((k) => String(k || ""))
+      : [];
+    return { activeStepKey, completedStepKeys };
+  } catch (_error) {
+    return { activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+  }
+}
 
-      const unlockAt = new Date(startedAt);
-      unlockAt.setDate(unlockAt.getDate() + offsetDays);
-      unlockAt.setHours(9, 0, 0, 0);
-      return unlockAt.toISOString();
+function writeState(next) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+}
+
+async function copyMessage(step) {
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/plain": new Blob([step.plainMessage], { type: "text/plain" }),
+          "text/html": new Blob([step.htmlMessage], { type: "text/html" })
+        })
+      ]);
+    } else {
+      await navigator.clipboard.writeText(step.plainMessage);
     }
+    return true;
+  } catch (_error) {
+    return false;
+  }
+}
 
-    function getLaunchState() {
-      try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : null;
-        if (parsed && typeof parsed === "object") {
-          return parsed;
-        }
-      } catch (_error) {
-        // Ignore invalid local state and reset below.
+function render() {
+  const state = readState();
+  const root = document.getElementById("stepsRoot");
+  if (!root) return;
+
+  root.innerHTML = ENERGY_RESET_LAUNCH_STEPS.map((step, index) => {
+    const isActive = step.key === state.activeStepKey;
+    const isDone = state.completedStepKeys.includes(step.key);
+    const nextStep = ENERGY_RESET_LAUNCH_STEPS[index + 1] || null;
+    const dayTitleMatch = step.title.match(/^(Day\s+\d+)(.*)$/);
+    const dayPrefix = dayTitleMatch ? dayTitleMatch[1] : step.title;
+    const daySuffix = dayTitleMatch ? dayTitleMatch[2] : "";
+    const advanceLabel = nextStep
+      ? `Mark complete and advance to ${nextStep.title}`
+      : "I have scheduled all Slack messages for the 5-Day Energy Reset Challenge";
+
+    return `
+      <article class="step-card rounded-xl border ${isActive ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
+        <div class="step-header ${isActive ? "active" : ""}">
+          <div class="text-sm ${isActive ? "text-white" : "text-slate-900"}"><span class="font-semibold">${dayPrefix}</span><span class="font-normal">${daySuffix}</span></div>
+          ${isDone ? `<span class="complete-pill ${isActive ? "text-emerald-300" : "text-emerald-600"}">✓ Complete</span>` : ""}
+        </div>
+        ${isActive ? `
+          <div class="step-body">
+            <div class="step-message">${step.htmlMessage}</div>
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" class="btn btn-primary" data-copy-step="${step.key}">Copy message</button>
+              <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+            </div>
+            <div class="mt-8">
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" data-advance-step="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
+                <span>${advanceLabel}</span>
+              </label>
+            </div>
+          </div>
+        ` : ""}
+      </article>
+    `;
+  }).join("");
+
+  const copyBtn = root.querySelector("[data-copy-step]");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const stepKey = String(copyBtn.getAttribute("data-copy-step") || "");
+      const step = ENERGY_RESET_LAUNCH_STEPS.find((s) => s.key === stepKey);
+      if (!step) return;
+      const ok = await copyMessage(step);
+      const original = copyBtn.textContent;
+      copyBtn.textContent = ok ? "✓ Copied" : "Could not copy";
+      window.setTimeout(() => { copyBtn.textContent = original; }, 1200);
+    });
+  }
+
+  const slackBtn = root.querySelector("[data-open-slack]");
+  if (slackBtn) {
+    slackBtn.addEventListener("click", () => {
+      window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+    });
+  }
+
+  const advance = root.querySelector("[data-advance-step]");
+  if (advance) {
+    advance.addEventListener("change", () => {
+      if (!advance.checked) return;
+      const stepKey = String(advance.getAttribute("data-advance-step") || "");
+      const currentIndex = ENERGY_RESET_LAUNCH_STEPS.findIndex((s) => s.key === stepKey);
+      if (currentIndex < 0) return;
+      const stateNow = readState();
+      if (!stateNow.completedStepKeys.includes(stepKey)) stateNow.completedStepKeys.push(stepKey);
+      const next = ENERGY_RESET_LAUNCH_STEPS[currentIndex + 1] || null;
+      if (next) {
+        stateNow.activeStepKey = next.key;
+        writeState(stateNow);
+        render();
+        return;
       }
+      writeState(stateNow);
+      window.alert("All Slack messages are scheduled.");
+      render();
+    });
+  }
+}
 
-      const challengeStartedAt = new Date().toISOString();
-      const reviewUnlockAt = getEnergyResetReviewUnlockAt(challengeStartedAt) || challengeStartedAt;
-      const nextState = { challengeStartedAt, reviewUnlockAt };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-      return nextState;
-    }
-
-    function formatCountdown() {
-      const countdownEl = document.getElementById("countdownLabel");
-      const unlockLabelEl = document.getElementById("unlockDateLabel");
-      if (!countdownEl || !unlockLabelEl) return;
-
-      const launchState = getLaunchState();
-      const unlockDate = new Date(String(launchState.reviewUnlockAt || ""));
-      const hasValidUnlockDate = !Number.isNaN(unlockDate.getTime());
-      const now = new Date();
-      const remainingMs = hasValidUnlockDate ? Math.max(0, unlockDate.getTime() - now.getTime()) : 0;
-      const totalHours = Math.floor(remainingMs / (60 * 60 * 1000));
-      const days = Math.floor(totalHours / 24);
-      const hours = totalHours % 24;
-      const countdownLabel = remainingMs > 0
-        ? `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} remaining`
-        : "Countdown complete";
-      const unlockDateLabel = hasValidUnlockDate
-        ? `Review Impact unlocks around ${unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}.`
-        : "Review Impact unlocks around 7 days from launch.";
-
-      countdownEl.textContent = countdownLabel;
-      unlockLabelEl.textContent = unlockDateLabel;
-    }
-
-    formatCountdown();
-    window.setInterval(formatCountdown, 60000);
-  </script>
+render();
+</script>
 </body>
 </html>
