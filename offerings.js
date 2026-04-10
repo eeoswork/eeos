@@ -5268,7 +5268,7 @@
   }
 ];
   window.EVENT_OFFERINGS_META = {
-  "generatedAt": "2026-04-10T16:40:05.709Z",
+  "generatedAt": "2026-04-10T17:35:03.307Z",
   "minPopularityScore": 60,
   "report": {
     "totalRows": 130,

@@ -1805,26 +1805,6 @@ function isGenericLandingMirrorMagicContext() {
   return true;
 }
 
-function isSuscoMagicLinkContext() {
-  return getMagicLinkContextKey() === "susco.eeos.work/susco2026a7d4k9m2";
-}
-
-const SUSCO_MAGIC_CHECKPOINTS = {
-  PROGRAM_REVEAL: "program_reveal",
-  ENERGY_RESET_LOCKED: "energy_reset_locked"
-};
-
-function getSuscoMagicCheckpoint() {
-  const raw = String(state.suscoMagicCheckpoint || "").trim();
-  if (raw === SUSCO_MAGIC_CHECKPOINTS.PROGRAM_REVEAL) return raw;
-  if (raw === SUSCO_MAGIC_CHECKPOINTS.ENERGY_RESET_LOCKED) return raw;
-  return "";
-}
-
-function shouldSuscoMagicOpenAppFromCheckpoint() {
-  return isSuscoMagicLinkContext() && Boolean(getSuscoMagicCheckpoint());
-}
-
 function toPossessiveLabel(name = "") {
   const base = String(name || "").trim();
   if (!base) return "";
@@ -1858,7 +1838,6 @@ function applyMagicLandingHeaderBranding() {
 
 function enforceGenericLandingMagicMode() {
   if (!isGenericLandingMirrorMagicContext()) return;
-  if (isSuscoMagicLinkContext()) return;
   state.landingBuilderStarted = false;
   state.landingTypeformComplete = false;
   state.setupEventsGenerated = false;
@@ -2896,101 +2875,6 @@ function enforceRevelryRunEventViewHardLock() {
   if (state.setupCompleted !== true) {
     state.setupCompleted = true;
     changed = true;
-  }
-
-  return changed;
-}
-
-function enforceSuscoEnergyResetRunEventLock() {
-  if (!isSuscoMagicLinkContext()) return false;
-
-  const chosenEventId = String(state.pollBuilder?.chosenEventId || "").trim();
-  const isEnergyResetRunPage = Number(state.currentSetupStep || 0) === EVENT_WORKFLOW_STEPS.RUN
-    && chosenEventId === "5_day_energy_reset_challenge";
-  const isProgramRevealPage = Number(state.currentSetupStep || 0) === EVENT_WORKFLOW_STEPS.SHORTLIST
-    && !hasLandingFirstEventLaunchStarted();
-
-  const checkpointFromState = isEnergyResetRunPage
-    ? SUSCO_MAGIC_CHECKPOINTS.ENERGY_RESET_LOCKED
-    : (isProgramRevealPage ? SUSCO_MAGIC_CHECKPOINTS.PROGRAM_REVEAL : "");
-
-  let changed = false;
-  if (checkpointFromState && state.suscoMagicCheckpoint !== checkpointFromState) {
-    state.suscoMagicCheckpoint = checkpointFromState;
-    changed = true;
-  }
-
-  const checkpoint = getSuscoMagicCheckpoint();
-  if (!checkpoint) return changed;
-
-  if (checkpoint === SUSCO_MAGIC_CHECKPOINTS.PROGRAM_REVEAL) {
-    if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.SHORTLIST) {
-      state.currentSetupStep = EVENT_WORKFLOW_STEPS.SHORTLIST;
-      changed = true;
-    }
-    if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.SHORTLIST) {
-      state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.SHORTLIST;
-      changed = true;
-    }
-    normalizeEventLaunchContext();
-    if (String(state.eventLaunchContext.templateId || "").trim()) {
-      state.eventLaunchContext.templateId = "";
-      changed = true;
-    }
-    if (state.landingFirstEventLaunched !== false) {
-      state.landingFirstEventLaunched = false;
-      changed = true;
-    }
-    if (state.sidebarActiveSection !== "setup") {
-      state.sidebarActiveSection = "setup";
-      changed = true;
-    }
-    return changed;
-  }
-
-  if (checkpoint === SUSCO_MAGIC_CHECKPOINTS.ENERGY_RESET_LOCKED) {
-    if (state.currentSetupStep !== EVENT_WORKFLOW_STEPS.RUN) {
-      state.currentSetupStep = EVENT_WORKFLOW_STEPS.RUN;
-      changed = true;
-    }
-    if (state.eventWorkflowProcessStep !== EVENT_WORKFLOW_STEPS.RUN) {
-      state.eventWorkflowProcessStep = EVENT_WORKFLOW_STEPS.RUN;
-      changed = true;
-    }
-    if (state.sidebarActiveSection !== "event-workflow") {
-      state.sidebarActiveSection = "event-workflow";
-      changed = true;
-    }
-
-    normalizeEventLaunchContext();
-    if (String(state.eventLaunchContext.templateId || "").trim() !== "5_day_energy_reset_challenge") {
-      state.eventLaunchContext.templateId = "5_day_energy_reset_challenge";
-      changed = true;
-    }
-
-    if (!state.pollBuilder || typeof state.pollBuilder !== "object") {
-      state.pollBuilder = {};
-      changed = true;
-    }
-    if (String(state.pollBuilder.chosenEventId || "").trim() !== "5_day_energy_reset_challenge") {
-      state.pollBuilder.chosenEventId = "5_day_energy_reset_challenge";
-      changed = true;
-    }
-    if (String(state.pollBuilder.chosenEventLabel || "").trim() !== "5-Day Energy Reset Challenge") {
-      state.pollBuilder.chosenEventLabel = "5-Day Energy Reset Challenge";
-      changed = true;
-    }
-
-    const launchState = normalizeEnergyResetLaunchState();
-    const nowIso = new Date().toISOString();
-    if (!launchState.challengeStartedAt) {
-      launchState.challengeStartedAt = nowIso;
-      changed = true;
-    }
-    if (!launchState.reviewUnlockAt) {
-      launchState.reviewUnlockAt = getEnergyResetReviewUnlockAt(launchState.challengeStartedAt) || nowIso;
-      changed = true;
-    }
   }
 
   return changed;
@@ -7611,7 +7495,6 @@ if (action === "complete-step") {
 
 function renderAll() {
 enforceRevelryRunEventViewHardLock();
-enforceSuscoEnergyResetRunEventLock();
 renderProgramSetupForm();
 renderSetupStepStates();
 renderSidebar();
@@ -7634,7 +7517,7 @@ if (active && state.workflowStates[active.id]) {
 
 
 function showLanding() {
-if (isRevelryLabsReadOnlyMagicLink() || shouldSuscoMagicOpenAppFromCheckpoint()) {
+if (isRevelryLabsReadOnlyMagicLink()) {
   showApp();
   return;
 }
@@ -7649,7 +7532,6 @@ renderAppIdentityView();
 
 function showApp() {
 enforceRevelryRunEventViewHardLock();
-enforceSuscoEnergyResetRunEventLock();
 $("landingView").classList.add("hidden");
 $("appView").classList.remove("hidden");
 renderLandingIdentityView();
@@ -11715,17 +11597,15 @@ async function bootstrap() {
       setAuthStatus(String(error?.message || "Session expired. Signed out.").trim(), true);
     } finally {
       enforceRevelryRunEventViewHardLock();
-      enforceSuscoEnergyResetRunEventLock();
       setSidebarHydrationLoading(false);
       renderSidebar();
     }
   }
 
   enforceRevelryRunEventViewHardLock();
-  enforceSuscoEnergyResetRunEventLock();
 
   hideAuthGate();
-  if (isRevelryLabsReadOnlyMagicLink() || shouldSuscoMagicOpenAppFromCheckpoint()) {
+  if (isRevelryLabsReadOnlyMagicLink()) {
     showApp();
   } else {
     showLanding();
