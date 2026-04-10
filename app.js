@@ -2644,7 +2644,11 @@ function resolveTotalBudgetRangeKey(totalValue = 0, preferredRangeKey = "") {
 
 function getPlatformFeeForTotalBudgetRange(rangeKey = "", fallbackTotal = 0) {
   const normalizedRangeKey = String(rangeKey || "").trim();
-  const resolvedKey = normalizedRangeKey || getBudgetRangeKeyFromValue("total", Number(fallbackTotal || 0));
+  const fallbackAmount = Number(fallbackTotal || 0);
+  if (!normalizedRangeKey && Math.round(fallbackAmount) === 500) {
+    return Number(PLATFORM_FEE_BY_TOTAL_RANGE.total_under_500 || 0);
+  }
+  const resolvedKey = normalizedRangeKey || getBudgetRangeKeyFromValue("total", fallbackAmount);
   const mappedFee = Number(PLATFORM_FEE_BY_TOTAL_RANGE[resolvedKey] || 0);
   return mappedFee > 0 ? mappedFee : 0;
 }
@@ -4255,17 +4259,23 @@ if (programResult.data) {
     state.companyName = p.company_name || state.companyName;
     state.adminName = p.admin_name || state.adminName;
   }
+  const programSurveyAnswers = (p.survey_answers && typeof p.survey_answers === "object") ? p.survey_answers : {};
+  const programTotalBudget = Number(p.total_budget || 0);
+  const programPerEmployeeBudget = Number(p.per_employee_budget || 0);
+  const programPersistedTotalRange = String(programSurveyAnswers.totalBudgetRange || "").trim();
   state.programSettings = {
     budgetMode: p.budget_mode || "total",
-    totalBudget: Number(p.total_budget || 0),
-    perEmployeeBudget: Number(p.per_employee_budget || 0),
+    totalBudget: programTotalBudget,
+    totalBudgetRange: resolveTotalBudgetRangeKey(programTotalBudget, programPersistedTotalRange),
+    perEmployeeBudget: programPerEmployeeBudget,
+    perEmployeeBudgetRange: String(programSurveyAnswers.perEmployeeBudgetRange || getBudgetRangeKeyFromValue("perEmployee", programPerEmployeeBudget) || "").trim(),
     employeeCount: Number(p.employee_count || 0),
     goals: p.goals || [],
     teamPreferenceEstimate: Array.isArray(p.team_preference_estimate) ? p.team_preference_estimate : [],
     admin_preference_weight: { boost: 0.22, first_cycle_only: true },
     cadence: p.cadence || "Monthly",
     preferredSchedule: p.preferred_schedule || [],
-    surveyAnswers: p.survey_answers || {}
+    surveyAnswers: programSurveyAnswers
   };
 }
 
@@ -4281,10 +4291,16 @@ const draftResult = await supabaseClient
 if (draftResult.data) {
   const d = draftResult.data;
   pushCloudUpdatedAt(d.updated_at);
+  const draftSurveyAnswers = (d.survey_answers && typeof d.survey_answers === "object") ? d.survey_answers : {};
+  const draftTotalBudget = Number(d.total_budget || 0);
+  const draftPerEmployeeBudget = Number(d.per_employee_budget || 0);
+  const draftPersistedTotalRange = String(draftSurveyAnswers.totalBudgetRange || "").trim();
   state.landingDraft = {
     budgetMode: d.budget_mode || "total",
-    totalBudget: Number(d.total_budget || 0),
-    perEmployee: Number(d.per_employee_budget || 0),
+    totalBudget: draftTotalBudget,
+    totalBudgetRange: resolveTotalBudgetRangeKey(draftTotalBudget, draftPersistedTotalRange),
+    perEmployee: draftPerEmployeeBudget,
+    perEmployeeBudgetRange: String(draftSurveyAnswers.perEmployeeBudgetRange || getBudgetRangeKeyFromValue("perEmployee", draftPerEmployeeBudget) || "").trim(),
     employeeCount: Number(d.employee_count || 0),
     goals: d.goals || [],
     teamPreferenceEstimate: Array.isArray(d.team_preference_estimate) ? d.team_preference_estimate : [],
@@ -4293,7 +4309,7 @@ if (draftResult.data) {
     daysSelected: d.days_selected || [],
     timesSelected: d.times_selected || [],
     localCity: d.local_city || "",
-    surveyAnswers: d.survey_answers || {}
+    surveyAnswers: draftSurveyAnswers
   };
   state.setupCompleted = d.setup_completed ?? true;
   state.setupEventsGenerated = d.setup_events_generated ?? false;
@@ -4397,6 +4413,18 @@ if (localBookingConfirmation && !cloudBookingConfirmation) {
 async function syncStateToSupabase() {
 if (!supabaseClient || !state.accountId || !isSupabaseHydrationEnabled()) return;
 
+const landingSurveyAnswers = {
+  ...(state.landingDraft.surveyAnswers && typeof state.landingDraft.surveyAnswers === "object" ? state.landingDraft.surveyAnswers : {}),
+  totalBudgetRange: String(state.landingDraft.totalBudgetRange || "").trim(),
+  perEmployeeBudgetRange: String(state.landingDraft.perEmployeeBudgetRange || "").trim()
+};
+
+const programSurveyAnswers = {
+  ...(state.programSettings.surveyAnswers && typeof state.programSettings.surveyAnswers === "object" ? state.programSettings.surveyAnswers : {}),
+  totalBudgetRange: String(state.programSettings.totalBudgetRange || "").trim(),
+  perEmployeeBudgetRange: String(state.programSettings.perEmployeeBudgetRange || "").trim()
+};
+
 // Sync landing draft (setup flow data)
 await supabaseClient.from("program_settings").upsert({
   id: `${state.accountId}-landing-draft`,
@@ -4413,7 +4441,7 @@ await supabaseClient.from("program_settings").upsert({
   days_selected: state.landingDraft.daysSelected,
   times_selected: state.landingDraft.timesSelected,
   local_city: state.landingDraft.localCity,
-  survey_answers: state.landingDraft.surveyAnswers,
+  survey_answers: landingSurveyAnswers,
   setup_completed: state.setupCompleted,
   setup_events_generated: state.setupEventsGenerated,
   current_setup_step: state.currentSetupStep,
@@ -4434,7 +4462,7 @@ await supabaseClient.from("program_settings").upsert({
   goals: state.programSettings.goals,
   cadence: state.programSettings.cadence,
   preferred_schedule: state.programSettings.preferredSchedule,
-  survey_answers: state.programSettings.surveyAnswers,
+  survey_answers: programSurveyAnswers,
   updated_at: new Date().toISOString()
 });
 
