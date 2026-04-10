@@ -14701,7 +14701,7 @@ function renderRunEventStep() {
       <article class="mt-4 rounded-xl border border-slate-200 bg-white p-5">
         <h4 class="text-base font-semibold text-slate-900">What happens next</h4>
         <p class="mt-2 text-sm text-slate-700">When this countdown ends, you&rsquo;ll move on to <span class="font-medium">Review Impact</span> for the 5-Day Energy Reset Challenge&mdash;covering budget, participation, reactions, and notes.</p>
-        ${isSuscoMagicLinkContext ? `<p class="mt-2 text-sm text-slate-700">You&rsquo;ll retun here, using your magic link: <a href="https://susco.eeos.work/susco2026a7d4k9m2" target="_blank" rel="noopener noreferrer" class="underline">https://susco.eeos.work/susco2026a7d4k9m2</a></p>` : ""}
+        ${isSuscoMagicLinkContext ? `<p class="mt-2 text-sm text-slate-700">You&rsquo;ll return here, using your magic link: <a href="https://susco.eeos.work/susco2026a7d4k9m2" target="_blank" rel="noopener noreferrer" class="underline font-semibold">https://susco.eeos.work/susco2026a7d4k9m2</a></p>` : ""}
         <p class="mt-2 text-sm text-slate-700">Once you complete Review Impact, your dashboard (engagement, budget, and employee sentiment tracking) will unlock.</p>
         <p class="mt-2 text-sm text-slate-700">After that, your next event&mdash;<strong>${escapeHtml(nextEventTitle)}</strong>&mdash;will be ready to launch.</p>
       </article>
