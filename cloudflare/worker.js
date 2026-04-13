@@ -237,6 +237,47 @@ function deepMergeState(baseValue, incomingValue) {
   return merged;
 }
 
+function buildProgramWeekSummaryFromStateBlob(stateBlob = {}) {
+  if (!stateBlob || typeof stateBlob !== "object") return [];
+  const program = stateBlob.fourMonthProgram;
+  if (!program || typeof program !== "object") return [];
+
+  const fromWeeks = Array.isArray(program.weeks)
+    ? program.weeks
+      .map((item, index) => ({
+        week: Number(item?.week || index + 1),
+        id: String(item?.templateId || item?.id || "").trim(),
+        eventName: String(item?.title || item?.name || "").trim()
+      }))
+      .filter((item) => item.week > 0 && item.eventName)
+    : [];
+  if (fromWeeks.length) return fromWeeks;
+
+  const fromEvents = Array.isArray(program.events)
+    ? program.events
+      .map((item, index) => ({
+        week: Number(index + 1),
+        id: String(item?.templateId || item?.id || "").trim(),
+        eventName: String(item?.title || item?.name || "").trim()
+      }))
+      .filter((item) => item.week > 0 && item.eventName)
+    : [];
+
+  return fromEvents;
+}
+
+function ensureSavedProgramWeeks(stateBlob = {}) {
+  if (!stateBlob || typeof stateBlob !== "object") return stateBlob;
+
+  const derivedWeeks = buildProgramWeekSummaryFromStateBlob(stateBlob);
+  if (!derivedWeeks.length) return stateBlob;
+
+  return {
+    ...stateBlob,
+    savedProgramWeeks: derivedWeeks
+  };
+}
+
 function buildMagicLoginUrl(env, token) {
   const base = String(env.MAGIC_LOGIN_ORIGIN || DEFAULT_MAGIC_LOGIN_ORIGIN).trim().replace(/\/+$/, "");
   return `${base}/?magicLoginToken=${encodeURIComponent(String(token || ""))}`;
@@ -561,10 +602,12 @@ async function handleStatePost(request, env) {
     return errorResponse("INVALID_STATE", "stateBlob object is required.", 422);
   }
 
+  const normalizedStateBlob = ensureSavedProgramWeeks(stateBlob);
+
   const timestamp = nowIso();
   await env.DB.prepare(
     "UPDATE accounts SET state_blob = ?1, state_version = COALESCE(state_version, 0) + 1, updated_at = ?2 WHERE company_id = ?3"
-  ).bind(toJsonString(stateBlob, {}), timestamp, session.company_id).run();
+  ).bind(toJsonString(normalizedStateBlob, {}), timestamp, session.company_id).run();
 
   return jsonResponse({ companyId: session.company_id, saved: true });
 }
@@ -871,6 +914,8 @@ async function handleAdminOnboardingDashboard(request, env) {
             json_extract(state_blob, '$.landingDraft.totalBudget') AS total_budget,
             json_extract(state_blob, '$.landingDraft.perEmployee') AS per_employee_budget,
             json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks,
+            json_extract(state_blob, '$.fourMonthProgram.weeks') AS four_month_program_weeks,
+            json_extract(state_blob, '$.fourMonthProgram.events') AS four_month_program_events,
             (
               SELECT token
               FROM user_magic_login_links uml
@@ -906,7 +951,16 @@ async function handleAdminOnboardingDashboard(request, env) {
 
   const rows = Array.isArray(rowsResult?.results) ? rowsResult.results : [];
   const users = rows.map((row) => {
-    const programWeeks = parseJsonValue(row.saved_program_weeks, []);
+    const savedProgramWeeks = parseJsonValue(row.saved_program_weeks, []);
+    const fallbackProgramWeeks = (() => {
+      const weeks = parseJsonValue(row.four_month_program_weeks, []);
+      if (Array.isArray(weeks) && weeks.length) return weeks;
+      const events = parseJsonValue(row.four_month_program_events, []);
+      return Array.isArray(events) ? events : [];
+    })();
+    const programWeeks = Array.isArray(savedProgramWeeks) && savedProgramWeeks.length
+      ? savedProgramWeeks
+      : fallbackProgramWeeks;
     const normalizedProgram = Array.isArray(programWeeks)
       ? programWeeks
         .map((item, index) => ({
