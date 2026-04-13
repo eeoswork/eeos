@@ -12,6 +12,9 @@ const MAGIC_LINK_HOSTS = new Set([
   "susco.eeos.work",
   "testing.eeos.work"
 ]);
+const MAGIC_LINK_COMPANY_ID_OVERRIDES = {
+  "neel.eeos.work/susco19ae29ffe3": "susco_neel"
+};
 
 function shouldProxyAsStaticAsset(pathname) {
   const path = String(pathname || "");
@@ -493,6 +496,14 @@ async function findValidMagicLink(env, host, tokenId) {
   if (Number(row.active || 0) !== 1) return null;
   const expiresAt = String(row.expires_at || "").trim();
   if (expiresAt && expiresAt <= nowIso()) return null;
+  const key = `${normalizedHost}/${normalizedToken}`;
+  const forcedCompanyId = String(MAGIC_LINK_COMPANY_ID_OVERRIDES[key] || "").trim();
+  if (forcedCompanyId) {
+    return {
+      ...row,
+      company_id: forcedCompanyId
+    };
+  }
   return row;
 }
 
