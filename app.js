@@ -6145,7 +6145,7 @@ function renderWeeklyProgramCards(weeks, options) {
   const primaryTemplateId = String(primaryEvent.templateId || primaryEvent.id || "");
   const primaryDisplayTitle = String(primaryEvent.title || "").trim();
   const primaryDisplayDescription = primaryTemplateId === "5_day_energy_reset_challenge"
-    ? "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come. Admin load: Schedule 7 daily Slack posts (~5 min total)."
+    ? "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come. Admin load: Schedule 6 daily Slack posts (~5 min total)."
     : resolveProgramRevealDescription(primaryTemplateId, primaryEvent.description || "");
   const primaryCardHtml = `
     <div id="${primaryCardId}" style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10); background: white; overflow: hidden;" class="four-month-card" data-expanded="${primaryIsExpanded ? "true" : "false"}">
