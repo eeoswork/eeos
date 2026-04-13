@@ -409,8 +409,8 @@
 
                     <!-- Q3: Goals -->
                     <div id="ltfQ3" class="ltf-q">
-                      <h3 class="ltf-q-title">What do you want this program to help improve?</h3>
-                      <p class="ltf-q-sub">Select all that apply — we'll tailor your program around these.</p>
+                      <h3 class="ltf-q-title">What outcomes are you currently focused on improving?</h3>
+                      <p class="ltf-q-sub">Select all that apply — we&rsquo;ll strengthen and accelerate the progress you're already working toward.</p>
                       <div id="ltfGoalsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
                     </div>
 
@@ -462,12 +462,13 @@
                     <!-- Q1: Setting -->
                     <div id="ltfQ1" class="ltf-q">
                       <h3 class="ltf-q-title">Which type of company events do you normally run?</h3>
-                      <p class="ltf-q-sub">Selecting 'Both virtual and in-person' unlocks every experience in the people program we design for you.</p>
+                      <p class="ltf-q-sub">Selecting “Both virtual and in-person” gives you access to the full range of experiences your program can support.</p>
                       <div id="ltfScheduleGrid" class="flex flex-wrap gap-2 mt-4 mb-2"></div>
 
 
                       <div id="ltfLocalCityRow" class="hidden mt-8">
-                        <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
+                        <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
+                        <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
                         <input id="ltfLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="e.g. New Orleans, Minneapolis, Boston" />
                       </div>
                     </div>
@@ -478,9 +479,9 @@
                         <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-availability-section="days">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">What days work best for your team’s group events?</span>
+                            <span class="text-sm font-medium text-slate-700">When do your team’s group events usually take place?</span>
                           </div>
-                          <p class="mb-5 text-xs text-slate-500">Check all that apply. Some events only run on certain days, but the majority will be scheduled on your preferred days.</p>
+                          <p class="mb-5 text-xs text-slate-500">Select all that apply — some events only run on certain days, but we'll align with your current cadence more often than not.</p>
                           <div class="flex flex-wrap gap-1">
                             <button data-ltf-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">M</button>
                             <button data-ltf-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">T</button>
@@ -492,9 +493,9 @@
                         <div class="mb-6 mt-12 border-b border-slate-200 pb-6" data-ltf-availability-section="times">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">What time of day works best for group events?</span>
+                            <span class="text-sm font-medium text-slate-700">What time of day do your events typically happen?</span>
                           </div>
-                          <p class="mb-5 text-xs text-slate-500">Check all that apply</p>
+                          <p class="mb-5 text-xs text-slate-500">Select all that apply — we'll optimize around what already works best for your team.</p>
                           <div class="flex gap-1">
                             <button data-availability-time="Before 9a" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Before 9a</button>
                             <button data-availability-time="12-1p" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">12-1p (Lunch)</button>
@@ -504,9 +505,9 @@
                         <div class="mb-2 mt-6" data-ltf-availability-section="weekend">
                           <div class="mb-2 flex items-center gap-[10px]">
                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
-                            <span class="text-sm font-medium text-slate-700">Are weekends okay for group events?</span>
+                            <span class="text-sm font-medium text-slate-700">Are you interested in group volunteering opportunities?</span>
                           </div>
-                          <p class="mb-5 text-xs text-slate-500">Most volunteering opportunities take place on Saturdays.</p>
+                          <p class="mb-5 text-xs text-slate-500">Choosing 'Yes' here allows us to schedule events on Saturdays, when most volunteering events are available.</p>
                           <div class="flex gap-1">
                             <button data-ltf-weekend="yes" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Yes</button>
                             <button data-ltf-weekend="no" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">No</button>
@@ -517,8 +518,8 @@
 
                     <!-- Q5: Interests -->
                     <div id="ltfQ5" class="ltf-q">
-                      <h3 class="ltf-q-title">What activities would your team most enjoy?</h3>
-                      <p class="ltf-q-sub">Check all that apply. This gets your program rolling; we'll refine it later with team input.</p>
+                      <h3 class="ltf-q-title">What types of activities has your team responded best to so far?</h3>
+                      <p class="ltf-q-sub">Select all that apply — this gets your program rolling; we'll build on this later with team input.</p>
                       <div id="ltfInterestsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
                     </div>
 
@@ -838,8 +839,8 @@
               </div>
               <div class="setup-step-content" style="padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="block text-sm font-medium mb-3">
-                  <p class="mb-2">What do you want this program to help improve?</p>
-                  <p class="text-xs font-normal text-slate-600">Select all that apply — we'll tailor your program around these.</p>
+                  <p class="mb-2">What outcomes are you currently focused on improving?</p>
+                  <p class="text-xs font-normal text-slate-600">Select all that apply — we&rsquo;ll strengthen and accelerate the progress you're already working toward.</p>
                 </div>
                 <div id="landingGoalsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="1">Next</button>
@@ -933,10 +934,11 @@
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <label class="block text-sm font-medium mb-1">Which type of company events do you normally run?</label>
-                <div class="text-xs text-slate-500 mb-2">Selecting 'Both virtual and in-person' unlocks every experience in the people program we design for you.</div>
+                <div class="text-xs text-slate-500 mb-2">Selecting “Both virtual and in-person” gives you access to the full range of experiences your program can support.</div>
                 <div id="setupSchedule" class="flex flex-wrap gap-2 mb-4"></div>
                 <div id="setupLocalCityRow" class="hidden" style="margin-top: 24px; margin-bottom: 12px;">
-                  <label class="block text-sm font-medium mb-2">What city should we use for local event recommendations?</label>
+                  <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
+                  <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
                   <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" />
                 </div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="4">Next</button>
@@ -959,9 +961,9 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
-                      <span class="text-sm font-medium text-slate-700">What days work best for your team’s group events?</span>
+                      <span class="text-sm font-medium text-slate-700">When do your team’s group events usually take place?</span>
                     </div>
-                    <p class="mb-2 text-xs text-slate-500">Check all that apply. Some events only run on certain days, but the majority will be scheduled on your preferred days.</p>
+                    <p class="mb-2 text-xs text-slate-500">Select all that apply — some events only run on certain days, but we'll align with your current cadence more often than not.</p>
                     <section>
                       <div class="flex flex-wrap gap-1">
                         <button id="setupAvailabilityDayM" data-availability-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">M</button>
@@ -976,9 +978,9 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
-                      <span class="text-sm font-medium text-slate-700">What time of day works best for group events?</span>
+                      <span class="text-sm font-medium text-slate-700">What time of day do your events typically happen?</span>
                     </div>
-                    <p class="mb-2 text-xs text-slate-500">Check all that apply</p>
+                    <p class="mb-2 text-xs text-slate-500">Select all that apply — we'll optimize around what already works best for your team.</p>
                     <section>
                       <div class="max-w-md rounded-sm bg-slate-100 p-1">
                         <div class="grid grid-cols-1 gap-1 sm:grid-cols-3">
@@ -993,13 +995,13 @@
                   <div class="mb-6">
                     <div class="mb-2 flex items-center gap-2">
                       <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">iii</span>
-                      <span class="text-sm font-medium text-slate-700">Are weekends okay for group events?</span>
+                      <span class="text-sm font-medium text-slate-700">Are you interested in group volunteering opportunities?</span>
                     </div>
                     <section>
                       <button id="setupSaturdayToggle" type="button" class="flex w-full items-center justify-between rounded-sm border border-slate-200 bg-slate-50/50 p-4 text-left transition-all hover:border-slate-300">
                         <div>
                           <p id="setupSaturdayLabel" class="text-xs font-bold uppercase text-slate-700">Saturday Availability</p>
-                          <p class="mt-1 text-xs italic text-slate-500">ⓘ Saturday is included so we can recommend volunteer opportunities, which are often scheduled on weekends.</p>
+                          <p class="mt-1 text-xs italic text-slate-500">ⓘ Choosing 'Yes' here allows us to schedule events on Saturdays, when most volunteering events are available.</p>
                         </div>
                         <span id="setupSaturdaySwitch" class="relative h-5 w-10 rounded-full bg-slate-300 transition-colors">
                           <span id="setupSaturdaySwitchKnob" class="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition-all"></span>
@@ -1031,8 +1033,8 @@
               </div>
               <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                 <div class="block text-sm font-medium mb-3">
-                  <p class="mb-2">What activities would your team most enjoy?</p>
-                  <p class="text-xs font-normal text-slate-600">Check all that apply. This gets your program rolling; we'll refine it later with team input.</p>
+                  <p class="mb-2">What types of activities has your team responded best to so far?</p>
+                  <p class="text-xs font-normal text-slate-600">Select all that apply — this gets your program rolling; we'll build on this later with team input.</p>
                 </div>
                 <div id="landingInterestsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">See your employee experience program →</button>
