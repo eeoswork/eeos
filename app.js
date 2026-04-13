@@ -357,8 +357,8 @@ Snap a photo of something interesting from your walk and drop it in the thread!`
   {
     key: "day_6",
     title: "Day 6 - Wrap Up",
-    plainMessage: `🌟 **_Day 6: Energy Reset Mini-Circuit!_**
-Celebrate completing the 5-Day Challenge with a quick, energizing flow:
+    plainMessage: `🌟 **_Energy Reset Mini-Circuit!_**
+  Celebrate completing our 5-Day Energy Reset Challenge with a quick, energizing flow:
 
 1️⃣ **Breathe:** 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)
 2️⃣ **Walk:** ~5 minutes wherever you can move, preferably outdoors
@@ -367,7 +367,7 @@ Celebrate completing the 5-Day Challenge with a quick, energizing flow:
 5️⃣ **Posture Check:** Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor
 
 Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
-    htmlMessage: `🌟 <b><u>Day 6: Energy Reset Mini-Circuit!</u></b><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
+    htmlMessage: `🌟 <b><u>Energy Reset Mini-Circuit!</u></b><br>Celebrate completing our 5-Day Energy Reset Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
   }
 ];
 
