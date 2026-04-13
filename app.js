@@ -380,6 +380,16 @@ function createDefaultEnergyResetLaunchState() {
   };
 }
 
+function getEnergyResetScheduleHintHtml(stepKey = "") {
+  if (stepKey === "day_1") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for today</span></div>';
+  }
+  if (stepKey === "day_6") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for one week from today</span></div>';
+  }
+  return "";
+}
+
 function normalizeEnergyResetLaunchState(target = state.pollBuilder) {
   if (!target || typeof target !== "object") {
     return createDefaultEnergyResetLaunchState();
@@ -15940,6 +15950,7 @@ function renderRsvpStep() {
                   ${isActive ? `
                     <div class="p-4 ${isReadOnlyCompleted ? "text-slate-400" : "text-slate-700"}">
                       <div>
+                        ${getEnergyResetScheduleHintHtml(step.key)}
                         <div class="rounded-lg border ${isReadOnlyCompleted ? "border-slate-200 bg-slate-100 text-slate-400" : "border-slate-200 bg-slate-50 text-slate-800"} p-4 text-sm leading-6">${step.htmlMessage}</div>
                         <div class="mt-4 flex flex-wrap items-center gap-3">
                           <button type="button" data-energy-reset-copy="${step.key}" ${isReadOnlyCompleted ? "disabled" : ""} class="rounded-lg ${isReadOnlyCompleted ? "cursor-not-allowed bg-slate-200 text-slate-500" : "bg-slate-700 text-white hover:bg-slate-800"} px-4 py-2.5 text-sm font-medium">Copy message</button>

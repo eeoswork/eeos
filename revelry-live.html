@@ -239,6 +239,16 @@ function writeState(next) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 }
 
+function getScheduleHintHtml(stepKey) {
+  if (stepKey === "day_1") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for today</span></div>';
+  }
+  if (stepKey === "day_6") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for one week from today</span></div>';
+  }
+  return "";
+}
+
 async function copyMessage(step) {
   try {
     if (navigator.clipboard && window.ClipboardItem) {
@@ -282,6 +292,7 @@ function render() {
         </div>
         ${isActive ? `
           <div class="step-body ${isReadOnlyCompleted ? "text-slate-400" : "text-slate-700"}">
+            ${getScheduleHintHtml(step.key)}
             <div class="step-message ${isReadOnlyCompleted ? "border-slate-200 bg-slate-100 text-slate-400" : "border-slate-200 bg-slate-50 text-slate-800"}">${step.htmlMessage}</div>
             <div class="mt-4 flex flex-wrap items-center gap-3">
               <button type="button" class="btn ${isReadOnlyCompleted ? "btn-secondary" : "btn-primary"}" data-copy-step="${step.key}" ${isReadOnlyCompleted ? "disabled" : ""}>Copy message</button>
