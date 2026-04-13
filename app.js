@@ -9621,8 +9621,10 @@ function renderSetupStepStates() {
       && stepNum > EVENT_WORKFLOW_STEPS.SHORTLIST
       && previousWorkflowStep !== null
       && !state.completedSetupSteps.includes(previousWorkflowStep);
+    const isEnergyResetRunStep = stepNum === EVENT_WORKFLOW_STEPS.RUN
+      && String(state.pollBuilder?.chosenEventId || state.eventLaunchContext?.templateId || "").trim() === "5_day_energy_reset_challenge";
     const suppressRunStepLockStyling = stepNum === EVENT_WORKFLOW_STEPS.RUN
-      && isRevelryBracketsMagicContext();
+      && (isRevelryBracketsMagicContext() || isEnergyResetRunStep);
     const isEventWorkflowStepLockedForUi = isEventWorkflowStepLocked && !suppressRunStepLockStyling;
     const isRevelrySetupReadOnly = revelryReadOnlyCompletedSteps
       && allCoreSetupComplete
