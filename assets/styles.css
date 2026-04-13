@@ -2029,23 +2029,30 @@ font-size: 11px;
   }
 
   #appShell .setup-step-content table.program-reveal-table col:nth-child(1) {
-    width: 16% !important;
+    width: 30% !important;
   }
 
   #appShell .setup-step-content table.program-reveal-table col:nth-child(2) {
-    width: 27% !important;
+    width: 70% !important;
   }
 
-  #appShell .setup-step-content table.program-reveal-table col:nth-child(3) {
-    width: 31% !important;
-  }
-
-  #appShell .setup-step-content table.program-reveal-table col:nth-child(4) {
-    width: 18% !important;
-  }
-
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(3),
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(4),
   #appShell .setup-step-content table.program-reveal-table col:nth-child(5) {
-    width: 8% !important;
+    display: none !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table th:nth-child(3),
+  #appShell .setup-step-content table.program-reveal-table th:nth-child(4),
+  #appShell .setup-step-content table.program-reveal-table th:nth-child(5),
+  #appShell .setup-step-content table.program-reveal-table td:nth-child(3),
+  #appShell .setup-step-content table.program-reveal-table td:nth-child(4),
+  #appShell .setup-step-content table.program-reveal-table td:nth-child(5) {
+    display: none !important;
+  }
+
+  .program-reveal-mobile-extra {
+    display: block !important;
   }
 
   #appShell .setup-step-content .program-reveal-head,
@@ -2067,8 +2074,9 @@ font-size: 11px;
   }
 
   #appShell .setup-step-content .program-reveal-event {
-    width: 26%;
+    width: 70%;
     min-width: 0 !important;
+    white-space: normal !important;
   }
 
   #appShell .setup-step-content .program-reveal-admin {
