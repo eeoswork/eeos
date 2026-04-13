@@ -426,12 +426,16 @@ function getEnergyResetReviewUnlockAt(startedAtIso = "") {
   const startedAt = new Date(String(startedAtIso || "").trim());
   if (Number.isNaN(startedAt.getTime())) return "";
 
+  // Keep existing Revelry magic-link cadence unchanged.
   const launchWeekday = startedAt.getDay();
-  const offsetDays = launchWeekday >= 1 && launchWeekday <= 3
+  const revelryOffsetDays = launchWeekday >= 1 && launchWeekday <= 3
     ? 9
     : (launchWeekday === 4
       ? 12
       : (launchWeekday === 5 ? 11 : 9));
+  const offsetDays = isRevelryLabsReadOnlyMagicLink()
+    ? revelryOffsetDays
+    : 8;
 
   const unlockAt = new Date(startedAt);
   unlockAt.setDate(unlockAt.getDate() + offsetDays);
@@ -14725,7 +14729,8 @@ function renderRunEventStep() {
       : "Countdown complete";
     const unlockDateLabel = hasValidUnlockDate
       ? unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
-      : "7 days from launch";
+      : "day 8 at 9:00 AM";
+    const unlockVerb = isRevelryLabsReadOnlyMagicLink() ? "around" : "at";
 
     panel.innerHTML = `
       <article class="rounded-xl border border-slate-200 bg-white p-5">
@@ -14739,7 +14744,7 @@ function renderRunEventStep() {
         <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div class="text-xs uppercase tracking-wide text-slate-500">Countdown to review</div>
           <div class="mt-1 text-lg font-semibold text-slate-900">${countdownLabel}</div>
-          <div class="mt-1 text-xs text-slate-500">Review Impact unlocks around ${escapeHtml(unlockDateLabel)}.</div>
+          <div class="mt-1 text-xs text-slate-500">Review Impact unlocks ${unlockVerb} ${escapeHtml(unlockDateLabel)}.</div>
         </div>
       </article>
 
