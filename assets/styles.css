@@ -1998,5 +1998,80 @@ font-size: 11px;
     grid-template-columns: 1fr clamp(18px, 5vw, 42px) 1fr clamp(18px, 5vw, 42px) 1fr;
     font-size: 0.75rem;
   }
+
+  #programOverviewCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .eeos-main {
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  #appShell .setup-step-content {
+    overflow-x: auto;
+  }
+
+  #appShell .setup-step-content table {
+    min-width: 560px;
+  }
+
+  #programOverviewCards {
+    grid-template-columns: 1fr !important;
+  }
+
+  #appShell .setup-step-header {
+    padding: 12px !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+  }
+
+  #appShell .setup-step-content {
+    padding: 12px !important;
+  }
+
+  #appShell .setup-step-number {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+  }
+
+  #appShell #eventWorkflowHeadingMain,
+  #appShell #sidebarWorkflowEventSubtitle {
+    margin-left: 34px !important;
+    max-width: calc(100% - 40px) !important;
+  }
+
+  #appShell #eventWorkflowHeadingMain > span[aria-hidden="true"] {
+    left: -22px !important;
+  }
+
+  #appShell input,
+  #appShell select,
+  #appShell textarea,
+  #appShell button {
+    font-size: 16px;
+  }
+
+  #appShell #pollPreviewCard {
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .eeos-hamburger {
+    right: 12px;
+    top: 10px;
+  }
+
+  .eeos-sidebar {
+    width: min(280px, 86vw);
+  }
+
+  #appShell .setup-step-content {
+    padding: 10px !important;
+  }
 }
 

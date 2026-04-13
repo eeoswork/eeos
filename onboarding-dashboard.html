@@ -245,6 +245,41 @@
       .controls { grid-template-columns: 1fr; }
       .grid { grid-template-columns: 1fr; }
     }
+
+    @media (max-width: 640px) {
+      .wrap {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .panel,
+      .cardHead,
+      .grid {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .actionsRow {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .box {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 520px;
+      }
+    }
   </style>
 </head>
 <body>

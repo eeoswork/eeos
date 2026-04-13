@@ -12304,7 +12304,7 @@ function getHorizontalProcessBarHtml(stages = [], activeStageIndex = 0, options 
       : "";
 
     return `
-      <li class="flex min-w-[180px] flex-1 items-center ${clickable ? "cursor-pointer" : ""}" ${clickable ? `data-process-index="${index}"` : ""}>
+      <li class="flex min-w-[140px] sm:min-w-[180px] flex-1 items-center ${clickable ? "cursor-pointer" : ""}" ${clickable ? `data-process-index="${index}"` : ""}>
         <div class="flex items-center gap-2">
           ${indicatorHtml}
           <span class="text-xs ${labelClass}">${escapeHtml(String(label || ""))}</span>
@@ -16617,7 +16617,7 @@ function renderBookEventStep() {
                   <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17" />
                 </svg>
               </button>
-              <div id="bookConfirmDateTimePopover" class="absolute left-0 top-full z-20 mt-2 hidden w-80 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+              <div id="bookConfirmDateTimePopover" class="absolute left-0 top-full z-20 mt-2 hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm" style="width: min(20rem, calc(100vw - 2rem));">
                 <div class="space-y-3">
                   <label class="block">
                     <span class="text-xs font-medium text-slate-600">Date</span>
@@ -16837,7 +16837,7 @@ function renderBookEventStep() {
                 <div id="bookAttendingSection" class="flex-1 border-b border-slate-200 px-6 py-5">
                   <div id="bookAttendingLabel" class="text-xs font-medium uppercase tracking-wide text-slate-500">Attendees</div>
                   ${displayNames.length
-                ? `<div class="${attendingListContainerClass}"><div class="grid grid-cols-3 gap-x-4"><div id="bookAttendingColOne" class="space-y-2">${attendingFirstColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}${showExpandedAttendingList && remainingAttendingCount > 0 ? `<button id="bookAttendingExpandMore" type="button" class="block text-left text-xs font-medium text-slate-600 underline decoration-slate-400 underline-offset-2 hover:text-slate-900">Show less</button>` : ""}</div><div class="space-y-2">${attendingSecondColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}</div><div class="space-y-2">${attendingThirdColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}${!showExpandedAttendingList && remainingAttendingCount > 0 ? `<button id="bookAttendingExpandMore" type="button" class="block text-left text-xs font-medium text-slate-600 underline decoration-slate-400 underline-offset-2 hover:text-slate-900">+${remainingAttendingCount}</button>` : ""}</div></div></div>`
+                ? `<div class="${attendingListContainerClass}"><div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2"><div id="bookAttendingColOne" class="space-y-2">${attendingFirstColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}${showExpandedAttendingList && remainingAttendingCount > 0 ? `<button id="bookAttendingExpandMore" type="button" class="block text-left text-xs font-medium text-slate-600 underline decoration-slate-400 underline-offset-2 hover:text-slate-900">Show less</button>` : ""}</div><div class="space-y-2">${attendingSecondColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}</div><div class="space-y-2">${attendingThirdColumnNames.map((name) => `<div class="attending-name-row truncate">${escapeHtml(name)}</div>`).join("")}${!showExpandedAttendingList && remainingAttendingCount > 0 ? `<button id="bookAttendingExpandMore" type="button" class="block text-left text-xs font-medium text-slate-600 underline decoration-slate-400 underline-offset-2 hover:text-slate-900">+${remainingAttendingCount}</button>` : ""}</div></div></div>`
     : '<div class="mt-3 text-sm text-slate-500">No responses yet</div>'}
                 </div>
                 <div class="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4">
@@ -17474,8 +17474,8 @@ function renderPollBuilderStep() {
     const selectedDeadlineMinute = pendingMinute || "00";
     const selectedDeadlinePeriod = pendingPeriod || "PM";
     deadlinePicker.innerHTML = `
-      <div class="flex items-center gap-2">
-        <div class="grid w-1/2 grid-cols-[1.275fr_0.4fr_0.4fr_auto] gap-2">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div class="grid w-full grid-cols-2 gap-2 sm:w-1/2 sm:grid-cols-[1.275fr_0.4fr_0.4fr_auto]">
           <input id="pollDeadlineDate" type="date" min="${todayLocalIsoDate}" placeholder="mm/dd/yyyy" class="rounded-lg border border-slate-300 px-2.5 py-2 text-sm ${pendingDate ? "text-slate-900" : "text-slate-400"}" value="${pendingDate}" />
           <select id="pollDeadlineHour" class="rounded-lg border border-slate-300 px-2 py-2 text-sm text-slate-900">
             ${hourOptions.map((hour) => `<option value="${hour}" ${hour === selectedDeadlineHour ? "selected" : ""}>${hour}</option>`).join("")}
@@ -17488,7 +17488,7 @@ function renderPollBuilderStep() {
             <option value="PM" ${selectedDeadlinePeriod === "PM" ? "selected" : ""}>PM</option>
           </select>
         </div>
-        <select id="pollDeadlineTimezone" class="w-[136px] rounded-lg border border-slate-300 px-2.5 py-2 text-sm text-slate-900">
+        <select id="pollDeadlineTimezone" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm text-slate-900 sm:w-[136px]">
           <option value="Eastern" ${selectedDeadlineTimeZone === "Eastern" ? "selected" : ""}>Eastern</option>
           <option value="Central" ${selectedDeadlineTimeZone === "Central" ? "selected" : ""}>Central</option>
           <option value="Mountain" ${selectedDeadlineTimeZone === "Mountain" ? "selected" : ""}>Mountain</option>
@@ -17681,11 +17681,13 @@ function renderPollBuilderStep() {
 
   const pollPreviewCard = document.getElementById("pollPreviewCard");
   if (pollPreviewCard) {
+    const useDesktopPreviewWidth = window.matchMedia("(min-width: 640px)").matches;
     if (isFinalized) {
-      pollPreviewCard.classList.add("w-[375px]", "shrink-0");
-      pollPreviewCard.style.width = "";
+      pollPreviewCard.classList.toggle("w-[375px]", useDesktopPreviewWidth);
+      pollPreviewCard.classList.toggle("shrink-0", useDesktopPreviewWidth);
+      pollPreviewCard.style.width = useDesktopPreviewWidth ? "" : "100%";
       pollPreviewCard.style.maxWidth = "";
-      pollPreviewCard.style.flex = "";
+      pollPreviewCard.style.flex = useDesktopPreviewWidth ? "" : "1 1 auto";
     } else {
       pollPreviewCard.classList.remove("w-[375px]", "shrink-0");
       pollPreviewCard.style.width = "100%";
@@ -18566,8 +18568,8 @@ function renderPollBuilderStep() {
       return `
       <div>
         <label class="block text-xs text-slate-500 mb-1">Option ${optionNumber}</label>
-        <div class="flex items-center gap-2">
-          <div class="grid w-1/2 grid-cols-[1.5fr_0.4fr_0.4fr_auto] gap-2">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div class="grid w-full grid-cols-2 gap-2 sm:w-1/2 sm:grid-cols-[1.5fr_0.4fr_0.4fr_auto]">
             <input data-poll-date-index="${index}" type="date" min="${todayLocalIsoDate}" class="rounded-lg border border-slate-300 px-2.5 py-2 text-sm ${pendingParts.date ? "text-slate-900" : "text-slate-400"}" value="${pendingParts.date}" />
             <select data-poll-hour-index="${index}" class="rounded-lg border border-slate-300 px-2 py-2 text-sm text-slate-900">
               ${hourOptions.map((hour) => `<option value="${hour}" ${hour === selectedHour ? "selected" : ""}>${hour}</option>`).join("")}
@@ -18581,7 +18583,7 @@ function renderPollBuilderStep() {
             </select>
           </div>
           ${optionNumber === 1
-            ? `<select data-poll-timezone-select class="w-[136px] rounded-lg border border-slate-300 px-2.5 py-2 text-sm text-slate-900">
+            ? `<select data-poll-timezone-select class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm text-slate-900 sm:w-[136px]">
                 <option value="Eastern" ${selectedTimeZone === "Eastern" ? "selected" : ""}>Eastern</option>
                 <option value="Central" ${selectedTimeZone === "Central" ? "selected" : ""}>Central</option>
                 <option value="Mountain" ${selectedTimeZone === "Mountain" ? "selected" : ""}>Mountain</option>
