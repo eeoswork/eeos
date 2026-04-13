@@ -2024,6 +2024,30 @@ font-size: 11px;
     table-layout: fixed !important;
   }
 
+  #appShell .setup-step-content table.program-reveal-table col {
+    width: auto !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(1) {
+    width: 16% !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(2) {
+    width: 27% !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(3) {
+    width: 31% !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(4) {
+    width: 18% !important;
+  }
+
+  #appShell .setup-step-content table.program-reveal-table col:nth-child(5) {
+    width: 8% !important;
+  }
+
   #appShell .setup-step-content .program-reveal-head,
   #appShell .setup-step-content .program-reveal-cell {
     white-space: normal !important;
@@ -2044,6 +2068,7 @@ font-size: 11px;
 
   #appShell .setup-step-content .program-reveal-event {
     width: 26%;
+    min-width: 0 !important;
   }
 
   #appShell .setup-step-content .program-reveal-admin {
@@ -2061,6 +2086,14 @@ font-size: 11px;
 
   #monthlyEvents {
     grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    overflow: hidden;
+  }
+
+  #monthlyEvents > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
   }
 
   #monthlyEvents #week-card-1 {

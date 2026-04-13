@@ -531,6 +531,7 @@ function goToEventWorkflowStep(stepNum, options = {}) {
   renderFourMonthProgram();
   if (shouldRenderPoll) renderPollBuilderStep();
   if (shouldRenderRsvp) renderRsvpStep();
+  resetMobileNavigationScrollToTop();
   setTimeout(() => scrollSetupStepIntoView(stepNum, "smooth"), 100);
 }
 
@@ -1501,6 +1502,27 @@ const $ = (id) => document.getElementById(id);
 
 function isElectron() {
 return !!window.electronAPI;
+}
+
+function resetMobileNavigationScrollToTop() {
+  if (!window.matchMedia || !window.matchMedia("(max-width: 640px)").matches) return;
+
+  requestAnimationFrame(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch (_error) {
+      window.scrollTo(0, 0);
+    }
+
+    const mainEl = document.querySelector(".eeos-main");
+    if (mainEl) mainEl.scrollTop = 0;
+
+    const landingView = $("landingView");
+    if (landingView) landingView.scrollTop = 0;
+
+    const appView = $("appView");
+    if (appView) appView.scrollTop = 0;
+  });
 }
 
 function fmtMoney(value) {
@@ -6397,10 +6419,10 @@ function renderWeeklyProgramCards(weeks, options) {
       <table class="program-reveal-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
         <colgroup>
           <col style="width: 80px;">
-          <col style="width: 190px;">
+          <col style="width: 205px;">
           <col>
           <col style="width: 220px;">
-          <col style="width: 90px;">
+          <col style="width: 120px;">
         </colgroup>
         <thead>
           <tr>
@@ -7602,6 +7624,7 @@ $("landingView").classList.remove("hidden");
 $("appView").classList.add("hidden");
 renderLandingIdentityView();
 renderAppIdentityView();
+resetMobileNavigationScrollToTop();
 }
 
 
@@ -7613,6 +7636,7 @@ $("landingView").classList.add("hidden");
 $("appView").classList.remove("hidden");
 renderLandingIdentityView();
 renderAppIdentityView();
+resetMobileNavigationScrollToTop();
 }
 
 let authRequestBusy = false;
@@ -10852,6 +10876,7 @@ function startLandingTypeform() {
   if (q1) {
     q1.classList.add("ltf-q--active");
   }
+  resetMobileNavigationScrollToTop();
   renderLtfProgressBar();
   renderLtfNavButtons();
   
@@ -10912,6 +10937,8 @@ function goLtfQuestion(targetIdx) {
     void targetEl.offsetWidth;
     targetEl.classList.add("ltf-q--active");
   }
+
+  resetMobileNavigationScrollToTop();
 
   ltfCurrentQ = targetIdx;
   renderLtfProgressBar();
