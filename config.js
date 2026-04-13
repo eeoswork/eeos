@@ -38,6 +38,10 @@ window.__EEOS_CONFIG__ = {
         companyName: 'Susco',
         adminName: ''
       },
+      'neel.eeos.work': {
+        companyName: 'Susco',
+        adminName: ''
+      },
       'testing.eeos.work': {
         companyName: 'Revelry Labs (Testing)',
         adminName: 'Jennifer Baldwin'

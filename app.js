@@ -788,6 +788,10 @@ const MAGIC_LINK_SETUP_DEFAULTS = {
     localCity: "New Orleans",
     forceLocalCity: true
   },
+  "neel.eeos.work/susco19ae29ffe3": {
+    localCity: "New Orleans",
+    forceLocalCity: true
+  },
   "testing.eeos.work/rlabs2026testa1b2c3d4": {
     totalBudget: 390,
     employeeCount: 39,
