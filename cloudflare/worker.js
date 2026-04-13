@@ -1029,6 +1029,181 @@ async function handleAdminOnboardingDashboard(request, env) {
   });
 }
 
+async function handleAdminOnboardingDashboardAccount(request, env) {
+  const expectedReadKey = String(env.DASHBOARD_READ_KEY || "").trim();
+  if (!expectedReadKey) {
+    return errorResponse("DASHBOARD_NOT_CONFIGURED", "Dashboard read key is not configured.", 503);
+  }
+
+  const providedReadKey = String(request.headers.get("x-dashboard-key") || "").trim();
+  if (!providedReadKey || providedReadKey !== expectedReadKey) {
+    return errorResponse("UNAUTHORIZED", "Dashboard read key is invalid.", 401);
+  }
+
+  const url = new URL(request.url);
+  const email = normalizeEmail(url.searchParams.get("email"));
+  const companyId = String(url.searchParams.get("companyId") || "").trim();
+  if (!email && !companyId) {
+    return errorResponse("INVALID_TARGET", "email or companyId query param is required.", 422);
+  }
+
+  const row = companyId
+    ? await env.DB.prepare(
+      `SELECT company_id,
+              email,
+              company_name,
+              admin_name,
+              updated_at,
+              json_extract(state_blob, '$.landingDraft.employeeCount') AS employee_count,
+              json_extract(state_blob, '$.landingDraft.goals') AS goals,
+              json_extract(state_blob, '$.landingDraft.setting') AS setting,
+              json_extract(state_blob, '$.landingDraft.schedule') AS schedule,
+              json_extract(state_blob, '$.landingDraft.daysSelected') AS days_selected,
+              json_extract(state_blob, '$.landingDraft.timesSelected') AS times_selected,
+              json_extract(state_blob, '$.landingDraft.teamPreferenceEstimate') AS interests,
+              json_extract(state_blob, '$.landingDraft.budgetMode') AS budget_mode,
+              json_extract(state_blob, '$.landingDraft.totalBudget') AS total_budget,
+              json_extract(state_blob, '$.landingDraft.perEmployee') AS per_employee_budget,
+              json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks,
+              json_extract(state_blob, '$.fourMonthProgram.weeks') AS four_month_program_weeks,
+              json_extract(state_blob, '$.fourMonthProgram.events') AS four_month_program_events,
+              (
+                SELECT token
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_token,
+              (
+                SELECT created_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_created_at,
+              (
+                SELECT expires_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_expires_at,
+              (
+                SELECT used_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_used_at
+       FROM accounts
+       WHERE company_id = ?1
+       LIMIT 1`
+    ).bind(companyId).first()
+    : await env.DB.prepare(
+      `SELECT company_id,
+              email,
+              company_name,
+              admin_name,
+              updated_at,
+              json_extract(state_blob, '$.landingDraft.employeeCount') AS employee_count,
+              json_extract(state_blob, '$.landingDraft.goals') AS goals,
+              json_extract(state_blob, '$.landingDraft.setting') AS setting,
+              json_extract(state_blob, '$.landingDraft.schedule') AS schedule,
+              json_extract(state_blob, '$.landingDraft.daysSelected') AS days_selected,
+              json_extract(state_blob, '$.landingDraft.timesSelected') AS times_selected,
+              json_extract(state_blob, '$.landingDraft.teamPreferenceEstimate') AS interests,
+              json_extract(state_blob, '$.landingDraft.budgetMode') AS budget_mode,
+              json_extract(state_blob, '$.landingDraft.totalBudget') AS total_budget,
+              json_extract(state_blob, '$.landingDraft.perEmployee') AS per_employee_budget,
+              json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks,
+              json_extract(state_blob, '$.fourMonthProgram.weeks') AS four_month_program_weeks,
+              json_extract(state_blob, '$.fourMonthProgram.events') AS four_month_program_events,
+              (
+                SELECT token
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_token,
+              (
+                SELECT created_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_created_at,
+              (
+                SELECT expires_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_expires_at,
+              (
+                SELECT used_at
+                FROM user_magic_login_links uml
+                WHERE uml.company_id = accounts.company_id
+                ORDER BY uml.created_at DESC
+                LIMIT 1
+              ) AS latest_magic_used_at
+       FROM accounts
+       WHERE email = ?1
+       LIMIT 1`
+    ).bind(email).first();
+
+  if (!row) {
+    return errorResponse("ACCOUNT_NOT_FOUND", "Account not found.", 404);
+  }
+
+  const savedProgramWeeks = parseJsonValue(row.saved_program_weeks, []);
+  const fallbackProgramWeeks = (() => {
+    const weeks = parseJsonValue(row.four_month_program_weeks, []);
+    if (Array.isArray(weeks) && weeks.length) return weeks;
+    const events = parseJsonValue(row.four_month_program_events, []);
+    return Array.isArray(events) ? events : [];
+  })();
+  const programWeeks = Array.isArray(savedProgramWeeks) && savedProgramWeeks.length
+    ? savedProgramWeeks
+    : fallbackProgramWeeks;
+  const normalizedProgram = Array.isArray(programWeeks)
+    ? programWeeks
+      .map((item, index) => ({
+        week: Number(item?.week || index + 1),
+        eventName: fallbackProgramEventName(item, index)
+      }))
+      .filter((item) => item.week > 0)
+    : [];
+
+  const user = {
+    companyId: String(row.company_id || "").trim(),
+    email: String(row.email || "").trim(),
+    companyName: String(row.company_name || "").trim(),
+    adminName: String(row.admin_name || "").trim(),
+    updatedAt: String(row.updated_at || "").trim(),
+    magicLink: String(row.latest_magic_token || "").trim() ? {
+      url: buildMagicLoginUrl(env, String(row.latest_magic_token || "").trim()),
+      createdAt: String(row.latest_magic_created_at || "").trim(),
+      expiresAt: String(row.latest_magic_expires_at || "").trim(),
+      usedAt: String(row.latest_magic_used_at || "").trim()
+    } : null,
+    answers: {
+      employeeCount: Number(row.employee_count || 0) || 0,
+      goals: parseJsonValue(row.goals, []),
+      setting: String(row.setting || "").trim(),
+      schedule: parseJsonValue(row.schedule, []),
+      daysSelected: parseJsonValue(row.days_selected, []),
+      timesSelected: parseJsonValue(row.times_selected, []),
+      interests: parseJsonValue(row.interests, []),
+      budgetMode: String(row.budget_mode || "").trim(),
+      totalBudget: Number(row.total_budget || 0) || 0,
+      perEmployeeBudget: Number(row.per_employee_budget || 0) || 0
+    },
+    program: normalizedProgram
+  };
+
+  return jsonResponse({ user, fetchedAt: nowIso() });
+}
+
 async function handleAdminDeleteAccount(request, env) {
   const expectedReadKey = String(env.DASHBOARD_READ_KEY || "").trim();
   if (!expectedReadKey) {
@@ -1203,6 +1378,7 @@ export default {
       if (method === "POST" && path === "/auth/magic-link/request") return withCors(await handleAuthMagicLinkRequest(request, env), request, env);
       if (method === "POST" && path === "/auth/magic-link/redeem") return withCors(await handleAuthMagicLinkRedeem(request, env), request, env);
       if (method === "GET" && path === "/admin/onboarding-dashboard") return withCors(await handleAdminOnboardingDashboard(request, env), request, env);
+      if (method === "GET" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminOnboardingDashboardAccount(request, env), request, env);
       if (method === "DELETE" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminDeleteAccount(request, env), request, env);
 
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
