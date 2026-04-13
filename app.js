@@ -267,116 +267,107 @@ function isWorkflowStepSkipped(stepNum, workflowType = getActiveWorkflowType()) 
 
 const ENERGY_RESET_LAUNCH_STEPS = [
   {
-    key: "day_0",
-    title: "Day 0 - Kickoff",
-    plainMessage: `🌻 Our 5-Day Energy Reset Challenge begins next week.
-
-  Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being.  You can fit each mini-challenge in whenever you like — each takes just a few minutes.
-
-  A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.
-
-  We start next week. Drop an emoji if you're in!`,
-    htmlMessage: `🌻 <b>Our 5-Day Energy Reset Challenge begins next week.</b><br><br>Each day here in Slack, you’ll get a simple, science-backed practice designed to support your focus, mood, and overall well-being. You can fit each mini-challenge in whenever you like — <b>each takes just a few minutes</b>.<br><br>A few small resets — a walk, a stretch, a posture check — can make your whole week feel easier.<br><br>We start next week. <b>Drop an emoji if you're in!</b>`
-  },
-  {
     key: "day_1",
-    title: "Day 1 - Take a Breath",
-    plainMessage: `Day 1 of our 5-Day Energy Reset Challenge:
+    title: "Day 1 - Kickoff / Take a Breath",
+    plainMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a _5-Day Energy Reset Challenge._
 
-Take a Breath 🌬️
+Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!
+
+Practice #1
+**Take a Breath** 🌬️
 👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.
 
-Why this works
+**Why this works**
 Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.
 
-Did it help?
+**Did it help?**
 Write a word or two that describes how you feel after completing the breathing reset.`,
-  htmlMessage: `<u>Day 1 of our 5-Day Energy Reset Challenge:</u><br><br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
+    htmlMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a <u>5-Day Energy Reset Challenge.</u><br><br>Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!<br><br>Practice #1<br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
   },
   {
     key: "day_2",
     title: "Day 2 - Stretch Break",
-    plainMessage: `Welcome to Day 2 of our 5-Day Energy Reset Challenge
+    plainMessage: `_Day 2 of our 5-Day Energy Reset Challenge_
 
-Stretch Break 🧘‍♂️
+**Stretch Break** 🧘‍♂️
 Today’s micro-challenge:
 👉 Stand and perform this active chest opener stretch below for 1 minute.
 
-Why this works
+**Why this works**
 Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.
 
-Have a favorite stretch?
+**Have a favorite stretch?**
 Share a GIF of it with us!
 
 
 https://eeos.work/active_chest_opener_stretch.gif`,
-  htmlMessage: `<u>Welcome to Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!<br><br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a>`,
+    htmlMessage: `<u>Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!<br><br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a>`,
   },
   {
     key: "day_3",
     title: "Day 3 - Posture Reset",
-    plainMessage: `Day 3 of the 5-Day Energy Reset Challenge:
+    plainMessage: `_Day 3 of our 5-Day Energy Reset Challenge_
 
-Posture Reset 🖥️
+**Posture Reset** 🖥️
 Today’s micro-challenge:
 👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!
 
-Why this works
+**Why this works**
 Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.
 
-Posture score
+**Posture score**
 Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!
 
 
 https://eeos.work/good_posture.jpg`,
-  htmlMessage: `<u>Day 3 of the 5-Day Energy Reset Challenge:</u><br><br><b>Posture Reset 🖥️</b><br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><br><a href="https://eeos.work/good_posture.jpg" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/good_posture.jpg</a>`
+    htmlMessage: `<u>Day 3 of our 5-Day Energy Reset Challenge</u><br><br><b>Posture Reset</b> 🖥️<br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><br><a href="https://eeos.work/good_posture.jpg" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/good_posture.jpg</a>`
   },
   {
     key: "day_4",
     title: "Day 4 - Hydration Boost",
-    plainMessage: `Day 4 of the 5-Day Energy Reset Challenge:
+    plainMessage: `_Day 4 of our 5-Day Energy Reset Challenge_
 
-Hydration Boost 💧
+**Hydration Boost** 💧
 Today’s micro-challenge:
 👉 Drink a full glass of water right now, and aim for one small glass every hour.
 
-Why this matters
+**Why this matters**
 On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.
 
-Tip swap
+**Tip swap**
 Share one trick you use to remember to drink enough water during the day.`,
-    htmlMessage: `<u>Day 4 of the 5-Day Energy Reset Challenge:</u><br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
+    htmlMessage: `<u>Day 4 of our 5-Day Energy Reset Challenge</u><br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
   },
   {
     key: "day_5",
     title: "Day 5 - Walk it Out",
-    plainMessage: `Final day of our 5-Day Energy Reset Challenge:
+    plainMessage: `_Final day of our 5-Day Energy Reset Challenge_
 
-Walk It Out 🚶
+**Walk It Out** 🚶
 Today’s micro-challenge:
 👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.
 
-Why this works
+**Why this works**
 Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.
 
-Walk the walk
+**Walk the walk**
 Snap a photo of something interesting from your walk and drop it in the thread!`,
-    htmlMessage: `<u>Final day of our 5-Day Energy Reset Challenge:</u><br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
+    htmlMessage: `<u>Final day of our 5-Day Energy Reset Challenge</u><br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
   },
   {
     key: "day_6",
     title: "Day 6 - Wrap Up",
-    plainMessage: `🌟 Day 6: Energy Reset Mini-Circuit!
+    plainMessage: `🌟 **_Day 6: Energy Reset Mini-Circuit!_**
 Celebrate completing the 5-Day Challenge with a quick, energizing flow:
 
-1️⃣ Breathe: 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)
-2️⃣ Walk: ~5 minutes wherever you can move, preferably outdoors
-3️⃣ Hydrate: Drink a full glass of water
-4️⃣ Stretch: Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)
-5️⃣ Posture Check: Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor
+1️⃣ **Breathe:** 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)
+2️⃣ **Walk:** ~5 minutes wherever you can move, preferably outdoors
+3️⃣ **Hydrate:** Drink a full glass of water
+4️⃣ **Stretch:** Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)
+5️⃣ **Posture Check:** Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor
 
 Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
-    htmlMessage: `<u>🌟 <b>Day 6: Energy Reset Mini-Circuit!</b></u><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
+    htmlMessage: `🌟 <b><u>Day 6: Energy Reset Mini-Circuit!</u></b><br>Celebrate completing the 5-Day Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
   }
 ];
 
@@ -411,7 +402,7 @@ function normalizeEnergyResetLaunchState(target = state.pollBuilder) {
   }
 
   const activeStepKey = String(launchState.activeStepKey || "");
-  if (!validKeys.has(activeStepKey) || launchState.completedStepKeys.includes(activeStepKey)) {
+  if (!activeStepKey || !validKeys.has(activeStepKey)) {
     const firstIncomplete = ENERGY_RESET_LAUNCH_STEPS.find((step) => !launchState.completedStepKeys.includes(step.key));
     launchState.activeStepKey = firstIncomplete
       ? firstIncomplete.key
@@ -15916,7 +15907,12 @@ function renderRsvpStep() {
 
   if (isEnergyResetLaunch) {
     const energyResetState = normalizeEnergyResetLaunchState();
-    const activeStepKey = String(energyResetState.activeStepKey || ENERGY_RESET_LAUNCH_STEPS[0].key);
+    const firstIncompleteEnergyResetStep = ENERGY_RESET_LAUNCH_STEPS.find((step) => !energyResetState.completedStepKeys.includes(step.key)) || null;
+    const activeStepKey = String(
+      energyResetState.activeStepKey
+      || firstIncompleteEnergyResetStep?.key
+      || ENERGY_RESET_LAUNCH_STEPS[ENERGY_RESET_LAUNCH_STEPS.length - 1].key
+    );
     panel.innerHTML = `
       <div class="space-y-5">
         <article class="rounded-xl border border-slate-200 bg-white p-5">
@@ -15927,6 +15923,7 @@ function renderRsvpStep() {
             ${ENERGY_RESET_LAUNCH_STEPS.map((step, index) => {
               const isActive = step.key === activeStepKey;
               const isDone = energyResetState.completedStepKeys.includes(step.key);
+              const isReadOnlyCompleted = isActive && isDone;
               const nextStep = ENERGY_RESET_LAUNCH_STEPS[index + 1] || null;
               const dayTitleMatch = step.title.match(/^(Day\s+\d+)(.*)$/);
               const dayPrefix = dayTitleMatch ? dayTitleMatch[1] : step.title;
@@ -15936,25 +15933,22 @@ function renderRsvpStep() {
                 : "I have scheduled all Slack messages for the 5-Day Energy Reset Challenge";
               return `
                 <article class="overflow-hidden rounded-xl border bg-white ${isActive ? "border-slate-400 shadow-sm" : "border-slate-200"}">
-                  <div class="flex items-center justify-between px-4 py-3 ${isActive ? "border-b border-slate-700 bg-slate-800" : ""}">
+                  <div class="flex items-center justify-between px-4 py-3 cursor-pointer ${isActive ? "border-b border-slate-700 bg-slate-800" : "hover:bg-slate-50"}" data-energy-reset-step-header="${step.key}">
                     <div class="text-sm ${isActive ? "text-white" : "text-slate-900"}"><span class="font-semibold">${dayPrefix}</span><span class="font-normal">${daySuffix}</span></div>
                     ${isDone ? `<span class="text-xs font-medium ${isActive ? "text-emerald-300" : "text-emerald-600"}">✓ Complete</span>` : ""}
                   </div>
                   ${isActive ? `
-                    <div class="p-4">
+                    <div class="p-4 ${isReadOnlyCompleted ? "text-slate-400" : "text-slate-700"}">
                       <div>
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">${step.htmlMessage}</div>
+                        <div class="rounded-lg border ${isReadOnlyCompleted ? "border-slate-200 bg-slate-100 text-slate-400" : "border-slate-200 bg-slate-50 text-slate-800"} p-4 text-sm leading-6">${step.htmlMessage}</div>
                         <div class="mt-4 flex flex-wrap items-center gap-3">
-                          <button type="button" data-energy-reset-copy="${step.key}" class="rounded-lg bg-slate-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">Copy message</button>
-                          <button type="button" data-energy-reset-open-slack class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Open Slack</button>
+                          <button type="button" data-energy-reset-copy="${step.key}" ${isReadOnlyCompleted ? "disabled" : ""} class="rounded-lg ${isReadOnlyCompleted ? "cursor-not-allowed bg-slate-200 text-slate-500" : "bg-slate-700 text-white hover:bg-slate-800"} px-4 py-2.5 text-sm font-medium">Copy message</button>
+                          <button type="button" data-energy-reset-open-slack ${isReadOnlyCompleted ? "disabled" : ""} class="rounded-lg border px-4 py-2.5 text-sm font-medium ${isReadOnlyCompleted ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-500" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}">Open Slack</button>
                         </div>
                       </div>
-                      <div class="mt-8">
-                        <label class="flex items-center gap-2 text-sm text-slate-700">
-                          <input type="checkbox" data-energy-reset-advance="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
-                          <span>${advanceLabel}</span>
-                        </label>
-                      </div>
+                      ${isReadOnlyCompleted
+                        ? '<div class="mt-8 text-sm text-slate-400">Completed step. Click any day header to open it. Click this header again to collapse.</div>'
+                        : `<div class="mt-8"><label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-energy-reset-advance="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"><span>${advanceLabel}</span></label></div>`}
                     </div>
                   ` : ""}
                 </article>
@@ -16202,6 +16196,25 @@ function renderRsvpStep() {
       energyResetSlackButton.onclick = () => {
         window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
       };
+    }
+
+    const energyResetStepHeaders = panel.querySelectorAll('[data-energy-reset-step-header]');
+    if (energyResetStepHeaders.length) {
+      energyResetStepHeaders.forEach((header) => {
+        header.onclick = () => {
+          const targetStepKey = String(header.getAttribute('data-energy-reset-step-header') || '').trim();
+          if (!targetStepKey) return;
+          const launchState = normalizeEnergyResetLaunchState();
+          const firstIncompleteStep = ENERGY_RESET_LAUNCH_STEPS.find((step) => !launchState.completedStepKeys.includes(step.key)) || null;
+          const targetIsCompleted = launchState.completedStepKeys.includes(targetStepKey);
+          const targetIsActive = String(launchState.activeStepKey || '') === targetStepKey;
+          launchState.activeStepKey = targetIsActive && targetIsCompleted
+            ? (firstIncompleteStep?.key || targetStepKey)
+            : targetStepKey;
+          persistState();
+          renderRsvpStep();
+        };
+      });
     }
 
     const energyResetAdvanceCheckbox = panel.querySelector('[data-energy-reset-advance]');
