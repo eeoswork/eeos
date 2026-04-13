@@ -237,6 +237,25 @@ function deepMergeState(baseValue, incomingValue) {
   return merged;
 }
 
+function fallbackProgramEventName(item = {}, index = 0) {
+  const direct = String(item?.eventName || item?.title || item?.name || "").trim();
+  if (direct) return direct;
+
+  const generated = Array.isArray(item?.generatedEvents) ? item.generatedEvents : [];
+  const fromGenerated = String(generated[0]?.name || generated[0]?.title || "").trim();
+  if (fromGenerated) return fromGenerated;
+
+  const templateId = String(item?.templateId || item?.id || "").trim();
+  if (templateId) {
+    return templateId
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  return `Week ${index + 1} event`;
+}
+
 function buildProgramWeekSummaryFromStateBlob(stateBlob = {}) {
   if (!stateBlob || typeof stateBlob !== "object") return [];
   const program = stateBlob.fourMonthProgram;
@@ -247,9 +266,9 @@ function buildProgramWeekSummaryFromStateBlob(stateBlob = {}) {
       .map((item, index) => ({
         week: Number(item?.week || index + 1),
         id: String(item?.templateId || item?.id || "").trim(),
-        eventName: String(item?.title || item?.name || "").trim()
+        eventName: fallbackProgramEventName(item, index)
       }))
-      .filter((item) => item.week > 0 && item.eventName)
+      .filter((item) => item.week > 0)
     : [];
   if (fromWeeks.length) return fromWeeks;
 
@@ -258,9 +277,9 @@ function buildProgramWeekSummaryFromStateBlob(stateBlob = {}) {
       .map((item, index) => ({
         week: Number(index + 1),
         id: String(item?.templateId || item?.id || "").trim(),
-        eventName: String(item?.title || item?.name || "").trim()
+        eventName: fallbackProgramEventName(item, index)
       }))
-      .filter((item) => item.week > 0 && item.eventName)
+      .filter((item) => item.week > 0)
     : [];
 
   return fromEvents;
@@ -849,13 +868,17 @@ async function handleOnboardingEmailSave(request, env) {
     mergedState.user = {};
   }
   mergedState.user.email = email;
-  if (programSummary.length) {
-    mergedState.savedProgramWeeks = programSummary.map((item, index) => ({
+  const normalizedProgramSummary = programSummary.length
+    ? programSummary.map((item, index) => ({
       week: Number(item.week || (index + 1)),
       id: String(item.id || item.eventId || item.templateId || "").trim(),
-      eventName: String(item.eventName || item.name || item.title || "").trim()
-    }));
+      eventName: fallbackProgramEventName(item, index)
+    }))
+    : [];
+  if (normalizedProgramSummary.length) {
+    mergedState.savedProgramWeeks = normalizedProgramSummary;
   }
+  mergedState = ensureSavedProgramWeeks(mergedState);
 
   await env.DB.prepare(
     `UPDATE accounts
@@ -965,9 +988,9 @@ async function handleAdminOnboardingDashboard(request, env) {
       ? programWeeks
         .map((item, index) => ({
           week: Number(item?.week || index + 1),
-          eventName: String(item?.eventName || item?.name || item?.title || "").trim()
+          eventName: fallbackProgramEventName(item, index)
         }))
-        .filter((item) => item.week > 0 && item.eventName)
+        .filter((item) => item.week > 0)
       : [];
 
     return {

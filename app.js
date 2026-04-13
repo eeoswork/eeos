@@ -2320,6 +2320,25 @@ function normalizeRecommendedEvent(rawEvent, index = 0) {
   };
 }
 
+function fallbackProgramEventName(item = {}, index = 0) {
+  const direct = String(item?.eventName || item?.title || item?.name || "").trim();
+  if (direct) return direct;
+
+  const generated = Array.isArray(item?.generatedEvents) ? item.generatedEvents : [];
+  const fromGenerated = String(generated[0]?.name || generated[0]?.title || "").trim();
+  if (fromGenerated) return fromGenerated;
+
+  const templateId = String(item?.templateId || item?.id || "").trim();
+  if (templateId) {
+    return templateId
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  return `Week ${index + 1} event`;
+}
+
 function buildProgramWeekSummary(program = state.fourMonthProgram) {
   if (!program || typeof program !== "object") return [];
 
@@ -2327,7 +2346,7 @@ function buildProgramWeekSummary(program = state.fourMonthProgram) {
     return program.weeks.map((item, index) => ({
       week: Number(item?.week || (index + 1)),
       id: String(item?.templateId || item?.id || "").trim(),
-      eventName: String(item?.title || item?.name || "").trim()
+      eventName: fallbackProgramEventName(item, index)
     }));
   }
 
@@ -2335,7 +2354,7 @@ function buildProgramWeekSummary(program = state.fourMonthProgram) {
     return program.events.map((item, index) => ({
       week: Number(index + 1),
       id: String(item?.templateId || item?.id || "").trim(),
-      eventName: String(item?.title || item?.name || "").trim()
+      eventName: fallbackProgramEventName(item, index)
     }));
   }
 
