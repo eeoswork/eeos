@@ -903,7 +903,7 @@
   },
   {
     "id": "navigating_stress_in_the_workplace",
-    "title": "Navigating Stress in the Workplace",
+    "title": "Navigating Work Stress",
     "description": "Practical strategies for handling workplace pressure and staying balanced",
     "category": "one_off",
     "deliveryMode": "remote",
