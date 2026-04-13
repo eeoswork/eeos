@@ -6340,11 +6340,11 @@ function renderWeeklyProgramCards(weeks, options) {
     const style = extraStyle || "";
     return `
       <tr style="${style}">
-        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: ${weekLabelColor}; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
-        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}${vendorNameHtml}</td>
-        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}</td>
-        <td style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; line-height: 1.35; vertical-align: top; white-space: nowrap;">${adminLoadHtml}</td>
-        <td style="${rowBg}padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: center; white-space: nowrap; vertical-align: top;">${resolvedCostDisplay}</td>
+        <td class="program-reveal-cell program-reveal-week" style="${rowBg}padding: 12px 16px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: ${weekLabelColor}; vertical-align: top;">${escapeHtml(weekLabel)}</td>
+        <td class="program-reveal-cell program-reveal-event" style="${rowBg}padding: 12px 16px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top;">${escapeHtml(displayTitle)}${vendorNameHtml}</td>
+        <td class="program-reveal-cell" style="${rowBg}padding: 12px 16px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}</td>
+        <td class="program-reveal-cell program-reveal-admin" style="${rowBg}padding: 12px 16px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; line-height: 1.35; vertical-align: top;">${adminLoadHtml}</td>
+        <td class="program-reveal-cell program-reveal-cost" style="${rowBg}padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: center; vertical-align: top;">${resolvedCostDisplay}</td>
       </tr>`;
   }
 
@@ -6385,21 +6385,21 @@ function renderWeeklyProgramCards(weeks, options) {
 
   const timelineHtml = remainingEvents.length
     ? `<div style="margin-top: 14px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding-left: 16px; padding-right: 16px;">
-      <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+      <table class="program-reveal-table" style="width: 100%; border-collapse: collapse; table-layout: auto;">
         <colgroup>
-          <col style="width: 80px;">
-          <col style="width: 190px;">
-          <col>
-          <col style="width: 220px;">
-          <col style="width: 90px;">
+          <col style="width: 14%;">
+          <col style="width: 24%;">
+          <col style="width: 32%;">
+          <col style="width: 20%;">
+          <col style="width: 10%;">
         </colgroup>
         <thead>
           <tr>
-            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Week</th>
-            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap; min-width: 180px;">Event</th>
-            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Description</th>
-            <th style="padding: 10px 30px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left; white-space: nowrap;">Admin time to launch event</th>
-            <th style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: center; white-space: nowrap;">Est. Cost</th>
+            <th class="program-reveal-head" style="padding: 10px 16px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left;">Week</th>
+            <th class="program-reveal-head" style="padding: 10px 16px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left;">Event</th>
+            <th class="program-reveal-head" style="padding: 10px 16px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left;">Description</th>
+            <th class="program-reveal-head" style="padding: 10px 16px 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: left;">Admin time to launch event</th>
+            <th class="program-reveal-head" style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #64748b; text-transform: uppercase; text-align: center;">Est. Cost</th>
           </tr>
         </thead>
         <tbody>

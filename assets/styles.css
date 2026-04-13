@@ -2018,6 +2018,43 @@ font-size: 11px;
     min-width: 560px;
   }
 
+  #appShell .setup-step-content table.program-reveal-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  #appShell .setup-step-content .program-reveal-head,
+  #appShell .setup-step-content .program-reveal-cell {
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  #appShell .setup-step-content .program-reveal-head,
+  #appShell .setup-step-content .program-reveal-cell {
+    padding-right: 8px !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  #appShell .setup-step-content .program-reveal-week {
+    width: 18%;
+  }
+
+  #appShell .setup-step-content .program-reveal-event {
+    width: 26%;
+  }
+
+  #appShell .setup-step-content .program-reveal-admin {
+    width: 20%;
+  }
+
+  #appShell .setup-step-content .program-reveal-cost {
+    width: 12%;
+    text-align: right !important;
+  }
+
   #programOverviewCards {
     grid-template-columns: 1fr !important;
   }
