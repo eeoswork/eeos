@@ -2059,6 +2059,17 @@ font-size: 11px;
     grid-template-columns: 1fr !important;
   }
 
+  #monthlyEvents {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #monthlyEvents #week-card-1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
   #appShell .setup-step-header {
     padding: 12px !important;
     gap: 10px !important;

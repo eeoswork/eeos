@@ -6139,6 +6139,15 @@ function renderWeeklyProgramCards(weeks, options) {
     return String(fallbackDescription || "").trim();
   }
 
+  function normalizeProgramRevealEventTitle(rawTitle = "") {
+    const title = String(rawTitle || "").trim();
+    if (!title) return "";
+    if (/^navigating\s+stress\s+in\s+the\s+workplace$/i.test(title)) {
+      return "Navigating Work Stress";
+    }
+    return title;
+  }
+
   const primaryEvent = weekItems[0];
   const remainingEvents = weekItems.slice(1);
   const primaryWeekNum = Number(primaryEvent.week || 1);
@@ -6162,7 +6171,7 @@ function renderWeeklyProgramCards(weeks, options) {
 
   const kickoffHeaderHtml = buildSectionHeaderHtml("KICKOFF", true);
   const primaryTemplateId = String(primaryEvent.templateId || primaryEvent.id || "");
-  const primaryDisplayTitle = String(primaryEvent.title || "").trim();
+  const primaryDisplayTitle = normalizeProgramRevealEventTitle(primaryEvent.title || "");
   const primaryDisplayDescription = primaryTemplateId === "5_day_energy_reset_challenge"
     ? "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come. Admin load: Schedule 6 daily Slack posts (~5 min total)."
     : resolveProgramRevealDescription(primaryTemplateId, primaryEvent.description || "");
@@ -6300,7 +6309,7 @@ function renderWeeklyProgramCards(weeks, options) {
     const weekLabel = `Week ${weekNum}`;
     const templateId = String(weekEvent.templateId || weekEvent.id || "");
     const offeringMeta = offeringById.get(templateId) || null;
-    const displayTitle = String(weekEvent.title || "").trim();
+    const displayTitle = normalizeProgramRevealEventTitle(weekEvent.title || "");
     const displayDescription = resolveProgramRevealDescription(templateId, weekEvent.description || "");
     const isPremium = [4, 8, 12].includes(weekNum);
     const rowBg = isPremium ? "background: #fffbeb;" : "";
