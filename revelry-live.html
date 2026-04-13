@@ -234,7 +234,7 @@ function readState() {
     const parsedActiveStepKey = String(parsed.activeStepKey || "");
     const activeStepKey = validKeys.has(parsedActiveStepKey)
       ? parsedActiveStepKey
-      : (firstIncompleteStep?.key || ENERGY_RESET_LAUNCH_STEPS[ENERGY_RESET_LAUNCH_STEPS.length - 1].key);
+      : (firstIncompleteStep?.key || "");
     return { activeStepKey, completedStepKeys };
   } catch (_error) {
     return { activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key, completedStepKeys: [] };
@@ -324,7 +324,7 @@ function render() {
         const targetIsCompleted = stateNow.completedStepKeys.includes(stepKey);
         const targetIsActive = String(stateNow.activeStepKey || "") === stepKey;
         stateNow.activeStepKey = targetIsActive && targetIsCompleted
-          ? (firstIncompleteStep?.key || stepKey)
+          ? (firstIncompleteStep?.key || "")
           : stepKey;
         writeState(stateNow);
         render();
@@ -368,8 +368,8 @@ function render() {
         render();
         return;
       }
+      stateNow.activeStepKey = "";
       writeState(stateNow);
-      window.alert("All Slack messages are scheduled.");
       render();
     });
   }
