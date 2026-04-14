@@ -440,6 +440,18 @@ function getEnergyResetReviewUnlockAt(startedAtIso = "") {
   const unlockAt = new Date(startedAt);
   unlockAt.setDate(unlockAt.getDate() + offsetDays);
   unlockAt.setHours(9, 0, 0, 0);
+
+  // Generic landing flows must unlock on weekdays only.
+  if (!isRevelryLabsReadOnlyMagicLink()) {
+    const unlockWeekday = unlockAt.getDay();
+    if (unlockWeekday === 6) {
+      unlockAt.setDate(unlockAt.getDate() + 2);
+    } else if (unlockWeekday === 0) {
+      unlockAt.setDate(unlockAt.getDate() + 1);
+    }
+    unlockAt.setHours(9, 0, 0, 0);
+  }
+
   return unlockAt.toISOString();
 }
 
