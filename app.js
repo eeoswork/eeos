@@ -14789,7 +14789,7 @@ function renderRunEventStep() {
       ? `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} remaining`
       : "Countdown complete";
     const unlockDateLabel = hasValidUnlockDate
-      ? unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric" })
+      ? unlockDate.toLocaleString([], { month: "long", day: "numeric" })
       : "day 8";
     const unlockTimeLabel = hasValidUnlockDate
       ? unlockDate.toLocaleString([], { hour: "numeric", minute: "2-digit" })
