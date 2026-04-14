@@ -824,6 +824,9 @@ const REVELRY_BRACKETS_MAGIC_LINK_KEYS = new Set([
   "revelrylabs.eeos.work/rlabs2026a1b2c3d4",
   "testing.eeos.work/rlabs2026testa1b2c3d4"
 ]);
+const GENERIC_MAGIC_LINK_NO_BRAND_KEYS = new Set([
+  "avery.eeos.work/avery20264fc4bc68e1"
+]);
 const REVELRY_GOAL_PRIORITY_ORDER = [
   "Support employee wellbeing",
   "Strengthen team connection",
@@ -1848,6 +1851,10 @@ function applyMagicLandingHeaderBranding() {
   if (!landingHeaderSignIn) return;
 
   if (isGenericLandingMirrorMagicContext()) {
+    const contextKey = getMagicLinkContextKey();
+    if (GENERIC_MAGIC_LINK_NO_BRAND_KEYS.has(contextKey)) {
+      if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
+    } else {
     const parsed = parseMagicLinkFromHostPath();
     const host = String(parsed?.host || "").trim().toLowerCase();
     const slug = host.split(".")[0] || "";
@@ -1855,6 +1862,7 @@ function applyMagicLandingHeaderBranding() {
     const companyName = String(state.companyName || MAGIC_LINK_HOST_DEFAULTS[host]?.companyName || fallbackName).trim() || fallbackName;
     const possessive = toPossessiveLabel(companyName) || "Your Company's";
     if (ltfStartBtn) ltfStartBtn.textContent = `Build ${possessive} People Plan \u2192`;
+    }
   } else {
     if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
   }

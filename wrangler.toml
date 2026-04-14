@@ -8,6 +8,8 @@ routes = [
 	{ pattern = "api.eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "revelrylabs.eeos.work/api/*", zone_name = "eeos.work" },
 	{ pattern = "revelrylabs.eeos.work/*", zone_name = "eeos.work" },
+	{ pattern = "avery.eeos.work/api/*", zone_name = "eeos.work" },
+	{ pattern = "avery.eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "neel.eeos.work/api/*", zone_name = "eeos.work" },
 	{ pattern = "neel.eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "susco.eeos.work/api/*", zone_name = "eeos.work" },

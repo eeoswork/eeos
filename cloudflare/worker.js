@@ -8,11 +8,13 @@ const HOME_PAGE_HOSTS = new Set([
   "revelrylabs.eeos.work"
 ]);
 const MAGIC_LINK_HOSTS = new Set([
+  "avery.eeos.work",
   "neel.eeos.work",
   "susco.eeos.work",
   "testing.eeos.work"
 ]);
 const MAGIC_LINK_COMPANY_ID_OVERRIDES = {
+  "avery.eeos.work/avery20264fc4bc68e1": "avery_generic_test",
   "neel.eeos.work/susco19ae29ffe3": "susco_neel"
 };
 
