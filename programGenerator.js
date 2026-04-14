@@ -177,6 +177,7 @@
   function chooseOffering(catalog, preferences, options = {}) {
     const requireFree = options.requireFree === true;
     const maxBudget = Number(options.maxBudget || 0);
+    const minBudget = Math.max(0, Number(options.minBudget || 0));
     const monthIndex = Number(options.monthIndex || 0);
     const forceInPersonOnly = options.forceInPersonOnly === true;
     const allowUsedIds = options.allowUsedIds === true;
@@ -244,6 +245,7 @@
         const totalCost = estimateTotalCost(offering, preferences.teamSize);
         if (requireFree && totalCost > 0) return false;
         if (!requireFree && maxBudget > 0 && totalCost > (maxBudget * 1.15)) return false;
+        if (!requireFree && minBudget > 0 && totalCost < minBudget) return false;
         if (forceInPersonOnly && offering?.inPersonOnly !== true) return false;
         if (pass.schedule && !passesScheduleFilter(offering)) return false;
         if (pass.day && !passesDayFilter(offering)) return false;
@@ -722,7 +724,9 @@
       weights[0] = 0.15;
     }
 
-    const maxMonthlyMultiplier = 1.5;
+    const maxMonthlyMultiplier = 1.25;
+    const kickoffMinMonthlyMultiplier = 0.5;
+    const standardMinMonthlyMultiplier = 0.65;
     let carryover = 0;
 
     const freePool = catalog.filter((item) => estimateTotalCost(item, teamSize) === 0);
@@ -730,12 +734,15 @@
 
     const monthRows = months.map((monthDate, index) => {
       const weightedBudget = monthlyBudget * Number(weights[index] || 1);
+      const isKickoffMonth = index === 0;
+      const minimumMonthlySpend = monthlyBudget * (isKickoffMonth ? kickoffMinMonthlyMultiplier : standardMinMonthlyMultiplier);
+      const maximumMonthlySpend = monthlyBudget * maxMonthlyMultiplier;
+      const effectiveChooserMaxBudget = maximumMonthlySpend > 0 ? (maximumMonthlySpend / 1.15) : 0;
       const adjustedBudget = Math.min(
         weightedBudget + (carryover * 0.5),
-        monthlyBudget * maxMonthlyMultiplier
+        maximumMonthlySpend
       );
 
-      const isKickoffMonth = index === 0;
       const fallbackFree = freePool.length
         ? freePool[index % freePool.length]
         : { id: `free-fallback-${index}`, title: "Coffee Meetup", costPerPerson: 0, goals: ["Strengthen team connection"], workflowType: "rsvp", type: "rsvp" };
@@ -753,10 +760,11 @@
       }
 
       let paidChoice = null;
-      if (!isKickoffMonth) {
+      if (maximumMonthlySpend > 0) {
         paidChoice = chooseOffering(catalog, preferences, {
           requireFree: false,
-          maxBudget: adjustedBudget,
+          maxBudget: effectiveChooserMaxBudget || adjustedBudget,
+          minBudget: minimumMonthlySpend,
           monthIndex: index,
           forceInPersonOnly: requiresMonthThreeInPerson && index === 2
         });
@@ -764,7 +772,27 @@
         if (!paidChoice) {
           paidChoice = chooseOffering(catalog, preferences, {
             requireFree: false,
-            maxBudget: adjustedBudget,
+            maxBudget: effectiveChooserMaxBudget || adjustedBudget,
+            minBudget: minimumMonthlySpend,
+            monthIndex: index,
+            forceInPersonOnly: requiresMonthThreeInPerson && index === 2,
+            allowUsedIds: true
+          });
+        }
+
+        if (!paidChoice) {
+          paidChoice = chooseOffering(catalog, preferences, {
+            requireFree: false,
+            maxBudget: effectiveChooserMaxBudget || adjustedBudget,
+            monthIndex: index,
+            forceInPersonOnly: requiresMonthThreeInPerson && index === 2
+          });
+        }
+
+        if (!paidChoice) {
+          paidChoice = chooseOffering(catalog, preferences, {
+            requireFree: false,
+            maxBudget: effectiveChooserMaxBudget || adjustedBudget,
             monthIndex: index,
             forceInPersonOnly: requiresMonthThreeInPerson && index === 2,
             allowUsedIds: true
@@ -780,6 +808,9 @@
         const weekTwo = kickoffWeekTwo || selectedFree;
         if (weekOne) events.push(toGeneratedEvent(weekOne, teamSize));
         if (weekTwo) events.push(toGeneratedEvent(weekTwo, teamSize));
+        if (selectedPaid && estimateTotalCost(selectedPaid, teamSize) > 0) {
+          events.push(toGeneratedEvent(selectedPaid, teamSize));
+        }
       } else {
         events.push(toGeneratedEvent(selectedFree, teamSize));
         if (selectedPaid && estimateTotalCost(selectedPaid, teamSize) > 0) {
