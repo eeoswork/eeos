@@ -14789,9 +14789,12 @@ function renderRunEventStep() {
       ? `${days} day${days === 1 ? "" : "s"}, ${hours} hour${hours === 1 ? "" : "s"} remaining`
       : "Countdown complete";
     const unlockDateLabel = hasValidUnlockDate
-      ? unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
-      : "day 8 at 9:00 AM";
-    const unlockVerb = isRevelryLabsReadOnlyMagicLink() ? "around" : "at";
+      ? unlockDate.toLocaleString([], { month: "short", day: "numeric", year: "numeric" })
+      : "day 8";
+    const unlockTimeLabel = hasValidUnlockDate
+      ? unlockDate.toLocaleString([], { hour: "numeric", minute: "2-digit" })
+      : "9:00 AM";
+    const unlockVerb = isRevelryLabsReadOnlyMagicLink() ? "around" : "on";
 
     panel.innerHTML = `
       <article class="rounded-xl border border-slate-200 bg-white p-5">
@@ -14805,7 +14808,7 @@ function renderRunEventStep() {
         <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div class="text-xs uppercase tracking-wide text-slate-500">Countdown to review</div>
           <div class="mt-1 text-lg font-semibold text-slate-900">${countdownLabel}</div>
-          <div class="mt-1 text-xs text-slate-500">Review Impact unlocks ${unlockVerb} ${escapeHtml(unlockDateLabel)}.</div>
+          <div class="mt-1 text-xs text-slate-500">Review Impact unlocks ${unlockVerb} ${escapeHtml(unlockDateLabel)} at ${escapeHtml(unlockTimeLabel)}.</div>
         </div>
       </article>
 
