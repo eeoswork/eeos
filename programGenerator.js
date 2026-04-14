@@ -502,6 +502,18 @@
   // Hybrid keeps the existing in-person pattern; remote keeps the same cadence
   // but uses premium remote paid events in weeks 4, 8, and 12.
   function buildNolaWeeks(catalog, preferences, teamSize, monthlyBudget) {
+    const maxMonthlyMultiplier = 1.25;
+    const kickoffMinMonthlyMultiplier = 0.5;
+    const standardMinMonthlyMultiplier = 0.65;
+
+    const getMonthlySpendBounds = (monthIndex) => {
+      const isKickoffMonth = monthIndex === 0;
+      const minSpend = monthlyBudget * (isKickoffMonth ? kickoffMinMonthlyMultiplier : standardMinMonthlyMultiplier);
+      const maxSpend = monthlyBudget * maxMonthlyMultiplier;
+      const effectiveChooserMaxBudget = maxSpend > 0 ? (maxSpend / 1.15) : 0;
+      return { minSpend, maxSpend, effectiveChooserMaxBudget };
+    };
+
     const fixedIds = new Set([
       "5_day_energy_reset_challenge",
       "coffee_meetup",
@@ -558,43 +570,93 @@
 
     // Premium remote event helper for fixed premium weeks.
     const pickPremiumRemoteOffering = (usedIds, monthIndex) => {
+      const bounds = getMonthlySpendBounds(Math.floor(monthIndex / 4));
       const pool = catalog.filter((o) => {
         const fmt = normalizeKey(o.formatCapability);
         const cost = Number(o.costPerPerson || 0);
         const totalCost = estimateTotalCost(o, teamSize);
-        return fmt === "remote_only" && cost > 0 && totalCost <= monthlyBudget;
+        return fmt === "remote_only" && cost > 0 && totalCost <= bounds.maxSpend;
       });
       const prefs = { ...preferences, usedIds: new Set(usedIds || []) };
-      const pick = chooseOffering(pool, prefs, {
+      let pick = chooseOffering(pool, prefs, {
         requireFree: false,
-        maxBudget: monthlyBudget,
+        maxBudget: bounds.effectiveChooserMaxBudget || bounds.maxSpend,
+        minBudget: bounds.minSpend,
         monthIndex
       });
+      if (!pick?.offering) {
+        pick = chooseOffering(pool, prefs, {
+          requireFree: false,
+          maxBudget: bounds.effectiveChooserMaxBudget || bounds.maxSpend,
+          monthIndex,
+          allowUsedIds: true
+        });
+      }
       return pick?.offering || null;
     };
 
+    const pickPremiumInPersonOffering = (usedIds, monthIndex) => {
+      const bounds = getMonthlySpendBounds(Math.floor(monthIndex / 4));
+      const pool = catalog.filter((o) => {
+        const totalCost = estimateTotalCost(o, teamSize);
+        return o?.inPersonOnly === true && totalCost > 0 && totalCost <= bounds.maxSpend;
+      });
+      const prefs = { ...preferences, usedIds: new Set(usedIds || []) };
+      let pick = chooseOffering(pool, prefs, {
+        requireFree: false,
+        maxBudget: bounds.effectiveChooserMaxBudget || bounds.maxSpend,
+        minBudget: bounds.minSpend,
+        monthIndex,
+        forceInPersonOnly: true
+      });
+      if (!pick?.offering) {
+        pick = chooseOffering(pool, prefs, {
+          requireFree: false,
+          maxBudget: bounds.effectiveChooserMaxBudget || bounds.maxSpend,
+          monthIndex,
+          forceInPersonOnly: true,
+          allowUsedIds: true
+        });
+      }
+      if (pick?.offering?.inPersonOnly === true) return pick.offering;
+      return null;
+    };
+
+    const monthTwoBounds = getMonthlySpendBounds(1);
     const remotePremiumPool = catalog.filter((o) => {
       const fmt = normalizeKey(o.formatCapability);
       const cost = Number(o.costPerPerson || 0);
       const totalCost = estimateTotalCost(o, teamSize);
-      return fmt === "remote_only" && cost > 0 && totalCost <= monthlyBudget;
+      return fmt === "remote_only" && cost > 0 && totalCost <= monthTwoBounds.maxSpend;
     });
 
     // Week 8: premium remote event, goals-aligned, in budget
     const week8UsedIds = new Set(fixedIds);
     if (week5Offering?.id) week8UsedIds.add(String(week5Offering.id));
     const week8Prefs = { ...preferences, usedIds: week8UsedIds };
-    const week8Pick = chooseOffering(remotePremiumPool, week8Prefs, {
+    let week8Pick = chooseOffering(remotePremiumPool, week8Prefs, {
       requireFree: false,
-      maxBudget: monthlyBudget,
+      maxBudget: monthTwoBounds.effectiveChooserMaxBudget || monthTwoBounds.maxSpend,
+      minBudget: monthTwoBounds.minSpend,
       monthIndex: 7
     });
+    if (!week8Pick?.offering) {
+      week8Pick = chooseOffering(remotePremiumPool, week8Prefs, {
+        requireFree: false,
+        maxBudget: monthTwoBounds.effectiveChooserMaxBudget || monthTwoBounds.maxSpend,
+        monthIndex: 7,
+        allowUsedIds: true
+      });
+    }
     const week8Offering = week8Pick?.offering || null;
 
     const hasSaturday = preferences.selectedDays instanceof Set && preferences.selectedDays.has("saturday");
-    let week12Offering;
+    const week12UsedIds = new Set(fixedIds);
+    if (week5Offering?.id) week12UsedIds.add(String(week5Offering.id));
+    if (week8Offering?.id) week12UsedIds.add(String(week8Offering.id));
+    let week12Offering = pickPremiumInPersonOffering(week12UsedIds, 11);
     if (hasSaturday) {
-      week12Offering = findById("green_light_new_orleans");
+      week12Offering = week12Offering || findById("green_light_new_orleans");
     } else {
       const triviaByDay = {
         monday: "trivia_monday_second_line_7p",
@@ -606,7 +668,7 @@
       const matchedDay = dayPriority.find(
         (d) => preferences.selectedDays instanceof Set && preferences.selectedDays.has(d)
       );
-      week12Offering = findById(matchedDay ? triviaByDay[matchedDay] : "trivia_thursday_port_orleans_7_30p");
+      week12Offering = week12Offering || findById(matchedDay ? triviaByDay[matchedDay] : "trivia_thursday_port_orleans_7_30p");
     }
 
     const week6UsedIds = new Set(fixedIds);
@@ -653,7 +715,8 @@
     }
     const week11Offering = week11Pick?.offering || findById("idea_walk") || null;
 
-    let week4Offering = findById("wats_may6");
+    const week4UsedIds = new Set(fixedIds);
+    let week4Offering = pickPremiumInPersonOffering(week4UsedIds, 3) || findById("wats_may6");
     if (isRemoteOnlyNola) {
       return buildVirtualOnlyWeeks(catalog, preferences, teamSize, monthlyBudget);
     }
