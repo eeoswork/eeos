@@ -61,7 +61,7 @@ async function serveHomePageHostRequest(request) {
   const host = String(url.hostname || "").toLowerCase();
   const fallbackPath = host === "revelrylabs.eeos.work"
     ? "/index.html"
-    : "/landing.html";
+    : "/index.html";
   return serveStaticHostRequest(request, fallbackPath);
 }
 
