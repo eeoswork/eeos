@@ -6445,7 +6445,7 @@ function renderWeeklyProgramCards(weeks, options) {
           <col style="width: 80px;">
           <col style="width: 205px;">
           <col>
-          <col style="width: 220px;">
+          <col style="width: 270px;">
           <col style="width: 120px;">
         </colgroup>
         <thead>
