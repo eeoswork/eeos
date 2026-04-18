@@ -7,6 +7,9 @@ const HOME_PAGE_HOSTS = new Set([
   "eeos.work",
   "revelrylabs.eeos.work"
 ]);
+const TODO_PAGE_HOSTS = new Set([
+  "todo.eeos.work"
+]);
 const MAGIC_LINK_HOSTS = new Set([
   "avery.eeos.work",
   "neel.eeos.work",
@@ -23,7 +26,7 @@ function shouldProxyAsStaticAsset(pathname) {
   if (!path || path === "/") return false;
   if (path.startsWith("/api/")) return false;
   if (path.startsWith("/assets/")) return true;
-  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/landing.html" || path === "/poll.html" || path === "/rsvp.html" || path === "/onboarding-dashboard.html" || path === "/event-locked.html") {
+  if (path === "/app.js" || path === "/config.js" || path === "/index.html" || path === "/landing.html" || path === "/todo.html" || path === "/poll.html" || path === "/rsvp.html" || path === "/onboarding-dashboard.html" || path === "/event-locked.html") {
     return true;
   }
   return /\.[a-zA-Z0-9]+$/.test(path);
@@ -63,6 +66,10 @@ async function serveHomePageHostRequest(request) {
     ? "/index.html"
     : "/index.html";
   return serveStaticHostRequest(request, fallbackPath);
+}
+
+async function serveTodoPageHostRequest(request) {
+  return serveStaticHostRequest(request, "/todo.html");
 }
 
 function resolveCorsOrigin(request, env) {
@@ -1371,6 +1378,12 @@ export default {
           return Response.redirect(`${url.origin}/`, 301);
         }
         return withCors(await serveHomePageHostRequest(request), request, env);
+      }
+      if (TODO_PAGE_HOSTS.has(host)) {
+        if (url.pathname === "/todo.html") {
+          return Response.redirect(`${url.origin}/`, 301);
+        }
+        return withCors(await serveTodoPageHostRequest(request), request, env);
       }
       if (MAGIC_LINK_HOSTS.has(host)) {
         return withCors(await serveMagicLinkHostRequest(request), request, env);

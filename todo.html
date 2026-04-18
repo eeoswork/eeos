@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #e8e8e8;
+      --bg-soft: #efefef;
+      --text: #2a2a2a;
+      --muted: #8b8b8b;
+      --line: #cfcfcf;
+      --line-dark: #9c9c9c;
+      --black: #131313;
+      --white: #f7f7f7;
+      --accent: #2f965a;
+      --danger: #9f3f3f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--text);
+      background: var(--bg);
+      padding: 14px 10px 20px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .app-shell {
+      width: min(1640px, 100%);
+      margin: 0 auto;
+    }
+
+    .top-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      padding: 0 12px 12px;
+      color: #494949;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .top-nav > div {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 14px;
+      white-space: nowrap;
+    }
+
+    .top-nav > div:last-child {
+      justify-content: flex-end;
+    }
+
+    .add-layout,
+    .work-layout {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: 0;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      box-shadow: none;
+      padding: 12px;
+    }
+
+    .panel-primary,
+    .panel-secondary,
+    .panel-success {
+      background: transparent;
+      border-color: transparent;
+      padding: 0;
+    }
+
+    .title-xl {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .title-lg {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .text-subtle {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      border: 1px solid var(--line-dark);
+      border-radius: 0;
+      background: #ececec;
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      padding: 7px 9px;
+      transition: border-color 0.1s ease;
+      outline: none;
+    }
+
+    .field:focus {
+      border-color: var(--black);
+    }
+
+    .field-input {
+      width: 320px;
+      max-width: 100%;
+    }
+
+    .field-select {
+      width: 90px;
+    }
+
+    .btn {
+      border: 1px solid var(--black);
+      border-radius: 0;
+      padding: 7px 12px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+      text-transform: uppercase;
+    }
+
+    .btn:hover {
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #2d2d2d;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-start-disabled {
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--line-dark);
+      cursor: not-allowed;
+    }
+
+    .list-stack {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .task-item,
+    .later-item,
+    .missed-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 0;
+      border: 0;
+      border-bottom: 1px solid #d6d6d6;
+      background: transparent;
+      box-shadow: none;
+      padding: 2px 0;
+      min-height: 24px;
+      transition: background 0.12s ease, color 0.12s ease, opacity 0.12s ease;
+    }
+
+    .task-item--active {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .task-item--active .chip,
+    .task-item--active .time-of-day,
+    .task-item--active .drag-handle,
+    .task-item--active .btn-remove {
+      color: #d5d5d5;
+    }
+
+    .task-item--upcoming {
+      opacity: 0.45;
+    }
+
+    .task-item.drag-over,
+    #task-list.drag-over {
+      background: #dbdbdb !important;
+    }
+
+    .dragging {
+      opacity: 0.35;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      user-select: none;
+      font-size: 12px;
+      color: #9a9a9a;
+      line-height: 1;
+      width: 12px;
+      text-align: center;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .task-text {
+      flex: 1;
+      min-width: 0;
+      font-size: 29px;
+      font-weight: 600;
+      color: inherit;
+      overflow-wrap: anywhere;
+      letter-spacing: 0.035em;
+      line-height: 1.02;
+    }
+
+    .chip {
+      padding: 0;
+      border-radius: 0;
+      border: 0;
+      background: transparent;
+      color: #a1a1a1;
+      font-size: 13px;
+      white-space: nowrap;
+      width: 80px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .time-of-day {
+      min-width: 56px;
+      text-align: right;
+      color: #7d7d7d;
+      font-size: 13px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .btn-remove {
+      border: 0;
+      background: transparent;
+      color: #8e8e8e;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      padding: 1px 3px;
+      border-radius: 0;
+    }
+
+    .btn-remove:hover {
+      color: var(--danger);
+      background: transparent;
+    }
+
+    .work-main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+
+    .metric {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      padding: 10px;
+      min-height: 92px;
+    }
+
+    .metric-label {
+      margin: 0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      margin: 8px 0 0;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .bonus-value {
+      color: var(--success);
+    }
+
+    .completed-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #296b44;
+      font-size: 12px;
+      min-height: 24px;
+      border-bottom: 1px solid #d5e5db;
+    }
+
+    .missed-caption {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: var(--danger);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .missed-item {
+      border-bottom-color: #dfc3c3;
+      background: transparent;
+      opacity: 1;
+    }
+
+    .missed-text {
+      flex: 1;
+      min-width: 0;
+      font-size: 12px;
+      color: #9f1239;
+    }
+
+    .all-done {
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .all-done h3 {
+      margin: 8px 0 0;
+      font-size: 16px;
+      color: #166534;
+      font-weight: 600;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border: 1px solid #7b7b7b;
+      border-radius: 0;
+      background: transparent;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    input[type="checkbox"]:not(:disabled):hover {
+      border-color: var(--black);
+    }
+
+    input[type="checkbox"]:checked {
+      background: var(--black);
+      border-color: var(--black);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: "✔";
+      position: absolute;
+      top: -2px;
+      left: 1px;
+      font-size: 10px;
+      color: #fff;
+    }
+
+    input[type="checkbox"]:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    @media (max-width: 1200px) {
+      .add-layout,
+      .work-layout {
+        grid-template-columns: 1fr;
+      }
+      .top-nav {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 6px;
+      }
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .field-input {
+        width: 100%;
+      }
+      .task-text {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="top-nav">
+      <div><span>AINO</span></div>
+      <div><span>WORK</span><span>SERVICES</span></div>
+      <div><span>ABOUT</span><span>PLAY</span></div>
+      <div><span>SETTINGS</span></div>
+      <div><span>CONTACT</span></div>
+    </div>
+
+    <div id="add-phase" class="add-layout">
+      <section class="panel panel-primary">
+        <h2 class="title-lg">Projects</h2>
+        <p class="text-subtle">Grid  List</p>
+
+        <div class="field-row">
+          <input type="text" id="task-input" class="field field-input" placeholder="What do you need to do?">
+          <select id="time-select" class="field field-select">
+            <option value="5">5 min</option>
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+          </select>
+          <button class="btn btn-primary" onclick="addTask()">Add</button>
+        </div>
+
+        <ul id="task-list" class="list-stack" style="margin-bottom:14px;"></ul>
+
+        <button id="start-btn" class="btn btn-primary btn-block btn-start-disabled" onclick="startWorking()" disabled>
+          Start Working
+        </button>
+      </section>
+
+      <section class="panel panel-secondary">
+        <h2 class="title-xl" style="font-size:16px;">TO DO LATER</h2>
+
+        <div class="field-row">
+          <input type="text" id="later-input" class="field field-input" placeholder="What to do later?">
+          <select id="later-time-select" class="field field-select">
+            <option value="5">5 min</option>
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+          </select>
+          <button class="btn btn-primary" onclick="addLaterTask()">Add</button>
+        </div>
+
+        <ul id="later-list" class="list-stack"></ul>
+      </section>
+    </div>
+
+    <div id="work-phase" class="work-layout hidden">
+      <aside class="panel panel-primary">
+        <h1 class="title-xl" style="margin-bottom:8px;">Projects</h1>
+        <p id="work-subtitle" class="text-subtle" style="margin:0 0 14px;"></p>
+        <ul id="work-list" class="list-stack"></ul>
+
+        <div id="missed-card" class="hidden" style="margin-top:14px;">
+          <p class="missed-caption">Didn't finish in time</p>
+          <ul id="missed-list" class="list-stack"></ul>
+        </div>
+      </aside>
+
+      <section class="work-main">
+        <div id="detail-card" class="panel panel-secondary">
+          <h2 class="title-lg" style="margin-bottom:12px;">Current Task Details</h2>
+          <div class="detail-grid">
+            <div class="metric">
+              <p class="metric-label">Time Left</p>
+              <p id="detail-time-left" class="metric-value">--:--</p>
+            </div>
+            <div class="metric">
+              <p class="metric-label">Deadline</p>
+              <p id="detail-deadline" class="metric-value">--:--</p>
+            </div>
+            <div class="metric">
+              <p class="metric-label">Bonus</p>
+              <p id="carry-line" class="metric-value bonus-value">+0m 0s</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="completed-card" class="panel panel-success hidden">
+          <ul id="completed-list" class="list-stack"></ul>
+        </div>
+
+        <div id="all-done" class="all-done hidden">
+          <div style="font-size:2.4rem;">🎉</div>
+          <h3>All done! Great work!</h3>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const tasks = [];
+    let workItems = [];
+    let currentIndex = 0;
+    let currentDeadline = null;
+    let countdownInterval = null;
+    let addPhaseDeadlineInterval = null;
+    let carriedForwardSecondsTotal = 0;
+    let dragSrcIndex = null;
+
+    const laterTasks = [];
+
+    function setStartButtonState(enabled) {
+      const btn = document.getElementById('start-btn');
+      btn.disabled = !enabled;
+      btn.classList.toggle('btn-start-disabled', !enabled);
+    }
+
+    function addTask() {
+      const input = document.getElementById('task-input');
+      const select = document.getElementById('time-select');
+      const text = input.value.trim();
+      if (!text) {
+        input.focus();
+        return;
+      }
+
+      tasks.push({ text, minutes: parseInt(select.value, 10) });
+      renderAddList();
+      startAddPhaseDeadlineUpdates();
+      input.value = '';
+      input.focus();
+      setStartButtonState(true);
+    }
+
+    function removeTask(index) {
+      tasks.splice(index, 1);
+      renderAddList();
+      if (tasks.length === 0) {
+        setStartButtonState(false);
+      }
+    }
+
+    function renderAddList() {
+      const ul = document.getElementById('task-list');
+      ul.innerHTML = '';
+
+      tasks.forEach((task, i) => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.draggable = true;
+        li.dataset.index = i;
+        li.innerHTML =
+          `<span class="drag-handle" title="Drag to reorder">⠿</span>` +
+          `<span class="task-text">${escHtml(task.text)}</span>` +
+          `<span class="chip">${task.minutes} min</span>` +
+          `<span class="time-of-day">${formatTimeOfDay(addPhaseDeadlineForTask(i))}</span>` +
+          `<button class="btn-remove" data-remove="${i}" title="Remove">×</button>`;
+
+        li.addEventListener('dragstart', e => {
+          dragSrcIndex = i;
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => li.classList.add('dragging'), 0);
+        });
+
+        li.addEventListener('dragend', () => {
+          li.classList.remove('dragging');
+          ul.querySelectorAll('li').forEach(el => el.classList.remove('drag-over'));
+        });
+
+        li.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          ul.querySelectorAll('li').forEach(el => el.classList.remove('drag-over'));
+          li.classList.add('drag-over');
+        });
+
+        li.addEventListener('dragleave', () => {
+          li.classList.remove('drag-over');
+        });
+
+        li.addEventListener('drop', e => {
+          e.preventDefault();
+          if (dragSrcIndex === null || dragSrcIndex === i) return;
+          const moved = tasks.splice(dragSrcIndex, 1)[0];
+          tasks.splice(i, 0, moved);
+          dragSrcIndex = null;
+          renderAddList();
+        });
+
+        li.querySelector('[data-remove]').addEventListener('click', () => removeTask(parseInt(li.dataset.index, 10)));
+        ul.appendChild(li);
+      });
+    }
+
+    function addPhaseDeadlineForTask(index) {
+      const cumulativeMinutes = tasks
+        .slice(0, index + 1)
+        .reduce((total, task) => total + task.minutes, 0);
+
+      return new Date(Date.now() + cumulativeMinutes * 60000);
+    }
+
+    function startAddPhaseDeadlineUpdates() {
+      if (addPhaseDeadlineInterval || tasks.length === 0) return;
+
+      const refresh = () => {
+        if (!document.getElementById('add-phase').classList.contains('hidden') && tasks.length > 0) {
+          renderAddList();
+        }
+      };
+
+      const now = new Date();
+      const delayUntilNextMinute = ((60 - now.getSeconds()) * 1000) - now.getMilliseconds();
+
+      addPhaseDeadlineInterval = setTimeout(() => {
+        refresh();
+        addPhaseDeadlineInterval = setInterval(refresh, 60000);
+      }, delayUntilNextMinute || 60000);
+    }
+
+    function stopAddPhaseDeadlineUpdates() {
+      if (!addPhaseDeadlineInterval) return;
+      clearTimeout(addPhaseDeadlineInterval);
+      clearInterval(addPhaseDeadlineInterval);
+      addPhaseDeadlineInterval = null;
+    }
+
+    function startWorking() {
+      if (tasks.length === 0) return;
+
+      stopAddPhaseDeadlineUpdates();
+      document.getElementById('add-phase').classList.add('hidden');
+      document.getElementById('work-phase').classList.remove('hidden');
+
+      const startTime = new Date();
+      let scheduledDeadline = new Date(startTime);
+      workItems = tasks.map(task => {
+        scheduledDeadline = new Date(scheduledDeadline.getTime() + task.minutes * 60000);
+        return {
+          text: task.text,
+          fixedDeadline: new Date(scheduledDeadline),
+          completed: false
+        };
+      });
+
+      currentIndex = 0;
+      carriedForwardSecondsTotal = 0;
+
+      document.getElementById('completed-list').innerHTML = '';
+      document.getElementById('completed-card').classList.add('hidden');
+      document.getElementById('missed-list').innerHTML = '';
+      document.getElementById('missed-card').classList.add('hidden');
+      document.getElementById('all-done').classList.add('hidden');
+      updateCarryLine();
+
+      renderWorkList();
+      activateItem(0);
+    }
+
+    function renderWorkList() {
+      const ul = document.getElementById('work-list');
+      ul.innerHTML = '';
+
+      workItems.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.id = `wi-${i}`;
+        li.className = 'task-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `cb-${i}`;
+        checkbox.disabled = true;
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) completeItem(i);
+        });
+
+        const textEl = document.createElement('span');
+        textEl.className = 'task-text';
+        textEl.textContent = item.text;
+
+        li.appendChild(checkbox);
+        li.appendChild(textEl);
+        ul.appendChild(li);
+
+        item.li = li;
+        item.checkbox = checkbox;
+      });
+    }
+
+    function activateItem(index) {
+      if (index >= workItems.length) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        updateWorkSubtitle();
+        document.getElementById('detail-time-left').textContent = '--:--';
+        document.getElementById('all-done').classList.remove('hidden');
+        return;
+      }
+
+      currentIndex = index;
+      const item = workItems[index];
+      currentDeadline = item.fixedDeadline;
+      document.getElementById('detail-deadline').textContent = formatTimeOfDay(currentDeadline);
+
+      item.li.className = 'task-item task-item--active';
+      item.checkbox.disabled = false;
+      updateCarryLine();
+
+      for (let j = index + 1; j < workItems.length; j++) {
+        workItems[j].li.className = 'task-item task-item--upcoming';
+        workItems[j].checkbox.disabled = true;
+      }
+
+      updateWorkSubtitle();
+
+      if (countdownInterval) clearInterval(countdownInterval);
+      tickCountdown(item);
+      countdownInterval = setInterval(() => tickCountdown(item), 1000);
+    }
+
+    function tickCountdown(item) {
+      const diff = currentDeadline - new Date();
+
+      if (diff <= 0) {
+        clearInterval(countdownInterval);
+        item.checkbox.checked = false;
+        item.checkbox.disabled = true;
+        moveMissedItem(item);
+        setTimeout(() => activateItem(currentIndex + 1), 1200);
+        return;
+      }
+
+      const secsLeft = Math.floor(diff / 1000);
+      const m = Math.floor(secsLeft / 60);
+      const s = secsLeft % 60;
+      document.getElementById('detail-time-left').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function completeItem(index) {
+      if (index !== currentIndex) return;
+      clearInterval(countdownInterval);
+
+      const remaining = currentDeadline - new Date();
+      const bonusSeconds = remaining > 0 ? Math.floor(remaining / 1000) : 0;
+      carriedForwardSecondsTotal += bonusSeconds;
+
+      const item = workItems[index];
+      item.completed = true;
+      item.checkbox.disabled = true;
+      moveItemToCompletedCard(item);
+      updateWorkSubtitle();
+
+      setTimeout(() => activateItem(currentIndex + 1), 1200);
+    }
+
+    function moveMissedItem(item) {
+      if (item.li && item.li.parentNode) {
+        item.li.parentNode.removeChild(item.li);
+      }
+
+      const missedCard = document.getElementById('missed-card');
+      const list = document.getElementById('missed-list');
+      const li = document.createElement('li');
+      li.className = 'missed-item';
+      li.innerHTML =
+        `<span class="chip" style="color:#9f1239;border-color:rgba(207,64,72,0.35);">✕</span>` +
+        `<span class="missed-text">${escHtml(item.text)}</span>` +
+        `<span class="time-of-day" style="color:#9f1239;">${formatTimeOfDay(item.fixedDeadline)}</span>`;
+      list.appendChild(li);
+      missedCard.classList.remove('hidden');
+    }
+
+    function moveItemToCompletedCard(item) {
+      const list = document.getElementById('completed-list');
+      const li = document.createElement('li');
+      li.className = 'completed-item';
+      li.innerHTML = `<span>✔</span><span>${escHtml(item.text)}</span>`;
+      list.appendChild(li);
+
+      document.getElementById('completed-card').classList.remove('hidden');
+      if (item.li && item.li.parentNode) {
+        item.li.parentNode.removeChild(item.li);
+      }
+    }
+
+    function updateWorkSubtitle() {
+      const totalTasks = workItems.length;
+      const shownTask = Math.min(currentIndex + 1, totalTasks);
+      document.getElementById('work-subtitle').textContent = `Task ${shownTask} of ${totalTasks}`;
+    }
+
+    function formatCarryTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `+${minutes}m ${seconds}s`;
+    }
+
+    function updateCarryLine() {
+      document.getElementById('carry-line').textContent = formatCarryTime(carriedForwardSecondsTotal);
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatTimeOfDay(date) {
+      return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+    }
+
+    function addLaterTask() {
+      const input = document.getElementById('later-input');
+      const select = document.getElementById('later-time-select');
+      const text = input.value.trim();
+      if (!text) {
+        input.focus();
+        return;
+      }
+
+      laterTasks.push({ text, minutes: parseInt(select.value, 10) });
+      saveLaterTasks();
+      renderLaterList();
+      input.value = '';
+      input.focus();
+    }
+
+    function removeLaterTask(index) {
+      laterTasks.splice(index, 1);
+      saveLaterTasks();
+      renderLaterList();
+    }
+
+    function saveLaterTasks() {
+      localStorage.setItem('laterTasks', JSON.stringify(laterTasks));
+    }
+
+    function loadLaterTasks() {
+      const saved = localStorage.getItem('laterTasks');
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          laterTasks.splice(0, laterTasks.length, ...parsed);
+        }
+      } catch (error) {
+        localStorage.removeItem('laterTasks');
+      }
+    }
+
+    function renderLaterList() {
+      const ul = document.getElementById('later-list');
+      ul.innerHTML = '';
+
+      laterTasks.forEach((task, i) => {
+        const li = document.createElement('li');
+        li.className = 'later-item';
+        li.draggable = true;
+        li.dataset.laterIndex = i;
+        li.innerHTML =
+          `<span class="drag-handle" title="Drag to Today's list">⠿</span>` +
+          `<span class="task-text">${escHtml(task.text)}</span>` +
+          `<span class="chip">${task.minutes} min</span>` +
+          `<button class="btn-remove" data-later-remove="${i}" title="Remove">×</button>`;
+
+        li.addEventListener('dragstart', e => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('laterIndex', i);
+          setTimeout(() => li.classList.add('dragging'), 0);
+        });
+
+        li.addEventListener('dragend', () => {
+          li.classList.remove('dragging');
+          document.getElementById('task-list').classList.remove('drag-over');
+        });
+
+        li.querySelector('[data-later-remove]').addEventListener('click', () => removeLaterTask(parseInt(li.dataset.laterIndex, 10)));
+        ul.appendChild(li);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const taskList = document.getElementById('task-list');
+
+      taskList.addEventListener('dragover', e => {
+        const laterIndex = e.dataTransfer.getData('laterIndex');
+        if (laterIndex !== null && laterIndex !== '') {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          taskList.classList.add('drag-over');
+        }
+      });
+
+      taskList.addEventListener('dragleave', () => {
+        taskList.classList.remove('drag-over');
+      });
+
+      taskList.addEventListener('drop', e => {
+        const laterIndex = e.dataTransfer.getData('laterIndex');
+        if (laterIndex !== null && laterIndex !== '') {
+          e.preventDefault();
+          const idx = parseInt(laterIndex, 10);
+          const task = laterTasks[idx];
+          if (task) {
+            tasks.push(task);
+            laterTasks.splice(idx, 1);
+            saveLaterTasks();
+            renderAddList();
+            renderLaterList();
+            startAddPhaseDeadlineUpdates();
+            setStartButtonState(true);
+          }
+          taskList.classList.remove('drag-over');
+        }
+      });
+
+      document.getElementById('task-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') addTask();
+      });
+
+      document.getElementById('later-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') addLaterTask();
+      });
+
+      loadLaterTasks();
+      renderLaterList();
+      setStartButtonState(false);
+    });
+  </script>
+</body>
+</html>
