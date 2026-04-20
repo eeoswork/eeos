@@ -153,6 +153,122 @@ const GOALS = [
 "Support employee wellbeing"
 ];
 
+const FOCUS_SERIES_EVENT_ID = "focus_series";
+
+const FOCUS_SERIES_TEMPLATES = {
+  start_before_ready: {
+    id: "start_before_ready",
+    emoji: "🌱",
+    title: "Start Before You're Ready",
+    shortDescription: "Lower the barrier to action and just begin.",
+    slackCopy: [
+      "🌱 Start Before You're Ready (Async)",
+      "",
+      "What have you been putting off because you're not \"ready\" yet?",
+      "",
+      "Today, just start.",
+      "",
+      "How it works:",
+      "1. Comment what you'll start",
+      "2. Spend 20 minutes making progress",
+      "3. Reply with your result:",
+      "   - ✅ Started",
+      "   - ⚠️ Tried but stuck",
+      "   - ❌ Didn't start",
+      "   + 1 sentence on what happened",
+      "",
+      "Bonus: React to 2 others for accountability 👀🔥",
+      "",
+      "What are you starting today? 👇"
+    ].join("\n")
+  },
+  one_hard_thing: {
+    id: "one_hard_thing",
+    emoji: "🧠",
+    title: "One Hard Thing",
+    shortDescription: "Tackle the thing you've been avoiding.",
+    slackCopy: [
+      "🧠 One Hard Thing (Async)",
+      "",
+      "What's the one thing you've been avoiding?",
+      "",
+      "Today, take it on.",
+      "",
+      "How it works:",
+      "1. Comment the ONE hard thing you'll tackle",
+      "2. Work on it (aim for at least 30-60 min)",
+      "3. Reply with your result:",
+      "   - ✅ Done",
+      "   - ⚠️ Partial",
+      "   - ❌ Didn't start",
+      "   + 1 sentence on what happened",
+      "",
+      "Bonus: React to 2 others for accountability 👀🔥",
+      "",
+      "Drop your hard thing below 👇"
+    ].join("\n")
+  },
+  ship_something_today: {
+    id: "ship_something_today",
+    emoji: "🚀",
+    title: "Ship Something Today",
+    shortDescription: "Drive completion and visible output.",
+    slackCopy: [
+      "🚀 Ship Something Today (Async)",
+      "",
+      "Today is about finishing and putting something out into the world-small and imperfect is fine.",
+      "",
+      "How it works:",
+      "1. Comment what you will ship today",
+      "2. Do the work",
+      "3. Reply with your result:",
+      "   - ✅ Done (share it if you can)",
+      "   - ⚠️ Partial",
+      "   - ❌ Didn't start",
+      "   + 1 sentence on what happened",
+      "",
+      "Bonus: React to 2 others for accountability 👀🔥",
+      "",
+      "What are you shipping today? 👇"
+    ].join("\n")
+  }
+};
+
+const FOCUS_SERIES_TEMPLATE_ORDER = [
+  "start_before_ready",
+  "one_hard_thing",
+  "ship_something_today"
+];
+
+const FOCUS_SERIES_FOLLOW_UP_MAP = {
+  start_before_ready: ["one_hard_thing", "ship_something_today"],
+  one_hard_thing: ["ship_something_today", "start_before_ready"],
+  ship_something_today: ["one_hard_thing", "start_before_ready"]
+};
+
+function getFocusSeriesFollowUps(dayOneId = "") {
+  const normalized = String(dayOneId || "").trim();
+  const followUpIds = FOCUS_SERIES_FOLLOW_UP_MAP[normalized] || [];
+  return [
+    { label: "Tomorrow", template: FOCUS_SERIES_TEMPLATES[followUpIds[0]] || null },
+    { label: "Next day", template: FOCUS_SERIES_TEMPLATES[followUpIds[1]] || null }
+  ].filter((item) => item.template);
+}
+
+function trackAdminSlackEventPicker(eventPayload = {}) {
+  try {
+    if (!window.__adminSlackEventPickerAnalytics) {
+      window.__adminSlackEventPickerAnalytics = [];
+    }
+    window.__adminSlackEventPickerAnalytics.push({
+      at: new Date().toISOString(),
+      ...eventPayload
+    });
+  } catch (_error) {
+    // no-op analytics fallback
+  }
+}
+
 const LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS = new Set(["In-person", "Hybrid"]);
 
 const US_CITY_AUTOCOMPLETE_DATA = [
@@ -626,6 +742,15 @@ function getSidebarWorkflowStepConfig(workflowType = getActiveWorkflowType()) {
 function getEventWorkflowConfig(eventLike = {}) {
   const templateId = String(eventLike?.templateId || eventLike?.id || "").trim().toLowerCase();
   const title = String(eventLike?.title || eventLike?.name || "").trim().toLowerCase();
+  if (templateId === FOCUS_SERIES_EVENT_ID) {
+    return {
+      workflowType: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+      allowDirectBookOverride: true,
+      pollVariant: "event-and-datetime",
+      hasPoll: false,
+      hasRsvp: false
+    };
+  }
   if (isRevelryLabsReadOnlyMagicLink() && (templateId === "march-madness" || title === "march madness bracket challenge")) {
     return {
       workflowType: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
@@ -1596,6 +1721,18 @@ function getSeededFreeEventTemplates() {
       eventLocationType: "virtual"
     },
     {
+      id: "focus_series",
+      templateId: "focus_series",
+      title: "Focus Series",
+      description: "An async 3-day Slack prompt series to build momentum and completion.",
+      type: "rsvp",
+      workflowType: "straight-to-promote",
+      costPerPerson: 0,
+      estimatedCost: 0,
+      url: "",
+      eventLocationType: "virtual"
+    },
+    {
       id: "wind_down",
       templateId: "wind_down",
       title: "Wind Down",
@@ -1882,6 +2019,14 @@ promoteEvent: {
   ics: {
     generated: false,
     lastGeneratedAt: ""
+  },
+  focusSeries: {
+    expandedEvent: "",
+    committedDayOne: "",
+    copiedFollowUpIds: [],
+    copyFallbackMessage: "",
+    copyFallbackText: "",
+    upsellViewed: false
   }
 },
 setupStepDirty: {},
@@ -3245,6 +3390,19 @@ function normalizePromoteEventState() {
   }
   if (typeof promote.ics.generated !== "boolean") promote.ics.generated = false;
   if (typeof promote.ics.lastGeneratedAt !== "string") promote.ics.lastGeneratedAt = "";
+
+  if (!promote.focusSeries || typeof promote.focusSeries !== "object") {
+    promote.focusSeries = {};
+  }
+  if (typeof promote.focusSeries.expandedEvent !== "string") promote.focusSeries.expandedEvent = "";
+  if (typeof promote.focusSeries.committedDayOne !== "string") promote.focusSeries.committedDayOne = "";
+  if (!Array.isArray(promote.focusSeries.copiedFollowUpIds)) promote.focusSeries.copiedFollowUpIds = [];
+  promote.focusSeries.copiedFollowUpIds = promote.focusSeries.copiedFollowUpIds
+    .map((id) => String(id || "").trim())
+    .filter((id) => Boolean(FOCUS_SERIES_TEMPLATES[id]));
+  if (typeof promote.focusSeries.copyFallbackMessage !== "string") promote.focusSeries.copyFallbackMessage = "";
+  if (typeof promote.focusSeries.copyFallbackText !== "string") promote.focusSeries.copyFallbackText = "";
+  if (typeof promote.focusSeries.upsellViewed !== "boolean") promote.focusSeries.upsellViewed = false;
 }
 
 function enforceRevelryLeaderboardLockState() {
@@ -14262,18 +14420,26 @@ function renderPromoteEventStep() {
   const isMagicLinkContext = Boolean(parseMagicLinkFromHostPath());
   const allowTestingStepNavigation = Boolean(getActiveTestingMagicContext());
   const isRevelryLeaderboardLock = !allowTestingStepNavigation && isRevelryBracketsMagicContext() && Boolean(state.revelryLeaderboardLockArmed);
+  const selectedTemplateId = String(state.pollBuilder?.chosenEventId || bookedEvent?.templateId || bookedEvent?.id || "").trim().toLowerCase();
+  const isFocusSeriesEvent = selectedTemplateId === FOCUS_SERIES_EVENT_ID || String(eventName || "").trim().toLowerCase() === "focus series";
   const isMarchMadnessEvent = isRevelryBracketsMagicContext() || String(eventName || "").trim().toLowerCase() === "march madness bracket challenge";
   const headerOverrideStep = String(promote.activeStep || "").trim();
   const shouldUseMarchMadnessHeaderCopy = isMagicLinkContext
     && isMarchMadnessEvent
     && (headerOverrideStep === "reminder_dayof" || headerOverrideStep === "reminder_dayof_2" || headerOverrideStep === "final_winner");
-  const promoteHeaderTitle = shouldUseMarchMadnessHeaderCopy
+  const promoteHeaderTitle = isFocusSeriesEvent
+    ? "Focus Series"
+    : shouldUseMarchMadnessHeaderCopy
     ? "March Madness Bracket Challenge"
     : "Promote Event";
-  const promoteHeaderDescription = shouldUseMarchMadnessHeaderCopy
+  const promoteHeaderDescription = isFocusSeriesEvent
+    ? "Pick and copy the right async Slack prompt with progressive disclosure."
+    : shouldUseMarchMadnessHeaderCopy
     ? ""
     : "Let Revelers know the bracket challenge is live, and keep the excitement going throughout the tournament with weekly leaderboard updates.";
-  const promoteHeaderSummary = shouldUseMarchMadnessHeaderCopy
+  const promoteHeaderSummary = isFocusSeriesEvent
+    ? "Admin Slack Event Picker"
+    : shouldUseMarchMadnessHeaderCopy
     ? "March 19 - April 7"
     : eventSummary;
   const promoteHeaderDescriptionStyle = shouldUseMarchMadnessHeaderCopy
@@ -14491,7 +14657,106 @@ function renderPromoteEventStep() {
     ].join("\r\n");
   };
 
-  const processSteps = (isMagicLinkContext && isMarchMadnessEvent)
+  const renderFocusSeriesAnnouncementBody = () => {
+    const focusState = promote.focusSeries || {};
+    const expandedEvent = String(focusState.expandedEvent || "").trim();
+    const committedDayOne = String(focusState.committedDayOne || "").trim();
+    const copiedFollowUpIds = Array.isArray(focusState.copiedFollowUpIds)
+      ? focusState.copiedFollowUpIds.map((id) => String(id || "").trim())
+      : [];
+    const followUps = committedDayOne ? getFocusSeriesFollowUps(committedDayOne) : [];
+    const dayOneTemplate = committedDayOne ? FOCUS_SERIES_TEMPLATES[committedDayOne] : null;
+    const pickerCardsHtml = FOCUS_SERIES_TEMPLATE_ORDER.map((eventId) => {
+      const template = FOCUS_SERIES_TEMPLATES[eventId];
+      if (!template) return "";
+      const isExpanded = expandedEvent === eventId;
+      return `
+        <article class="rounded-2xl border ${isExpanded ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white hover:border-slate-400"} p-4 transition-all">
+          <button type="button" data-promote-action="focus-series-expand" data-event-id="${eventId}" class="w-full text-left">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-base font-semibold text-slate-900">${template.emoji} ${escapeHtml(template.title)}</div>
+                <div class="mt-1 text-sm text-slate-600">${escapeHtml(template.shortDescription)}</div>
+              </div>
+              <div class="text-lg font-semibold text-slate-400">${isExpanded ? "-" : "+"}</div>
+            </div>
+          </button>
+          ${isExpanded ? `
+            <div class="mt-4 border-t border-slate-200 pt-4">
+              <div class="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-700" style="white-space: pre-wrap;">${escapeHtml(template.slackCopy)}</div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button type="button" data-promote-action="focus-series-copy-day1" data-event-id="${eventId}" class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">Copy Slack Post</button>
+                ${promoteUiState.copiedAction === `focus-series-copy-day1-${eventId}` ? `<span class="text-sm font-medium text-emerald-600">Copied to clipboard</span>` : ""}
+              </div>
+              ${focusState.copyFallbackMessage && focusState.copyFallbackText ? `
+                <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  ${escapeHtml(focusState.copyFallbackMessage)}
+                </div>
+                <textarea readonly class="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3 text-xs text-slate-700" rows="8">${escapeHtml(focusState.copyFallbackText)}</textarea>
+              ` : ""}
+            </div>
+          ` : ""}
+        </article>
+      `;
+    }).join("");
+
+    const dayOneBannerHtml = dayOneTemplate
+      ? `
+      <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="text-sm font-semibold text-slate-900">Day 1 selected</div>
+            <div class="text-sm text-slate-600">You copied: ${escapeHtml(dayOneTemplate.title)}</div>
+          </div>
+          <button type="button" data-promote-action="focus-series-start-over" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">Start over</button>
+        </div>
+      </div>
+      `
+      : "";
+
+    const followUpHtml = dayOneTemplate
+      ? `
+      <section class="mt-5">
+        <h5 class="text-lg font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
+        <p class="mt-1 text-sm text-slate-600">You've already posted Day 1. Here are the next two prompts to use over the next two days.</p>
+        <div class="mt-3 space-y-3">
+          ${followUps.map((item) => {
+            const template = item.template;
+            const alreadyCopied = copiedFollowUpIds.includes(template.id);
+            return `
+              <article class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">${escapeHtml(item.label)}</div>
+                    <div class="mt-1 text-sm font-semibold text-slate-900">${template.emoji} ${escapeHtml(template.title)}</div>
+                    <div class="text-sm text-slate-600">${escapeHtml(template.shortDescription)}</div>
+                  </div>
+                  <button type="button" data-promote-action="focus-series-copy-followup" data-event-id="${template.id}" data-day-label="${escapeHtml(item.label)}" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">${alreadyCopied ? "Copied" : "Copy Slack Post"}</button>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+      `
+      : "";
+
+    return `
+      <div class="mt-2">
+        <h5 class="text-lg font-semibold text-slate-900">Pick the event that feels right for your team today</h5>
+        <p class="mt-1 text-sm text-slate-600">Choose one option to preview the full Slack post.</p>
+      </div>
+      <div class="mt-4 space-y-3">${pickerCardsHtml}</div>
+      ${dayOneBannerHtml}
+      ${followUpHtml}
+    `;
+  };
+
+  const processSteps = isFocusSeriesEvent
+    ? [
+        { key: "announcement", label: "Slack prompt", title: "Admin Slack Event Picker" }
+      ]
+    : (isMagicLinkContext && isMarchMadnessEvent)
     ? [
         { key: "announcement", label: "Announcement", title: "Announcement" },
         { key: "reminder_week", label: "Signup Reminder", title: "Signup Reminder" }
@@ -14639,6 +14904,17 @@ function renderPromoteEventStep() {
     }
 
     if (stepKey === "announcement") {
+      if (isFocusSeriesEvent) {
+        return `
+          ${renderFocusSeriesAnnouncementBody()}
+          <div class="mt-4 flex items-center justify-end gap-3">
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" data-promote-complete="announcement" class="h-4 w-4 rounded border-slate-300" ${doneFlags.announcement ? "checked" : ""} />
+              <span>Day 1 post shared in Slack</span>
+            </label>
+          </div>
+        `;
+      }
       if (isMagicLinkContext && isMarchMadnessEvent) {
         const useEmail = promoteUiState.announcementChannel === "email";
         const isAnnouncementReadOnly = isRevelryBracketsPromoteFlow && Boolean(promote.announcementLockedAfterContinue);
@@ -14952,8 +15228,10 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   const copyToClipboard = async (text) => {
     try {
       await writeClipboardMessage(String(text || ""));
+      return true;
     } catch (error) {
       console.warn("Clipboard copy failed", error?.message || error);
+      return false;
     }
   };
 
@@ -15053,10 +15331,102 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
   });
 
   panel.querySelectorAll("[data-promote-action]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       const action = String(button.getAttribute("data-promote-action") || "");
+      if (action === "focus-series-expand") {
+        const eventId = String(button.getAttribute("data-event-id") || "").trim();
+        if (!FOCUS_SERIES_TEMPLATES[eventId]) return;
+        state.promoteEvent.focusSeries.expandedEvent = eventId;
+        state.promoteEvent.focusSeries.copyFallbackMessage = "";
+        state.promoteEvent.focusSeries.copyFallbackText = "";
+        trackAdminSlackEventPicker({ name: "admin_event_expanded", eventType: eventId });
+        persistState();
+        renderPromoteEventStep();
+        return;
+      }
+      if (action === "focus-series-copy-day1") {
+        const eventId = String(button.getAttribute("data-event-id") || "").trim();
+        const template = FOCUS_SERIES_TEMPLATES[eventId];
+        if (!template) return;
+        const copied = await copyToClipboard(template.slackCopy);
+        if (!copied) {
+          state.promoteEvent.focusSeries.copyFallbackMessage = "Couldn't copy automatically. Select and copy manually below.";
+          state.promoteEvent.focusSeries.copyFallbackText = template.slackCopy;
+          persistState();
+          renderPromoteEventStep();
+          return;
+        }
+        state.promoteEvent.focusSeries.committedDayOne = eventId;
+        state.promoteEvent.focusSeries.copyFallbackMessage = "";
+        state.promoteEvent.focusSeries.copyFallbackText = "";
+        state.promoteEvent.focusSeries.copiedFollowUpIds = [];
+        trackAdminSlackEventPicker({ name: "admin_event_day1_copied", eventType: eventId });
+        if (!state.promoteEvent.focusSeries.upsellViewed) {
+          state.promoteEvent.focusSeries.upsellViewed = true;
+          trackAdminSlackEventPicker({ name: "admin_series_upsell_viewed", dayOneEventType: eventId });
+        }
+        promoteUiState.copiedAction = `focus-series-copy-day1-${eventId}`;
+        persistState();
+        renderPromoteEventStep();
+        setTimeout(() => {
+          promoteUiState.copiedAction = null;
+          renderPromoteEventStep();
+        }, 3000);
+        return;
+      }
+      if (action === "focus-series-copy-followup") {
+        const eventId = String(button.getAttribute("data-event-id") || "").trim();
+        const dayLabel = String(button.getAttribute("data-day-label") || "").trim() || "Tomorrow";
+        const committedDayOne = String(state.promoteEvent.focusSeries.committedDayOne || "").trim();
+        const template = FOCUS_SERIES_TEMPLATES[eventId];
+        if (!template || !committedDayOne) return;
+        const copied = await copyToClipboard(template.slackCopy);
+        if (!copied) {
+          state.promoteEvent.focusSeries.copyFallbackMessage = "Couldn't copy automatically. Select and copy manually below.";
+          state.promoteEvent.focusSeries.copyFallbackText = template.slackCopy;
+          persistState();
+          renderPromoteEventStep();
+          return;
+        }
+        const existing = Array.isArray(state.promoteEvent.focusSeries.copiedFollowUpIds)
+          ? state.promoteEvent.focusSeries.copiedFollowUpIds.map((id) => String(id || "").trim())
+          : [];
+        if (!existing.includes(eventId)) existing.push(eventId);
+        state.promoteEvent.focusSeries.copiedFollowUpIds = existing;
+        state.promoteEvent.focusSeries.copyFallbackMessage = "";
+        state.promoteEvent.focusSeries.copyFallbackText = "";
+        trackAdminSlackEventPicker({
+          name: "admin_series_followup_copied",
+          dayOneEventType: committedDayOne,
+          followUpEventType: eventId,
+          dayLabel
+        });
+        promoteUiState.copiedAction = `focus-series-copy-followup-${eventId}`;
+        persistState();
+        renderPromoteEventStep();
+        setTimeout(() => {
+          promoteUiState.copiedAction = null;
+          renderPromoteEventStep();
+        }, 3000);
+        return;
+      }
+      if (action === "focus-series-start-over") {
+        const previousDayOne = String(state.promoteEvent.focusSeries.committedDayOne || "").trim();
+        if (previousDayOne) {
+          trackAdminSlackEventPicker({ name: "admin_series_reset", previousDayOneEventType: previousDayOne });
+        }
+        state.promoteEvent.focusSeries.expandedEvent = "";
+        state.promoteEvent.focusSeries.committedDayOne = "";
+        state.promoteEvent.focusSeries.copiedFollowUpIds = [];
+        state.promoteEvent.focusSeries.copyFallbackMessage = "";
+        state.promoteEvent.focusSeries.copyFallbackText = "";
+        state.promoteEvent.focusSeries.upsellViewed = false;
+        persistState();
+        renderPromoteEventStep();
+        return;
+      }
       if (action === "copy-emails") {
-        copyToClipboard(attendeeEmails.join(", "));
+        await copyToClipboard(attendeeEmails.join(", "));
         return;
       }
       if (action === "download-ics") {
@@ -15076,15 +15446,15 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         return;
       }
       if (action === "copy-invite") {
-        copyToClipboard(inviteMessage);
+        await copyToClipboard(inviteMessage);
         return;
       }
       if (action === "copy-announcement") {
         if (isMagicLinkContext && isMarchMadnessEvent) {
           const useEmail = promoteUiState.announcementChannel === "email";
-          copyToClipboard(useEmail ? marchMadnessAnnouncementEmailMessage : marchMadnessAnnouncementSlackMessage);
+          await copyToClipboard(useEmail ? marchMadnessAnnouncementEmailMessage : marchMadnessAnnouncementSlackMessage);
         } else {
-          copyToClipboard(announcementMessage);
+          await copyToClipboard(announcementMessage);
         }
         promoteUiState.copiedAction = "copy-announcement";
         renderPromoteEventStep();
@@ -15092,7 +15462,7 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
         return;
       }
       if (action === "copy-announcement-subject") {
-        copyToClipboard("Join the Revelry March Madness Bracket Challenge 🏀");
+        await copyToClipboard("Join the Revelry March Madness Bracket Challenge 🏀");
         promoteUiState.copiedAction = "copy-announcement-subject";
         renderPromoteEventStep();
         setTimeout(() => { promoteUiState.copiedAction = null; renderPromoteEventStep(); }, 3000);
@@ -15125,9 +15495,9 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       }
       if (action === "copy-reminder-week") {
         if (isRevelryBracketsPromoteFlow) {
-          copyToClipboard(marchMadnessSignupReminderMessage);
+          await copyToClipboard(marchMadnessSignupReminderMessage);
         } else {
-          copyToClipboard(reminderWeekMessage);
+          await copyToClipboard(reminderWeekMessage);
         }
         promoteUiState.copiedAction = "copy-reminder-week";
         renderPromoteEventStep();
@@ -15136,9 +15506,9 @@ P.S. Extra bragging rights to the Reveler with the best bracket name.</div>
       }
       if (action === "copy-reminder-dayof") {
         if (isRevelryBracketsPromoteFlow) {
-          copyToClipboard(marchMadnessWeeklyLeaderboardMessage);
+          await copyToClipboard(marchMadnessWeeklyLeaderboardMessage);
         } else {
-          copyToClipboard(reminderDayOfMessage);
+          await copyToClipboard(reminderDayOfMessage);
         }
         promoteUiState.copiedAction = "copy-reminder-dayof";
         renderPromoteEventStep();

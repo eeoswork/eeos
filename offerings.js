@@ -857,6 +857,51 @@
     "type": "rsvp"
   },
   {
+    "id": "focus_series",
+    "title": "Focus Series",
+    "description": "Three-day async Slack series: Start Before You're Ready, One Hard Thing, and Ship Something Today",
+    "category": "one_off",
+    "deliveryMode": "async_slack",
+    "formatCapability": "async_slack",
+    "day": "Any",
+    "timeSlot": "Any",
+    "includeWeekends": false,
+    "costPerPerson": 0,
+    "durationMinutes": null,
+    "maxParticipants": null,
+    "goals": [
+      "Improve employee performance"
+    ],
+    "goalKeys": [
+      "employee_performance"
+    ],
+    "interestCategories": [
+      "Learning events"
+    ],
+    "interestKeys": [
+      "learning_events"
+    ],
+    "energyLevel": "medium",
+    "interactionLevel": "high",
+    "popularityScore": 90,
+    "registrationRequired": false,
+    "instructions": "",
+    "vendorName": "",
+    "vendorUrl": "",
+    "registrationLink": "",
+    "location": {
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "remoteCompatible": true,
+    "inPersonOnly": false,
+    "adminLoad": "week_of_slack_posts",
+    "workflowType": "rsvp",
+    "type": "rsvp"
+  },
+  {
     "id": "green_light_new_orleans",
     "title": "Green Light New Orleans",
     "description": "Volunteer outing preparing rain barrels for Green Light",
@@ -5268,11 +5313,11 @@
   }
 ];
   window.EVENT_OFFERINGS_META = {
-  "generatedAt": "2026-04-13T18:48:06.583Z",
+  "generatedAt": "2026-04-20T20:12:42.244Z",
   "minPopularityScore": 60,
   "report": {
-    "totalRows": 130,
-    "acceptedRows": 117,
+    "totalRows": 131,
+    "acceptedRows": 118,
     "rejectedRows": 12,
     "rejectedByReason": {
       "popularity below threshold (60)": 12
