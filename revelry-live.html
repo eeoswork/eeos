@@ -342,7 +342,6 @@ function render() {
   if (!state.selectedDayOneId) {
     const cardsHtml = DAY_ONE_ORDER.map((id) => renderCollapsedChoiceCard(FOCUS_SERIES_EVENTS[id])).join("");
     root.innerHTML = `
-      <div class="text-sm text-slate-600 mb-4">Choose one async event to post in Slack.  Create a shared, cross-department moment of focus and accountability—on everyone's own time.</div>
       <div class="space-y-3">${cardsHtml}</div>
     `;
   } else {
