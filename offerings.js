@@ -859,7 +859,7 @@
   {
     "id": "focus_series",
     "title": "Focus Series",
-    "description": "Three-day async Slack series: Start Before You're Ready, One Hard Thing, and Ship Something Today",
+    "description": "Build team focus and execution momentum",
     "category": "one_off",
     "deliveryMode": "async_slack",
     "formatCapability": "async_slack",
@@ -897,7 +897,7 @@
     },
     "remoteCompatible": true,
     "inPersonOnly": false,
-    "adminLoad": "week_of_slack_posts",
+    "adminLoad": "one_slack_post",
     "workflowType": "rsvp",
     "type": "rsvp"
   },
@@ -5313,7 +5313,7 @@
   }
 ];
   window.EVENT_OFFERINGS_META = {
-  "generatedAt": "2026-04-20T20:12:42.244Z",
+  "generatedAt": "2026-04-20T20:23:11.644Z",
   "minPopularityScore": 60,
   "report": {
     "totalRows": 131,
