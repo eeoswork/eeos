@@ -171,8 +171,8 @@
     <main class="main-scroll">
       <div class="page-wrap">
         <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">Focus Series</h4>
-          <p class="mt-1 text-sm text-slate-600">Use this 3-day async Slack sequence to build team focus and execution momentum.</p>
+          <h4 class="text-base font-semibold text-slate-900">What feels right for your team today?</h4>
+          <p class="mt-1 text-sm text-slate-600">Choose one async event to launch in Slack today.</p>
           <div id="stepsRoot" class="mt-5 space-y-3"></div>
         </article>
       </div>
@@ -182,9 +182,9 @@
 <script>
 const STORAGE_KEY = "revelryLive.focusSeriesLaunchState";
 const DAY_ONE_ORDER = [
-  "start_before_ready",
   "one_hard_thing",
-  "ship_something_today"
+  "ship_something_today",
+  "start_before_ready"
 ];
 
 const FOCUS_SERIES_EVENTS = {
@@ -192,7 +192,7 @@ const FOCUS_SERIES_EVENTS = {
     id: "start_before_ready",
     emoji: "🌱",
     title: "Start Before You're Ready",
-    shortDescription: "Lower the barrier to action and just begin.",
+    shortDescription: "Help the team turn \"I'll do it later\" into real progress.",
     scheduleHint: "Schedule this post for today",
     plainMessage: `🌱 Start Before You're Ready (Async)\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start\n2. Spend 20 minutes making progress\n3. Reply with your result:\n   - ✅ Started\n   - ⚠️ Tried but stuck\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👇`,
     htmlMessage: `🌱 Start Before You're Ready (Async)<br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start<br>2. Spend 20 minutes making progress<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Started<br>&nbsp;&nbsp;&nbsp;- ⚠️ Tried but stuck<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👇`
@@ -201,7 +201,7 @@ const FOCUS_SERIES_EVENTS = {
     id: "one_hard_thing",
     emoji: "🧠",
     title: "One Hard Thing",
-    shortDescription: "Tackle the thing you've been avoiding.",
+    shortDescription: "Help the team tackle the thing they've been avoiding.",
     scheduleHint: "Schedule this post for tomorrow",
     plainMessage: `🧠 One Hard Thing (Async)\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle\n2. Work on it (aim for at least 30-60 min)\n3. Reply with your result:\n   - ✅ Done\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nDrop your hard thing below 👇`,
     htmlMessage: `🧠 One Hard Thing (Async)<br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle<br>2. Work on it (aim for at least 30-60 min)<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>Drop your hard thing below 👇`
@@ -210,7 +210,7 @@ const FOCUS_SERIES_EVENTS = {
     id: "ship_something_today",
     emoji: "🚀",
     title: "Ship Something Today",
-    shortDescription: "Drive completion and visible output.",
+    shortDescription: "Help the team feel the sense of achievement.",
     scheduleHint: "Schedule this post for the next day",
     plainMessage: `🚀 Ship Something Today (Async)\n\nToday is about finishing and putting something out into the world-small and imperfect is fine.\n\nHow it works:\n1. Comment what you will ship today\n2. Do the work\n3. Reply with your result:\n   - ✅ Done (share it if you can)\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👇`,
     htmlMessage: `🚀 Ship Something Today (Async)<br><br>Today is about finishing and putting something out into the world-small and imperfect is fine.<br><br>How it works:<br>1. Comment what you will ship today<br>2. Do the work<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done (share it if you can)<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👇`
@@ -342,7 +342,7 @@ function render() {
   if (!state.selectedDayOneId) {
     const cardsHtml = DAY_ONE_ORDER.map((id) => renderCollapsedChoiceCard(FOCUS_SERIES_EVENTS[id])).join("");
     root.innerHTML = `
-      <div class="text-sm text-slate-600 mb-4">Choose one mini-challenge to launch today.</div>
+      <div class="text-sm text-slate-600 mb-4">Choose one async event to launch in Slack today.</div>
       <div class="space-y-3">${cardsHtml}</div>
     `;
   } else {
