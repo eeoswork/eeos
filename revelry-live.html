@@ -171,8 +171,8 @@
     <main class="main-scroll">
       <div class="page-wrap">
         <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">5-Day Energy Reset Challenge</h4>
-          <p class="mt-1 text-sm text-slate-600">This challenge includes a series of daily Slack messages. Just copy and paste each one below and schedule it for the appropriate day.</p>
+          <h4 class="text-base font-semibold text-slate-900">Focus Series</h4>
+          <p class="mt-1 text-sm text-slate-600">Use this 3-day async Slack sequence to build team focus and execution momentum.</p>
           <div id="stepsRoot" class="mt-5 space-y-3"></div>
         </article>
       </div>
@@ -180,64 +180,46 @@
   </div>
 
 <script>
-const STORAGE_KEY = "revelryLive.energyResetLaunchState";
-const ENERGY_RESET_LAUNCH_STEPS = [
+const STORAGE_KEY = "revelryLive.focusSeriesLaunchState";
+const FOCUS_SERIES_LAUNCH_STEPS = [
   {
     key: "day_1",
-    title: "Day 1 - Kickoff / Take a Breath",
-    plainMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a _5-Day Energy Reset Challenge._\n\nEach day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!\n\nPractice #1\n**Take a Breath** 🌬️\n👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.\n\n**Why this works**\nLong exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.\n\n**Did it help?**\nWrite a word or two that describes how you feel after completing the breathing reset.`,
-    htmlMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a <u>5-Day Energy Reset Challenge.</u><br><br>Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!<br><br>Practice #1<br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
+    title: "Day 1 - Start Before You're Ready",
+    plainMessage: `🌱 Start Before You're Ready (Async)\n\nWhat have you been putting off because you're not \"ready\" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start\n2. Spend 20 minutes making progress\n3. Reply with your result:\n   - ✅ Started\n   - ⚠️ Tried but stuck\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👇`,
+    htmlMessage: `🌱 Start Before You're Ready (Async)<br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start<br>2. Spend 20 minutes making progress<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Started<br>&nbsp;&nbsp;&nbsp;- ⚠️ Tried but stuck<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👇`
   },
   {
     key: "day_2",
-    title: "Day 2 - Stretch Break",
-    plainMessage: `_Day 2 of our 5-Day Energy Reset Challenge_\n\n**Stretch Break** 🧘‍♂️\nToday’s micro-challenge:\n👉 Stand and perform this active chest opener stretch below for 1 minute.\n\n**Why this works**\nSitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.\n\n**Have a favorite stretch?**\nShare a GIF of it with us!\n\n\nhttps://eeos.work/active_chest_opener_stretch.gif`,
-    htmlMessage: `<u>Day 2 of our 5-Day Energy Reset Challenge</u><br><br><b>Stretch Break</b> 🧘‍♂️<br>Today’s micro-challenge:<br>👉 Stand and perform this active chest opener stretch below for 1 minute.<br><br><b>Why this works</b><br>Sitting hunched forward tightens your chest muscles and rounds your shoulders, which can strain your upper back and neck. A chest opener stretch helps reverse this posture, opens the chest, improves shoulder mobility, and reduces tension in the upper body — helping you breathe easier and feel better.<br><br><b>Have a favorite stretch?</b><br>Share a GIF of it with us!<br><br><br><a href="https://eeos.work/active_chest_opener_stretch.gif" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/active_chest_opener_stretch.gif</a>`
+    title: "Day 2 - One Hard Thing",
+    plainMessage: `🧠 One Hard Thing (Async)\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle\n2. Work on it (aim for at least 30-60 min)\n3. Reply with your result:\n   - ✅ Done\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nDrop your hard thing below 👇`,
+    htmlMessage: `🧠 One Hard Thing (Async)<br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle<br>2. Work on it (aim for at least 30-60 min)<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>Drop your hard thing below 👇`
   },
   {
     key: "day_3",
-    title: "Day 3 - Posture Reset",
-    plainMessage: `_Day 3 of our 5-Day Energy Reset Challenge_\n\n**Posture Reset** 🖥️\nToday’s micro-challenge:\n👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!\n\n**Why this works**\nSlouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.\n\n**Posture score**\nLook at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!\n\n\nhttps://eeos.work/good_posture.jpg`,
-    htmlMessage: `<u>Day 3 of our 5-Day Energy Reset Challenge</u><br><br><b>Posture Reset</b> 🖥️<br>Today’s micro-challenge:<br>👉 Sit tall, stack your ribcage over your pelvis, keep your ears above your shoulders, then gently roll your shoulders back and relax!<br><br><b>Why this works</b><br>Slouched posture compresses the diaphragm and reduces oxygen intake, lowering energy and increasing fatigue. Research shows that “expansive” posture boosts alertness and stress resilience.<br><br><b>Posture score</b><br>Look at the posture image below — how many of the 8 posture points are you currently doing correctly at your desk? Drop your score out of 8 in the thread and share one thing you’ll adjust today to improve!<br><br><br><a href="https://eeos.work/good_posture.jpg" target="_blank" rel="noopener noreferrer" style="color:#0066cc;text-decoration:underline;">https://eeos.work/good_posture.jpg</a>`
-  },
-  {
-    key: "day_4",
-    title: "Day 4 - Hydration Boost",
-    plainMessage: `_Day 4 of our 5-Day Energy Reset Challenge_\n\n**Hydration Boost** 💧\nToday’s micro-challenge:\n👉 Drink a full glass of water right now, and aim for one small glass every hour.\n\n**Why this matters**\nOn average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.\n\n**Tip swap**\nShare one trick you use to remember to drink enough water during the day.`,
-    htmlMessage: `<u>Day 4 of our 5-Day Energy Reset Challenge</u><br><br><b>Hydration Boost</b> 💧<br>Today’s micro-challenge:<br>👉 Drink a full glass of water right now, and aim for one small glass every hour.<br><br><b>Why this matters</b><br>On average, adults lose about 80 oz of water each day through urine, sweat, breathing, and digestion. Everyone’s different — exercise, heat, or illness can increase needs, and about 20% of water comes from food. Even a 1–2% loss of body weight can affect mood, focus, and energy.<br><br><b>Tip swap</b><br>Share one trick you use to remember to drink enough water during the day.`
-  },
-  {
-    key: "day_5",
-    title: "Day 5 - Walk it Out",
-    plainMessage: `_Final day of our 5-Day Energy Reset Challenge_\n\n**Walk It Out** 🚶\nToday’s micro-challenge:\n👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.\n\n**Why this works**\nStanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.\n\n**Walk the walk**\nSnap a photo of something interesting from your walk and drop it in the thread!`,
-    htmlMessage: `<u>Final day of our 5-Day Energy Reset Challenge</u><br><br><b>Walk It Out</b> 🚶<br>Today’s micro-challenge:<br>👉 Take a 5–10 minute walk — outdoors if possible, but anywhere is fine.<br><br><b>Why this works</b><br>Stanford researchers found that walking boosts creativity by up to 60% and improves mood by increasing blood flow to the brain. Even brief walks reduce stress hormones like cortisol.<br><br><b>Walk the walk</b><br>Snap a photo of something interesting from your walk and drop it in the thread!`
-  },
-  {
-    key: "day_6",
-    title: "Day 6 - Wrap Up",
-    plainMessage: `🌟 **_Energy Reset Mini-Circuit!_**\nCelebrate completing our 5-Day Energy Reset Challenge with a quick, energizing flow:\n\n1️⃣ **Breathe:** 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)\n2️⃣ **Walk:** ~5 minutes wherever you can move, preferably outdoors\n3️⃣ **Hydrate:** Drink a full glass of water\n4️⃣ **Stretch:** Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)\n5️⃣ **Posture Check:** Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor\n\nKeep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`,
-    htmlMessage: `🌟 <b><u>Energy Reset Mini-Circuit!</u></b><br>Celebrate completing our 5-Day Energy Reset Challenge with a quick, energizing flow:<br><br>1️⃣ <b>Breathe:</b> 5 slow breaths (inhale 4 sec → hold 2 sec → exhale 6 sec)<br>2️⃣ <b>Walk:</b> ~5 minutes wherever you can move, preferably outdoors<br>3️⃣ <b>Hydrate:</b> Drink a full glass of water<br>4️⃣ <b>Stretch:</b> Open your chest (clasp hands behind your back, puff out your chest, squeeze shoulder blades together — hold for a minute)<br>5️⃣ <b>Posture Check:</b> Sit tall, shoulders back and relaxed, ears over shoulders, ribcage stacked over pelvis, thighs about parallel to the ground, feet flat on the floor<br><br>Keep this as a reference — you can repeat this mini-circuit anytime for a quick reset.`
+    title: "Day 3 - Ship Something Today",
+    plainMessage: `🚀 Ship Something Today (Async)\n\nToday is about finishing and putting something out into the world-small and imperfect is fine.\n\nHow it works:\n1. Comment what you will ship today\n2. Do the work\n3. Reply with your result:\n   - ✅ Done (share it if you can)\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👇`,
+    htmlMessage: `🚀 Ship Something Today (Async)<br><br>Today is about finishing and putting something out into the world-small and imperfect is fine.<br><br>How it works:<br>1. Comment what you will ship today<br>2. Do the work<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done (share it if you can)<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👇`
   }
 ];
 
 function readState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+    if (!raw) return { activeStepKey: FOCUS_SERIES_LAUNCH_STEPS[0].key, completedStepKeys: [] };
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") throw new Error("invalid");
     const completedStepKeys = Array.isArray(parsed.completedStepKeys)
       ? parsed.completedStepKeys.map((k) => String(k || ""))
       : [];
-    const validKeys = new Set(ENERGY_RESET_LAUNCH_STEPS.map((step) => step.key));
-    const firstIncompleteStep = ENERGY_RESET_LAUNCH_STEPS.find((step) => !completedStepKeys.includes(step.key)) || null;
+    const validKeys = new Set(FOCUS_SERIES_LAUNCH_STEPS.map((step) => step.key));
+    const firstIncompleteStep = FOCUS_SERIES_LAUNCH_STEPS.find((step) => !completedStepKeys.includes(step.key)) || null;
     const parsedActiveStepKey = String(parsed.activeStepKey || "");
     const activeStepKey = validKeys.has(parsedActiveStepKey)
       ? parsedActiveStepKey
       : (firstIncompleteStep?.key || "");
     return { activeStepKey, completedStepKeys };
   } catch (_error) {
-    return { activeStepKey: ENERGY_RESET_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+    return { activeStepKey: FOCUS_SERIES_LAUNCH_STEPS[0].key, completedStepKeys: [] };
   }
 }
 
@@ -249,8 +231,11 @@ function getScheduleHintHtml(stepKey) {
   if (stepKey === "day_1") {
     return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for today</span></div>';
   }
-  if (stepKey === "day_6") {
-    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for one week from today</span></div>';
+  if (stepKey === "day_2") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for tomorrow</span></div>';
+  }
+  if (stepKey === "day_3") {
+    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for the next day</span></div>';
   }
   return "";
 }
@@ -278,17 +263,17 @@ function render() {
   const root = document.getElementById("stepsRoot");
   if (!root) return;
 
-  root.innerHTML = ENERGY_RESET_LAUNCH_STEPS.map((step, index) => {
+  root.innerHTML = FOCUS_SERIES_LAUNCH_STEPS.map((step, index) => {
     const isActive = step.key === state.activeStepKey;
     const isDone = state.completedStepKeys.includes(step.key);
     const isReadOnlyCompleted = isActive && isDone;
-    const nextStep = ENERGY_RESET_LAUNCH_STEPS[index + 1] || null;
+    const nextStep = FOCUS_SERIES_LAUNCH_STEPS[index + 1] || null;
     const dayTitleMatch = step.title.match(/^(Day\s+\d+)(.*)$/);
     const dayPrefix = dayTitleMatch ? dayTitleMatch[1] : step.title;
     const daySuffix = dayTitleMatch ? dayTitleMatch[2] : "";
     const advanceLabel = nextStep
       ? `Mark complete and advance to ${nextStep.title}`
-      : "I have scheduled all Slack messages for the 5-Day Energy Reset Challenge";
+      : "I have scheduled all Slack messages for Focus Series";
 
     return `
       <article class="step-card rounded-xl border ${isActive ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
@@ -320,7 +305,7 @@ function render() {
         const stepKey = String(header.getAttribute("data-step-header") || "");
         if (!stepKey) return;
         const stateNow = readState();
-        const firstIncompleteStep = ENERGY_RESET_LAUNCH_STEPS.find((step) => !stateNow.completedStepKeys.includes(step.key)) || null;
+        const firstIncompleteStep = FOCUS_SERIES_LAUNCH_STEPS.find((step) => !stateNow.completedStepKeys.includes(step.key)) || null;
         const targetIsCompleted = stateNow.completedStepKeys.includes(stepKey);
         const targetIsActive = String(stateNow.activeStepKey || "") === stepKey;
         stateNow.activeStepKey = targetIsActive && targetIsCompleted
@@ -336,7 +321,7 @@ function render() {
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
       const stepKey = String(copyBtn.getAttribute("data-copy-step") || "");
-      const step = ENERGY_RESET_LAUNCH_STEPS.find((s) => s.key === stepKey);
+      const step = FOCUS_SERIES_LAUNCH_STEPS.find((s) => s.key === stepKey);
       if (!step) return;
       const ok = await copyMessage(step);
       const original = copyBtn.textContent;
@@ -357,11 +342,11 @@ function render() {
     advance.addEventListener("change", () => {
       if (!advance.checked) return;
       const stepKey = String(advance.getAttribute("data-advance-step") || "");
-      const currentIndex = ENERGY_RESET_LAUNCH_STEPS.findIndex((s) => s.key === stepKey);
+      const currentIndex = FOCUS_SERIES_LAUNCH_STEPS.findIndex((s) => s.key === stepKey);
       if (currentIndex < 0) return;
       const stateNow = readState();
       if (!stateNow.completedStepKeys.includes(stepKey)) stateNow.completedStepKeys.push(stepKey);
-      const next = ENERGY_RESET_LAUNCH_STEPS[currentIndex + 1] || null;
+      const next = FOCUS_SERIES_LAUNCH_STEPS[currentIndex + 1] || null;
       if (next) {
         stateNow.activeStepKey = next.key;
         writeState(stateNow);
