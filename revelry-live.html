@@ -181,45 +181,74 @@
 
 <script>
 const STORAGE_KEY = "revelryLive.focusSeriesLaunchState";
-const FOCUS_SERIES_LAUNCH_STEPS = [
-  {
-    key: "day_1",
-    title: "Day 1 - Start Before You're Ready",
-    plainMessage: `🌱 Start Before You're Ready (Async)\n\nWhat have you been putting off because you're not \"ready\" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start\n2. Spend 20 minutes making progress\n3. Reply with your result:\n   - ✅ Started\n   - ⚠️ Tried but stuck\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👇`,
+const DAY_ONE_ORDER = [
+  "start_before_ready",
+  "one_hard_thing",
+  "ship_something_today"
+];
+
+const FOCUS_SERIES_EVENTS = {
+  start_before_ready: {
+    id: "start_before_ready",
+    emoji: "🌱",
+    title: "Start Before You're Ready",
+    shortDescription: "Lower the barrier to action and just begin.",
+    scheduleHint: "Schedule this post for today",
+    plainMessage: `🌱 Start Before You're Ready (Async)\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start\n2. Spend 20 minutes making progress\n3. Reply with your result:\n   - ✅ Started\n   - ⚠️ Tried but stuck\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👇`,
     htmlMessage: `🌱 Start Before You're Ready (Async)<br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start<br>2. Spend 20 minutes making progress<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Started<br>&nbsp;&nbsp;&nbsp;- ⚠️ Tried but stuck<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👇`
   },
-  {
-    key: "day_2",
-    title: "Day 2 - One Hard Thing",
+  one_hard_thing: {
+    id: "one_hard_thing",
+    emoji: "🧠",
+    title: "One Hard Thing",
+    shortDescription: "Tackle the thing you've been avoiding.",
+    scheduleHint: "Schedule this post for tomorrow",
     plainMessage: `🧠 One Hard Thing (Async)\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle\n2. Work on it (aim for at least 30-60 min)\n3. Reply with your result:\n   - ✅ Done\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nDrop your hard thing below 👇`,
     htmlMessage: `🧠 One Hard Thing (Async)<br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle<br>2. Work on it (aim for at least 30-60 min)<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>Drop your hard thing below 👇`
   },
-  {
-    key: "day_3",
-    title: "Day 3 - Ship Something Today",
+  ship_something_today: {
+    id: "ship_something_today",
+    emoji: "🚀",
+    title: "Ship Something Today",
+    shortDescription: "Drive completion and visible output.",
+    scheduleHint: "Schedule this post for the next day",
     plainMessage: `🚀 Ship Something Today (Async)\n\nToday is about finishing and putting something out into the world-small and imperfect is fine.\n\nHow it works:\n1. Comment what you will ship today\n2. Do the work\n3. Reply with your result:\n   - ✅ Done (share it if you can)\n   - ⚠️ Partial\n   - ❌ Didn't start\n   + 1 sentence on what happened\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👇`,
     htmlMessage: `🚀 Ship Something Today (Async)<br><br>Today is about finishing and putting something out into the world-small and imperfect is fine.<br><br>How it works:<br>1. Comment what you will ship today<br>2. Do the work<br>3. Reply with your result:<br>&nbsp;&nbsp;&nbsp;- ✅ Done (share it if you can)<br>&nbsp;&nbsp;&nbsp;- ⚠️ Partial<br>&nbsp;&nbsp;&nbsp;- ❌ Didn't start<br>&nbsp;&nbsp;&nbsp;+ 1 sentence on what happened<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👇`
   }
-];
+};
+
+const FOLLOW_UP_MAP = {
+  start_before_ready: ["one_hard_thing", "ship_something_today"],
+  one_hard_thing: ["ship_something_today", "start_before_ready"],
+  ship_something_today: ["one_hard_thing", "start_before_ready"]
+};
 
 function readState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { activeStepKey: FOCUS_SERIES_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+    if (!raw) {
+      return {
+        selectedDayOneId: "",
+        dayOneCopied: false,
+        expandedFollowUpId: ""
+      };
+    }
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") throw new Error("invalid");
-    const completedStepKeys = Array.isArray(parsed.completedStepKeys)
-      ? parsed.completedStepKeys.map((k) => String(k || ""))
-      : [];
-    const validKeys = new Set(FOCUS_SERIES_LAUNCH_STEPS.map((step) => step.key));
-    const firstIncompleteStep = FOCUS_SERIES_LAUNCH_STEPS.find((step) => !completedStepKeys.includes(step.key)) || null;
-    const parsedActiveStepKey = String(parsed.activeStepKey || "");
-    const activeStepKey = validKeys.has(parsedActiveStepKey)
-      ? parsedActiveStepKey
-      : (firstIncompleteStep?.key || "");
-    return { activeStepKey, completedStepKeys };
+    const selectedDayOneId = String(parsed.selectedDayOneId || "").trim();
+    const dayOneCopied = parsed.dayOneCopied === true;
+    const expandedFollowUpId = String(parsed.expandedFollowUpId || "").trim();
+    return {
+      selectedDayOneId: FOCUS_SERIES_EVENTS[selectedDayOneId] ? selectedDayOneId : "",
+      dayOneCopied,
+      expandedFollowUpId: FOCUS_SERIES_EVENTS[expandedFollowUpId] ? expandedFollowUpId : ""
+    };
   } catch (_error) {
-    return { activeStepKey: FOCUS_SERIES_LAUNCH_STEPS[0].key, completedStepKeys: [] };
+    return {
+      selectedDayOneId: "",
+      dayOneCopied: false,
+      expandedFollowUpId: ""
+    };
   }
 }
 
@@ -227,30 +256,17 @@ function writeState(next) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 }
 
-function getScheduleHintHtml(stepKey) {
-  if (stepKey === "day_1") {
-    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for today</span></div>';
-  }
-  if (stepKey === "day_2") {
-    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for tomorrow</span></div>';
-  }
-  if (stepKey === "day_3") {
-    return '<div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>Schedule this post for the next day</span></div>';
-  }
-  return "";
-}
-
-async function copyMessage(step) {
+async function copyMessage(eventData) {
   try {
     if (navigator.clipboard && window.ClipboardItem) {
       await navigator.clipboard.write([
         new ClipboardItem({
-          "text/plain": new Blob([step.plainMessage], { type: "text/plain" }),
-          "text/html": new Blob([step.htmlMessage], { type: "text/html" })
+          "text/plain": new Blob([eventData.plainMessage], { type: "text/plain" }),
+          "text/html": new Blob([eventData.htmlMessage], { type: "text/html" })
         })
       ]);
     } else {
-      await navigator.clipboard.writeText(step.plainMessage);
+      await navigator.clipboard.writeText(eventData.plainMessage);
     }
     return true;
   } catch (_error) {
@@ -258,106 +274,194 @@ async function copyMessage(step) {
   }
 }
 
+function renderCollapsedChoiceCard(eventData) {
+  return `
+    <article class="step-card rounded-xl border border-slate-200 bg-white hover:border-slate-400">
+      <button type="button" class="w-full px-4 py-4 text-left" data-select-day1="${eventData.id}">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-sm font-semibold text-slate-900">${eventData.emoji} ${eventData.title}</div>
+            <div class="mt-1 text-sm text-slate-600">${eventData.shortDescription}</div>
+          </div>
+          <span class="text-slate-400">▸</span>
+        </div>
+      </button>
+    </article>
+  `;
+}
+
+function renderExpandedCard(eventData, options = {}) {
+  const copyAction = String(options.copyAction || "");
+  const copied = options.copied === true;
+  return `
+    <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
+      <div class="step-header active">
+        <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+      </div>
+      <div class="step-body">
+        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
+        <div class="step-message">${eventData.htmlMessage}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
+          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+          <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderFollowUpCard(eventData, label, expanded) {
+  return `
+    <article class="step-card rounded-xl border ${expanded ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
+      <button type="button" class="step-header ${expanded ? "active" : ""} w-full cursor-pointer" data-toggle-followup="${eventData.id}">
+        <div class="text-sm ${expanded ? "text-white" : "text-slate-900"}"><span class="font-semibold">${label}: ${eventData.emoji} ${eventData.title}</span></div>
+        <span class="${expanded ? "text-white/80" : "text-slate-400"}">${expanded ? "▾" : "▸"}</span>
+      </button>
+      ${expanded ? `
+      <div class="step-body">
+        <div class="mb-3 text-sm text-slate-600">${eventData.shortDescription}</div>
+        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
+        <div class="step-message">${eventData.htmlMessage}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn btn-primary" data-copy-event="followup:${eventData.id}">Copy message</button>
+          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+          <span class="text-sm font-medium text-emerald-600 hidden" data-copy-feedback="followup:${eventData.id}">✓ Copied</span>
+        </div>
+      </div>
+      ` : ""}
+    </article>
+  `;
+}
+
 function render() {
   const state = readState();
   const root = document.getElementById("stepsRoot");
   if (!root) return;
 
-  root.innerHTML = FOCUS_SERIES_LAUNCH_STEPS.map((step, index) => {
-    const isActive = step.key === state.activeStepKey;
-    const isDone = state.completedStepKeys.includes(step.key);
-    const isReadOnlyCompleted = isActive && isDone;
-    const nextStep = FOCUS_SERIES_LAUNCH_STEPS[index + 1] || null;
-    const dayTitleMatch = step.title.match(/^(Day\s+\d+)(.*)$/);
-    const dayPrefix = dayTitleMatch ? dayTitleMatch[1] : step.title;
-    const daySuffix = dayTitleMatch ? dayTitleMatch[2] : "";
-    const advanceLabel = nextStep
-      ? `Mark complete and advance to ${nextStep.title}`
-      : "I have scheduled all Slack messages for Focus Series";
-
-    return `
-      <article class="step-card rounded-xl border ${isActive ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
-        <div class="step-header ${isActive ? "active" : ""} cursor-pointer" data-step-header="${step.key}">
-          <div class="text-sm ${isActive ? "text-white" : "text-slate-900"}"><span class="font-semibold">${dayPrefix}</span><span class="font-normal">${daySuffix}</span></div>
-          ${isDone ? `<span class="complete-pill ${isActive ? "text-emerald-300" : "text-emerald-600"}">✓ Complete</span>` : ""}
-        </div>
-        ${isActive ? `
-          <div class="step-body ${isReadOnlyCompleted ? "read-only" : ""}">
-            ${getScheduleHintHtml(step.key)}
-            <div class="step-message ${isReadOnlyCompleted ? "read-only" : ""}">${step.htmlMessage}</div>
-            <div class="mt-4 flex flex-wrap items-center gap-3">
-              <button type="button" class="btn ${isReadOnlyCompleted ? "btn-secondary" : "btn-primary"}" data-copy-step="${step.key}" ${isReadOnlyCompleted ? "disabled" : ""}>Copy message</button>
-              <button type="button" class="btn btn-secondary" data-open-slack="true" ${isReadOnlyCompleted ? "disabled" : ""}>Open Slack</button>
-            </div>
-            ${isReadOnlyCompleted
-              ? '<div class="mt-8 text-sm text-slate-400">Completed step. Click any day header to open it. Click this header again to collapse.</div>'
-              : `<div class="mt-8"><label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-advance-step="${step.key}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"><span>${advanceLabel}</span></label></div>`}
-          </div>
-        ` : ""}
-      </article>
+  if (!state.selectedDayOneId) {
+    const cardsHtml = DAY_ONE_ORDER.map((id) => renderCollapsedChoiceCard(FOCUS_SERIES_EVENTS[id])).join("");
+    root.innerHTML = `
+      <div class="text-sm text-slate-600 mb-4">Choose one mini-challenge to launch today.</div>
+      <div class="space-y-3">${cardsHtml}</div>
     `;
-  }).join("");
+  } else {
+    const dayOneEvent = FOCUS_SERIES_EVENTS[state.selectedDayOneId];
+    const [followIdOne, followIdTwo] = FOLLOW_UP_MAP[state.selectedDayOneId] || [];
+    const followUps = [
+      { label: "Tomorrow", id: followIdOne },
+      { label: "Next day", id: followIdTwo }
+    ].filter((item) => FOCUS_SERIES_EVENTS[item.id]);
 
-  const stepHeaders = root.querySelectorAll("[data-step-header]");
-  if (stepHeaders.length) {
-    stepHeaders.forEach((header) => {
-      header.addEventListener("click", () => {
-        const stepKey = String(header.getAttribute("data-step-header") || "");
-        if (!stepKey) return;
-        const stateNow = readState();
-        const firstIncompleteStep = FOCUS_SERIES_LAUNCH_STEPS.find((step) => !stateNow.completedStepKeys.includes(step.key)) || null;
-        const targetIsCompleted = stateNow.completedStepKeys.includes(stepKey);
-        const targetIsActive = String(stateNow.activeStepKey || "") === stepKey;
-        stateNow.activeStepKey = targetIsActive && targetIsCompleted
-          ? (firstIncompleteStep?.key || "")
-          : stepKey;
-        writeState(stateNow);
-        render();
+    const selectedHtml = renderExpandedCard(dayOneEvent, {
+      copyAction: `day1:${dayOneEvent.id}`,
+      copied: state.dayOneCopied
+    });
+
+    const followUpsSection = state.dayOneCopied
+      ? `
+      <section class="mt-6">
+        <h5 class="text-base font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
+        <p class="mt-1 text-sm text-slate-600">If so, schedule these two mini-challenges below.</p>
+        <div class="mt-4 space-y-3">
+          ${followUps.map((item) => renderFollowUpCard(FOCUS_SERIES_EVENTS[item.id], item.label, state.expandedFollowUpId === item.id)).join("")}
+        </div>
+      </section>
+      `
+      : "";
+
+    root.innerHTML = `
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <div class="text-sm text-slate-600">Day 1 selected: <span class="font-semibold text-slate-900">${dayOneEvent.title}</span></div>
+        <button type="button" class="btn btn-secondary" data-reset-day1="true">Start over</button>
+      </div>
+      ${selectedHtml}
+      ${followUpsSection}
+    `;
+  }
+
+  root.querySelectorAll("[data-select-day1]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventId = String(button.getAttribute("data-select-day1") || "").trim();
+      if (!FOCUS_SERIES_EVENTS[eventId]) return;
+      writeState({
+        selectedDayOneId: eventId,
+        dayOneCopied: false,
+        expandedFollowUpId: ""
       });
+      render();
     });
-  }
+  });
 
-  const copyBtn = root.querySelector("[data-copy-step]");
-  if (copyBtn) {
-    copyBtn.addEventListener("click", async () => {
-      const stepKey = String(copyBtn.getAttribute("data-copy-step") || "");
-      const step = FOCUS_SERIES_LAUNCH_STEPS.find((s) => s.key === stepKey);
-      if (!step) return;
-      const ok = await copyMessage(step);
-      const original = copyBtn.textContent;
-      copyBtn.textContent = ok ? "✓ Copied" : "Could not copy";
-      window.setTimeout(() => { copyBtn.textContent = original; }, 1200);
-    });
-  }
-
-  const slackBtn = root.querySelector("[data-open-slack]");
-  if (slackBtn) {
-    slackBtn.addEventListener("click", () => {
-      window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
-    });
-  }
-
-  const advance = root.querySelector("[data-advance-step]");
-  if (advance) {
-    advance.addEventListener("change", () => {
-      if (!advance.checked) return;
-      const stepKey = String(advance.getAttribute("data-advance-step") || "");
-      const currentIndex = FOCUS_SERIES_LAUNCH_STEPS.findIndex((s) => s.key === stepKey);
-      if (currentIndex < 0) return;
-      const stateNow = readState();
-      if (!stateNow.completedStepKeys.includes(stepKey)) stateNow.completedStepKeys.push(stepKey);
-      const next = FOCUS_SERIES_LAUNCH_STEPS[currentIndex + 1] || null;
-      if (next) {
-        stateNow.activeStepKey = next.key;
-        writeState(stateNow);
-        render();
-        return;
-      }
-      stateNow.activeStepKey = "";
-      writeState(stateNow);
+  const resetBtn = root.querySelector("[data-reset-day1]");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      writeState({
+        selectedDayOneId: "",
+        dayOneCopied: false,
+        expandedFollowUpId: ""
+      });
       render();
     });
   }
+
+  root.querySelectorAll("[data-toggle-followup]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventId = String(button.getAttribute("data-toggle-followup") || "").trim();
+      const nextState = readState();
+      if (!nextState.dayOneCopied) return;
+      nextState.expandedFollowUpId = nextState.expandedFollowUpId === eventId ? "" : eventId;
+      writeState(nextState);
+      render();
+    });
+  });
+
+  root.querySelectorAll("[data-copy-event]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const copyKey = String(button.getAttribute("data-copy-event") || "").trim();
+      if (!copyKey) return;
+
+      let eventId = "";
+      const nextState = readState();
+      if (copyKey.startsWith("day1:")) {
+        eventId = copyKey.replace("day1:", "");
+      } else if (copyKey.startsWith("followup:")) {
+        eventId = copyKey.replace("followup:", "");
+      }
+      const eventData = FOCUS_SERIES_EVENTS[eventId];
+      if (!eventData) return;
+
+      const ok = await copyMessage(eventData);
+      const feedback = root.querySelector(`[data-copy-feedback="${copyKey}"]`);
+      const originalLabel = button.textContent;
+
+      if (!ok) {
+        button.textContent = "Could not copy";
+        window.setTimeout(() => { button.textContent = originalLabel; }, 1200);
+        return;
+      }
+
+      if (copyKey.startsWith("day1:")) {
+        nextState.dayOneCopied = true;
+        writeState(nextState);
+        render();
+        return;
+      }
+
+      if (feedback) feedback.classList.remove("hidden");
+      button.textContent = "✓ Copied";
+      window.setTimeout(() => {
+        if (feedback) feedback.classList.add("hidden");
+        button.textContent = originalLabel;
+      }, 1200);
+    });
+  });
+
+  root.querySelectorAll("[data-open-slack]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+    });
+  });
 }
 
 render();
