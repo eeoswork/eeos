@@ -185,10 +185,10 @@ const FOCUS_SERIES_TEMPLATES = {
   one_hard_thing: {
     id: "one_hard_thing",
     emoji: "🧠",
-    title: "One Hard Thing",
+    title: "Tackle the Task You've Been Avoiding",
     shortDescription: "Tackle the thing you've been avoiding.",
     slackCopy: [
-      "🧠 One Hard Thing (Async)",
+      "🧠 Tackle the Task You've Been Avoiding (Async)",
       "",
       "What's the one thing you've been avoiding?",
       "",
