@@ -153,6 +153,433 @@ const GOALS = [
 "Support employee wellbeing"
 ];
 
+const LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS = new Set(["In-person", "Hybrid"]);
+
+const US_CITY_AUTOCOMPLETE_DATA = [
+  ["New York", "New York", "NY"],
+  ["Los Angeles", "California", "CA"],
+  ["Chicago", "Illinois", "IL"],
+  ["Houston", "Texas", "TX"],
+  ["Phoenix", "Arizona", "AZ"],
+  ["Philadelphia", "Pennsylvania", "PA"],
+  ["San Antonio", "Texas", "TX"],
+  ["San Diego", "California", "CA"],
+  ["Dallas", "Texas", "TX"],
+  ["San Jose", "California", "CA"],
+  ["Austin", "Texas", "TX"],
+  ["Jacksonville", "Florida", "FL"],
+  ["Fort Worth", "Texas", "TX"],
+  ["Columbus", "Ohio", "OH"],
+  ["Charlotte", "North Carolina", "NC"],
+  ["San Francisco", "California", "CA"],
+  ["Indianapolis", "Indiana", "IN"],
+  ["Seattle", "Washington", "WA"],
+  ["Denver", "Colorado", "CO"],
+  ["Washington", "District of Columbia", "DC"],
+  ["Boston", "Massachusetts", "MA"],
+  ["El Paso", "Texas", "TX"],
+  ["Nashville", "Tennessee", "TN"],
+  ["Detroit", "Michigan", "MI"],
+  ["Oklahoma City", "Oklahoma", "OK"],
+  ["Portland", "Oregon", "OR"],
+  ["Las Vegas", "Nevada", "NV"],
+  ["Memphis", "Tennessee", "TN"],
+  ["Louisville", "Kentucky", "KY"],
+  ["Baltimore", "Maryland", "MD"],
+  ["Milwaukee", "Wisconsin", "WI"],
+  ["Albuquerque", "New Mexico", "NM"],
+  ["Tucson", "Arizona", "AZ"],
+  ["Fresno", "California", "CA"],
+  ["Sacramento", "California", "CA"],
+  ["Mesa", "Arizona", "AZ"],
+  ["Kansas City", "Missouri", "MO"],
+  ["Atlanta", "Georgia", "GA"],
+  ["Long Beach", "California", "CA"],
+  ["Colorado Springs", "Colorado", "CO"],
+  ["Raleigh", "North Carolina", "NC"],
+  ["Miami", "Florida", "FL"],
+  ["Virginia Beach", "Virginia", "VA"],
+  ["Omaha", "Nebraska", "NE"],
+  ["Oakland", "California", "CA"],
+  ["Minneapolis", "Minnesota", "MN"],
+  ["Tulsa", "Oklahoma", "OK"],
+  ["Arlington", "Texas", "TX"],
+  ["New Orleans", "Louisiana", "LA"],
+  ["Wichita", "Kansas", "KS"],
+  ["Cleveland", "Ohio", "OH"],
+  ["Tampa", "Florida", "FL"],
+  ["Bakersfield", "California", "CA"],
+  ["Aurora", "Colorado", "CO"],
+  ["Honolulu", "Hawaii", "HI"],
+  ["Anaheim", "California", "CA"],
+  ["Santa Ana", "California", "CA"],
+  ["Corpus Christi", "Texas", "TX"],
+  ["Riverside", "California", "CA"],
+  ["Lexington", "Kentucky", "KY"],
+  ["Stockton", "California", "CA"],
+  ["Henderson", "Nevada", "NV"],
+  ["St. Paul", "Minnesota", "MN"],
+  ["St. Louis", "Missouri", "MO"],
+  ["Cincinnati", "Ohio", "OH"],
+  ["Pittsburgh", "Pennsylvania", "PA"],
+  ["Greensboro", "North Carolina", "NC"],
+  ["Anchorage", "Alaska", "AK"],
+  ["Plano", "Texas", "TX"],
+  ["Lincoln", "Nebraska", "NE"],
+  ["Orlando", "Florida", "FL"],
+  ["Irvine", "California", "CA"],
+  ["Newark", "New Jersey", "NJ"],
+  ["Durham", "North Carolina", "NC"],
+  ["Chula Vista", "California", "CA"],
+  ["Toledo", "Ohio", "OH"],
+  ["Fort Wayne", "Indiana", "IN"],
+  ["St. Petersburg", "Florida", "FL"],
+  ["Laredo", "Texas", "TX"],
+  ["Jersey City", "New Jersey", "NJ"],
+  ["Chandler", "Arizona", "AZ"],
+  ["Madison", "Wisconsin", "WI"],
+  ["Lubbock", "Texas", "TX"],
+  ["Scottsdale", "Arizona", "AZ"],
+  ["Reno", "Nevada", "NV"],
+  ["Buffalo", "New York", "NY"],
+  ["Gilbert", "Arizona", "AZ"],
+  ["Glendale", "Arizona", "AZ"],
+  ["North Las Vegas", "Nevada", "NV"],
+  ["Winston-Salem", "North Carolina", "NC"],
+  ["Chesapeake", "Virginia", "VA"],
+  ["Norfolk", "Virginia", "VA"],
+  ["Fremont", "California", "CA"],
+  ["Garland", "Texas", "TX"],
+  ["Irving", "Texas", "TX"],
+  ["Hialeah", "Florida", "FL"],
+  ["Richmond", "Virginia", "VA"],
+  ["Boise", "Idaho", "ID"],
+  ["Spokane", "Washington", "WA"],
+  ["Baton Rouge", "Louisiana", "LA"],
+  ["Des Moines", "Iowa", "IA"],
+  ["Salt Lake City", "Utah", "UT"],
+  ["Birmingham", "Alabama", "AL"],
+  ["Montgomery", "Alabama", "AL"],
+  ["Little Rock", "Arkansas", "AR"],
+  ["Providence", "Rhode Island", "RI"],
+  ["Hartford", "Connecticut", "CT"],
+  ["Bridgeport", "Connecticut", "CT"],
+  ["Wilmington", "Delaware", "DE"],
+  ["Savannah", "Georgia", "GA"],
+  ["Charleston", "South Carolina", "SC"],
+  ["Columbia", "South Carolina", "SC"],
+  ["Sioux Falls", "South Dakota", "SD"],
+  ["Fargo", "North Dakota", "ND"],
+  ["Cheyenne", "Wyoming", "WY"],
+  ["Billings", "Montana", "MT"],
+  ["Burlington", "Vermont", "VT"],
+  ["Manchester", "New Hampshire", "NH"],
+  ["Portland", "Maine", "ME"],
+  ["Charleston", "West Virginia", "WV"],
+  ["Louisville", "Kentucky", "KY"],
+  ["Knoxville", "Tennessee", "TN"],
+  ["Chattanooga", "Tennessee", "TN"],
+  ["Mobile", "Alabama", "AL"],
+  ["Jackson", "Mississippi", "MS"],
+  ["Shreveport", "Louisiana", "LA"],
+  ["Rochester", "New York", "NY"],
+  ["Syracuse", "New York", "NY"],
+  ["Yonkers", "New York", "NY"],
+  ["Albany", "New York", "NY"],
+  ["Allentown", "Pennsylvania", "PA"],
+  ["Harrisburg", "Pennsylvania", "PA"],
+  ["Scranton", "Pennsylvania", "PA"],
+  ["Trenton", "New Jersey", "NJ"],
+  ["Paterson", "New Jersey", "NJ"],
+  ["Elizabeth", "New Jersey", "NJ"],
+  ["New Haven", "Connecticut", "CT"]
+].map(([city, state, stateCode]) => ({
+  city,
+  state,
+  stateCode,
+  country: "US",
+  displayName: `${city}, ${stateCode}`,
+  searchKey: `${city} ${stateCode} ${state}`.toLowerCase()
+}));
+
+let setupLocalCityAutocompleteController = null;
+let ltfLocalCityAutocompleteController = null;
+
+function normalizeUsCitySelection(selection) {
+  if (!selection || typeof selection !== "object") return null;
+  const city = String(selection.city || "").trim();
+  const state = String(selection.state || "").trim();
+  const stateCode = String(selection.stateCode || "").trim().toUpperCase();
+  if (!city || !state || !stateCode) return null;
+  const matched = US_CITY_AUTOCOMPLETE_DATA.find((item) => item.city === city && item.stateCode === stateCode);
+  if (!matched) return null;
+  return {
+    city: matched.city,
+    state: matched.state,
+    stateCode: matched.stateCode,
+    country: "US",
+    displayName: `${matched.city}, ${matched.stateCode}`
+  };
+}
+
+function setInlineValidationMessage(el, message = "") {
+  if (!el) return;
+  const nextMessage = String(message || "").trim();
+  el.textContent = nextMessage || "Please select a valid U.S. city";
+  el.classList.toggle("hidden", !nextMessage);
+}
+
+function searchUsCities(query, limit = 8) {
+  const q = String(query || "").trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const scored = US_CITY_AUTOCOMPLETE_DATA.map((item) => {
+    const cityKey = item.city.toLowerCase();
+    const displayKey = item.displayName.toLowerCase();
+    const startsCity = cityKey.startsWith(q);
+    const startsDisplay = displayKey.startsWith(q);
+    const includes = item.searchKey.includes(q);
+    let score = 0;
+    if (startsCity) score += 3;
+    if (startsDisplay) score += 2;
+    if (includes) score += 1;
+    return { item, score };
+  })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.item.city.localeCompare(b.item.city));
+
+  return scored.slice(0, Math.max(1, Number(limit || 8))).map((entry) => ({
+    city: entry.item.city,
+    state: entry.item.state,
+    stateCode: entry.item.stateCode,
+    country: "US",
+    displayName: entry.item.displayName
+  }));
+}
+
+function findExactUsCitySelection(query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return null;
+
+  const match = US_CITY_AUTOCOMPLETE_DATA.find((item) => {
+    if (item.displayName.toLowerCase() === q) return true;
+    if (`${item.city}, ${item.state}`.toLowerCase() === q) return true;
+    return false;
+  });
+
+  if (!match) return null;
+  return {
+    city: match.city,
+    state: match.state,
+    stateCode: match.stateCode,
+    country: "US",
+    displayName: match.displayName
+  };
+}
+
+function isScheduleLocalCityRequired(scheduleValues = []) {
+  return Array.isArray(scheduleValues)
+    && scheduleValues.some((option) => LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS.has(String(option || "").trim()));
+}
+
+function isUsCitySelectionValid(selection, rawText = "") {
+  const normalized = normalizeUsCitySelection(selection);
+  if (!normalized) return false;
+  const text = String(rawText || "").trim().toLowerCase();
+  if (!text) return false;
+  return text === normalized.displayName.toLowerCase();
+}
+
+function createUsCityAutocompleteController(options = {}) {
+  const inputEl = options.inputEl;
+  const listEl = options.listEl;
+  if (!inputEl || !listEl) return null;
+
+  const getSelection = typeof options.getSelection === "function"
+    ? options.getSelection
+    : () => null;
+  const onSelect = typeof options.onSelect === "function"
+    ? options.onSelect
+    : () => {};
+  const onTextChange = typeof options.onTextChange === "function"
+    ? options.onTextChange
+    : () => {};
+  const onValidationMessage = typeof options.onValidationMessage === "function"
+    ? options.onValidationMessage
+    : () => {};
+
+  let suggestions = [];
+  let activeIndex = -1;
+
+  const closeSuggestions = () => {
+    listEl.classList.add("hidden");
+    listEl.innerHTML = "";
+    activeIndex = -1;
+    inputEl.setAttribute("aria-expanded", "false");
+    inputEl.removeAttribute("aria-activedescendant");
+  };
+
+  const renderSuggestions = () => {
+    if (!suggestions.length) {
+      closeSuggestions();
+      return;
+    }
+
+    listEl.innerHTML = suggestions.map((item, index) => {
+      const active = index === activeIndex;
+      const classes = active
+        ? "w-full px-3 py-2 text-left text-sm bg-slate-900 text-white"
+        : "w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100";
+      return `<button type="button" id="city-option-${index}" class="${classes}" data-city-index="${index}" role="option" aria-selected="${active ? "true" : "false"}">${item.displayName}</button>`;
+    }).join("");
+
+    listEl.classList.remove("hidden");
+    inputEl.setAttribute("aria-expanded", "true");
+    if (activeIndex >= 0) {
+      inputEl.setAttribute("aria-activedescendant", `city-option-${activeIndex}`);
+    } else {
+      inputEl.removeAttribute("aria-activedescendant");
+    }
+  };
+
+  const commitSelection = (selection, options = {}) => {
+    const normalized = normalizeUsCitySelection(selection);
+    if (!normalized) return;
+    inputEl.value = normalized.displayName;
+    onSelect(normalized);
+    onTextChange(normalized.displayName);
+    onValidationMessage("");
+    closeSuggestions();
+    if (options.keepFocus !== false) {
+      inputEl.focus();
+    }
+  };
+
+  const handleInput = () => {
+    const rawText = String(inputEl.value || "").trim();
+    onTextChange(rawText);
+
+    const selected = getSelection();
+    if (selected && rawText.toLowerCase() !== String(selected.displayName || "").toLowerCase()) {
+      onSelect(null);
+    }
+
+    if (rawText.length < 2) {
+      suggestions = [];
+      closeSuggestions();
+      return;
+    }
+
+    suggestions = searchUsCities(rawText, 8);
+    activeIndex = suggestions.length ? 0 : -1;
+    renderSuggestions();
+  };
+
+  const handleKeydown = (event) => {
+    if (!suggestions.length) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      activeIndex = activeIndex < suggestions.length - 1 ? activeIndex + 1 : 0;
+      renderSuggestions();
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      activeIndex = activeIndex > 0 ? activeIndex - 1 : suggestions.length - 1;
+      renderSuggestions();
+      return;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (activeIndex >= 0 && suggestions[activeIndex]) {
+        commitSelection(suggestions[activeIndex]);
+      }
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeSuggestions();
+    }
+  };
+
+  const handleSuggestionClick = (event) => {
+    const button = event.target.closest("[data-city-index]");
+    if (!button) return;
+    const index = Number(button.getAttribute("data-city-index"));
+    if (!Number.isInteger(index) || !suggestions[index]) return;
+    commitSelection(suggestions[index]);
+  };
+
+  const handleBlur = () => {
+    window.setTimeout(() => {
+      const rawText = String(inputEl.value || "").trim();
+      if (!rawText) {
+        onSelect(null);
+        onValidationMessage("");
+        closeSuggestions();
+        return;
+      }
+      if (isUsCitySelectionValid(getSelection(), rawText)) {
+        closeSuggestions();
+        return;
+      }
+      const exact = findExactUsCitySelection(rawText);
+      if (exact) {
+        commitSelection(exact, { keepFocus: false });
+        return;
+      }
+      onValidationMessage("Please select a valid U.S. city");
+      closeSuggestions();
+    }, 120);
+  };
+
+  const handleDocumentClick = (event) => {
+    if (event.target === inputEl || listEl.contains(event.target)) return;
+    closeSuggestions();
+  };
+
+  inputEl.setAttribute("role", "combobox");
+  inputEl.setAttribute("aria-autocomplete", "list");
+  inputEl.setAttribute("aria-expanded", "false");
+  inputEl.setAttribute("aria-controls", listEl.id || "");
+  listEl.setAttribute("role", "listbox");
+
+  inputEl.addEventListener("input", handleInput);
+  inputEl.addEventListener("keydown", handleKeydown);
+  inputEl.addEventListener("blur", handleBlur);
+  listEl.addEventListener("mousedown", (event) => event.preventDefault());
+  listEl.addEventListener("click", handleSuggestionClick);
+  document.addEventListener("click", handleDocumentClick);
+
+  return {
+    destroy() {
+      inputEl.removeEventListener("input", handleInput);
+      inputEl.removeEventListener("keydown", handleKeydown);
+      inputEl.removeEventListener("blur", handleBlur);
+      listEl.removeEventListener("click", handleSuggestionClick);
+      document.removeEventListener("click", handleDocumentClick);
+      closeSuggestions();
+    },
+    syncFromSelection(selection) {
+      const normalized = normalizeUsCitySelection(selection);
+      if (normalized) {
+        inputEl.value = normalized.displayName;
+      }
+    },
+    validate(showMessage = false) {
+      const rawText = String(inputEl.value || "").trim();
+      const valid = isUsCitySelectionValid(getSelection(), rawText);
+      if (!valid && showMessage) {
+        onValidationMessage("Please select a valid U.S. city");
+      }
+      if (valid && showMessage) {
+        onValidationMessage("");
+      }
+      return valid;
+    }
+  };
+}
+
 const EVENT_WORKFLOW_TYPES = {
   POLL: "poll",
   RSVP: "rsvp",
@@ -1473,6 +1900,7 @@ landingDraft: {
   daysSelected: ["Th", "Sa"],
   timesSelected: ["After 5p"],
   localCity: "",
+  localCitySelection: null,
   workEmail: "",
   surveyAnswers: {}
 },
@@ -8370,14 +8798,19 @@ function initializeLandingSetupFlow() {
 
     const localCityRow = $("setupLocalCityRow");
     const localCityInput = $("setupLocalCity");
+    const localCitySuggestions = $("setupLocalCitySuggestions");
+    const localCityValidationMessage = $("setupLocalCityValidationMessage");
     const magicSetupDefaults = getMagicLinkSetupDefaultsForCurrentPath();
-    const localCityTriggers = new Set(["In-person", "Hybrid"]);
+    const localCityTriggers = LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS;
     
     const updateLocalCityVisibility = () => {
       if (!localCityRow) return;
       const selectedOption = state.landingDraft.schedule[0] || "";
       const shouldShow = localCityTriggers.has(selectedOption);
       localCityRow.classList.toggle("hidden", !shouldShow);
+      if (!shouldShow) {
+        setInlineValidationMessage(localCityValidationMessage, "");
+      }
     };
 
     scheduleContainer.querySelectorAll('input').forEach(input => {
@@ -8401,16 +8834,52 @@ function initializeLandingSetupFlow() {
       localCityInput.placeholder = magicLocalCity
         ? `e.g. ${magicLocalCity}`
         : "e.g. New Orleans, Minneapolis, Boston";
-      localCityInput.value = String(state.landingDraft.localCity || "").trim();
-      localCityInput.addEventListener("input", (e) => {
-        if (isCompletedStepEditBlocked(4)) {
-          e.target.value = state.landingDraft.localCity || "";
-          showSetupSignUpPopup();
-          return;
-        }
-        state.landingDraft.localCity = e.target.value;
-        persistState();
-        validateAndUpdateStep4();
+
+      const startingCity = String(state.landingDraft.localCity || "").trim();
+      const normalizedSelection = normalizeUsCitySelection(state.landingDraft.localCitySelection);
+      const exactSelection = normalizedSelection || findExactUsCitySelection(startingCity);
+      state.landingDraft.localCitySelection = exactSelection;
+      if (exactSelection) {
+        state.landingDraft.localCity = exactSelection.displayName;
+        localCityInput.value = exactSelection.displayName;
+      } else {
+        localCityInput.value = startingCity;
+      }
+
+      if (setupLocalCityAutocompleteController) {
+        setupLocalCityAutocompleteController.destroy();
+        setupLocalCityAutocompleteController = null;
+      }
+
+      setupLocalCityAutocompleteController = createUsCityAutocompleteController({
+        inputEl: localCityInput,
+        listEl: localCitySuggestions,
+        getSelection: () => state.landingDraft.localCitySelection,
+        onTextChange: (rawText) => {
+          if (isCompletedStepEditBlocked(4)) {
+            const restored = normalizeUsCitySelection(state.landingDraft.localCitySelection);
+            localCityInput.value = restored ? restored.displayName : String(state.landingDraft.localCity || "").trim();
+            showSetupSignUpPopup();
+            return;
+          }
+          state.landingDraft.localCity = String(rawText || "").trim();
+          setInlineValidationMessage(localCityValidationMessage, "");
+          persistState();
+          validateAndUpdateStep4();
+        },
+        onSelect: (selection) => {
+          if (isCompletedStepEditBlocked(4)) {
+            showSetupSignUpPopup();
+            return;
+          }
+          const normalized = normalizeUsCitySelection(selection);
+          state.landingDraft.localCitySelection = normalized;
+          state.landingDraft.localCity = normalized ? normalized.displayName : String(localCityInput.value || "").trim();
+          setInlineValidationMessage(localCityValidationMessage, "");
+          persistState();
+          validateAndUpdateStep4();
+        },
+        onValidationMessage: (message) => setInlineValidationMessage(localCityValidationMessage, message)
       });
     }
 
@@ -9147,6 +9616,7 @@ function syncLandingDraftToProgramSettings() {
     ? [...state.landingDraft.timesSelected]
     : [];
   state.programSettings.localCity = state.landingDraft.localCity || state.programSettings.localCity;
+  state.programSettings.localCitySelection = normalizeUsCitySelection(state.landingDraft.localCitySelection);
   state.programSettings.teamPreferenceEstimate = Array.isArray(state.landingDraft.teamPreferenceEstimate)
     ? [...state.landingDraft.teamPreferenceEstimate]
     : [];
@@ -9186,6 +9656,9 @@ function attachSetupStepHandlers() {
       
       // Validate step before allowing advance
       if (!isSetupStepValid(step)) {
+        if (step === 4 && setupLocalCityAutocompleteController) {
+          setupLocalCityAutocompleteController.validate(true);
+        }
         if (step === 2 && isRevelryLabsReadOnlyMagicLink()) {
           const messageEl = $("setupBudgetValidationMessage");
           const mode = String(state.landingDraft?.budgetMode || "total").trim();
@@ -9341,15 +9814,10 @@ function isSetupStepValid(step) {
       if (!state.landingDraft.schedule || state.landingDraft.schedule.length === 0) {
         return false;
       }
-      // Check if city sub-question should be shown and if it's filled
-      const cityTriggers = new Set([
-        "In-person",
-        "Hybrid"
-      ]);
-      const shouldShowCity = state.landingDraft.schedule.some(option => cityTriggers.has(option));
+      // Check if city sub-question should be shown and if it has a validated U.S. city.
+      const shouldShowCity = isScheduleLocalCityRequired(state.landingDraft.schedule);
       if (shouldShowCity) {
-        const city = (state.landingDraft.localCity || "").trim();
-        return city.length > 0;
+        return isUsCitySelectionValid(state.landingDraft.localCitySelection, state.landingDraft.localCity);
       }
       return true;
     
@@ -9911,6 +10379,7 @@ const ltfAnswers = {
   cadence: "Monthly",
   schedule: [],
   localCity: "",
+  localCitySelection: null,
   workEmail: "",
   daysSelected: [],
   timesSelected: [],
@@ -10083,6 +10552,7 @@ function buildLtfGeneratedProgramPreview() {
     daysSelected: selectedDays,
     timesSelected: Array.isArray(ltfAnswers.timesSelected) ? [...ltfAnswers.timesSelected] : [],
     localCity: String(ltfAnswers.localCity || "").trim(),
+    localCitySelection: normalizeUsCitySelection(ltfAnswers.localCitySelection),
     employeeCount,
     totalBudget: Number(ltfAnswers.totalBudget || 0),
     monthlyBudget: Number(ltfAnswers.totalBudget || 0)
@@ -10345,12 +10815,11 @@ function initLandingTypeform() {
     }
     
     const selectedOption = ltfAnswers.schedule[0];
-    const localTriggers = ["In-person", "Hybrid"];
-    const needsCity = localTriggers.includes(selectedOption);
+    const needsCity = LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS.has(selectedOption);
     
     if (needsCity) {
-      const cityFilled = (ltfAnswers.localCity || "").trim().length > 0;
-      nextBtn.disabled = !cityFilled;
+      const cityValid = isUsCitySelectionValid(ltfAnswers.localCitySelection, ltfAnswers.localCity);
+      nextBtn.disabled = !cityValid;
     } else {
       // Remote selected - just needs schedule, no city needed
       nextBtn.disabled = false;
@@ -10359,20 +10828,54 @@ function initLandingTypeform() {
 
   renderScheduleInputs("ltfScheduleGrid", ltfAnswers.schedule, (option) => {
     ltfAnswers.schedule = [option];
-    const localTriggers = ["In-person", "Hybrid"];
-    const showCity = localTriggers.includes(option);
+    const showCity = LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS.has(option);
     $("ltfLocalCityRow")?.classList.toggle("hidden", !showCity);
+    if (!showCity) {
+      setInlineValidationMessage($("ltfLocalCityValidationMessage"), "");
+    }
     updateNextButtonStateForSchedule();
   });
 
   // Bind city input for real-time updates
   const cityInput = $("ltfLocalCity");
+  const citySuggestions = $("ltfLocalCitySuggestions");
+  const cityValidationMessage = $("ltfLocalCityValidationMessage");
   ltfAnswers.localCity = String(state.landingDraft?.localCity || ltfAnswers.localCity || "").trim();
+  ltfAnswers.localCitySelection = normalizeUsCitySelection(state.landingDraft?.localCitySelection)
+    || findExactUsCitySelection(ltfAnswers.localCity)
+    || null;
   if (cityInput) {
-    cityInput.value = ltfAnswers.localCity;
-    cityInput.addEventListener("input", () => {
-      ltfAnswers.localCity = (cityInput.value || "").trim();
-      updateNextButtonStateForSchedule();
+    const normalizedSelection = normalizeUsCitySelection(ltfAnswers.localCitySelection);
+    if (normalizedSelection) {
+      ltfAnswers.localCitySelection = normalizedSelection;
+      ltfAnswers.localCity = normalizedSelection.displayName;
+      cityInput.value = normalizedSelection.displayName;
+    } else {
+      cityInput.value = ltfAnswers.localCity;
+    }
+
+    if (ltfLocalCityAutocompleteController) {
+      ltfLocalCityAutocompleteController.destroy();
+      ltfLocalCityAutocompleteController = null;
+    }
+
+    ltfLocalCityAutocompleteController = createUsCityAutocompleteController({
+      inputEl: cityInput,
+      listEl: citySuggestions,
+      getSelection: () => ltfAnswers.localCitySelection,
+      onTextChange: (rawText) => {
+        ltfAnswers.localCity = String(rawText || "").trim();
+        setInlineValidationMessage(cityValidationMessage, "");
+        updateNextButtonStateForSchedule();
+      },
+      onSelect: (selection) => {
+        const normalized = normalizeUsCitySelection(selection);
+        ltfAnswers.localCitySelection = normalized;
+        ltfAnswers.localCity = normalized ? normalized.displayName : String(cityInput.value || "").trim();
+        setInlineValidationMessage(cityValidationMessage, "");
+        updateNextButtonStateForSchedule();
+      },
+      onValidationMessage: (message) => setInlineValidationMessage(cityValidationMessage, message)
     });
   }
 
@@ -10978,11 +11481,10 @@ function goLtfQuestion(targetIdx) {
         nextBtn.disabled = true;
       } else {
         const selectedOption = ltfAnswers.schedule[0];
-        const localTriggers = ["In-person", "Hybrid"];
-        const needsCity = localTriggers.includes(selectedOption);
+        const needsCity = LOCAL_CITY_REQUIRED_SCHEDULE_OPTIONS.has(selectedOption);
         if (needsCity) {
-          const cityFilled = (ltfAnswers.localCity || "").trim().length > 0;
-          nextBtn.disabled = !cityFilled;
+          const cityValid = isUsCitySelectionValid(ltfAnswers.localCitySelection, ltfAnswers.localCity);
+          nextBtn.disabled = !cityValid;
         } else {
           nextBtn.disabled = false;
         }
@@ -11031,11 +11533,15 @@ function validateLtfCurrentQuestion() {
   if (ltfCurrentQ === 1) {
     if (ltfAnswers.schedule.length === 0) { showLtfError("Please select at least one setting."); return false; }
     // Check if city is required and filled
-    const localTriggers = ["In-person", "Hybrid"];
-    const shouldShowCity = ltfAnswers.schedule.some(s => localTriggers.includes(s));
+    const shouldShowCity = isScheduleLocalCityRequired(ltfAnswers.schedule);
     if (shouldShowCity) {
-      const city = (ltfAnswers.localCity || "").trim();
-      if (!city) { showLtfError("Please enter a city for local recommendations."); return false; }
+      const city = String(ltfAnswers.localCity || "").trim();
+      if (!city) { showLtfError("Please select a valid U.S. city"); return false; }
+      if (!isUsCitySelectionValid(ltfAnswers.localCitySelection, city)) {
+        ltfLocalCityAutocompleteController?.validate(true);
+        showLtfError("Please select a valid U.S. city");
+        return false;
+      }
     }
     return true;
   }
@@ -11088,6 +11594,9 @@ function saveLtfCurrentAnswer() {
   // }
   if (ltfCurrentQ === 1) {
     ltfAnswers.localCity = ($("ltfLocalCity")?.value || "").trim();
+    if (!isUsCitySelectionValid(ltfAnswers.localCitySelection, ltfAnswers.localCity)) {
+      ltfAnswers.localCitySelection = null;
+    }
   }
   if (ltfCurrentQ === 6) {
     ltfAnswers.workEmail = String($("ltfWorkEmail")?.value || "").trim();
@@ -11184,6 +11693,7 @@ async function completeLtfSetup() {
   // state.landingDraft.cadence = ltfAnswers.cadence; // Q0 (Cadence) is disabled
   state.landingDraft.schedule = [...ltfAnswers.schedule];
   state.landingDraft.localCity = ltfAnswers.localCity;
+  state.landingDraft.localCitySelection = normalizeUsCitySelection(ltfAnswers.localCitySelection);
   state.landingDraft.daysSelected = [
     ...ltfAnswers.daysSelected,
     ...(ltfAnswers.saturdayOn ? ["Sa"] : [])
@@ -11210,6 +11720,7 @@ async function completeLtfSetup() {
             companyName: String(state.companyName || "").trim(),
             adminName: String(state.adminName || "").trim()
           },
+          location: normalizeUsCitySelection(state.landingDraft.localCitySelection),
           draft: buildDraftPayload(state),
           stateBlob: clone(state),
           programSummary: buildProgramWeekSummary(state.fourMonthProgram)

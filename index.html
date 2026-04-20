@@ -469,7 +469,11 @@
                       <div id="ltfLocalCityRow" class="hidden mt-8">
                         <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
                         <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
-                        <input id="ltfLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="e.g. New Orleans, Minneapolis, Boston" />
+                        <div class="relative">
+                          <input id="ltfLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="e.g. New Orleans, Minneapolis, Boston" autocomplete="off" />
+                          <div id="ltfLocalCitySuggestions" class="hidden absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"></div>
+                        </div>
+                        <p id="ltfLocalCityValidationMessage" class="mt-2 hidden text-xs text-rose-600">Please select a valid U.S. city</p>
                       </div>
                     </div>
 
@@ -939,7 +943,11 @@
                 <div id="setupLocalCityRow" class="hidden" style="margin-top: 24px; margin-bottom: 12px;">
                   <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
                   <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
-                  <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" />
+                  <div class="relative">
+                    <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" autocomplete="off" />
+                    <div id="setupLocalCitySuggestions" class="hidden absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"></div>
+                  </div>
+                  <p id="setupLocalCityValidationMessage" class="mt-2 hidden text-xs text-rose-600">Please select a valid U.S. city</p>
                 </div>
                 <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="4">Next</button>
               </div>
