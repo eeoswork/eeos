@@ -310,6 +310,185 @@ function ensureSavedProgramWeeks(stateBlob = {}) {
   };
 }
 
+const EVENT_WORKFLOW_STAGE_LABELS = {
+  launch: "Launch Event",
+  run: "Run Event",
+  feedback: "Collect Feedback",
+  review: "Review Impact"
+};
+
+function getWorkflowStageLabelFromStep(stepNum) {
+  const step = Number(stepNum || 0);
+  if (step >= 14) return EVENT_WORKFLOW_STAGE_LABELS.review;
+  if (step === 13) return EVENT_WORKFLOW_STAGE_LABELS.feedback;
+  if (step === 12) return EVENT_WORKFLOW_STAGE_LABELS.run;
+  if (step >= 7 && step <= 11) return EVENT_WORKFLOW_STAGE_LABELS.launch;
+  return "";
+}
+
+function normalizeProgramWeeksForDashboard(row = {}) {
+  const savedProgramWeeks = parseJsonValue(row.saved_program_weeks, []);
+  const fallbackProgramWeeks = (() => {
+    const weeks = parseJsonValue(row.four_month_program_weeks, []);
+    if (Array.isArray(weeks) && weeks.length) return weeks;
+    const events = parseJsonValue(row.four_month_program_events, []);
+    return Array.isArray(events) ? events : [];
+  })();
+  const programWeeks = Array.isArray(savedProgramWeeks) && savedProgramWeeks.length
+    ? savedProgramWeeks
+    : fallbackProgramWeeks;
+
+  return Array.isArray(programWeeks)
+    ? programWeeks
+      .map((item, index) => ({
+        week: Number(item?.week || index + 1),
+        id: String(item?.id || item?.eventId || item?.templateId || "").trim(),
+        eventName: fallbackProgramEventName(item, index)
+      }))
+      .filter((item) => item.week > 0)
+    : [];
+}
+
+function normalizeBookedEventsForDashboard(row = {}) {
+  const bookedEventsRaw = parseJsonValue(row.events_booked, []);
+  if (!Array.isArray(bookedEventsRaw) || !bookedEventsRaw.length) return [];
+
+  return bookedEventsRaw
+    .map((item, index) => ({
+      index,
+      bookedId: String(item?.id || "").trim(),
+      eventId: String(item?.event_master_id || item?.eventId || item?.templateId || "").trim(),
+      eventName: String(item?.name || item?.title || "").trim(),
+      status: String(item?.status || "").trim().toLowerCase(),
+      bookedAt: String(item?.bookedAt || item?.createdAt || "").trim(),
+      runEventCompletedAt: String(
+        item?.runEventCompletedAt
+        || item?.runEvent?.runEventCompletedAt
+        || ""
+      ).trim(),
+      feedbackClosedAt: String(
+        item?.feedbackClosedAt
+        || item?.feedback?.feedbackClosedAt
+        || ""
+      ).trim()
+    }))
+    .sort((a, b) => {
+      const timeA = Date.parse(a.bookedAt || "") || 0;
+      const timeB = Date.parse(b.bookedAt || "") || 0;
+      return timeA - timeB;
+    });
+}
+
+function buildDashboardProgressFromRow(row = {}) {
+  const program = normalizeProgramWeeksForDashboard(row);
+  const booked = normalizeBookedEventsForDashboard(row);
+  const activeEventId = String(row.active_event_id || "").trim();
+  const processStep = Number(row.event_workflow_process_step || 0);
+  const processStageLabel = getWorkflowStageLabelFromStep(processStep);
+  const accountState = String(row.password_hash || "").startsWith("pending:") ? "email_only" : "registered";
+
+  const bookingsByEventId = new Map();
+  booked.forEach((item) => {
+    if (!item.eventId) return;
+    const existing = bookingsByEventId.get(item.eventId) || [];
+    existing.push(item);
+    bookingsByEventId.set(item.eventId, existing);
+  });
+
+  const usedBookingIndexes = new Set();
+  const matchedBookingsByWeek = program.map((item) => {
+    const eventId = String(item.id || "").trim();
+    if (eventId) {
+      const candidateList = bookingsByEventId.get(eventId) || [];
+      const nextCandidate = candidateList.find((entry) => !usedBookingIndexes.has(entry.index));
+      if (nextCandidate) {
+        usedBookingIndexes.add(nextCandidate.index);
+        return nextCandidate;
+      }
+    }
+
+    const fallbackByName = booked.find((entry) => {
+      if (usedBookingIndexes.has(entry.index)) return false;
+      if (!entry.eventName || !item.eventName) return false;
+      return entry.eventName.toLowerCase() === String(item.eventName).toLowerCase();
+    });
+    if (fallbackByName) {
+      usedBookingIndexes.add(fallbackByName.index);
+      return fallbackByName;
+    }
+
+    return null;
+  });
+
+  const weeks = program.map((item, index) => {
+    const booking = matchedBookingsByWeek[index];
+    const isActive = booking && booking.bookedId && booking.bookedId === activeEventId;
+
+    if (!booking) {
+      return {
+        week: item.week,
+        eventId: item.id,
+        eventName: item.eventName,
+        status: "not_started",
+        stageLabel: EVENT_WORKFLOW_STAGE_LABELS.launch,
+        runEventCompletedAt: "",
+        feedbackClosedAt: ""
+      };
+    }
+
+    if (booking.feedbackClosedAt) {
+      return {
+        week: item.week,
+        eventId: item.id,
+        eventName: item.eventName,
+        status: "complete",
+        stageLabel: EVENT_WORKFLOW_STAGE_LABELS.review,
+        runEventCompletedAt: booking.runEventCompletedAt,
+        feedbackClosedAt: booking.feedbackClosedAt
+      };
+    }
+
+    if (booking.runEventCompletedAt) {
+      return {
+        week: item.week,
+        eventId: item.id,
+        eventName: item.eventName,
+        status: "in_progress",
+        stageLabel: isActive && processStageLabel ? processStageLabel : EVENT_WORKFLOW_STAGE_LABELS.feedback,
+        runEventCompletedAt: booking.runEventCompletedAt,
+        feedbackClosedAt: ""
+      };
+    }
+
+    return {
+      week: item.week,
+      eventId: item.id,
+      eventName: item.eventName,
+      status: "in_progress",
+      stageLabel: isActive && processStageLabel ? processStageLabel : EVENT_WORKFLOW_STAGE_LABELS.run,
+      runEventCompletedAt: "",
+      feedbackClosedAt: ""
+    };
+  });
+
+  const currentWeekIndex = weeks.findIndex((item) => item.status !== "complete");
+  const currentWeek = currentWeekIndex >= 0 ? weeks[currentWeekIndex] : null;
+  const completedWeeks = weeks.filter((item) => item.status === "complete").length;
+
+  if (currentWeek && currentWeek.status === "not_started" && processStageLabel) {
+    currentWeek.stageLabel = processStageLabel;
+  }
+
+  return {
+    accountState,
+    totalWeeks: weeks.length,
+    completedWeeks,
+    currentWeek: currentWeek ? Number(currentWeek.week || 0) : 0,
+    currentStage: currentWeek?.stageLabel || (weeks.length ? EVENT_WORKFLOW_STAGE_LABELS.review : ""),
+    weeks
+  };
+}
+
 function buildMagicLoginUrl(env, token) {
   const base = String(env.MAGIC_LOGIN_ORIGIN || DEFAULT_MAGIC_LOGIN_ORIGIN).trim().replace(/\/+$/, "");
   return `${base}/?magicLoginToken=${encodeURIComponent(String(token || ""))}`;
@@ -944,6 +1123,7 @@ async function handleAdminOnboardingDashboard(request, env) {
   const rowsResult = await env.DB.prepare(
     `SELECT company_id,
             email,
+            password_hash,
             company_name,
             admin_name,
             updated_at,
@@ -961,6 +1141,9 @@ async function handleAdminOnboardingDashboard(request, env) {
             json_extract(state_blob, '$.savedProgramWeeks') AS saved_program_weeks,
             json_extract(state_blob, '$.fourMonthProgram.weeks') AS four_month_program_weeks,
             json_extract(state_blob, '$.fourMonthProgram.events') AS four_month_program_events,
+            json_extract(state_blob, '$.eventsBooked') AS events_booked,
+            json_extract(state_blob, '$.activeEventId') AS active_event_id,
+            json_extract(state_blob, '$.eventWorkflowProcessStep') AS event_workflow_process_step,
             (
               SELECT token
               FROM user_magic_login_links uml
@@ -996,24 +1179,8 @@ async function handleAdminOnboardingDashboard(request, env) {
 
   const rows = Array.isArray(rowsResult?.results) ? rowsResult.results : [];
   const users = rows.map((row) => {
-    const savedProgramWeeks = parseJsonValue(row.saved_program_weeks, []);
-    const fallbackProgramWeeks = (() => {
-      const weeks = parseJsonValue(row.four_month_program_weeks, []);
-      if (Array.isArray(weeks) && weeks.length) return weeks;
-      const events = parseJsonValue(row.four_month_program_events, []);
-      return Array.isArray(events) ? events : [];
-    })();
-    const programWeeks = Array.isArray(savedProgramWeeks) && savedProgramWeeks.length
-      ? savedProgramWeeks
-      : fallbackProgramWeeks;
-    const normalizedProgram = Array.isArray(programWeeks)
-      ? programWeeks
-        .map((item, index) => ({
-          week: Number(item?.week || index + 1),
-          eventName: fallbackProgramEventName(item, index)
-        }))
-        .filter((item) => item.week > 0)
-      : [];
+    const normalizedProgram = normalizeProgramWeeksForDashboard(row);
+    const progress = buildDashboardProgressFromRow(row);
 
     return {
       companyId: String(row.company_id || "").trim(),
@@ -1040,7 +1207,8 @@ async function handleAdminOnboardingDashboard(request, env) {
         totalBudget: Number(row.total_budget || 0) || 0,
         perEmployeeBudget: Number(row.per_employee_budget || 0) || 0
       },
-      program: normalizedProgram
+      program: normalizedProgram,
+      progress
     };
   });
 

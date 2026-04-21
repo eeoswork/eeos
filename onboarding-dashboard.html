@@ -60,7 +60,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr auto auto;
+      grid-template-columns: 1.2fr 0.8fr auto auto auto;
       gap: 10px;
       align-items: end;
       margin-bottom: 14px;
@@ -73,7 +73,8 @@
       margin-bottom: 4px;
     }
 
-    .field input {
+    .field input,
+    .field select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -235,6 +236,35 @@
       flex-wrap: wrap;
     }
 
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+
+    .badge.ok {
+      color: #0f6b45;
+      background: #e8fbf0;
+      border: 1px solid #b6f0cb;
+    }
+
+    .badge.warn {
+      color: #8a5a00;
+      background: #fff8e5;
+      border: 1px solid #fde39a;
+    }
+
+    .badge.muted {
+      color: #4a5a73;
+      background: #eef2f8;
+      border: 1px solid #d7deea;
+    }
+
     .empty {
       padding: 14px;
       font-size: 13px;
@@ -306,6 +336,14 @@
           <label for="limit">Rows</label>
           <input id="limit" type="number" min="1" max="100" value="25" />
         </div>
+        <div class="field">
+          <label for="accountFilter">Account type</label>
+          <select id="accountFilter">
+            <option value="all">All accounts</option>
+            <option value="email_only">Email only</option>
+            <option value="registered">Registered</option>
+          </select>
+        </div>
         <button id="loadBtn" type="button">Load</button>
       </div>
       <button class="ghost" id="refreshBtn" type="button">Refresh</button>
@@ -320,12 +358,15 @@
       apiBase: document.getElementById("apiBase"),
       readKey: document.getElementById("readKey"),
       limit: document.getElementById("limit"),
+      accountFilter: document.getElementById("accountFilter"),
       loadBtn: document.getElementById("loadBtn"),
       refreshBtn: document.getElementById("refreshBtn"),
       status: document.getElementById("status"),
       results: document.getElementById("results"),
       fetchedAt: document.getElementById("fetchedAt")
     };
+
+    let allUsers = [];
 
     function setStatus(message, type) {
       refs.status.className = "status" + (type ? " " + type : "");
@@ -351,6 +392,37 @@
       return d.toLocaleString();
     }
 
+    function formatProgressStatus(status) {
+      const normalized = String(status || "").trim().toLowerCase();
+      if (normalized === "complete") {
+        return { label: "Complete", className: "ok" };
+      }
+      if (normalized === "in_progress") {
+        return { label: "In progress", className: "warn" };
+      }
+      return { label: "Not started", className: "muted" };
+    }
+
+    function getFilteredUsers() {
+      const filter = String(refs.accountFilter?.value || "all").trim().toLowerCase();
+      if (filter !== "email_only" && filter !== "registered") {
+        return [...allUsers];
+      }
+      return allUsers.filter((user) => String(user?.progress?.accountState || "").trim().toLowerCase() === filter);
+    }
+
+    function renderFilteredUsers() {
+      const filteredUsers = getFilteredUsers();
+      render(filteredUsers);
+      const filter = String(refs.accountFilter?.value || "all").trim().toLowerCase();
+      const label = filter === "email_only"
+        ? "email-only"
+        : filter === "registered"
+          ? "registered"
+          : "all";
+      setStatus(`Showing ${filteredUsers.length} of ${allUsers.length} user record(s) (${label}).`, "ok");
+    }
+
     function render(users) {
       refs.results.innerHTML = "";
       if (!Array.isArray(users) || !users.length) {
@@ -365,12 +437,15 @@
         const answers = user.answers || {};
         const program = Array.isArray(user.program) ? user.program : [];
         const magicLink = user.magicLink || null;
+        const progress = user.progress || {};
+        const progressWeeks = Array.isArray(progress.weeks) ? progress.weeks : [];
+        const accountStateLabel = String(progress.accountState || "") === "email_only" ? "Email only" : "Registered";
 
         card.innerHTML = `
           <div class="cardHead">
             <div>
               <div class="email">${escapeHtml(user.email || "-")}</div>
-              <div class="small">Company: ${escapeHtml(user.companyName || "-")} | Admin: ${escapeHtml(user.adminName || "-")}</div>
+              <div class="small">Company: ${escapeHtml(user.companyName || "-")} | Admin: ${escapeHtml(user.adminName || "-")} | Account: ${escapeHtml(accountStateLabel)}</div>
             </div>
             <div class="headActions">
               <div class="small">Updated: ${escapeHtml(formatDate(user.updatedAt))}</div>
@@ -393,6 +468,27 @@
               <div class="row"><div class="key">Per employee</div><div class="val">${escapeHtml(formatCurrency(answers.perEmployeeBudget))}</div></div>
             </section>
             <section class="box">
+              <h3>Program Progress</h3>
+              ${progress.totalWeeks ? `
+                <div class="row"><div class="key">Current week</div><div class="val">${escapeHtml(String(progress.currentWeek || "-"))}</div></div>
+                <div class="row"><div class="key">Current stage</div><div class="val">${escapeHtml(progress.currentStage || "-")}</div></div>
+                <div class="row"><div class="key">Completed</div><div class="val">${escapeHtml(String(progress.completedWeeks || 0))} / ${escapeHtml(String(progress.totalWeeks || 0))}</div></div>
+                <table>
+                  <thead><tr><th>Week</th><th>Event</th><th>Stage</th><th>Status</th></tr></thead>
+                  <tbody>
+                    ${progressWeeks.map((item) => {
+                      const status = formatProgressStatus(item.status);
+                      return `<tr>
+                        <td>${escapeHtml(String(item.week || "-"))}</td>
+                        <td>${escapeHtml(item.eventName || "-")}</td>
+                        <td>${escapeHtml(item.stageLabel || "-")}</td>
+                        <td><span class="badge ${escapeHtml(status.className)}">${escapeHtml(status.label)}</span></td>
+                      </tr>`;
+                    }).join("")}
+                  </tbody>
+                </table>
+              ` : '<div class="small">No program progress found yet.</div>'}
+              <div style="height:10px"></div>
               <h3>Recommended Program</h3>
               ${program.length ? `
                 <table>
@@ -489,9 +585,9 @@
 
         const data = payload.data || {};
         const users = Array.isArray(data.users) ? data.users : [];
-        render(users);
+        allUsers = users;
+        renderFilteredUsers();
         refs.fetchedAt.textContent = `Last fetched: ${formatDate(data.fetchedAt)}`;
-        setStatus(`Loaded ${users.length} user record(s).`, "ok");
       } catch (error) {
         setStatus(error.message || "Failed to load dashboard.", "err");
       } finally {
@@ -541,6 +637,9 @@
 
     refs.loadBtn.addEventListener("click", loadDashboard);
     refs.refreshBtn.addEventListener("click", loadDashboard);
+    refs.accountFilter.addEventListener("change", () => {
+      renderFilteredUsers();
+    });
   </script>
 </body>
 </html>
