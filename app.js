@@ -1039,7 +1039,9 @@ function createEmptyEventLaunchContext() {
     allowDirectBookOverride: false,
     url: "",
     costPerPerson: 0,
-    locationType: "virtual"
+    locationType: "virtual",
+    source: "system",
+    programWeek: 0
   };
 }
 
@@ -1056,6 +1058,8 @@ function normalizeEventLaunchContext() {
   if (typeof next.url !== "string") next.url = "";
   if (typeof next.costPerPerson !== "number") next.costPerPerson = 0;
   if (typeof next.locationType !== "string") next.locationType = "virtual";
+  if (typeof next.source !== "string") next.source = "system";
+  if (!Number.isInteger(next.programWeek)) next.programWeek = 0;
 }
 
 function setEventLaunchContextFromTemplate(template = {}) {
@@ -1068,7 +1072,9 @@ function setEventLaunchContextFromTemplate(template = {}) {
     allowDirectBookOverride: config.allowDirectBookOverride,
     url: String(template?.url || "").trim(),
     costPerPerson: Number(template?.costPerPerson ?? template?.estimatedCost ?? 0),
-    locationType: String(template?.eventLocationType || template?.locationType || "virtual").trim() || "virtual"
+    locationType: String(template?.eventLocationType || template?.locationType || "virtual").trim() || "virtual",
+    source: String(template?.source || "system").trim() || "system",
+    programWeek: Number(template?.programWeek || template?.week || 0) || 0
   };
 }
 
@@ -6748,6 +6754,188 @@ function getFourMonthShortlistCandidates(monthEvent = {}) {
   return picked.slice(0, 4);
 }
 
+function isCustomProgramWeekEvent(weekEvent = {}) {
+  return String(weekEvent?.source || "").trim().toLowerCase() === "custom";
+}
+
+function getProgramWeekEvents() {
+  return Array.isArray(state?.fourMonthProgram?.weeks) ? state.fourMonthProgram.weeks : [];
+}
+
+function getProgramWeekEvent(weekNumber) {
+  const normalizedWeek = Number(weekNumber || 0);
+  if (normalizedWeek <= 0) return null;
+  return getProgramWeekEvents().find((item) => Number(item?.week || 0) === normalizedWeek) || null;
+}
+
+function getProgramWeekEventByTemplateId(templateId) {
+  const normalizedId = String(templateId || "").trim();
+  if (!normalizedId) return null;
+  return getProgramWeekEvents().find((item) => String(item?.templateId || item?.id || "").trim() === normalizedId) || null;
+}
+
+function syncWeeklyProgramBudgetTotals(program = state.fourMonthProgram) {
+  if (!program || typeof program !== "object") return program;
+  const weeks = Array.isArray(program.weeks) ? program.weeks : [];
+  const totalEstimatedCost = weeks.reduce((sum, eventItem) => {
+    const cost = Number(eventItem?.estimatedCost || 0);
+    return cost > 0 ? sum + cost : sum;
+  }, 0);
+  const totalBudget = Math.max(0, Number(program.totalBudget || (Number(program.monthlyBudget || 0) * 3) || 0));
+  return {
+    ...program,
+    totalEstimatedCost,
+    remainingBudget: Math.max(0, totalBudget - totalEstimatedCost)
+  };
+}
+
+function getHostRequirementLabel(value = "") {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "host_required") return "Requires a host";
+  if (normalized === "flex") return "Flexible setup";
+  if (normalized === "no_host_required") return "No host required";
+  return "";
+}
+
+function getCustomProgramEventFormDefaults(weekEvent = {}) {
+  const isCustom = isCustomProgramWeekEvent(weekEvent);
+  const locationType = String(weekEvent?.locationType || weekEvent?.eventLocationType || "virtual").trim().toLowerCase();
+  const format = locationType === "in-person" ? "in_person" : "virtual";
+  return {
+    title: isCustom ? String(weekEvent?.title || "").trim() : "",
+    description: isCustom ? String(weekEvent?.description || "").trim() : "",
+    estimatedCost: isCustom && Number(weekEvent?.estimatedCost || 0) > 0 ? String(Math.round(Number(weekEvent.estimatedCost || 0))) : "",
+    format,
+    hostRequirement: isCustom ? String(weekEvent?.hostRequirement || "no_host_required").trim() || "no_host_required" : "no_host_required"
+  };
+}
+
+function buildCustomProgramWeekEvent(weekNumber, formValues = {}, existingWeekEvent = null) {
+  const normalizedWeek = Number(weekNumber || 0);
+  const teamSize = Math.max(1, Number(state?.fourMonthProgram?.teamSize || state?.programSettings?.employeeCount || 1));
+  const title = String(formValues.title || "").trim();
+  const description = String(formValues.description || "").trim();
+  const estimatedCost = Math.max(0, Math.round(Number(formValues.estimatedCost || 0) || 0));
+  const format = String(formValues.format || "virtual").trim().toLowerCase() === "in_person" ? "in_person" : "virtual";
+  const hostRequirement = format === "in_person"
+    ? String(formValues.hostRequirement || "no_host_required").trim().toLowerCase()
+    : "";
+  const templateId = isCustomProgramWeekEvent(existingWeekEvent)
+    ? String(existingWeekEvent?.templateId || existingWeekEvent?.id || "").trim()
+    : `custom_week_${normalizedWeek}_${uid().replace(/-/g, "")}`;
+  const locationType = format === "in_person" ? "in-person" : "virtual";
+
+  return {
+    ...(existingWeekEvent && typeof existingWeekEvent === "object" ? existingWeekEvent : {}),
+    week: normalizedWeek,
+    id: templateId,
+    templateId,
+    source: "custom",
+    title,
+    description,
+    estimatedCost,
+    costPerPerson: estimatedCost > 0 ? Math.max(0, Math.round(estimatedCost / teamSize)) : 0,
+    workflowType: EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+    url: "",
+    isLaunchReady: existingWeekEvent?.isLaunchReady === true,
+    formatCapability: format === "in_person" ? "in_person_only" : "remote_only",
+    inPersonOnly: format === "in_person",
+    adminLoad: format === "in_person" ? "rsvp_and_book" : "one_slack_post",
+    deliveryMode: format === "in_person" ? "in_person" : "remote",
+    durationMinutes: Number(existingWeekEvent?.durationMinutes || 0),
+    eventLocationType: locationType,
+    locationType,
+    hostRequirement,
+    chosenByAdmin: true,
+    isEditable: true,
+    status: String(existingWeekEvent?.status || "planned").trim() || "planned"
+  };
+}
+
+function updateProgramWeekEvent(weekNumber, nextWeekEvent) {
+  if (!state.fourMonthProgram || typeof state.fourMonthProgram !== "object") return null;
+  const weeks = Array.isArray(state.fourMonthProgram.weeks) ? [...state.fourMonthProgram.weeks] : [];
+  const targetIndex = weeks.findIndex((item) => Number(item?.week || 0) === Number(weekNumber || 0));
+  if (targetIndex < 0) return null;
+  weeks[targetIndex] = nextWeekEvent;
+  state.fourMonthProgram = syncWeeklyProgramBudgetTotals({
+    ...state.fourMonthProgram,
+    weeks
+  });
+  return weeks[targetIndex];
+}
+
+function updateCustomProgramWeekStatus(templateId, nextStatus, extraFields = {}) {
+  const existingWeekEvent = getProgramWeekEventByTemplateId(templateId);
+  if (!existingWeekEvent || !isCustomProgramWeekEvent(existingWeekEvent)) return;
+  updateProgramWeekEvent(existingWeekEvent.week, {
+    ...existingWeekEvent,
+    status: String(nextStatus || existingWeekEvent.status || "planned").trim() || "planned",
+    ...extraFields
+  });
+}
+
+function buildProgramEventStatusBadgeHtml(weekEvent = {}) {
+  const status = String(weekEvent?.status || "").trim().toLowerCase();
+  if (!status) return "";
+  const map = {
+    planned: { label: "Planned", bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+    completed: { label: "Completed", bg: "#ecfdf5", color: "#047857", border: "#a7f3d0" },
+    reviewed: { label: "Reviewed", bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" }
+  };
+  const config = map[status];
+  if (!config) return "";
+  return `<span style="display: inline-flex; align-items: center; gap: 6px; background: ${config.bg}; color: ${config.color}; border: 1px solid ${config.border}; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;">${escapeHtml(config.label)}</span>`;
+}
+
+function buildCustomProgramEventFormHtml(weekEvent = {}) {
+  const weekNumber = Number(weekEvent?.week || 0);
+  const defaults = getCustomProgramEventFormDefaults(weekEvent);
+  const isEditing = isCustomProgramWeekEvent(weekEvent);
+  const hostRequirementValue = defaults.hostRequirement || "no_host_required";
+  return `
+    <div style="margin-top: 10px; border: 1px solid #dbe2e8; border-radius: 12px; padding: 12px; background: #f8fafc; display: grid; gap: 10px;">
+      <div>
+        <div style="font-size: 13px; font-weight: 600; color: #0f172a;">➕ Add your own event</div>
+        <div style="margin-top: 3px; font-size: 12px; color: #64748b;">Have something your team already runs? Add it here.</div>
+      </div>
+      <label style="display: grid; gap: 4px;">
+        <span style="font-size: 12px; font-weight: 600; color: #475569;">Event name</span>
+        <input id="programCustomTitle_${weekNumber}" type="text" value="${escapeHtml(defaults.title)}" placeholder="Team lunch" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 10px; font-size: 13px; color: #0f172a; background: #ffffff;" />
+      </label>
+      <label style="display: grid; gap: 4px;">
+        <span style="font-size: 12px; font-weight: 600; color: #475569;">Short description</span>
+        <textarea id="programCustomDescription_${weekNumber}" rows="3" placeholder="A quick description for the team." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 10px; font-size: 13px; color: #0f172a; background: #ffffff; resize: vertical;">${escapeHtml(defaults.description)}</textarea>
+      </label>
+      <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+        <label style="display: grid; gap: 4px;">
+          <span style="font-size: 12px; font-weight: 600; color: #475569;">Estimated total cost</span>
+          <input id="programCustomCost_${weekNumber}" type="number" min="0" step="1" value="${escapeHtml(defaults.estimatedCost)}" placeholder="0" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 10px; font-size: 13px; color: #0f172a; background: #ffffff;" />
+        </label>
+        <label style="display: grid; gap: 4px;">
+          <span style="font-size: 12px; font-weight: 600; color: #475569;">Format</span>
+          <select id="programCustomFormat_${weekNumber}" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 10px; font-size: 13px; color: #0f172a; background: #ffffff;">
+            <option value="virtual" ${defaults.format === "virtual" ? "selected" : ""}>Virtual</option>
+            <option value="in_person" ${defaults.format === "in_person" ? "selected" : ""}>In person</option>
+          </select>
+        </label>
+        <label style="display: grid; gap: 4px;">
+          <span style="font-size: 12px; font-weight: 600; color: #475569;">Host requirement</span>
+          <select id="programCustomHost_${weekNumber}" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 10px; font-size: 13px; color: #0f172a; background: #ffffff;">
+            <option value="no_host_required" ${hostRequirementValue === "no_host_required" ? "selected" : ""}>No host required</option>
+            <option value="host_required" ${hostRequirementValue === "host_required" ? "selected" : ""}>Requires a host</option>
+            <option value="flex" ${hostRequirementValue === "flex" ? "selected" : ""}>Flexible setup</option>
+          </select>
+        </label>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+        <button type="button" data-action="cancel-custom-event-form" data-week="${weekNumber}" style="border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 600;">Cancel</button>
+        <button type="button" data-action="save-custom-event" data-week="${weekNumber}" style="border: 1px solid #0f172a; background: #0f172a; color: #ffffff; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 600;">${isEditing ? "Save changes" : "Add to program"}</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderWeeklyProgramCards(weeks, options) {
   const isInitialRender = options.isInitialRender !== false;
   const expandedCardIds = options.expandedCardIds instanceof Set ? options.expandedCardIds : new Set();
@@ -6787,6 +6975,7 @@ function renderWeeklyProgramCards(weeks, options) {
   const primaryCardId = `week-card-${primaryWeekNum}`;
   const primaryIsExpanded = isInitialRender ? true : expandedCardIds.has(primaryCardId);
   const primaryIsLaunchReady = primaryEvent.isLaunchReady === true;
+  const primaryIsCustom = isCustomProgramWeekEvent(primaryEvent);
   const primaryCostDisplay = primaryEvent.estimatedCost > 0
     ? `Est. cost: ${fmtMoney(primaryEvent.estimatedCost)}`
     : "Free";
@@ -6807,6 +6996,12 @@ function renderWeeklyProgramCards(weeks, options) {
   const primaryDisplayDescription = primaryTemplateId === "5_day_energy_reset_challenge"
     ? "Recharge with our 5-day challenge featuring quick, science-backed habits to boost focus and energy. A low-pressure, free kickoff to build program momentum for bigger, premium events to come. Admin load: Schedule 6 daily Slack posts (~5 min total)."
     : resolveProgramRevealDescription(primaryTemplateId, primaryEvent.description || "");
+  const primaryStatusBadgeHtml = buildProgramEventStatusBadgeHtml(primaryEvent);
+  const primarySourceBadgeHtml = primaryIsCustom
+    ? `<span style="display: inline-flex; align-items: center; gap: 6px; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;">Custom</span>`
+    : "";
+  const primaryFormOpen = Number(programRevealUiState.selectedWeekForCustomForm || 0) === primaryWeekNum;
+  const primaryFormToggleHtml = `<button type="button" data-action="open-custom-event-form" data-week="${primaryWeekNum}" style="border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 600;">${primaryIsCustom ? "Edit custom event" : "Add your own event"}</button>`;
   const primaryCardHtml = `
     <div id="${primaryCardId}" style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10); background: white; overflow: hidden;" class="four-month-card" data-expanded="${primaryIsExpanded ? "true" : "false"}">
       <div style="padding: 16px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
@@ -6817,6 +7012,8 @@ function renderWeeklyProgramCards(weeks, options) {
                 ${calendarIconSvg}
                 <h3 class="text-sm font-semibold text-slate-500">${escapeHtml(primaryWeekLabel)}</h3>
               </div>
+              ${primarySourceBadgeHtml}
+              ${primaryStatusBadgeHtml}
             </div>
             <p class="text-base font-semibold text-slate-900" style="margin: 0;">${escapeHtml(primaryDisplayTitle)}</p>
           </div>
@@ -6826,8 +7023,12 @@ function renderWeeklyProgramCards(weeks, options) {
         <p class="text-sm text-slate-600">${escapeHtml(primaryDisplayDescription)}</p>
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
           <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #0f172a;">${escapeHtml(primaryCostDisplay)}${primaryCostPillsHtml}</div>
-          ${primaryLaunchButtonHtml}
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            ${primaryFormToggleHtml}
+            ${primaryLaunchButtonHtml}
+          </div>
         </div>
+        ${primaryFormOpen ? buildCustomProgramEventFormHtml(primaryEvent) : ""}
       </div>
     </div>
   `;
@@ -6906,6 +7107,13 @@ function renderWeeklyProgramCards(weeks, options) {
         style: "display: inline-block; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;"
       });
     }
+    const hostRequirementLabel = getHostRequirementLabel(weekEvent?.hostRequirement);
+    if (hostRequirementLabel) {
+      pills.push({
+        label: hostRequirementLabel,
+        style: "display: inline-block; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;"
+      });
+    }
     if (!pills.length) return "";
     return `<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">${pills.map((pill) => `<span style="${pill.style}">${escapeHtml(pill.label)}</span>`).join("")}</div>`;
   }
@@ -6939,6 +7147,7 @@ function renderWeeklyProgramCards(weeks, options) {
   function buildRow(weekEvent, isLast, extraStyle) {
     const weekNum = Number(weekEvent.week || 0);
     const weekLabel = `Week ${weekNum}`;
+    const isCustom = isCustomProgramWeekEvent(weekEvent);
     const templateId = String(weekEvent.templateId || weekEvent.id || "");
     const offeringMeta = offeringById.get(templateId) || null;
     const displayTitle = normalizeProgramRevealEventTitle(weekEvent.title || "");
@@ -6973,8 +7182,24 @@ function renderWeeklyProgramCards(weeks, options) {
     const descriptionPillsHtml = buildDescriptionPillsHtml({
       deliveryMode: resolvedDeliveryMode,
       durationMinutes: resolvedDurationMinutes,
-      roiPrimary: resolvedRoiPrimary
+      roiPrimary: resolvedRoiPrimary,
+      hostRequirement: weekEvent?.hostRequirement
     });
+    const statusBadgeHtml = buildProgramEventStatusBadgeHtml(weekEvent);
+    const sourceBadgeHtml = isCustom
+      ? `<span style="display: inline-flex; align-items: center; gap: 6px; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap;">Custom</span>`
+      : "";
+    const formOpen = Number(programRevealUiState.selectedWeekForCustomForm || 0) === weekNum;
+    const customControlsHtml = `
+      <div style="margin-top: 10px; display: grid; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          ${sourceBadgeHtml}
+          ${statusBadgeHtml}
+          <button type="button" data-action="open-custom-event-form" data-week="${weekNum}" style="border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 10px; padding: 7px 10px; font-size: 12px; font-weight: 600;">${isCustom ? "Edit custom event" : "Add your own event"}</button>
+        </div>
+        ${formOpen ? buildCustomProgramEventFormHtml(weekEvent) : ""}
+      </div>
+    `;
     const vendorNameHtml = resolvedVendorName
       ? `<div style="margin-top: 2px; font-size: 12px; font-weight: 500; color: #94a3b8; line-height: 1.2;">${escapeHtml(resolvedVendorName)}</div>`
       : "";
@@ -6983,7 +7208,7 @@ function renderWeeklyProgramCards(weeks, options) {
       <tr style="${style}">
         <td class="program-reveal-cell program-reveal-week" style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: ${weekLabelColor}; white-space: nowrap; vertical-align: top;">${escapeHtml(weekLabel)}</td>
         <td class="program-reveal-cell program-reveal-event" style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.25; vertical-align: top; min-width: 180px; white-space: nowrap;">${escapeHtml(displayTitle)}${vendorNameHtml}<div class="program-reveal-mobile-extra" style="display: none; font-weight: 400;"><div class="program-reveal-mobile-desc" style="font-size: 11px; color: #475569; margin-top: 5px; line-height: 1.4; white-space: normal;">${escapeHtml(displayDescription)}</div><div class="program-reveal-mobile-cost" style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px; white-space: normal;">Est. cost: ${resolvedCostDisplay}</div></div></td>
-        <td class="program-reveal-cell" style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}</td>
+        <td class="program-reveal-cell" style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 13px; color: #475569; line-height: 1.35; vertical-align: top;">${descriptionPillsHtml}${escapeHtml(displayDescription)}${customControlsHtml}</td>
         <td class="program-reveal-cell program-reveal-admin" style="${rowBg}padding: 12px 30px 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; line-height: 1.35; vertical-align: top; white-space: nowrap;">${adminLoadHtml}</td>
         <td class="program-reveal-cell program-reveal-cost" style="${rowBg}padding: 12px 0; border-bottom: ${isLast ? "none" : "1px solid #e2e8f0"}; font-size: 12px; color: #475569; text-align: center; vertical-align: top;">${resolvedCostDisplay}</td>
       </tr>`;
@@ -8125,10 +8350,98 @@ if (action === "select-confetti") {
 
 
 
+if (action === "open-custom-event-form") {
+  const weekNumber = Number(actionTarget.dataset.week || 0);
+  const weekEvent = getProgramWeekEvent(weekNumber);
+  if (!weekEvent) {
+    showMiniToast("Week not found");
+    return;
+  }
+  programRevealUiState.selectedWeekForCustomForm = weekNumber;
+  programRevealUiState.editingCustomEventId = isCustomProgramWeekEvent(weekEvent)
+    ? String(weekEvent.templateId || weekEvent.id || "").trim()
+    : "";
+  renderFourMonthProgram();
+  return;
+}
+
+
+
+if (action === "cancel-custom-event-form") {
+  programRevealUiState.selectedWeekForCustomForm = null;
+  programRevealUiState.editingCustomEventId = "";
+  renderFourMonthProgram();
+  return;
+}
+
+
+
+if (action === "save-custom-event") {
+  const weekNumber = Number(actionTarget.dataset.week || 0);
+  const existingWeekEvent = getProgramWeekEvent(weekNumber);
+  if (!existingWeekEvent) {
+    showMiniToast("Week not found");
+    return;
+  }
+
+  const titleInput = document.getElementById(`programCustomTitle_${weekNumber}`);
+  const descriptionInput = document.getElementById(`programCustomDescription_${weekNumber}`);
+  const costInput = document.getElementById(`programCustomCost_${weekNumber}`);
+  const formatInput = document.getElementById(`programCustomFormat_${weekNumber}`);
+  const hostInput = document.getElementById(`programCustomHost_${weekNumber}`);
+
+  const title = String(titleInput?.value || "").trim();
+  const description = String(descriptionInput?.value || "").trim();
+  const estimatedCost = String(costInput?.value || "").trim();
+  const format = String(formatInput?.value || "virtual").trim();
+  const hostRequirement = String(hostInput?.value || "no_host_required").trim();
+
+  if (!title) {
+    showMiniToast("Add an event name");
+    return;
+  }
+  if (!description) {
+    showMiniToast("Add a short description");
+    return;
+  }
+
+  const nextWeekEvent = buildCustomProgramWeekEvent(weekNumber, {
+    title,
+    description,
+    estimatedCost,
+    format,
+    hostRequirement
+  }, existingWeekEvent);
+
+  updateProgramWeekEvent(weekNumber, nextWeekEvent);
+  programRevealUiState.selectedWeekForCustomForm = null;
+  programRevealUiState.editingCustomEventId = "";
+  persistState();
+  renderFourMonthProgram();
+  showMiniToast(isCustomProgramWeekEvent(existingWeekEvent) ? "Custom event updated" : "Custom event added to program");
+  syncWorkflowStateToDraft().catch((error) => {
+    console.warn("Custom event sync to D1 failed", error?.message || error);
+  });
+  return;
+}
+
+
+
 
 if (action === "create-event") {
   const templateId = actionTarget.dataset.templateId;
-  const template = (state.fourMonthProgram?.events || []).find((e) => String(e.templateId || e.id || "") === String(templateId))
+  const weekTemplate = getProgramWeekEventByTemplateId(templateId);
+  const template = weekTemplate
+    ? {
+      ...weekTemplate,
+      id: String(weekTemplate.templateId || weekTemplate.id || "").trim(),
+      costPerPerson: Number(weekTemplate.costPerPerson ?? 0),
+      url: String(weekTemplate.url || "").trim(),
+      workflowType: String(weekTemplate.workflowType || EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE).trim() || EVENT_WORKFLOW_TYPES.STRAIGHT_TO_PROMOTE,
+      eventLocationType: String(weekTemplate.eventLocationType || weekTemplate.locationType || "virtual").trim() || "virtual",
+      locationType: String(weekTemplate.locationType || weekTemplate.eventLocationType || "virtual").trim() || "virtual"
+    }
+    : (state.fourMonthProgram?.events || []).find((e) => String(e.templateId || e.id || "") === String(templateId))
     || (Array.isArray(window.EVENT_TEMPLATES) ? window.EVENT_TEMPLATES : []).find((t) => String(t.id) === String(templateId))
     || getSeededFreeEventTemplateById(templateId);
 
@@ -8178,6 +8491,9 @@ if (action === "create-event") {
   }
 
   persistState();
+  if (isCustomProgramWeekEvent(template)) {
+    updateCustomProgramWeekStatus(String(templateId || "").trim(), "planned");
+  }
   syncWorkflowStateToDraft().catch((error) => {
     console.warn("Launch event sync to D1 failed", error?.message || error);
   });
@@ -12955,6 +13271,11 @@ const promoteUiState = {
   copiedAction: null
 };
 
+const programRevealUiState = {
+  selectedWeekForCustomForm: null,
+  editingCustomEventId: ""
+};
+
 function getPollCloseCountdownStatus(deadlineValue) {
   const deadlineRaw = String(deadlineValue || "").trim();
   const deadlineDate = deadlineRaw ? new Date(deadlineRaw) : null;
@@ -16100,6 +16421,10 @@ function renderRunEventStep() {
     if (bookedEvent && typeof bookedEvent === "object") {
       bookedEvent.status = "completed";
     }
+    updateCustomProgramWeekStatus(String(state.eventLaunchContext?.templateId || "").trim(), "completed", {
+      attendanceCount: Number(runState.attendanceEstimate || 0) || null,
+      actualTotalCost: Number(bookedEvent?.totalCost || 0) || null
+    });
     runEventUiState.confirmCompleteWithoutChecks = false;
     if (!Array.isArray(state.completedSetupSteps)) {
       state.completedSetupSteps = [];
@@ -16491,6 +16816,15 @@ function renderCollectFeedbackStep() {
       if (!state.completedSetupSteps.includes(13)) {
         state.completedSetupSteps.push(13);
       }
+      const activeBookedEvent = Array.isArray(state.eventsBooked)
+        ? state.eventsBooked.find((item) => String(item?.id || "").trim() === String(state.activeEventId || "").trim())
+        : null;
+      updateCustomProgramWeekStatus(String(state.eventLaunchContext?.templateId || "").trim(), "reviewed", {
+        attendanceCount: Number(activeBookedEvent?.attendance || activeBookedEvent?.attendanceEstimate || activeBookedEvent?.runEvent?.attendanceEstimate || 0) || null,
+        actualTotalCost: Number(activeBookedEvent?.totalCost || 0) || null,
+        reviewNotes: String(activeBookedEvent?.feedback?.whatWorked || activeBookedEvent?.runEventNotes || activeBookedEvent?.runEvent?.runEventNotes || "").trim(),
+        impactRating: Number(activeBookedEvent?.feedback?.starRating || 0) || null
+      });
       state.currentSetupStep = 14;
       state.eventWorkflowProcessStep = 14;
       persistState();
@@ -18023,7 +18357,8 @@ function renderBookEventStep() {
         const chosenEvent = selectedEvents.find((eventItem) => String(eventItem?.defaultLabel || "").trim() === String(topEventLabel || "").trim())
           || selectedEvents[0]
           || null;
-        const chosenEventMasterId = String(chosenEvent?.id || "").trim();
+        const launchedProgramWeekEvent = getProgramWeekEventByTemplateId(String(state.eventLaunchContext?.templateId || "").trim());
+        const chosenEventMasterId = String(chosenEvent?.id || state.eventLaunchContext?.templateId || "").trim();
         const vendorUrl = String(topEventDetailsUrl || state.pollBuilder.vendorBookingUrl || "").trim();
 
         const existingBookedIndex = currentEventsBooked.findIndex((eventItem) => {
@@ -18039,6 +18374,8 @@ function renderBookEventStep() {
           ...(existingBookedEvent || {}),
           id: bookedEventId,
           event_master_id: chosenEventMasterId || existingBookedEvent?.event_master_id || "",
+          source: String(launchedProgramWeekEvent?.source || state.eventLaunchContext?.source || existingBookedEvent?.source || "system").trim() || "system",
+          programWeek: Number(launchedProgramWeekEvent?.week || state.eventLaunchContext?.programWeek || existingBookedEvent?.programWeek || 0) || null,
           name: String(topEventLabel || existingBookedEvent?.name || "Team Event"),
           url: vendorUrl || String(existingBookedEvent?.url || ""),
           date: bookedDate,
