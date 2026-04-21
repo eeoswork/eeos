@@ -194,8 +194,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Start Before You're Ready",
     shortDescription: "Help the team turn \"I'll do it later\" into real progress.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start.\n2. Spend 30 minutes making progress.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👉🧵`,
-    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start.<br>2. Spend 30 minutes making progress.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👉🧵`
+    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start.\n2. Spend 30 minutes making progress.\n3. Come back and reply with your result.\n\n**Bonus:** Choose 1 person and cheer them on\n\nWhat are you starting today? 👉🧵`,
+    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start.<br>2. Spend 30 minutes making progress.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Choose 1 person and cheer them on<br><br>What are you starting today? 👉🧵`
   },
   one_hard_thing: {
     id: "one_hard_thing",
@@ -203,8 +203,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Do the Hard Thing",
     shortDescription: "Help the team tackle the thing they've been avoiding.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle.\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat task will you tackle? 👉 🧵`,
-    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle.<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What task will you tackle? 👉 🧵`
+    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle.\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\n**Bonus:** Support 1 person—encourage them or check in on their progress\n\nWhat task will you tackle? 👉 🧵`,
+    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle.<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Support 1 person—encourage them or check in on their progress<br><br>What task will you tackle? 👉 🧵`
   },
   ship_something_today: {
     id: "ship_something_today",
@@ -212,8 +212,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Ship Something Today",
     shortDescription: "Help the team move across the finish line and feel that sense of achievement.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today.\n2. Do the work.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👉 🧵`,
-    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today.<br>2. Do the work.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👉 🧵`
+    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today.\n2. Do the work.\n3. Come back and reply with your result.\n\n**Bonus:** Help 1 other person stay accountable—check in or encourage them\n\nWhat are you shipping today? 👉 🧵`,
+    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today.<br>2. Do the work.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Help 1 other person stay accountable—check in or encourage them<br><br>What are you shipping today? 👉 🧵`
   }
 };
 
@@ -402,7 +402,6 @@ function render() {
         <div class="mb-6"></div>
         <div class="mb-6"></div>
         <div class="mb-6"></div>
-        <br>
         <br>
         <h5 class="text-base font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
         <p class="mt-1 text-sm text-slate-600">If so, schedule these two mini-challenges below.</p>
