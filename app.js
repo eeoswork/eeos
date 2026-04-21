@@ -2444,7 +2444,7 @@ function applyMagicLandingHeaderBranding() {
   if (isGenericLandingMirrorMagicContext()) {
     const contextKey = getMagicLinkContextKey();
     if (GENERIC_MAGIC_LINK_NO_BRAND_KEYS.has(contextKey)) {
-      if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
+      if (ltfStartBtn) ltfStartBtn.textContent = "Get Your Program \u2192";
     } else {
     const parsed = parseMagicLinkFromHostPath();
     const host = String(parsed?.host || "").trim().toLowerCase();
@@ -2452,10 +2452,10 @@ function applyMagicLandingHeaderBranding() {
     const fallbackName = slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "Your Company";
     const companyName = String(state.companyName || MAGIC_LINK_HOST_DEFAULTS[host]?.companyName || fallbackName).trim() || fallbackName;
     const possessive = toPossessiveLabel(companyName) || "Your Company's";
-    if (ltfStartBtn) ltfStartBtn.textContent = `Build ${possessive} People Plan \u2192`;
+    if (ltfStartBtn) ltfStartBtn.textContent = `Get ${possessive} Program \u2192`;
     }
   } else {
-    if (ltfStartBtn) ltfStartBtn.textContent = "Build Your People Plan \u2192";
+    if (ltfStartBtn) ltfStartBtn.textContent = "Get Your Program \u2192";
   }
 
   landingHeaderSignIn.textContent = "Log in";
