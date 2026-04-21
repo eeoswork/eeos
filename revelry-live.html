@@ -194,8 +194,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Start Before You're Ready",
     shortDescription: "Help the team turn \"I'll do it later\" into real progress.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start\n2. Spend 30 minutes making progress\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👉🧵`,
-    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start<br>2. Spend 30 minutes making progress<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👉🧵`
+    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start.\n2. Spend 30 minutes making progress.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you starting today? 👉🧵`,
+    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start.<br>2. Spend 30 minutes making progress.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you starting today? 👉🧵`
   },
   one_hard_thing: {
     id: "one_hard_thing",
@@ -203,8 +203,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Do the Hard Thing",
     shortDescription: "Help the team tackle the thing they've been avoiding.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat task will you tackle? 👉 🧵`,
-    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What task will you tackle? 👉 🧵`
+    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle.\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat task will you tackle? 👉 🧵`,
+    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle.<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What task will you tackle? 👉 🧵`
   },
   ship_something_today: {
     id: "ship_something_today",
@@ -212,8 +212,8 @@ const FOCUS_SERIES_EVENTS = {
     title: "Ship Something Today",
     shortDescription: "Help the team move across the finish line and feel that sense of achievement.",
     scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today\n2. Do the work\n3. Come back and reply with your result\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👉 🧵`,
-    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today<br>2. Do the work<br>3. Come back and reply with your result<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👉 🧵`
+    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today.\n2. Do the work.\n3. Come back and reply with your result.\n\nBonus: React to 2 others for accountability 👀🔥\n\nWhat are you shipping today? 👉 🧵`,
+    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today.<br>2. Do the work.<br>3. Come back and reply with your result.<br><br>Bonus: React to 2 others for accountability 👀🔥<br><br>What are you shipping today? 👉 🧵`
   }
 };
 
@@ -230,24 +230,24 @@ function readState() {
       return {
         selectedDayOneId: "",
         dayOneCopied: false,
-        expandedFollowUpId: ""
+        expandedCardId: ""
       };
     }
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") throw new Error("invalid");
     const selectedDayOneId = String(parsed.selectedDayOneId || "").trim();
     const dayOneCopied = parsed.dayOneCopied === true;
-    const expandedFollowUpId = String(parsed.expandedFollowUpId || "").trim();
+    const expandedCardId = String(parsed.expandedCardId || parsed.expandedFollowUpId || "").trim();
     return {
       selectedDayOneId: FOCUS_SERIES_EVENTS[selectedDayOneId] ? selectedDayOneId : "",
       dayOneCopied,
-      expandedFollowUpId: FOCUS_SERIES_EVENTS[expandedFollowUpId] ? expandedFollowUpId : ""
+      expandedCardId: FOCUS_SERIES_EVENTS[expandedCardId] ? expandedCardId : ""
     };
   } catch (_error) {
     return {
       selectedDayOneId: "",
       dayOneCopied: false,
-      expandedFollowUpId: ""
+      expandedCardId: ""
     };
   }
 }
@@ -311,6 +311,41 @@ function renderExpandedCard(eventData, options = {}) {
   `;
 }
 
+function renderSelectedDayOneCard(eventData, options = {}) {
+  const expanded = options.expanded !== false;
+  const copyAction = String(options.copyAction || "");
+  const copied = options.copied === true;
+  const canToggle = options.canToggle === true;
+  if (expanded) {
+    return `
+      <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
+        <button type="button" class="step-header active w-full ${canToggle ? "cursor-pointer" : "cursor-default"}" ${canToggle ? 'data-toggle-day1="true"' : ""}>
+          <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+          ${canToggle ? '<span class="text-white/80">▾</span>' : ""}
+        </button>
+        <div class="step-body">
+          <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
+          <div class="step-message">${eventData.htmlMessage}</div>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
+            <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+            <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  return `
+    <article class="step-card rounded-xl border border-slate-200 bg-white">
+      <button type="button" class="step-header w-full cursor-pointer" data-toggle-day1="true">
+        <div class="text-sm text-slate-900"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+        <span class="text-slate-400">▸</span>
+      </button>
+    </article>
+  `;
+}
+
 function renderFollowUpCard(eventData, label, expanded, followUpIndex) {
   const scheduleHintText = followUpIndex === 0 ? "Schedule this post for the following day." : "Schedule this post for the day after.";
   return `
@@ -352,9 +387,12 @@ function render() {
       { label: "The day after", id: followIdTwo }
     ].filter((item) => FOCUS_SERIES_EVENTS[item.id]);
 
-    const selectedHtml = renderExpandedCard(dayOneEvent, {
+    const expandedCardId = state.dayOneCopied ? (state.expandedCardId || dayOneEvent.id) : dayOneEvent.id;
+    const selectedHtml = renderSelectedDayOneCard(dayOneEvent, {
       copyAction: `day1:${dayOneEvent.id}`,
-      copied: state.dayOneCopied
+      copied: state.dayOneCopied,
+      expanded: expandedCardId === dayOneEvent.id,
+      canToggle: state.dayOneCopied
     });
 
     const followUpsSection = state.dayOneCopied
@@ -364,10 +402,12 @@ function render() {
         <div class="mb-6"></div>
         <div class="mb-6"></div>
         <div class="mb-6"></div>
+        <br>
+        <br>
         <h5 class="text-base font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
         <p class="mt-1 text-sm text-slate-600">If so, schedule these two mini-challenges below.</p>
         <div class="mt-4 space-y-3">
-          ${followUps.map((item, followUpIndex) => renderFollowUpCard(FOCUS_SERIES_EVENTS[item.id], item.label, state.expandedFollowUpId === item.id, followUpIndex)).join("")}
+          ${followUps.map((item, followUpIndex) => renderFollowUpCard(FOCUS_SERIES_EVENTS[item.id], item.label, expandedCardId === item.id, followUpIndex)).join("")}
         </div>
       </section>
       `
@@ -389,7 +429,7 @@ function render() {
       writeState({
         selectedDayOneId: eventId,
         dayOneCopied: false,
-        expandedFollowUpId: ""
+        expandedCardId: eventId
       });
       render();
     });
@@ -401,8 +441,19 @@ function render() {
       writeState({
         selectedDayOneId: "",
         dayOneCopied: false,
-        expandedFollowUpId: ""
+        expandedCardId: ""
       });
+      render();
+    });
+  }
+
+  const toggleDayOneBtn = root.querySelector("[data-toggle-day1]");
+  if (toggleDayOneBtn) {
+    toggleDayOneBtn.addEventListener("click", () => {
+      const nextState = readState();
+      if (!nextState.dayOneCopied || !nextState.selectedDayOneId) return;
+      nextState.expandedCardId = nextState.expandedCardId === nextState.selectedDayOneId ? "" : nextState.selectedDayOneId;
+      writeState(nextState);
       render();
     });
   }
@@ -412,7 +463,7 @@ function render() {
       const eventId = String(button.getAttribute("data-toggle-followup") || "").trim();
       const nextState = readState();
       if (!nextState.dayOneCopied) return;
-      nextState.expandedFollowUpId = nextState.expandedFollowUpId === eventId ? "" : eventId;
+      nextState.expandedCardId = nextState.expandedCardId === eventId ? "" : eventId;
       writeState(nextState);
       render();
     });
@@ -445,6 +496,9 @@ function render() {
 
       if (copyKey.startsWith("day1:")) {
         nextState.dayOneCopied = true;
+        if (!nextState.expandedCardId) {
+          nextState.expandedCardId = nextState.selectedDayOneId;
+        }
         writeState(nextState);
         render();
         return;
