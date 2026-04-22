@@ -11858,7 +11858,6 @@ function startLandingTypeform() {
   // Update rail label and enable full color preview
   const railLabel = $("ltfPreviewRailLabel");
   if (railLabel) {
-    railLabel.textContent = "YOUR PROGRAM";
     railLabel.classList.add("ltf-preview-rail-label--active");
   }
   const previewPanel = $("landingTfRight");
