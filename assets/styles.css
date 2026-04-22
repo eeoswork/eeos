@@ -1219,7 +1219,7 @@ font-size: 11px;
   font-size: 0.8125rem;
   color: #0f172a;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .landing-tf-cta {
@@ -1237,6 +1237,7 @@ font-size: 11px;
   cursor: pointer;
   letter-spacing: -0.01em;
   transition: background 0.15s ease;
+  margin-bottom: 10px;
 }
 
 .landing-tf-cta:hover {
