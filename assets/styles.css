@@ -1237,6 +1237,7 @@ font-size: 11px;
   cursor: pointer;
   letter-spacing: -0.01em;
   transition: background 0.15s ease;
+  margin-top: 16px;
   margin-bottom: 10px;
 }
 
