@@ -11855,10 +11855,11 @@ function startLandingTypeform() {
   $("landingTfBuilder")?.classList.remove("hidden");
   renderLtfProgressBar();
   renderLtfNavButtons();
-  // Update rail label and enable full color preview
+  // The builder uses a separate preview state, so keep the landing helper label blurred.
   const railLabel = $("ltfPreviewRailLabel");
   if (railLabel) {
-    railLabel.classList.add("ltf-preview-rail-label--active");
+    railLabel.classList.remove("ltf-preview-rail-label--active");
+    railLabel.classList.add("ltf-blurred");
   }
   const previewPanel = $("landingTfRight");
   if (previewPanel) {

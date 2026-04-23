@@ -1606,6 +1606,7 @@ font-size: 11px;
 
 .ltf-preview-card.ltf-blurred,
 .ltf-events-cycle-label.ltf-blurred,
+.ltf-preview-rail-label.ltf-blurred,
 .ltf-preview-schedule-list.ltf-blurred {
   filter: blur(4px);
   opacity: 0.55;
