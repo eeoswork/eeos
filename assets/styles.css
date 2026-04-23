@@ -1223,7 +1223,8 @@ font-size: 11px;
 }
 
 .landing-tf-cta {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
   justify-content: center;
   height: 50px;
@@ -1237,7 +1238,7 @@ font-size: 11px;
   cursor: pointer;
   letter-spacing: -0.01em;
   transition: background 0.15s ease;
-  margin-top: 16px;
+  margin-top: 18px;
   margin-bottom: 10px;
 }
 
