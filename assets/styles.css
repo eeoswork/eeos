@@ -1041,6 +1041,11 @@ font-size: 11px;
   padding-right: 8px;
 }
 
+#landingTopHeader {
+  left: 14px;
+  right: 14px;
+}
+
 .landing-tf-left {
   min-height: calc(100vh - 84px);
   min-width: 0;
@@ -2023,6 +2028,11 @@ font-size: 11px;
 }
 
 @media (max-width: 640px) {
+  #landingTopHeader {
+    left: 10px;
+    right: 10px;
+  }
+
   .eeos-main {
     padding: 10px;
     overflow-x: hidden;
