@@ -347,6 +347,7 @@
         <button id="loadBtn" type="button">Load</button>
       </div>
       <button class="ghost" id="refreshBtn" type="button">Refresh</button>
+      <button class="ghost" id="resyncBtn" type="button" style="margin-left:8px">Resync progress data</button>
       <div class="status" id="status"></div>
     </div>
 
@@ -361,6 +362,7 @@
       accountFilter: document.getElementById("accountFilter"),
       loadBtn: document.getElementById("loadBtn"),
       refreshBtn: document.getElementById("refreshBtn"),
+      resyncBtn: document.getElementById("resyncBtn"),
       status: document.getElementById("status"),
       results: document.getElementById("results"),
       fetchedAt: document.getElementById("fetchedAt")
@@ -637,6 +639,32 @@
 
     refs.loadBtn.addEventListener("click", loadDashboard);
     refs.refreshBtn.addEventListener("click", loadDashboard);
+    refs.resyncBtn.addEventListener("click", async () => {
+      const apiBase = String(refs.apiBase.value || "").trim().replace(/\/+$/, "");
+      const readKey = String(refs.readKey.value || "").trim();
+      if (!apiBase || !readKey) {
+        setStatus("API base URL and dashboard key are required.", "err");
+        return;
+      }
+      refs.resyncBtn.disabled = true;
+      setStatus("Resyncing progress data...", "");
+      try {
+        const response = await fetch(`${apiBase}/admin/onboarding-dashboard/resync`, {
+          method: "POST",
+          headers: { "Accept": "application/json", "x-dashboard-key": readKey }
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload?.ok) {
+          throw new Error(payload?.error?.message || "Resync failed.");
+        }
+        setStatus(`Resynced ${payload.data.resynced} of ${payload.data.total} accounts. Refreshing...`, "ok");
+        await loadDashboard();
+      } catch (error) {
+        setStatus(error.message || "Resync failed.", "err");
+      } finally {
+        refs.resyncBtn.disabled = false;
+      }
+    });
     refs.accountFilter.addEventListener("change", () => {
       renderFilteredUsers();
     });

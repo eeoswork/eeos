@@ -1063,6 +1063,15 @@ async function handleOnboardingEmailSave(request, env) {
 
   let mergedState = mergeDraftState(existingState, draft, "if-empty-or-newer");
   mergedState = deepMergeState(mergedState, incomingStateBlob);
+
+  // If the incoming state had no program (generator hadn't run yet), preserve
+  // whatever fourMonthProgram is already stored in the DB for this account.
+  const incomingProgram = incomingStateBlob.fourMonthProgram;
+  const incomingHasWeeks = incomingProgram && Array.isArray(incomingProgram.weeks) && incomingProgram.weeks.length > 0;
+  if (!incomingHasWeeks && existingState.fourMonthProgram) {
+    mergedState.fourMonthProgram = existingState.fourMonthProgram;
+  }
+
   mergedState.accountId = companyId;
   if (!mergedState.user || typeof mergedState.user !== "object") {
     mergedState.user = {};
@@ -1105,6 +1114,44 @@ async function handleOnboardingEmailSave(request, env) {
     magicLogin,
     stateBlob: mergedState
   });
+}
+
+async function handleAdminResyncProgress(request, env) {
+  const expectedReadKey = String(env.DASHBOARD_READ_KEY || "").trim();
+  if (!expectedReadKey) {
+    return errorResponse("DASHBOARD_NOT_CONFIGURED", "Dashboard read key is not configured.", 503);
+  }
+  const providedReadKey = String(request.headers.get("x-dashboard-key") || "").trim();
+  if (!providedReadKey || providedReadKey !== expectedReadKey) {
+    return errorResponse("UNAUTHORIZED", "Dashboard read key is invalid.", 401);
+  }
+
+  const rowsResult = await env.DB.prepare(
+    "SELECT company_id, state_blob FROM accounts"
+  ).all();
+  const rows = Array.isArray(rowsResult?.results) ? rowsResult.results : [];
+
+  const timestamp = nowIso();
+  let resynced = 0;
+
+  for (const row of rows) {
+    const stateBlob = parseJsonField(row.state_blob, {});
+
+    // Only update accounts that are missing savedProgramWeeks but have fourMonthProgram data
+    const existingWeeks = parseJsonValue(stateBlob.savedProgramWeeks, []);
+    if (Array.isArray(existingWeeks) && existingWeeks.length > 0) continue;
+
+    const derived = buildProgramWeekSummaryFromStateBlob(stateBlob);
+    if (!derived.length) continue;
+
+    const updated = { ...stateBlob, savedProgramWeeks: derived };
+    await env.DB.prepare(
+      "UPDATE accounts SET state_blob = ?1, updated_at = ?2 WHERE company_id = ?3"
+    ).bind(toJsonString(updated, {}), timestamp, String(row.company_id || "")).run();
+    resynced++;
+  }
+
+  return jsonResponse({ resynced, total: rows.length });
 }
 
 async function handleAdminOnboardingDashboard(request, env) {
@@ -1577,6 +1624,7 @@ export default {
       if (method === "GET" && path === "/admin/onboarding-dashboard") return withCors(await handleAdminOnboardingDashboard(request, env), request, env);
       if (method === "GET" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminOnboardingDashboardAccount(request, env), request, env);
       if (method === "DELETE" && path === "/admin/onboarding-dashboard/account") return withCors(await handleAdminDeleteAccount(request, env), request, env);
+      if (method === "POST" && path === "/admin/onboarding-dashboard/resync") return withCors(await handleAdminResyncProgress(request, env), request, env);
 
       if (method === "GET" && path === "/state") return withCors(await handleStateGet(request, env), request, env);
       if (method === "POST" && path === "/state") return withCors(await handleStatePost(request, env), request, env);
