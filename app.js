@@ -821,7 +821,7 @@ const ENERGY_RESET_LAUNCH_STEPS = [
   {
     key: "day_1",
     title: "Day 1 - Kickoff / Take a Breath",
-    plainMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a _5-Day Energy Reset Challenge._
+    plainMessage: `🌻 Let’s combat stress with a _5-Day Energy Reset Challenge._
 
 Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!
 
@@ -834,7 +834,7 @@ Long exhales activate your parasympathetic nervous system. Studies show this bre
 
 **Did it help?**
 Write a word or two that describes how you feel after completing the breathing reset.`,
-    htmlMessage: `🌻 April is Stress Awareness Month. Let’s combat stress with a <u>5-Day Energy Reset Challenge.</u><br><br>Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!<br><br>Practice #1<br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
+    htmlMessage: `🌻 Let’s combat stress with a <u>5-Day Energy Reset Challenge.</u><br><br>Each day here in Slack, you’ll get one simple, science-backed practice to reduce stress and support your overall wellbeing. Each mini-challenge takes just a few minutes — fit them in whenever you like!<br><br>Practice #1<br><b>Take a Breath</b> 🌬️<br>👉 Try this: Inhale through the nose for 4 sec → hold 2 sec → exhale through the mouth for 6 sec. Repeat 5 times.<br><br><b>Why this works</b><br>Long exhales activate your parasympathetic nervous system. Studies show this breathing pattern can lower stress and stabilize heart rate in under a minute.<br><br><b>Did it help?</b><br>Write a word or two that describes how you feel after completing the breathing reset.`
   },
   {
     key: "day_2",
