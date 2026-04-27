@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EEOS | Revelry Labs</title>
+<link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
+<link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
+<link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="assets/tailwind.css" />
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  .eeos-shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+  .eeos-sidebar {
+    border-right: 1px solid #dbe2ea;
+    background: #f8fafc;
+    padding: 16px 12px 12px;
+  }
+  .sidebar-block {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+  .workflow-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #475569;
+  }
+  .workflow-item.active {
+    background: #eef3ff;
+    color: #0f172a;
+  }
+  .workflow-item.locked { color: #94a3b8; }
+  .workflow-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: #cbd5e1;
+    flex-shrink: 0;
+  }
+  .workflow-item.active .workflow-icon { background: #6366f1; }
+  .workflow-check {
+    color: #22c55e;
+    font-size: 13px;
+    font-weight: 700;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .main-scroll { overflow-y: auto; }
+  .page-wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+  .step-card { overflow: hidden; }
+  .step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+  .step-header.active {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    color: #ffffff;
+  }
+  .step-body { padding: 16px; }
+  .step-body.read-only { color: #94a3b8; }
+  .step-message {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #334155;
+  }
+  .step-message.read-only {
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+    color: #94a3b8;
+  }
+  .btn {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-primary {
+    border: 1px solid #334155;
+    background: #334155;
+    color: #ffffff;
+  }
+  .btn-secondary {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+  }
+  .complete-pill {
+    font-size: 12px;
+    font-weight: 500;
+    color: #16a34a;
+  }
+  @media (max-width: 900px) {
+    .eeos-shell { grid-template-columns: 1fr; }
+    .eeos-sidebar {
+      border-right: none;
+      border-bottom: 1px solid #dbe2ea;
+    }
+    .page-wrap {
+      padding: 16px;
+      max-width: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="eeos-shell">
+    <aside class="eeos-sidebar">
+      <div class="sidebar-block">
+        <img src="eeos-logo-svg-black.svg" alt="EEOS" style="height:18px;width:auto;margin-bottom:8px;" />
+        <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
+        <div class="mt-0.5 text-xs text-slate-500">Jennifer Baldwin</div>
+      </div>
+
+      <div class="px-2 pt-3">
+        <div class="flex items-center justify-between px-1 py-1">
+          <span class="sidebar-label">Setup</span>
+          <span class="text-sm font-semibold text-emerald-500">✓</span>
+        </div>
+      </div>
+
+      <div class="px-2 pt-3">
+        <div class="px-1 pb-2"><span class="sidebar-label">Event Workflow</span></div>
+        <div class="sidebar-block">
+          <div class="workflow-item active"><span class="workflow-icon"></span><span>Launch Event</span></div>
+          <div class="workflow-item locked"><span class="workflow-icon"></span><span>Run Event</span></div>
+          <div class="workflow-item locked"><span class="workflow-icon"></span><span>Review Impact</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-scroll">
+      <div class="page-wrap">
+        <article class="rounded-xl border border-slate-200 bg-white p-5">
+          <h4 class="text-base font-semibold text-slate-900">What feels right for the team today?</h4>
+          <p class="mt-1 text-sm text-slate-600">Choose one async event to post in Slack.  Create a shared, cross-department moment of focus and accountability—on everyone's own time.</p>
+          <div id="stepsRoot" class="mt-5 space-y-3"></div>
+        </article>
+      </div>
+    </main>
+  </div>
+
+<script>
+const STORAGE_KEY = "revelryLive.focusSeriesLaunchState";
+const DAY_ONE_ORDER = [
+  "one_hard_thing",
+  "ship_something_today",
+  "start_before_ready"
+];
+
+const FOCUS_SERIES_EVENTS = {
+  start_before_ready: {
+    id: "start_before_ready",
+    emoji: "🌱",
+    title: "Start Before You're Ready",
+    shortDescription: "Help the team turn \"I'll do it later\" into real progress.",
+    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
+    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start.\n2. Spend 30 minutes making progress.\n3. Come back and reply with your result.\n\n**Bonus:** Choose 1 person and cheer them on.\n\nWhat are you starting today? 👉🧵`,
+    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start.<br>2. Spend 30 minutes making progress.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Choose 1 person and cheer them on.<br><br>What are you starting today? 👉🧵`
+  },
+  one_hard_thing: {
+    id: "one_hard_thing",
+    emoji: "🧠",
+    title: "Do the Hard Thing",
+    shortDescription: "Help the team tackle the thing they've been avoiding.",
+    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
+    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle.\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\n**Bonus:** Support 1 person—encourage them or check in on their progress.\n\nWhat task will you tackle? 👉 🧵`,
+    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle.<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Support 1 person—encourage them or check in on their progress.<br><br>What task will you tackle? 👉 🧵`
+  },
+  ship_something_today: {
+    id: "ship_something_today",
+    emoji: "🚀",
+    title: "Ship Something Today",
+    shortDescription: "Help the team move across the finish line and feel that sense of achievement.",
+    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
+    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today.\n2. Do the work.\n3. Come back and reply with your result.\n\n**Bonus:** Help 1 other person stay accountable—check in or encourage them.\n\nWhat are you shipping today? 👉 🧵`,
+    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today.<br>2. Do the work.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Help 1 other person stay accountable—check in or encourage them.<br><br>What are you shipping today? 👉 🧵`
+  }
+};
+
+const FOLLOW_UP_MAP = {
+  start_before_ready: ["one_hard_thing", "ship_something_today"],
+  one_hard_thing: ["ship_something_today", "start_before_ready"],
+  ship_something_today: ["one_hard_thing", "start_before_ready"]
+};
+
+function readState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return {
+        selectedDayOneId: "",
+        dayOneCopied: false,
+        expandedCardId: ""
+      };
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") throw new Error("invalid");
+    const selectedDayOneId = String(parsed.selectedDayOneId || "").trim();
+    const dayOneCopied = parsed.dayOneCopied === true;
+    const expandedCardId = String(parsed.expandedCardId || parsed.expandedFollowUpId || "").trim();
+    return {
+      selectedDayOneId: FOCUS_SERIES_EVENTS[selectedDayOneId] ? selectedDayOneId : "",
+      dayOneCopied,
+      expandedCardId: FOCUS_SERIES_EVENTS[expandedCardId] ? expandedCardId : ""
+    };
+  } catch (_error) {
+    return {
+      selectedDayOneId: "",
+      dayOneCopied: false,
+      expandedCardId: ""
+    };
+  }
+}
+
+function writeState(next) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+}
+
+async function copyMessage(eventData) {
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/plain": new Blob([eventData.plainMessage], { type: "text/plain" }),
+          "text/html": new Blob([eventData.htmlMessage], { type: "text/html" })
+        })
+      ]);
+    } else {
+      await navigator.clipboard.writeText(eventData.plainMessage);
+    }
+    return true;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function renderCollapsedChoiceCard(eventData) {
+  return `
+    <article class="step-card rounded-xl border border-slate-200 bg-white hover:border-slate-400">
+      <button type="button" class="w-full px-4 py-4 text-left" data-select-day1="${eventData.id}">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-sm font-semibold text-slate-900">${eventData.emoji} ${eventData.title}</div>
+            <div class="mt-1 text-sm text-slate-600">${eventData.shortDescription}</div>
+          </div>
+          <span class="text-slate-400">▸</span>
+        </div>
+      </button>
+    </article>
+  `;
+}
+
+function renderExpandedCard(eventData, options = {}) {
+  const copyAction = String(options.copyAction || "");
+  const copied = options.copied === true;
+  return `
+    <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
+      <div class="step-header active">
+        <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+      </div>
+      <div class="step-body">
+        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
+        <div class="step-message">${eventData.htmlMessage}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
+          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+          <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderSelectedDayOneCard(eventData, options = {}) {
+  const expanded = options.expanded !== false;
+  const copyAction = String(options.copyAction || "");
+  const copied = options.copied === true;
+  const canToggle = options.canToggle === true;
+  if (expanded) {
+    return `
+      <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
+        <button type="button" class="step-header active w-full ${canToggle ? "cursor-pointer" : "cursor-default"}" ${canToggle ? 'data-toggle-day1="true"' : ""}>
+          <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+          ${canToggle ? '<span class="text-white/80">▾</span>' : ""}
+        </button>
+        <div class="step-body">
+          <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
+          <div class="step-message">${eventData.htmlMessage}</div>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
+            <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+            <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  return `
+    <article class="step-card rounded-xl border border-slate-200 bg-white">
+      <button type="button" class="step-header w-full cursor-pointer" data-toggle-day1="true">
+        <div class="text-sm text-slate-900"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
+        <span class="text-slate-400">▸</span>
+      </button>
+    </article>
+  `;
+}
+
+function renderFollowUpCard(eventData, label, expanded, followUpIndex) {
+  const scheduleHintText = followUpIndex === 0 ? "Schedule this post for the following day." : "Schedule this post for the day after.";
+  return `
+    <article class="step-card rounded-xl border ${expanded ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
+      <button type="button" class="step-header ${expanded ? "active" : ""} w-full cursor-pointer" data-toggle-followup="${eventData.id}">
+        <div class="text-sm ${expanded ? "text-white" : "text-slate-900"}"><span class="font-semibold">${label}: ${eventData.emoji} ${eventData.title}</span></div>
+        <span class="${expanded ? "text-white/80" : "text-slate-400"}">${expanded ? "▾" : "▸"}</span>
+      </button>
+      ${expanded ? `
+      <div class="step-body">
+        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${scheduleHintText}</span></div>
+        <div class="step-message">${eventData.htmlMessage}</div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn btn-primary" data-copy-event="followup:${eventData.id}">Copy message</button>
+          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
+          <span class="text-sm font-medium text-emerald-600 hidden" data-copy-feedback="followup:${eventData.id}">✓ Copied</span>
+        </div>
+      </div>
+      ` : ""}
+    </article>
+  `;
+}
+
+function render() {
+  const state = readState();
+  const root = document.getElementById("stepsRoot");
+  if (!root) return;
+
+  if (!state.selectedDayOneId) {
+    const cardsHtml = DAY_ONE_ORDER.map((id) => renderCollapsedChoiceCard(FOCUS_SERIES_EVENTS[id])).join("");
+    root.innerHTML = `
+      <div class="space-y-3">${cardsHtml}</div>
+    `;
+  } else {
+    const dayOneEvent = FOCUS_SERIES_EVENTS[state.selectedDayOneId];
+    const [followIdOne, followIdTwo] = FOLLOW_UP_MAP[state.selectedDayOneId] || [];
+    const followUps = [
+      { label: "Next day", id: followIdOne },
+      { label: "The day after", id: followIdTwo }
+    ].filter((item) => FOCUS_SERIES_EVENTS[item.id]);
+
+    const expandedCardId = state.dayOneCopied ? (state.expandedCardId || dayOneEvent.id) : dayOneEvent.id;
+    const selectedHtml = renderSelectedDayOneCard(dayOneEvent, {
+      copyAction: `day1:${dayOneEvent.id}`,
+      copied: state.dayOneCopied,
+      expanded: expandedCardId === dayOneEvent.id,
+      canToggle: state.dayOneCopied
+    });
+
+    const followUpsSection = state.dayOneCopied
+      ? `
+      <section class="mt-6">
+        <div class="mb-6"></div>
+        <div class="mb-6"></div>
+        <div class="mb-6"></div>
+        <div class="mb-6"></div>
+        <br>
+        <h5 class="text-base font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
+        <p class="mt-1 text-sm text-slate-600">If so, schedule these two mini-challenges below.</p>
+        <div class="mt-4 space-y-3">
+          ${followUps.map((item, followUpIndex) => renderFollowUpCard(FOCUS_SERIES_EVENTS[item.id], item.label, expandedCardId === item.id, followUpIndex)).join("")}
+        </div>
+      </section>
+      `
+      : "";
+
+    root.innerHTML = `
+      <div class="mb-3 flex items-center justify-end gap-3">
+        <button type="button" class="btn btn-secondary" data-reset-day1="true">Start over</button>
+      </div>
+      ${selectedHtml}
+      ${followUpsSection}
+    `;
+  }
+
+  root.querySelectorAll("[data-select-day1]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventId = String(button.getAttribute("data-select-day1") || "").trim();
+      if (!FOCUS_SERIES_EVENTS[eventId]) return;
+      writeState({
+        selectedDayOneId: eventId,
+        dayOneCopied: false,
+        expandedCardId: eventId
+      });
+      render();
+    });
+  });
+
+  const resetBtn = root.querySelector("[data-reset-day1]");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      writeState({
+        selectedDayOneId: "",
+        dayOneCopied: false,
+        expandedCardId: ""
+      });
+      render();
+    });
+  }
+
+  const toggleDayOneBtn = root.querySelector("[data-toggle-day1]");
+  if (toggleDayOneBtn) {
+    toggleDayOneBtn.addEventListener("click", () => {
+      const nextState = readState();
+      if (!nextState.dayOneCopied || !nextState.selectedDayOneId) return;
+      nextState.expandedCardId = nextState.expandedCardId === nextState.selectedDayOneId ? "" : nextState.selectedDayOneId;
+      writeState(nextState);
+      render();
+    });
+  }
+
+  root.querySelectorAll("[data-toggle-followup]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventId = String(button.getAttribute("data-toggle-followup") || "").trim();
+      const nextState = readState();
+      if (!nextState.dayOneCopied) return;
+      nextState.expandedCardId = nextState.expandedCardId === eventId ? "" : eventId;
+      writeState(nextState);
+      render();
+    });
+  });
+
+  root.querySelectorAll("[data-copy-event]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const copyKey = String(button.getAttribute("data-copy-event") || "").trim();
+      if (!copyKey) return;
+
+      let eventId = "";
+      const nextState = readState();
+      if (copyKey.startsWith("day1:")) {
+        eventId = copyKey.replace("day1:", "");
+      } else if (copyKey.startsWith("followup:")) {
+        eventId = copyKey.replace("followup:", "");
+      }
+      const eventData = FOCUS_SERIES_EVENTS[eventId];
+      if (!eventData) return;
+
+      const ok = await copyMessage(eventData);
+      const feedback = root.querySelector(`[data-copy-feedback="${copyKey}"]`);
+      const originalLabel = button.textContent;
+
+      if (!ok) {
+        button.textContent = "Could not copy";
+        window.setTimeout(() => { button.textContent = originalLabel; }, 1200);
+        return;
+      }
+
+      if (copyKey.startsWith("day1:")) {
+        nextState.dayOneCopied = true;
+        if (!nextState.expandedCardId) {
+          nextState.expandedCardId = nextState.selectedDayOneId;
+        }
+        writeState(nextState);
+        render();
+        return;
+      }
+
+      if (feedback) feedback.classList.remove("hidden");
+      button.textContent = "✓ Copied";
+      window.setTimeout(() => {
+        if (feedback) feedback.classList.add("hidden");
+        button.textContent = originalLabel;
+      }, 1200);
+    });
+  });
+
+  root.querySelectorAll("[data-open-slack]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>

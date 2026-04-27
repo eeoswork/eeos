@@ -13,22 +13,27 @@
 <link rel="stylesheet" href="assets/tailwind.css" />
 <style>
   html, body {
-    height: 100%;
+    min-height: 100%;
     margin: 0;
-    font-family: Inter, Helvetica, Arial, sans-serif;
-    background: #f1f5f9;
+    font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef2f9 55%, #e6edf7 100%);
+    color: #0f172a;
   }
   * { box-sizing: border-box; }
+
   .eeos-shell {
     display: grid;
     grid-template-columns: 280px 1fr;
     min-height: 100vh;
   }
+
   .eeos-sidebar {
     border-right: 1px solid #dbe2ea;
-    background: #f8fafc;
+    background: rgba(250, 252, 255, 0.94);
+    backdrop-filter: blur(6px);
     padding: 16px 12px 12px;
   }
+
   .sidebar-block {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -36,6 +41,7 @@
     padding: 12px;
     margin-bottom: 10px;
   }
+
   .sidebar-label {
     font-size: 10px;
     font-weight: 700;
@@ -43,6 +49,7 @@
     text-transform: uppercase;
     color: #94a3b8;
   }
+
   .workflow-item {
     display: flex;
     align-items: center;
@@ -52,11 +59,14 @@
     font-size: 14px;
     color: #475569;
   }
+
   .workflow-item.active {
-    background: #eef3ff;
+    background: #e6efff;
     color: #0f172a;
   }
+
   .workflow-item.locked { color: #94a3b8; }
+
   .workflow-icon {
     width: 14px;
     height: 14px;
@@ -64,81 +74,320 @@
     background: #cbd5e1;
     flex-shrink: 0;
   }
-  .workflow-item.active .workflow-icon { background: #6366f1; }
-  .workflow-check {
-    color: #22c55e;
-    font-size: 13px;
-    font-weight: 700;
-    width: 14px;
-    text-align: center;
-    flex-shrink: 0;
-  }
+
+  .workflow-item.active .workflow-icon { background: #2563eb; }
+
   .main-scroll { overflow-y: auto; }
+
   .page-wrap {
-    max-width: 880px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 28px 20px 40px;
+    padding: 28px 20px 48px;
   }
-  .step-card { overflow: hidden; }
-  .step-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
+
+  .hero {
+    border: 1px solid #dbe6f5;
+    border-radius: 16px;
+    background: radial-gradient(circle at 15% 10%, #ffffff 0%, #f3f8ff 45%, #edf4ff 100%);
+    padding: 20px;
+    box-shadow: 0 16px 36px rgba(26, 52, 90, 0.08);
   }
-  .step-header.active {
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
-    color: #ffffff;
+
+  .hero h1 {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
   }
-  .step-body { padding: 16px; }
-  .step-body.read-only { color: #94a3b8; }
-  .step-message {
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
+
+  .hero p {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #334155;
+    max-width: 760px;
+  }
+
+  .section-card {
+    margin-top: 16px;
+    border: 1px solid #dbe6f5;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(26, 52, 90, 0.06);
+  }
+
+  .section-card h2 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtext {
+    margin-top: 8px;
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .event-card {
+    margin-top: 14px;
+    border: 1px solid #d9e2f0;
+    border-radius: 12px;
+    background: #f9fbff;
+    padding: 14px;
+  }
+
+  .event-title {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .event-line {
+    margin-top: 6px;
+    color: #475569;
+    font-size: 14px;
+  }
+
+  .copy-box {
+    margin-top: 12px;
+    border: 1px solid #d3deef;
+    background: #ffffff;
     border-radius: 10px;
     padding: 14px;
+    white-space: pre-wrap;
     font-size: 14px;
     line-height: 1.55;
-    color: #334155;
+    color: #1e293b;
   }
-  .step-message.read-only {
-    border-color: #e2e8f0;
-    background: #f1f5f9;
-    color: #94a3b8;
+
+  .actions {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
+
+  .mark-posted-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #475569;
+  }
+  .mark-posted-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #16a34a;
+  }
+
   .btn {
-    border-radius: 8px;
+    border-radius: 9px;
     padding: 10px 14px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
   }
+
   .btn-primary {
-    border: 1px solid #334155;
-    background: #334155;
+    border: 1px solid #1e3a8a;
+    background: #1d4ed8;
     color: #ffffff;
   }
+
+  .btn-primary:hover { background: #1e40af; }
+
   .btn-secondary {
-    border: 1px solid #cbd5e1;
+    border: 1px solid #c8d5ea;
     background: #ffffff;
+    color: #1e3a8a;
+  }
+
+  .btn-secondary:hover { background: #eef4ff; }
+
+  .btn-ghost {
+    border: 1px solid #d7dee9;
+    background: #f8fafc;
     color: #334155;
   }
-  .complete-pill {
-    font-size: 12px;
-    font-weight: 500;
-    color: #16a34a;
+
+  .notice {
+    margin-top: 12px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #1e3a8a;
   }
-  @media (max-width: 900px) {
+
+  .choice-grid {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .choice-card {
+    border: 1px solid #d6dfed;
+    border-radius: 12px;
+    padding: 14px;
+    background: #fbfdff;
+  }
+
+  .choice-card h3 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .choice-mini {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #334155;
+    font-weight: 600;
+  }
+
+  .effort {
+    margin-top: 10px;
+    display: inline-block;
+    border: 1px solid #c7d9fb;
+    background: #eaf2ff;
+    color: #1e40af;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .list-box {
+    margin-top: 12px;
+    border: 1px solid #d6dfed;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 12px;
+  }
+
+  .list-box h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .list-box ul {
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .list-box li {
+    margin: 3px 0;
+  }
+
+  .muted-note {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #475569;
+  }
+
+  .hidden { display: none !important; }
+
+  .field-wrap {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+  }
+
+  .field-input,
+  .field-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  .field-textarea {
+    min-height: 88px;
+    resize: vertical;
+  }
+
+  .radio-group {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .radio-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #1f2937;
+  }
+
+  .calc-line {
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .status {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .status.ok { color: #166534; }
+  .status.err { color: #b91c1c; }
+  .status.muted { color: #475569; }
+
+  .success-line {
+    margin-top: 12px;
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  @media (max-width: 960px) {
     .eeos-shell { grid-template-columns: 1fr; }
     .eeos-sidebar {
       border-right: none;
       border-bottom: 1px solid #dbe2ea;
     }
-    .page-wrap {
-      padding: 16px;
-      max-width: none;
-    }
+    .choice-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .page-wrap { padding: 14px; }
+    .hero h1 { font-size: 26px; }
+    .section-card h2 { font-size: 20px; }
+    .event-title { font-size: 18px; }
   }
 </style>
 </head>
@@ -149,13 +398,6 @@
         <img src="eeos-logo-svg-black.svg" alt="EEOS" style="height:18px;width:auto;margin-bottom:8px;" />
         <div class="text-sm font-semibold text-slate-900">Revelry Labs</div>
         <div class="mt-0.5 text-xs text-slate-500">Jennifer Baldwin</div>
-      </div>
-
-      <div class="px-2 pt-3">
-        <div class="flex items-center justify-between px-1 py-1">
-          <span class="sidebar-label">Setup</span>
-          <span class="text-sm font-semibold text-emerald-500">✓</span>
-        </div>
       </div>
 
       <div class="px-2 pt-3">
@@ -170,103 +412,314 @@
 
     <main class="main-scroll">
       <div class="page-wrap">
-        <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h4 class="text-base font-semibold text-slate-900">What feels right for Revelry today?</h4>
-          <p class="mt-1 text-sm text-slate-600">Choose one async event to post in Slack.  Create a shared, cross-department moment of focus and accountability—on everyone's own time.</p>
-          <div id="stepsRoot" class="mt-5 space-y-3"></div>
-        </article>
+        <section class="hero">
+          <h1>This week's engagement plan</h1>
+          <p>Start with a simple async Slack event, then decide whether you want to add an optional in-person meetup at next week's Wednesday at the Square.</p>
+        </section>
+
+        <section class="section-card" id="asyncSection">
+          <h2>Step 1: Run this simple async event</h2>
+          <p class="subtext">Schedule this in Slack for tomorrow.</p>
+
+          <div class="event-card">
+            <div id="copyAsync" class="copy-box"></div>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" data-copy="async">Copy Slack post</button>
+              <button type="button" class="btn btn-secondary" data-open-slack="1">Open Slack</button>
+              <span class="status muted" data-copy-status="async"></span>
+            </div>
+            <label class="mark-posted-row" id="markPostedLabel">
+              <input type="checkbox" id="markPostedCheck">
+              <span>Mark as posted &amp; continue</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="section-card" id="inPersonSection">
+          <h2>Step 2: Optional in-person meetup next week</h2>
+          <p class="subtext">Would you like to invite the team to meet up at Wednesday at the Square on May 6?</p>
+
+          <div id="inPersonDetails" class="hidden">
+          <div class="event-card">
+            <h3 class="event-title">🎶 Wednesday at the Square</h3>
+            <div class="event-line" style="font-weight:600; margin-top:8px;">Wednesday, May 6 · 5-8pm · Lafayette Square</div>
+            <div class="event-line" style="font-weight:600; margin-top:4px;">Brass-a-holics, Justin Garner</div>
+            <div class="event-line" style="margin-top:4px;">Presented by YLC</div>
+            <p class="subtext" style="margin-top:10px;">A casual after-work meetup for anyone who wants to connect in person.</p>
+            <p class="subtext" style="margin-top:8px; font-weight:600;">Do you want to schedule this in-person event?<br><br><span style="font-weight:400; font-style:italic;">Note: Providing food and drink for this event would require prepaid gift cards, which aren't allowed under company tax policy. This event is best run as a free, simple meetup.</span></p>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" data-inperson="yes">Yes, schedule it</button>
+              <button type="button" class="btn btn-ghost" data-inperson="no">No, skip it</button>
+            </div>
+          </div>
+          </div><!-- end inPersonDetails -->
+          <div id="inPersonStartOverWrap" class="hidden" style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span style="color:#16a34a; font-weight:600; font-size:15px;">✓ All set for this week</span>
+            <button type="button" class="btn btn-ghost" id="inPersonStartOverBtn">Start over</button>
+          </div>
+        </section>
+
+        <section class="section-card hidden" id="ticketDecisionSection">
+          <h2>Do you want to provide gift cards for food/drink?</h2>
+          <p class="subtext">You can keep this as a simple meetup, or provide food/drink gift cards for employees who RSVP.</p>
+
+          <div class="choice-grid">
+            <article class="choice-card">
+              <h3>Simple meetup</h3>
+              <div class="choice-mini">No food/drink gift cards.</div>
+              <p class="subtext">Free event. Post the meetup details in Slack and have people meet at a designated spot.</p>
+              <span class="effort">Admin time: ~5 min</span>
+              <div class="actions">
+                <button type="button" class="btn btn-secondary" data-ticket-option="simple">Choose simple meetup</button>
+              </div>
+            </article>
+
+            <article class="choice-card">
+              <h3>Hosted meetup</h3>
+              <div class="choice-mini">Provide food/drink gift cards. $15/employee.</div>
+              <p class="subtext">More structured. Employees RSVP in Slack, gift cards are purchased ahead of time, and someone hands them out at the meetup spot.</p>
+              <span class="effort">Admin time: ~90 min</span>
+
+              <div class="list-box">
+                <h4>What this involves:</h4>
+                <ul>
+                  <li>Post the RSVP message in Slack</li>
+                  <li>Use emoji reactions to get a headcount</li>
+                  <li>Send EEOS the final ticket count</li>
+                  <li>Complete a credit card authorization form (direct to YLC)</li>
+                  <li>Pick up the gift cards at the Information tent at the event</li>
+                  <li>Hand them out at the meetup spot during a 15-20 minute window</li>
+                </ul>
+              </div>
+              <div class="actions">
+                <button type="button" class="btn btn-secondary" data-ticket-option="ticketed">Choose hosted meetup</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-card hidden" id="simpleMeetupSection">
+          <h2>Slack post: simple meetup</h2>
+          <p class="subtext">Schedule this for the day after the async event above.</p>
+          <div class="copy-box" id="copySimpleMeetup"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" data-copy="simple_meetup">Copy Slack post</button>
+            <button type="button" class="btn btn-secondary" data-open-slack="1">Open Slack</button>
+            <span class="status muted" data-copy-status="simple_meetup"></span>
+          </div>
+          <label class="mark-posted-row" id="simpleMarkPostedLabel">
+            <input type="checkbox" id="simpleMarkPostedCheck">
+            <span>Mark as posted &amp; continue to reminder 1 of 2</span>
+          </label>
+
+          <div id="simpleReminderWrap" class="hidden">
+          <br><br><br>
+          <h2 id="simpleReminderHeading" style="margin-top:18px; font-size:18px;">Week-of reminder</h2>
+          <p class="subtext">Schedule this post for Monday or Tuesday of next week.</p>
+          <div class="copy-box" id="copySimpleReminder"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-copy="simple_reminder">Copy reminder</button>
+            <span class="status muted" data-copy-status="simple_reminder"></span>
+          </div>
+          <label class="mark-posted-row" id="simpleReminderPostedLabel">
+            <input type="checkbox" id="simpleReminderPostedCheck">
+            <span>Mark as posted &amp; continue to optional final reminder (last step)</span>
+          </label>
+          </div>
+
+          <div id="simpleFinalReminderWrap" class="hidden">
+          <br><br><br>
+          <h2 id="simpleFinalReminderHeading" style="margin-top:18px; font-size:18px;">Optional day-of reminder</h2>
+          <p class="subtext">Schedule this for Wednesday, May 6.</p>
+          <div class="copy-box" id="copySimpleFinalReminder"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-copy="simple_final_reminder">Copy final reminder</button>
+            <span class="status muted" data-copy-status="simple_final_reminder"></span>
+          </div>
+          <label class="mark-posted-row" id="simpleFinalCompleteLabel">
+            <input type="checkbox" id="simpleFinalCompleteCheck">
+            <span>Mark as complete</span>
+          </label>
+          </div>
+        </section>
+
+        <div id="simpleMeetupScrollSpacer" class="hidden" style="height: 55vh;"></div>
+
+        <section class="section-card hidden" id="ticketedRsvpSection">
+          <h2>Step 3: Collect RSVPs in Slack</h2>
+          <p class="subtext">Post this Slack message so employees can RSVP for food/drink tickets.</p>
+          <div class="copy-box" id="copyTicketRsvp"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" data-copy="ticket_rsvp">Copy RSVP Slack post</button>
+            <button type="button" class="btn btn-secondary" data-open-slack="1">Open Slack</button>
+            <span class="status muted" data-copy-status="ticket_rsvp"></span>
+          </div>
+        </section>
+
+        <section class="section-card hidden" id="ticketFormSection">
+          <h2>Step 4: Send ticket count to EEOS</h2>
+          <p class="subtext">Once you have the RSVP count from Slack, enter it here so EEOS can coordinate the next step.</p>
+
+          <form id="ticketForm" novalidate>
+            <div class="field-wrap">
+              <div>
+                <label for="rsvpCount" class="field-label">Number of employees who RSVP'd</label>
+                <input id="rsvpCount" name="rsvpCount" class="field-input" type="number" min="1" placeholder="e.g. 18" required>
+              </div>
+
+              <div>
+                <span class="field-label">Ticket amount per person</span>
+                <div class="radio-group">
+                  <label class="radio-row"><input type="radio" name="amountType" value="10" checked> $10 per person</label>
+                  <label class="radio-row"><input type="radio" name="amountType" value="15"> $15 per person</label>
+                  <label class="radio-row"><input type="radio" name="amountType" value="custom"> Custom amount</label>
+                </div>
+              </div>
+
+              <div id="customAmountWrap" class="hidden">
+                <label for="customAmount" class="field-label">Custom amount per person</label>
+                <input id="customAmount" name="customAmount" class="field-input" type="number" min="1" step="0.01" placeholder="$">
+              </div>
+
+              <div class="calc-line" id="estimatedTotalLine">Estimated total: $0</div>
+
+              <div>
+                <label for="ticketNotes" class="field-label">Notes for EEOS</label>
+                <textarea id="ticketNotes" name="ticketNotes" class="field-textarea" placeholder="Anything EEOS should know?"></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="btn btn-primary">Send ticket details to EEOS</button>
+            </div>
+            <div id="formStatus" class="status muted"></div>
+            <div id="formSuccess" class="success-line hidden">Ticket details sent. EEOS will follow up with a credit card authorization form.</div>
+          </form>
+        </section>
+
+        <section class="section-card hidden" id="ticketReminderSection">
+          <h2>Reminder posts</h2>
+
+          <h3 style="margin:0; font-size:18px;">RSVP reminder</h3>
+          <div class="copy-box" id="copyRsvpReminder"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-copy="ticket_rsvp_reminder">Copy RSVP reminder</button>
+            <span class="status muted" data-copy-status="ticket_rsvp_reminder"></span>
+          </div>
+
+          <h3 style="margin:16px 0 0; font-size:18px;">Final event reminder</h3>
+          <div class="copy-box" id="copyFinalReminder"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-copy="ticket_final_reminder">Copy final reminder</button>
+            <span class="status muted" data-copy-status="ticket_final_reminder"></span>
+          </div>
+        </section>
       </div>
     </main>
   </div>
 
 <script>
-const STORAGE_KEY = "revelryLive.focusSeriesLaunchState";
-const DAY_ONE_ORDER = [
-  "one_hard_thing",
-  "ship_something_today",
-  "start_before_ready"
-];
+const STORAGE_KEY = "revelryLive.ticketFormDraft.v1";
+const FLOW_PROGRESS_KEY = "revelryLive.progress.v1";
+const EEOS_CONTACT_EMAIL = "ajolly2@gmail.com";
+const EEOS_CONTACT_CC = "avery@eeos.work";
 
-const FOCUS_SERIES_EVENTS = {
-  start_before_ready: {
-    id: "start_before_ready",
-    emoji: "🌱",
-    title: "Start Before You're Ready",
-    shortDescription: "Help the team turn \"I'll do it later\" into real progress.",
-    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🌱 Start Before You're Ready\n\nWhat have you been putting off because you're not "ready" yet?\n\nToday, just start.\n\nHow it works:\n1. Comment what you'll start.\n2. Spend 30 minutes making progress.\n3. Come back and reply with your result.\n\n**Bonus:** Choose 1 person and cheer them on.\n\nWhat are you starting today? 👉🧵`,
-    htmlMessage: `<strong>🌱 Start Before You're Ready</strong><br><br>What have you been putting off because you're not &quot;ready&quot; yet?<br><br>Today, just start.<br><br>How it works:<br>1. Comment what you'll start.<br>2. Spend 30 minutes making progress.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Choose 1 person and cheer them on.<br><br>What are you starting today? 👉🧵`
-  },
-  one_hard_thing: {
-    id: "one_hard_thing",
-    emoji: "🧠",
-    title: "Do the Hard Thing",
-    shortDescription: "Help the team tackle the thing they've been avoiding.",
-    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🧠 Do the Hard Thing\n\nWhat's the one thing you've been avoiding?\n\nToday, take it on.\n\nHow it works:\n1. Comment the ONE hard thing you'll tackle.\n2. Work on it for 30 minutes.\n3. Come back and reply with your result.\n\n**Bonus:** Support 1 person—encourage them or check in on their progress.\n\nWhat task will you tackle? 👉 🧵`,
-    htmlMessage: `<strong>🧠 Do the Hard Thing</strong><br><br>What's the one thing you've been avoiding?<br><br>Today, take it on.<br><br>How it works:<br>1. Comment the ONE hard thing you'll tackle.<br>2. Work on it for 30 minutes.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Support 1 person—encourage them or check in on their progress.<br><br>What task will you tackle? 👉 🧵`
-  },
-  ship_something_today: {
-    id: "ship_something_today",
-    emoji: "🚀",
-    title: "Ship Something Today",
-    shortDescription: "Help the team move across the finish line and feel that sense of achievement.",
-    scheduleHint: "Schedule this post for today or tomorrow—preferably earlier in the day.",
-    plainMessage: `🚀 Ship Something Today\n\nToday is about finishing and putting something out into the world—even if small.\n\nHow it works:\n1. Comment what you will ship today.\n2. Do the work.\n3. Come back and reply with your result.\n\n**Bonus:** Help 1 other person stay accountable—check in or encourage them.\n\nWhat are you shipping today? 👉 🧵`,
-    htmlMessage: `<strong>🚀 Ship Something Today</strong><br><br>Today is about finishing and putting something out into the world—even if small.<br><br>How it works:<br>1. Comment what you will ship today.<br>2. Do the work.<br>3. Come back and reply with your result.<br><br><strong>Bonus:</strong> Help 1 other person stay accountable—check in or encourage them.<br><br>What are you shipping today? 👉 🧵`
-  }
+const COPY_TEXT = {
+  async: `*📸 Workspace Show & Tell*\n\nWhere are you working from today?\n\nDrop a picture of your workspace in this thread—home office, coffee shop, kitchen table, wherever.\n\nGive everyone a feel for what your day looks like on your end. 👀`,
+  simple_meetup: `*🎶 Revelry meetup: Wednesday at the Square - May 6*\n\nGoing to Wednesday at the Square next week to see Brass-A-Holics?\n\nWant to meet up with other Revelers while you're there?\n\n*Meetup spot*: the statue in the center of Lafayette Square\n*Time*: 5:30 PM\n\nIf you're planning to come, drop a 👍 on this post so others know who to look for.\n\nHope to see you there!\n\nMore info: https://www.ylcwats.com/`,
+  simple_reminder: `Reminder: we're meeting up at *Wednesday at the Square* on *May 6* for *Brass-A-Holics, Justin Garner*\n\n*Time*: 5:30 PM\n*Meetup Spot*: the statue in the center of Lafayette Square\n\nFree concert, casual hangout. Hope to see you there 🎶`,
+  simple_final_reminder: `🎶 Today: Wednesday at the Square for Justin Garner, Brass-A-Holics\n\nMeeting at 5:30 PM at the statue in the center of Lafayette Square.\n\nSee you there 🎶`,
+  ticket_rsvp: `🎶 Revelry meetup: Wednesday at the Square\n\nWe're planning to meet up after work on Wednesday, May 6 for Wednesday at the Square.\n\nIt's a free concert in the park from 5-8pm and a casual chance to hang out outside of work.\n\nRevelry will provide food/drink tickets for employees who RSVP.\n\nIf you're planning to attend and want tickets, react to this message with 🎟️ by Monday, May 4, at 12:00 PM CST.\n\nWe'll use the RSVP count to purchase tickets.\n\nMeetup spot and ticket pickup details coming soon.`,
+  ticket_rsvp_reminder: `Reminder: if you're planning to join us at Wednesday at the Square and want food/drink tickets, react with 🎟️ on the original post by Monday, May 4, at 12:00 PM CST.\n\nWe'll use that count to purchase tickets.`,
+  ticket_final_reminder: `Reminder: we're meeting up at Wednesday at the Square today after work 🎶\n\nTime: [Add meetup time]\nMeetup spot: [Add meetup spot]\n\nIf you RSVP'd for food/drink tickets, you can pick them up at the meetup spot during [pickup window].`
 };
 
-const FOLLOW_UP_MAP = {
-  start_before_ready: ["one_hard_thing", "ship_something_today"],
-  one_hard_thing: ["ship_something_today", "start_before_ready"],
-  ship_something_today: ["one_hard_thing", "start_before_ready"]
+const state = {
+  inPersonEnabled: null,
+  ticketOption: "",
+  copied: {},
+  formSent: false
 };
 
-function readState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {
-        selectedDayOneId: "",
-        dayOneCopied: false,
-        expandedCardId: ""
-      };
+function applyStep1PostedUI(posted) {
+  const asyncSec = document.getElementById("asyncSection");
+  if (!asyncSec) return;
+  const eventCard = asyncSec.querySelector(".event-card");
+  const subtext = asyncSec.querySelector(".subtext");
+  const existingBadge = asyncSec.querySelector(".step1-posted-badge");
+
+  if (posted) {
+    if (eventCard) eventCard.style.display = "none";
+    if (subtext) subtext.style.display = "none";
+    if (!existingBadge) {
+      const badge = document.createElement("p");
+      badge.className = "completed-badge step1-posted-badge";
+      badge.style.cssText = "color:#16a34a; font-weight:600; margin-top:8px; font-size:15px;";
+      badge.textContent = "✓ Posted";
+      asyncSec.appendChild(badge);
     }
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") throw new Error("invalid");
-    const selectedDayOneId = String(parsed.selectedDayOneId || "").trim();
-    const dayOneCopied = parsed.dayOneCopied === true;
-    const expandedCardId = String(parsed.expandedCardId || parsed.expandedFollowUpId || "").trim();
-    return {
-      selectedDayOneId: FOCUS_SERIES_EVENTS[selectedDayOneId] ? selectedDayOneId : "",
-      dayOneCopied,
-      expandedCardId: FOCUS_SERIES_EVENTS[expandedCardId] ? expandedCardId : ""
-    };
-  } catch (_error) {
-    return {
-      selectedDayOneId: "",
-      dayOneCopied: false,
-      expandedCardId: ""
-    };
+  } else {
+    if (eventCard) eventCard.style.display = "";
+    if (subtext) subtext.style.display = "";
+    if (existingBadge) existingBadge.remove();
   }
 }
 
-function writeState(next) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+function setCopyBoxes() {
+  const map = {
+    copyAsync: COPY_TEXT.async,
+    copySimpleMeetup: COPY_TEXT.simple_meetup,
+    copySimpleReminder: COPY_TEXT.simple_reminder,
+    copySimpleFinalReminder: COPY_TEXT.simple_final_reminder,
+    copyTicketRsvp: COPY_TEXT.ticket_rsvp,
+    copyRsvpReminder: COPY_TEXT.ticket_rsvp_reminder,
+    copyFinalReminder: COPY_TEXT.ticket_final_reminder
+  };
+
+  Object.entries(map).forEach(([id, text]) => {
+    const node = document.getElementById(id);
+    if (!node) return;
+    if (id === "copyAsync" || id === "copySimpleMeetup" || id === "copySimpleReminder") {
+      const lines = text.split("\n");
+      node.innerHTML = lines.map((line, i) => {
+        const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        const withBold = escaped.replace(/\*(.+?)\*/g, "<strong>$1</strong>");
+        if (i === 0 && /^\*.+\*$/.test(line.trim())) return "<strong>" + escaped.replace(/^\*|\*$/g, "") + "</strong>";
+        return withBold;
+      }).join("\n");
+    } else {
+      node.textContent = text;
+    }
+  });
 }
 
-async function copyMessage(eventData) {
+async function copyText(key) {
+  const message = COPY_TEXT[key] || "";
+  if (!message) return false;
+
   try {
-    if (navigator.clipboard && window.ClipboardItem) {
+    if (key === "async" || key === "simple_meetup" || key === "simple_reminder") {
+      // Copy as rich text so Slack pastes with bold formatting
+      const lines = message.split("\n");
+      const htmlLines = lines.map((line, i) => {
+        const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        if (i === 0 && line.startsWith("*") && line.endsWith("*")) {
+          return "<b>" + escaped.slice(1, -1) + "</b>";
+        }
+        return escaped.replace(/\*(.+?)\*/g, "<b>$1</b>");
+      });
+      const html = "<div>" + htmlLines.join("<br>") + "</div>";
+      const plainText = lines.map((line, i) =>
+        i === 0 && line.startsWith("*") && line.endsWith("*") ? line.slice(1, -1) : line.replace(/\*(.+?)\*/g, "$1")
+      ).join("\n");
       await navigator.clipboard.write([
         new ClipboardItem({
-          "text/plain": new Blob([eventData.plainMessage], { type: "text/plain" }),
-          "text/html": new Blob([eventData.htmlMessage], { type: "text/html" })
-        })
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([plainText], { type: "text/plain" }),
+        }),
       ]);
     } else {
-      await navigator.clipboard.writeText(eventData.plainMessage);
+      await navigator.clipboard.writeText(message);
     }
     return true;
   } catch (_error) {
@@ -274,252 +727,510 @@ async function copyMessage(eventData) {
   }
 }
 
-function renderCollapsedChoiceCard(eventData) {
-  return `
-    <article class="step-card rounded-xl border border-slate-200 bg-white hover:border-slate-400">
-      <button type="button" class="w-full px-4 py-4 text-left" data-select-day1="${eventData.id}">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <div class="text-sm font-semibold text-slate-900">${eventData.emoji} ${eventData.title}</div>
-            <div class="mt-1 text-sm text-slate-600">${eventData.shortDescription}</div>
-          </div>
-          <span class="text-slate-400">▸</span>
-        </div>
-      </button>
-    </article>
-  `;
+function setCopyStatus(key, message, type) {
+  const node = document.querySelector('[data-copy-status="' + key + '"]');
+  if (!node) return;
+  node.textContent = message;
+  node.className = "status " + (type || "muted");
 }
 
-function renderExpandedCard(eventData, options = {}) {
-  const copyAction = String(options.copyAction || "");
-  const copied = options.copied === true;
-  return `
-    <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
-      <div class="step-header active">
-        <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
-      </div>
-      <div class="step-body">
-        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
-        <div class="step-message">${eventData.htmlMessage}</div>
-        <div class="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
-          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
-          <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
-        </div>
-      </div>
-    </article>
-  `;
+function showSection(id, visible) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  node.classList.toggle("hidden", !visible);
 }
 
-function renderSelectedDayOneCard(eventData, options = {}) {
-  const expanded = options.expanded !== false;
-  const copyAction = String(options.copyAction || "");
-  const copied = options.copied === true;
-  const canToggle = options.canToggle === true;
-  if (expanded) {
-    return `
-      <article class="step-card rounded-xl border border-slate-400 bg-white shadow-sm">
-        <button type="button" class="step-header active w-full ${canToggle ? "cursor-pointer" : "cursor-default"}" ${canToggle ? 'data-toggle-day1="true"' : ""}>
-          <div class="text-sm text-white"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
-          ${canToggle ? '<span class="text-white/80">▾</span>' : ""}
-        </button>
-        <div class="step-body">
-          <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${eventData.scheduleHint}</span></div>
-          <div class="step-message">${eventData.htmlMessage}</div>
-          <div class="mt-4 flex flex-wrap items-center gap-3">
-            <button type="button" class="btn btn-primary" data-copy-event="${copyAction}">Copy message</button>
-            <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
-            <span class="text-sm font-medium text-emerald-600 ${copied ? "" : "hidden"}" data-copy-feedback="${copyAction}">✓ Copied</span>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  return `
-    <article class="step-card rounded-xl border border-slate-200 bg-white">
-      <button type="button" class="step-header w-full cursor-pointer" data-toggle-day1="true">
-        <div class="text-sm text-slate-900"><span class="font-semibold">${eventData.emoji} ${eventData.title}</span></div>
-        <span class="text-slate-400">▸</span>
-      </button>
-    </article>
-  `;
+function scrollSectionToTop(id) {
+  const node = document.getElementById(id);
+  if (!node || node.classList.contains("hidden")) return;
+  window.requestAnimationFrame(() => {
+    node.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
-function renderFollowUpCard(eventData, label, expanded, followUpIndex) {
-  const scheduleHintText = followUpIndex === 0 ? "Schedule this post for the following day." : "Schedule this post for the day after.";
-  return `
-    <article class="step-card rounded-xl border ${expanded ? "border-slate-400 shadow-sm" : "border-slate-200"} bg-white">
-      <button type="button" class="step-header ${expanded ? "active" : ""} w-full cursor-pointer" data-toggle-followup="${eventData.id}">
-        <div class="text-sm ${expanded ? "text-white" : "text-slate-900"}"><span class="font-semibold">${label}: ${eventData.emoji} ${eventData.title}</span></div>
-        <span class="${expanded ? "text-white/80" : "text-slate-400"}">${expanded ? "▾" : "▸"}</span>
-      </button>
-      ${expanded ? `
-      <div class="step-body">
-        <div class="mb-3 flex items-center gap-2 text-sm text-slate-500"><span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold">i</span><span>${scheduleHintText}</span></div>
-        <div class="step-message">${eventData.htmlMessage}</div>
-        <div class="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" class="btn btn-primary" data-copy-event="followup:${eventData.id}">Copy message</button>
-          <button type="button" class="btn btn-secondary" data-open-slack="true">Open Slack</button>
-          <span class="text-sm font-medium text-emerald-600 hidden" data-copy-feedback="followup:${eventData.id}">✓ Copied</span>
-        </div>
-      </div>
-      ` : ""}
-    </article>
-  `;
+function renderBranching() {
+  const inPersonYes = state.inPersonEnabled === true;
+  const isSimple = state.ticketOption === "simple";
+  const isTicketed = state.ticketOption === "ticketed";
+
+  showSection("ticketDecisionSection", false);
+  showSection("simpleMeetupSection", inPersonYes && isSimple);
+  showSection("simpleMeetupScrollSpacer", inPersonYes && isSimple);
+  showSection("ticketedRsvpSection", inPersonYes && isTicketed);
+  showSection("ticketFormSection", inPersonYes && isTicketed);
+  showSection("ticketReminderSection", inPersonYes && isTicketed);
 }
 
-function render() {
-  const state = readState();
-  const root = document.getElementById("stepsRoot");
-  if (!root) return;
+function clearInPersonPostedState() {
+  const inPersonSec = document.getElementById("inPersonSection");
+  if (!inPersonSec) return;
+  const postedBadge = inPersonSec.querySelector(".inperson-posted-badge");
+  if (postedBadge) postedBadge.remove();
+  const topSubtext = inPersonSec.querySelector(":scope > .subtext");
+  if (topSubtext) topSubtext.style.display = "";
+}
 
-  if (!state.selectedDayOneId) {
-    const cardsHtml = DAY_ONE_ORDER.map((id) => renderCollapsedChoiceCard(FOCUS_SERIES_EVENTS[id])).join("");
-    root.innerHTML = `
-      <div class="space-y-3">${cardsHtml}</div>
-    `;
+function applyStep2PostedUI(posted) {
+  const inPersonSec = document.getElementById("inPersonSection");
+  const details = document.getElementById("inPersonDetails");
+  const startOverWrap = document.getElementById("inPersonStartOverWrap");
+  if (!inPersonSec) return;
+
+  if (posted) {
+    if (details) details.classList.add("hidden");
+    if (startOverWrap) startOverWrap.classList.add("hidden");
+    const topSubtext = inPersonSec.querySelector(":scope > .subtext");
+    if (topSubtext) topSubtext.style.display = "none";
+    if (!inPersonSec.querySelector(".inperson-posted-badge")) {
+      const badge = document.createElement("p");
+      badge.className = "completed-badge inperson-posted-badge";
+      badge.style.cssText = "color:#16a34a; font-weight:600; margin-top:8px; font-size:15px;";
+      badge.textContent = "✓ Posted";
+      inPersonSec.appendChild(badge);
+    }
   } else {
-    const dayOneEvent = FOCUS_SERIES_EVENTS[state.selectedDayOneId];
-    const [followIdOne, followIdTwo] = FOLLOW_UP_MAP[state.selectedDayOneId] || [];
-    const followUps = [
-      { label: "Next day", id: followIdOne },
-      { label: "The day after", id: followIdTwo }
-    ].filter((item) => FOCUS_SERIES_EVENTS[item.id]);
+    clearInPersonPostedState();
+  }
+}
 
-    const expandedCardId = state.dayOneCopied ? (state.expandedCardId || dayOneEvent.id) : dayOneEvent.id;
-    const selectedHtml = renderSelectedDayOneCard(dayOneEvent, {
-      copyAction: `day1:${dayOneEvent.id}`,
-      copied: state.dayOneCopied,
-      expanded: expandedCardId === dayOneEvent.id,
-      canToggle: state.dayOneCopied
-    });
+function saveFlowProgress() {
+  try {
+    const markPostedCheck = document.getElementById("markPostedCheck");
+    const simpleMarkPostedCheck = document.getElementById("simpleMarkPostedCheck");
+    const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+    const simpleFinalCompleteCheck = document.getElementById("simpleFinalCompleteCheck");
+    const inPersonSec = document.getElementById("inPersonSection");
 
-    const followUpsSection = state.dayOneCopied
-      ? `
-      <section class="mt-6">
-        <div class="mb-6"></div>
-        <div class="mb-6"></div>
-        <div class="mb-6"></div>
-        <div class="mb-6"></div>
-        <br>
-        <h5 class="text-base font-semibold text-slate-900">Want to turn this into a 3-day series?</h5>
-        <p class="mt-1 text-sm text-slate-600">If so, schedule these two mini-challenges below.</p>
-        <div class="mt-4 space-y-3">
-          ${followUps.map((item, followUpIndex) => renderFollowUpCard(FOCUS_SERIES_EVENTS[item.id], item.label, expandedCardId === item.id, followUpIndex)).join("")}
-        </div>
-      </section>
-      `
-      : "";
+    const payload = {
+      inPersonEnabled: state.inPersonEnabled,
+      ticketOption: state.ticketOption,
+      step1Posted: Boolean(markPostedCheck?.checked),
+      simpleMarkPosted: Boolean(simpleMarkPostedCheck?.checked),
+      simpleReminderPosted: Boolean(simpleReminderPostedCheck?.checked),
+      simpleFinalComplete: Boolean(simpleFinalCompleteCheck?.checked),
+      step2Posted: Boolean(inPersonSec?.querySelector(".inperson-posted-badge"))
+    };
+    localStorage.setItem(FLOW_PROGRESS_KEY, JSON.stringify(payload));
+  } catch (_error) {
+    // Ignore localStorage failures.
+  }
+}
 
-    root.innerHTML = `
-      <div class="mb-3 flex items-center justify-end gap-3">
-        <button type="button" class="btn btn-secondary" data-reset-day1="true">Start over</button>
-      </div>
-      ${selectedHtml}
-      ${followUpsSection}
-    `;
+function loadFlowProgress() {
+  try {
+    const raw = localStorage.getItem(FLOW_PROGRESS_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!saved || typeof saved !== "object") return;
+
+    if (saved.inPersonEnabled === true || saved.inPersonEnabled === false || saved.inPersonEnabled === null) {
+      state.inPersonEnabled = saved.inPersonEnabled;
+    }
+    if (typeof saved.ticketOption === "string") {
+      state.ticketOption = saved.ticketOption;
+    }
+
+    renderBranching();
+
+    const markPostedCheck = document.getElementById("markPostedCheck");
+    if (markPostedCheck) markPostedCheck.checked = Boolean(saved.step1Posted);
+    applyStep1PostedUI(Boolean(saved.step1Posted));
+
+    const simpleMarkPostedCheck = document.getElementById("simpleMarkPostedCheck");
+    const simpleReminderWrap = document.getElementById("simpleReminderWrap");
+    const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+    const simpleFinalReminderWrap = document.getElementById("simpleFinalReminderWrap");
+    const simpleFinalCompleteCheck = document.getElementById("simpleFinalCompleteCheck");
+
+    if (simpleMarkPostedCheck) simpleMarkPostedCheck.checked = Boolean(saved.simpleMarkPosted);
+    if (simpleReminderWrap) simpleReminderWrap.classList.toggle("hidden", !saved.simpleMarkPosted);
+
+    if (simpleReminderPostedCheck) simpleReminderPostedCheck.checked = Boolean(saved.simpleReminderPosted);
+    if (simpleFinalReminderWrap) simpleFinalReminderWrap.classList.toggle("hidden", !saved.simpleReminderPosted);
+
+    if (simpleFinalCompleteCheck) simpleFinalCompleteCheck.checked = Boolean(saved.simpleFinalComplete);
+
+    if (saved.step2Posted) {
+      applyStep2PostedUI(true);
+    } else {
+      clearInPersonPostedState();
+      const details = document.getElementById("inPersonDetails");
+      const startOverWrap = document.getElementById("inPersonStartOverWrap");
+      if (state.inPersonEnabled === true) {
+        if (details) details.classList.remove("hidden");
+        if (startOverWrap) startOverWrap.classList.add("hidden");
+      } else if (state.inPersonEnabled === false) {
+        if (details) details.classList.add("hidden");
+        if (startOverWrap) startOverWrap.classList.remove("hidden");
+      } else if (saved.step1Posted) {
+        if (details) details.classList.remove("hidden");
+      }
+    }
+  } catch (_error) {
+    // Ignore invalid progress payloads.
+  }
+}
+
+function getAmountPerPerson() {
+  const selected = document.querySelector('input[name="amountType"]:checked');
+  const selectedValue = selected ? selected.value : "10";
+
+  if (selectedValue === "custom") {
+    const custom = Number.parseFloat(String(document.getElementById("customAmount")?.value || "0"));
+    return Number.isFinite(custom) && custom > 0 ? custom : 0;
   }
 
-  root.querySelectorAll("[data-select-day1]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const eventId = String(button.getAttribute("data-select-day1") || "").trim();
-      if (!FOCUS_SERIES_EVENTS[eventId]) return;
-      writeState({
-        selectedDayOneId: eventId,
-        dayOneCopied: false,
-        expandedCardId: eventId
-      });
-      render();
+  const fixed = Number.parseFloat(selectedValue);
+  return Number.isFinite(fixed) ? fixed : 0;
+}
+
+function updateCustomAmountVisibility() {
+  const selected = document.querySelector('input[name="amountType"]:checked');
+  const selectedValue = selected ? selected.value : "10";
+  const customWrap = document.getElementById("customAmountWrap");
+  if (customWrap) customWrap.classList.toggle("hidden", selectedValue !== "custom");
+}
+
+function updateEstimatedTotal() {
+  const count = Number.parseInt(String(document.getElementById("rsvpCount")?.value || "0"), 10) || 0;
+  const amount = getAmountPerPerson();
+  const estimated = Math.max(0, count * amount);
+  const line = document.getElementById("estimatedTotalLine");
+  if (line) {
+    line.textContent = "Estimated total: $" + estimated.toLocaleString(undefined, {
+      minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2
     });
+  }
+  return estimated;
+}
+
+function saveDraft() {
+  const draft = {
+    rsvpCount: String(document.getElementById("rsvpCount")?.value || ""),
+    amountType: String(document.querySelector('input[name="amountType"]:checked')?.value || "10"),
+    customAmount: String(document.getElementById("customAmount")?.value || ""),
+    notes: String(document.getElementById("ticketNotes")?.value || "")
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return;
+
+    const rsvpInput = document.getElementById("rsvpCount");
+    const customInput = document.getElementById("customAmount");
+    const notesInput = document.getElementById("ticketNotes");
+
+    if (rsvpInput) rsvpInput.value = String(parsed.rsvpCount || "");
+    if (customInput) customInput.value = String(parsed.customAmount || "");
+    if (notesInput) notesInput.value = String(parsed.notes || "");
+
+    const amountType = String(parsed.amountType || "10");
+    const radio = document.querySelector('input[name="amountType"][value="' + amountType + '"]');
+    if (radio) radio.checked = true;
+  } catch (_error) {
+    // Ignore invalid local draft.
+  }
+}
+
+function buildEmailBody(payload) {
+  return [
+    "Revelry selected food/drink tickets for Wednesday at the Square.",
+    "",
+    "RSVP count: " + payload.rsvpCount,
+    "Amount per person: $" + payload.amountPerPerson,
+    "Estimated total: $" + payload.estimatedTotal,
+    "",
+    "Notes:",
+    payload.notes || "(none)"
+  ].join("\n");
+}
+
+function persistTicketRequest(payload) {
+  const key = "revelryLive.ticketRequests";
+  const existing = (() => {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_error) {
+      return [];
+    }
+  })();
+
+  existing.push({
+    submittedAt: new Date().toISOString(),
+    ...payload
   });
+  localStorage.setItem(key, JSON.stringify(existing));
+}
 
-  const resetBtn = root.querySelector("[data-reset-day1]");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      writeState({
-        selectedDayOneId: "",
-        dayOneCopied: false,
-        expandedCardId: ""
-      });
-      render();
-    });
+function setFormStatus(message, type) {
+  const node = document.getElementById("formStatus");
+  if (!node) return;
+  node.textContent = message;
+  node.className = "status " + (type || "muted");
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+
+  const rsvpCount = Number.parseInt(String(document.getElementById("rsvpCount")?.value || "0"), 10) || 0;
+  const amountPerPerson = getAmountPerPerson();
+  const estimatedTotal = updateEstimatedTotal();
+  const notes = String(document.getElementById("ticketNotes")?.value || "").trim();
+
+  if (rsvpCount <= 0) {
+    setFormStatus("Enter a valid RSVP count.", "err");
+    return;
+  }
+  if (amountPerPerson <= 0) {
+    setFormStatus("Select a valid ticket amount.", "err");
+    return;
   }
 
-  const toggleDayOneBtn = root.querySelector("[data-toggle-day1]");
-  if (toggleDayOneBtn) {
-    toggleDayOneBtn.addEventListener("click", () => {
-      const nextState = readState();
-      if (!nextState.dayOneCopied || !nextState.selectedDayOneId) return;
-      nextState.expandedCardId = nextState.expandedCardId === nextState.selectedDayOneId ? "" : nextState.selectedDayOneId;
-      writeState(nextState);
-      render();
-    });
-  }
+  const payload = {
+    client: "Revelry Labs",
+    inPersonEventEnabled: true,
+    eventName: "Wednesday at the Square",
+    eventDate: "May 6",
+    ticketOption: "food_drink_tickets",
+    rsvpCount,
+    amountPerPerson,
+    estimatedTotal,
+    notes
+  };
 
-  root.querySelectorAll("[data-toggle-followup]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const eventId = String(button.getAttribute("data-toggle-followup") || "").trim();
-      const nextState = readState();
-      if (!nextState.dayOneCopied) return;
-      nextState.expandedCardId = nextState.expandedCardId === eventId ? "" : eventId;
-      writeState(nextState);
-      render();
-    });
-  });
+  persistTicketRequest(payload);
 
-  root.querySelectorAll("[data-copy-event]").forEach((button) => {
+  const subject = "Revelry ticket request - Wednesday at the Square";
+  const body = buildEmailBody(payload);
+  const mailto = "mailto:" + encodeURIComponent(EEOS_CONTACT_EMAIL)
+    + "?cc=" + encodeURIComponent(EEOS_CONTACT_CC)
+    + "&subject=" + encodeURIComponent(subject)
+    + "&body=" + encodeURIComponent(body);
+
+  setFormStatus("Opening email draft...", "muted");
+  window.location.href = mailto;
+
+  state.formSent = true;
+  const successNode = document.getElementById("formSuccess");
+  if (successNode) successNode.classList.remove("hidden");
+  setFormStatus("", "muted");
+}
+
+function bindInteractions() {
+  document.querySelectorAll("[data-copy]").forEach((button) => {
     button.addEventListener("click", async () => {
-      const copyKey = String(button.getAttribute("data-copy-event") || "").trim();
-      if (!copyKey) return;
-
-      let eventId = "";
-      const nextState = readState();
-      if (copyKey.startsWith("day1:")) {
-        eventId = copyKey.replace("day1:", "");
-      } else if (copyKey.startsWith("followup:")) {
-        eventId = copyKey.replace("followup:", "");
-      }
-      const eventData = FOCUS_SERIES_EVENTS[eventId];
-      if (!eventData) return;
-
-      const ok = await copyMessage(eventData);
-      const feedback = root.querySelector(`[data-copy-feedback="${copyKey}"]`);
-      const originalLabel = button.textContent;
-
+      const key = String(button.getAttribute("data-copy") || "");
+      if (!key) return;
+      const ok = await copyText(key);
       if (!ok) {
-        button.textContent = "Could not copy";
-        window.setTimeout(() => { button.textContent = originalLabel; }, 1200);
+        setCopyStatus(key, "Could not copy", "err");
         return;
       }
-
-      if (copyKey.startsWith("day1:")) {
-        nextState.dayOneCopied = true;
-        if (!nextState.expandedCardId) {
-          nextState.expandedCardId = nextState.selectedDayOneId;
-        }
-        writeState(nextState);
-        render();
-        return;
-      }
-
-      if (feedback) feedback.classList.remove("hidden");
-      button.textContent = "✓ Copied";
+      setCopyStatus(key, "Copied", "ok");
       window.setTimeout(() => {
-        if (feedback) feedback.classList.add("hidden");
-        button.textContent = originalLabel;
+        setCopyStatus(key, "", "muted");
       }, 1200);
     });
   });
 
-  root.querySelectorAll("[data-open-slack]").forEach((button) => {
+  document.querySelectorAll("[data-open-slack]").forEach((button) => {
     button.addEventListener("click", () => {
       window.open("https://app.slack.com/client/", "_blank", "noopener,noreferrer");
     });
   });
+
+  const markPostedCheck = document.getElementById("markPostedCheck");
+  if (markPostedCheck) {
+    markPostedCheck.addEventListener("change", () => {
+      if (!markPostedCheck.checked) return;
+      applyStep1PostedUI(true);
+      const inPersonDetails = document.getElementById("inPersonDetails");
+      if (inPersonDetails) inPersonDetails.classList.remove("hidden");
+      saveFlowProgress();
+    });
+  }
+
+  const simpleMarkPostedCheck = document.getElementById("simpleMarkPostedCheck");
+  if (simpleMarkPostedCheck) {
+    simpleMarkPostedCheck.addEventListener("change", () => {
+      const simpleReminderWrap = document.getElementById("simpleReminderWrap");
+      const simpleFinalReminderWrap = document.getElementById("simpleFinalReminderWrap");
+      const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+      if (simpleReminderWrap) {
+        simpleReminderWrap.classList.toggle("hidden", !simpleMarkPostedCheck.checked);
+      }
+      if (!simpleMarkPostedCheck.checked) {
+        if (simpleFinalReminderWrap) simpleFinalReminderWrap.classList.add("hidden");
+        if (simpleReminderPostedCheck) simpleReminderPostedCheck.checked = false;
+      }
+      if (simpleMarkPostedCheck.checked) {
+        scrollSectionToTop("simpleReminderHeading");
+      }
+      saveFlowProgress();
+    });
+  }
+
+  const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+  if (simpleReminderPostedCheck) {
+    simpleReminderPostedCheck.addEventListener("change", () => {
+      const simpleFinalReminderWrap = document.getElementById("simpleFinalReminderWrap");
+      if (simpleFinalReminderWrap) {
+        simpleFinalReminderWrap.classList.toggle("hidden", !simpleReminderPostedCheck.checked);
+      }
+      if (simpleReminderPostedCheck.checked) {
+        scrollSectionToTop("simpleFinalReminderHeading");
+      }
+      saveFlowProgress();
+    });
+  }
+
+  const simpleFinalCompleteCheck = document.getElementById("simpleFinalCompleteCheck");
+  if (simpleFinalCompleteCheck) {
+    simpleFinalCompleteCheck.addEventListener("change", () => {
+      if (!simpleFinalCompleteCheck.checked) return;
+
+      // Hide downstream simple-meetup flow and collapse Step 2 as posted.
+      state.ticketOption = "";
+      renderBranching();
+
+      applyStep2PostedUI(true);
+      saveFlowProgress();
+      scrollSectionToTop("inPersonSection");
+    });
+  }
+
+  document.querySelectorAll("[data-inperson]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const choice = String(button.getAttribute("data-inperson") || "");
+      if (choice === "yes") {
+        state.inPersonEnabled = true;
+        state.ticketOption = "simple";
+        clearInPersonPostedState();
+        const details = document.getElementById("inPersonDetails");
+        const startOverWrap = document.getElementById("inPersonStartOverWrap");
+        if (details) details.classList.remove("hidden");
+        if (startOverWrap) startOverWrap.classList.add("hidden");
+      } else if (choice === "no") {
+        state.inPersonEnabled = false;
+        state.ticketOption = "";
+        clearInPersonPostedState();
+        const startOverWrap = document.getElementById("inPersonStartOverWrap");
+        const details = document.getElementById("inPersonDetails");
+        if (details) details.classList.add("hidden");
+        if (startOverWrap) startOverWrap.classList.remove("hidden");
+      }
+      renderBranching();
+      saveFlowProgress();
+      if (choice === "yes") {
+        const simpleReminderWrap = document.getElementById("simpleReminderWrap");
+        const simpleMarkPostedCheck = document.getElementById("simpleMarkPostedCheck");
+        const simpleFinalReminderWrap = document.getElementById("simpleFinalReminderWrap");
+        const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+        const simpleFinalCompleteCheck = document.getElementById("simpleFinalCompleteCheck");
+        if (simpleReminderWrap) simpleReminderWrap.classList.add("hidden");
+        if (simpleMarkPostedCheck) simpleMarkPostedCheck.checked = false;
+        if (simpleFinalReminderWrap) simpleFinalReminderWrap.classList.add("hidden");
+        if (simpleReminderPostedCheck) simpleReminderPostedCheck.checked = false;
+        if (simpleFinalCompleteCheck) simpleFinalCompleteCheck.checked = false;
+        saveFlowProgress();
+        scrollSectionToTop("simpleMeetupSection");
+      }
+    });
+  });
+
+  const inPersonStartOverBtn = document.getElementById("inPersonStartOverBtn");
+  if (inPersonStartOverBtn) {
+    inPersonStartOverBtn.addEventListener("click", () => {
+      clearInPersonPostedState();
+      const details = document.getElementById("inPersonDetails");
+      const startOverWrap = document.getElementById("inPersonStartOverWrap");
+      if (details) details.classList.remove("hidden");
+      if (startOverWrap) startOverWrap.classList.add("hidden");
+      state.inPersonEnabled = null;
+      state.ticketOption = "";
+      renderBranching();
+      saveFlowProgress();
+    });
+  }
+
+  document.querySelectorAll("[data-ticket-option]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const option = String(button.getAttribute("data-ticket-option") || "");
+      if (option === "simple" || option === "ticketed") {
+        state.ticketOption = option;
+      }
+      renderBranching();
+      saveFlowProgress();
+      if (option === "simple") {
+        const simpleReminderWrap = document.getElementById("simpleReminderWrap");
+        const simpleMarkPostedCheck = document.getElementById("simpleMarkPostedCheck");
+        const simpleFinalReminderWrap = document.getElementById("simpleFinalReminderWrap");
+        const simpleReminderPostedCheck = document.getElementById("simpleReminderPostedCheck");
+        const simpleFinalCompleteCheck = document.getElementById("simpleFinalCompleteCheck");
+        if (simpleReminderWrap) simpleReminderWrap.classList.add("hidden");
+        if (simpleMarkPostedCheck) simpleMarkPostedCheck.checked = false;
+        if (simpleFinalReminderWrap) simpleFinalReminderWrap.classList.add("hidden");
+        if (simpleReminderPostedCheck) simpleReminderPostedCheck.checked = false;
+        if (simpleFinalCompleteCheck) simpleFinalCompleteCheck.checked = false;
+        saveFlowProgress();
+        scrollSectionToTop("simpleMeetupSection");
+      } else if (option === "ticketed") {
+        scrollSectionToTop("ticketedRsvpSection");
+      }
+    });
+  });
+
+  const form = document.getElementById("ticketForm");
+  if (form) form.addEventListener("submit", handleFormSubmit);
+
+  const rsvpCount = document.getElementById("rsvpCount");
+  const customAmount = document.getElementById("customAmount");
+  const notes = document.getElementById("ticketNotes");
+
+  if (rsvpCount) {
+    rsvpCount.addEventListener("input", () => {
+      updateEstimatedTotal();
+      saveDraft();
+    });
+  }
+  if (customAmount) {
+    customAmount.addEventListener("input", () => {
+      updateEstimatedTotal();
+      saveDraft();
+    });
+  }
+  if (notes) {
+    notes.addEventListener("input", saveDraft);
+  }
+
+  document.querySelectorAll('input[name="amountType"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      updateCustomAmountVisibility();
+      updateEstimatedTotal();
+      saveDraft();
+    });
+  });
 }
 
-render();
+function init() {
+  setCopyBoxes();
+  loadDraft();
+  updateCustomAmountVisibility();
+  updateEstimatedTotal();
+  bindInteractions();
+  renderBranching();
+  loadFlowProgress();
+}
+
+init();
 </script>
 </body>
 </html>
