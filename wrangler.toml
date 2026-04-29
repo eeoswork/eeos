@@ -19,8 +19,7 @@ routes = [
 
 [vars]
 POLL_UPSTREAM_BASE = "https://esos-polls.ajolly2.workers.dev/api"
-RESEND_API_KEY = ""
-NOTIFY_EMAIL = ""
+NOTIFY_EMAIL = "avery@eeos.work"
 FROM_EMAIL = "no-reply@eeos.work"
 
 [[d1_databases]]
