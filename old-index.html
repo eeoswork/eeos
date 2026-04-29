@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EEOS</title>
+<!-- Default for browsers that do NOT support prefers-color-scheme -->
+<link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
+<link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
+
+<!-- Light mode -->
+<link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
+
+<!-- Dark mode -->
+<link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="assets/tailwind.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="assets/styles.css" />
+<script src="config.js"></script>
+<script src="eventTemplates.js"></script>
+<script src="offerings.js"></script>
+<script src="programGenerator.js"></script>
+<script>
+  // Always load the latest local app bundle during active development.
+  (function loadLatestAppScript() {
+    const appScript = document.createElement("script");
+    appScript.src = `app.js?v=${Date.now()}`;
+    appScript.defer = true;
+    document.head.appendChild(appScript);
+  }());
+</script>
+</head>
+<body class="bg-slate-100 text-slate-900">
+<div id="authBanner" class="hidden px-4 py-2 text-sm bg-amber-100 text-amber-900 border-b border-amber-200"></div>
+
+<section id="authGate" class="hidden fixed inset-0 z-[1200] bg-slate-900/35 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="authGateTitle" aria-describedby="authGateSubtitle">
+  <div class="mx-auto mt-10 max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h1 id="authGateTitle" class="text-xl font-semibold text-slate-900">Save your progress</h1>
+        <p id="authGateSubtitle" class="mt-1 text-sm text-slate-600">Create an account to keep your workspace across browsers and devices.</p>
+      </div>
+      <button id="authGateClose" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-xl leading-none text-slate-500 transition hover:border-slate-300 hover:text-slate-700" aria-label="Close save progress modal">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="mt-5 space-y-4">
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Company name</span>
+        <input id="authCompanyName" type="text" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Acme Inc." />
+      </label>
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Email</span>
+        <input id="authEmail" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="you@company.com" />
+      </label>
+      <label class="block">
+        <span class="text-xs font-medium text-slate-600">Password</span>
+        <input id="authPassword" type="password" minlength="8" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+        <span id="authPasswordHint" class="mt-1 block text-[11px] text-slate-500">8 character minimum</span>
+      </label>
+      <label id="authPasswordConfirmRow" class="block">
+        <span class="text-xs font-medium text-slate-600">Confirm password</span>
+        <input id="authPasswordConfirm" type="password" minlength="8" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="••••••••" />
+      </label>
+      <div id="authStatus" class="min-h-[20px] text-xs text-slate-600"></div>
+      <div id="authPrimaryActions" class="flex flex-col gap-2 sm:flex-row">
+        <button id="authCreateAccount" type="button" class="h-10 w-full rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800">Create account</button>
+        <button id="authSignIn" type="button" class="h-10 w-full rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800">Sign in</button>
+      </div>
+      <button id="authContinueWithoutSaving" type="button" class="hidden h-10 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">Continue without saving</button>
+    </div>
+  </div>
+</section>
+
+
+
+
+<button id="mobileSidebarToggle" type="button" class="eeos-hamburger" aria-label="Open navigation menu" aria-expanded="false">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+<div id="mobileSidebarBackdrop" class="eeos-sidebar-backdrop" aria-hidden="true"></div>
+
+<div id="appShell" class="eeos-layout h-screen sidebar-hidden">
+  <aside class="eeos-sidebar flex flex-col">
+    <div class="eeos-head">
+      <img src="assets/eeos.svg" alt="EEOS" class="h-[30px] w-auto" />
+      <button id="mobileSidebarClose" type="button" class="eeos-sidebar-close" aria-label="Close navigation menu">&times;</button>
+    </div>
+
+
+    <div id="sidebarScrollArea" class="min-h-0 flex-1 overflow-y-auto pr-1">
+
+
+
+      <section id="sidebarIdentityStack" class="mb-3 hidden" style="margin-top: 25px; margin-bottom: 50px;">
+        <div style="margin-bottom: 0;">
+          <label id="appCompanyLabel" class="text-xs uppercase tracking-wide text-slate-500">Company Name</label>
+          <div id="appCompanyInputWrap">
+            <input id="companyName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Acme Inc." />
+          </div>
+          <div id="appCompanyDisplayRow" class="hidden items-center justify-between">
+            <div id="appCompanyDisplay" class="text-slate-900" style="font-size: 24px; font-weight: 600; line-height: 1;"></div>
+            <div class="flex items-center gap-2">
+              <button id="appTestingReset" type="button" class="hidden rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100">Reset Test Data</button>
+              <button id="appIdentityEdit" type="button" onclick="editAppIdentity()" class="text-xs text-slate-600 hover:text-slate-900">Edit</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label id="appAdminLabel" class="text-xs uppercase tracking-wide text-slate-500" style="display: block; margin-top: 15px;">Admin Name</label>
+          <div id="appAdminInputWrap">
+            <input id="adminName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="People Ops Manager" />
+            <button id="appIdentitySubmit" type="button" onclick="submitAppIdentity()" class="mt-2 inline-flex items-center rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Submit</button>
+          </div>
+          <div id="appAdminDisplay" class="hidden text-slate-900" style="font-size: 12px; font-weight: 500; line-height: 1; margin-top: 10px;"></div>
+        </div>
+      </section>
+
+      <div id="sidebarDashboardSection" class="sidebar-top-nav-item sidebar-top-nav-item--locked mt-0 mb-3 text-slate-800" role="button" aria-disabled="true" tabindex="-1">
+        <span aria-hidden="true" class="sidebar-section-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[18px] h-[18px] block">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h6.75v6.75H3.75V4.5Zm9.75 0h6.75v6.75H13.5V4.5Zm-9.75 9.75h6.75V21H3.75v-6.75Zm9.75 0h6.75V21H13.5v-6.75Z" />
+          </svg>
+        </span>
+        <span class="sidebar-section-label">Overview</span>
+      </div>
+
+
+
+
+      <!-- SETUP SECTION - Commented out. Setup steps are now accessible in Dashboard menu.
+      <div id="sidebarSetupHeading" class="sidebar-section-heading sidebar-section-heading--spacious mb-3 text-slate-800">
+        <span aria-hidden="true" class="sidebar-section-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[18px] h-[18px] block">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+          </svg>
+        </span>
+        <span id="sidebarSetupCheck" aria-hidden="true" style="display: none; width: 6px; height: 3.3px; border-left: 1.33px solid currentColor; border-bottom: 1.33px solid currentColor; transform: translateY(-1px) rotate(-45deg); box-sizing: border-box;"></span>
+        <span id="sidebarSetupLabel" class="sidebar-section-label">Setup</span>
+        <a id="sidebarSetupEditPrefs" href="#" style="display: none;" class="ml-auto text-[9px] font-medium text-slate-500 no-underline normal-case">Edit</a>
+      </div>
+      <div id="sidebarSetupMenuCollapse" style="transition: max-height 0.3s cubic-bezier(.4,0,.2,1); overflow: hidden;">
+        <section id="sidebarSetupMenu" class="mb-3">
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="goals" style="margin-bottom: 0.3125px;">Goals</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="budget" style="margin-bottom: 0.3125px;">Investment</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="cadence" style="margin-bottom: 0.3125px;">Cadence</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="setting" style="margin-bottom: 0.3125px;">Setting</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="availability" style="margin-bottom: 0.3125px;">Availability</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="interests" style="margin-bottom: 0.3125px;">Interests</div>
+          <div class="eeos-block text-sm font-medium" data-setup-menu-item="employee-input" style="margin-bottom: 12.5px;">Employee Input</div>
+        </section>
+      </div>
+      -->
+
+      <div id="sidebarEventWorkflowSection" style="display: none;">
+        <div id="sidebarEventWorkflowHeading" class="sidebar-top-nav-item sidebar-top-nav-item--locked mt-6 mb-2 text-slate-800" aria-disabled="true">
+          <span aria-hidden="true" class="sidebar-section-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[18px] h-[18px] block">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+            </svg>
+          </span>
+          <span class="sidebar-section-label">This Week</span>
+        </div>
+        <div id="sidebarEventWorkflowMenuCollapse" style="transition: max-height 0.15s cubic-bezier(.4,0,.2,1); overflow: hidden;">
+          <div id="sidebarNavWorkflowEventSubtitle" style="font-size: 13px; font-weight: 600; color: #334155; margin: 2px 2px 10px; line-height: 1.35; display: none;"></div>
+          <section id="sidebarEventWorkflowMenu" class="mb-3">
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="events-shortlist" style="margin-bottom: 0.3125px;">
+            <span aria-hidden="true" class="sidebar-workflow-item-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-[18px] h-[18px] block">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.25h13.5v13.5H5.25V5.25Zm3.75 3.75h6m-6 3h6m-6 3h3" />
+              </svg>
+            </span>
+            <span class="sidebar-workflow-item-label">Launch Event</span>
+            <span class="sidebar-step-indicator" aria-hidden="true"></span>
+          </div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="run-event" style="margin-bottom: 0.3125px;">
+            <span aria-hidden="true" class="sidebar-workflow-item-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-[18px] h-[18px] block">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.25h13.5v13.5H5.25V5.25Zm5.25 3.75 4.5 3-4.5 3V9Z" />
+              </svg>
+            </span>
+            <span class="sidebar-workflow-item-label">Run Event</span>
+            <span class="sidebar-step-indicator" aria-hidden="true"></span>
+          </div>
+          <div class="eeos-block text-sm font-medium" data-event-workflow-menu-item="review-impact" style="margin-bottom: 0.3125px;">
+            <span aria-hidden="true" class="sidebar-workflow-item-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-[18px] h-[18px] block">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12.75 10.5 15.75 16.5 9.75M4.5 12a7.5 7.5 0 1 0 15 0 7.5 7.5 0 0 0-15 0Z" />
+              </svg>
+            </span>
+            <span class="sidebar-workflow-item-label">Review Impact</span>
+            <span class="sidebar-step-indicator" aria-hidden="true"></span>
+          </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- PROGRAM SECTION - shown after "Launch this Event" is clicked
+      <div id="sidebarProgramSection" class="hidden">
+        <div class="sidebar-top-nav-item sidebar-top-nav-item--locked mt-3 mb-2 text-slate-800" aria-disabled="true">
+          <span aria-hidden="true" class="sidebar-section-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[18px] h-[18px] block">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </span>
+          <span class="sidebar-section-label">Next Up</span>
+        </div>
+        <div id="sidebarProgramTable" style="padding: 0 2px;"></div>
+      </div>
+      -->
+      <!-- EVENT WORKFLOW - Hidden on landing page, shown after signup
+      <div class="text-xs uppercase tracking-wide text-slate-500 mt-5 mb-2 px-1">EVENT WORKFLOW</div>
+      <section id="sidebarEventWorkflowMenu" class="mb-3">
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="1" style="margin-bottom: 0.3125px;">Launch Event</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="2" style="margin-bottom: 0.3125px;">Copy Poll</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="3" style="margin-bottom: 0.3125px;">Book Event</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="4" style="margin-bottom: 0.3125px;">Tell the Team</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="5" style="margin-bottom: 0.3125px;">Run the Event</div>
+        <div class="eeos-block text-sm font-medium" data-workflow-menu-step="6">Track Results</div>
+      </section>
+      -->
+      <div class="hidden">
+        <span id="activeEventLabel"></span>
+        <span id="activeEventMeta"></span>
+      </div>
+
+
+
+
+      <!-- UPCOMING EVENTS - Hidden on landing page, shown after signup
+      <section class="eeos-block mt-5" id="sidebarUpcoming">
+        <h3 class="text-xs uppercase tracking-wide text-slate-500 mb-2">Upcoming Events</h3>
+        <ul id="upcomingList" class="space-y-2 text-sm"></ul>
+      </section>
+      -->
+
+
+
+
+      <!-- PAST EVENTS - Hidden on landing page, shown after signup
+      <section class="eeos-block mt-5" id="sidebarPast">
+        <details>
+          <summary class="cursor-pointer text-xs uppercase tracking-wide text-slate-500">Past Events</summary>
+          <ul id="pastList" class="mt-2 space-y-2 text-sm"></ul>
+        </details>
+      </section>
+      -->
+
+
+
+
+      <section id="sidebarUpcomingEventCard" class="hidden mt-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Upcoming event</div>
+        <div id="sidebarUpcomingEventContent" class="mt-2"></div>
+      </section>
+
+    </div>
+
+      <div id="sidebarFooterActions" class="shrink-0 border-t border-slate-200 bg-slate-50 pt-4 mt-4">
+        <button id="budgetFooter" class="eeos-budget-sticky" type="button">
+          <span class="eeos-budget-sticky__title">Monthly Budget</span>
+          <span class="eeos-budget-sticky__divider" aria-hidden="true"></span>
+          <span id="budgetTotalLabel">Total: $0</span>
+          <span id="budgetSpentLabel">Spent: $0</span>
+          <span id="budgetRemainingLabel">Remaining: $0</span>
+        </button>
+        <div class="mt-3 px-1">
+          <button id="saveProgressAction" type="button" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Save progress</button>
+          <div class="mt-2 flex items-center justify-center gap-3 text-xs text-slate-500">
+            <button id="createAccountAction" type="button" class="underline hover:text-slate-700">Create an account</button>
+            <span>•</span>
+            <button id="signInAction" type="button" class="underline hover:text-slate-700">Sign in</button>
+          </div>
+        </div>
+      </div>
+  </aside>
+
+
+
+
+  <main class="eeos-main">
+    <section id="landingView" class="min-h-screen py-8">
+      <header id="landingTopHeader" class="hidden fixed inset-x-0 top-0 z-[250] h-[60px] bg-slate-100">
+        <div class="landing-shell-inner landing-top-grid">
+          <div class="landing-top-left">
+            <div class="landing-top-left-inner">
+              <img src="assets/eeos.svg" alt="EEOS" class="h-[30px] w-auto" />
+            </div>
+          </div>
+          <div class="landing-top-right">
+            <button
+              id="landingHeaderSignIn"
+              type="button"
+              onclick="openAuthGateWithContext('signin')"
+              class="text-sm font-medium"
+              style="background: transparent; border: none; padding: 0; color: #040404;"
+            >
+              Log in
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="landing-shell-inner">
+
+        <div id="landingSetupFlow">
+
+          <!-- ======= LANDING TYPEFORM (generic landing only) ======= -->
+          <div id="landingTypeformRoot" style="display:none">
+            <div class="landing-tf-grid">
+
+              <!-- LEFT COLUMN -->
+              <div id="landingTfLeft" class="landing-tf-left">
+
+                <!-- Phase: Hero -->
+                <div id="landingTfHero">
+                  <p class="landing-tf-eyebrow">FOR PEOPLE LEADERS</p>
+                  <h2 class="landing-tf-headline">Run consistent team engagement—<br>without the planning overhead</h2>
+                  <p class="landing-tf-sub">Get a ready-to-run 12-week engagement plan—and the system to run it consistently going forward.</p>
+                  <div class="landing-tf-process" aria-label="3-step process overview">
+                    <div class="landing-tf-process-top" aria-hidden="true">
+                      <span>Step 1</span>
+                      <span class="landing-tf-step-line"></span>
+                      <span>Step 2</span>
+                      <span class="landing-tf-step-line"></span>
+                      <span>Step 3</span>
+                    </div>
+                    <div class="landing-tf-process-bottom">
+                      <span>Tell us about your team</span>
+                      <span>Get your program</span>
+                      <span>Run your first event</span>
+                    </div>
+                  </div>
+                  <p class="mt-3 text-sm text-slate-600">EEOS handles planning, logistics, and communication—so you don’t have to. Your first two events are free.</p>
+                  <button id="ltfStartBtn" type="button" class="landing-tf-cta">Get Your Program →</button>
+                  <p class="mt-2 text-xs text-slate-500">Takes ~2 minutes. No setup required.</p>
+                </div>
+
+                <!-- Phase: Builder -->
+                <div id="landingTfBuilder" class="hidden">
+
+                  <!-- 7-node progress bar (Node 0 disabled) -->
+                  <nav id="landingTfProgressBar" aria-label="Setup progress" class="ltf-pb-track">
+                    <!-- <div class="ltf-pb-node-wrap" data-ltf-node-wrap="0">
+                      <div class="ltf-node ltf-node--active" data-ltf-node="0">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Cadence</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="0"></div> -->
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="1">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="1">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Setting</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="1"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="2">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="2">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Availability</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="2"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="3">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="3">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Goals</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="3"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="4">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="4">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Investment</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="4"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="5">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="5">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">Interests</span>
+                    </div>
+                    <div class="ltf-connector" data-ltf-connector="5"></div>
+                    <div class="ltf-pb-node-wrap" data-ltf-node-wrap="6">
+                      <div class="ltf-node ltf-node--pending" data-ltf-node="6">
+                        <svg class="ltf-node-check" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="ltf-node-ring"></span>
+                      </div>
+                      <span class="ltf-node-label">SAVE PROGRESS</span>
+                    </div>
+                  </nav>
+
+                  <!-- Error -->
+                  <p id="ltfErrorMsg" class="hidden text-sm text-red-600 mb-4" role="alert"></p>
+
+                  <!-- Question cards -->
+                  <div id="landingTfQWrap" class="ltf-qwrap">
+
+                    <!-- Q3: Goals -->
+                    <div id="ltfQ3" class="ltf-q">
+                      <h3 class="ltf-q-title">What outcomes are you currently focused on improving?</h3>
+                      <p class="ltf-q-sub">Select all that apply — we&rsquo;ll strengthen and accelerate the progress you're already working toward.</p>
+                      <div id="ltfGoalsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
+                    </div>
+
+                    <!-- Q4: Investment -->
+                    <div id="ltfQ4" class="ltf-q">
+                      <h3 class="ltf-q-title">What's your current monthly investment in your people?</h3>
+                      <p class="ltf-q-sub">This helps us tailor your program to match what you already spend on team engagement and culture.</p>
+
+                      <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-budget-section="teamsize">
+                        <div class="mb-3 flex items-center gap-[10px]">
+                          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
+                          <span class="text-sm font-medium text-slate-700">Enter team size (rough estimate is fine):</span>
+                        </div>
+                        <div class="mt-3">
+                          <div class="relative max-w-[180px]">
+                            <input id="ltfEmployeeCount" type="number" min="0" placeholder="e.g. 25" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" />
+                            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">Employees</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mb-6" data-ltf-budget-section="funding">
+                        <div class="mb-3 flex items-center gap-[10px]">
+                          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
+                          <span class="text-sm font-medium text-slate-700">Current monthly investment:</span>
+                        </div>
+                        
+                        <div class="rounded-sm border border-slate-300 bg-slate-50 px-3 py-3">
+                          <div id="ltfTotalRangeOptions" class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-1"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-2 mb-4">
+                          <div class="rounded-sm border border-slate-300 bg-slate-50 px-3 py-2">
+                            <div class="text-[10px] font-medium text-slate-500 mb-1">Per Employee Per Month (Median)</div>
+                            <div id="ltfPerEmployeeDisplay" class="text-sm font-semibold text-slate-900">$0</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Q0: Cadence (DISABLED) -->
+                    <!-- <div id="ltfQ0" class="ltf-q ltf-q--active">
+                      <h3 class="ltf-q-title">How often would you like to run company events?</h3>
+                      <div class="mt-4 mb-2">
+                        <select id="ltfCadence" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-slate-500"></select>
+                      </div>
+                    </div> -->
+
+                    <!-- Q1: Setting -->
+                    <div id="ltfQ1" class="ltf-q">
+                      <h3 class="ltf-q-title">Which type of company events do you normally run?</h3>
+                      <p class="ltf-q-sub">Selecting “Both virtual and in-person” gives you access to the full range of experiences your program can support.</p>
+                      <div id="ltfScheduleGrid" class="flex flex-wrap gap-2 mt-4 mb-2"></div>
+
+
+                      <div id="ltfLocalCityRow" class="hidden mt-8">
+                        <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
+                        <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
+                        <div class="relative">
+                          <input id="ltfLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="e.g. New Orleans, Minneapolis, Boston" autocomplete="off" />
+                          <div id="ltfLocalCitySuggestions" class="hidden absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"></div>
+                        </div>
+                        <p id="ltfLocalCityValidationMessage" class="mt-2 hidden text-xs text-rose-600">Please select a valid U.S. city</p>
+                      </div>
+                    </div>
+
+                    <!-- Q2: Availability -->
+                    <div id="ltfQ2" class="ltf-q">
+                      <div class="mb-6">
+                        <div class="mb-6 mt-6 border-b border-slate-200 pb-6" data-ltf-availability-section="days">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white ltf-availability-indicator"></span>
+                            <span class="text-sm font-medium text-slate-700">When do your team’s group events usually take place?</span>
+                          </div>
+                          <p class="mb-5 text-xs text-slate-500">Select all that apply — some events only run on certain days, but we'll align with your current cadence more often than not.</p>
+                          <div class="flex flex-wrap gap-1">
+                            <button data-ltf-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">M</button>
+                            <button data-ltf-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">T</button>
+                            <button data-ltf-day="W" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">W</button>
+                            <button data-ltf-day="Th" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Th</button>
+                            <button data-ltf-day="F" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">F</button>
+                          </div>
+                        </div>
+                        <div class="mb-6 mt-12 border-b border-slate-200 pb-6" data-ltf-availability-section="times">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
+                            <span class="text-sm font-medium text-slate-700">What time of day do your events typically happen?</span>
+                          </div>
+                          <p class="mb-5 text-xs text-slate-500">Select all that apply — we'll optimize around what already works best for your team.</p>
+                          <div class="flex gap-1">
+                            <button data-availability-time="Before 9a" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Before 9a</button>
+                            <button data-availability-time="12-1p" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">12-1p (Lunch)</button>
+                            <button data-availability-time="After 5p" type="button" class="flex h-10 items-center justify-center border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition-all hover:border-slate-400">After 5p</button>
+                          </div>
+                        </div>
+                        <div class="mb-2 mt-6" data-ltf-availability-section="weekend">
+                          <div class="mb-2 flex items-center gap-[10px]">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 bg-white text-xs font-bold text-slate-700 ltf-availability-indicator"></span>
+                            <span class="text-sm font-medium text-slate-700">Should we include Saturdays when scheduling your volunteering?</span>
+                          </div>
+                          <p class="mb-5 text-xs text-slate-500">Most volunteer opportunities are scheduled on Saturdays.</p>
+                          <div class="flex gap-1">
+                            <button data-ltf-weekend="yes" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">Yes</button>
+                            <button data-ltf-weekend="no" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-700 transition-all hover:border-slate-400">No</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Q5: Interests -->
+                    <div id="ltfQ5" class="ltf-q">
+                      <h3 class="ltf-q-title">What types of activities has your team responded best to so far?</h3>
+                      <p class="ltf-q-sub">Select all that apply — this gets your program rolling; we'll build on this later with team input.</p>
+                      <div id="ltfInterestsGrid" class="grid grid-cols-1 gap-2 mt-4 mb-2"></div>
+                    </div>
+
+                    <!-- Q6: Save Progress -->
+                    <div id="ltfQ6" class="ltf-q">
+                      <h3 class="ltf-q-title">Enter your work email to save your progress.</h3>
+                      <p class="ltf-q-sub">Based on your answers, we've prepared the first 12 weeks of your people program.  Launch your first event on the next page — no payment required; your first 2 events are free!</p>
+                      <div class="mt-4 mb-2">
+                        <input id="ltfWorkEmail" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:border-slate-500" placeholder="Work email address" />
+                      </div>
+                    </div>
+
+                  </div><!-- /landingTfQWrap -->
+
+                  <!-- Navigation -->
+                  <div class="ltf-nav mt-6 flex items-center gap-3">
+                    <button id="ltfBackBtn" type="button" class="ltf-btn-back hidden">← Back</button>
+                    <button id="ltfNextBtn" type="button" class="ltf-btn-next">Next →</button>
+                  </div>
+
+                </div><!-- /landingTfBuilder -->
+
+                <!-- Phase: Loading -->
+                <div id="landingTfLoading" class="hidden">
+                  <div class="ltf-loading-wrap" role="status" aria-live="polite">
+                    <p class="ltf-loading-title">Setting up your program…</p>
+                    <ul id="ltfLoadingChecklist" class="ltf-loading-checklist" aria-label="Program setup progress">
+                      <li class="ltf-loading-item" data-loading-key="event_recommendations">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Event recommendations</span>
+                      </li>
+                      <li class="ltf-loading-item" data-loading-key="planning_scheduling">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Automated planning &amp; scheduling</span>
+                      </li>
+                      <li class="ltf-loading-item" data-loading-key="engagement_reporting">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Engagement &amp; feedback reporting</span>
+                      </li>
+                      <li class="ltf-loading-item" data-loading-key="copy_prompts_announcements">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Copy, prompts, and announcements</span>
+                      </li>
+                      <li class="ltf-loading-item" data-loading-key="slack_email_automations">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Slack + Email automations</span>
+                      </li>
+                      <li class="ltf-loading-item" data-loading-key="admin_rollout_guidance">
+                        <span class="ltf-loading-check" aria-hidden="true">
+                          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M5 10.5L8.2 13.5L15 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
+                        <span class="ltf-loading-item-text">Admin rollout guidance</span>
+                      </li>
+                    </ul>
+                    <p id="ltfLoadingAnnouncer" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"></p>
+                  </div>
+                </div>
+
+              </div><!-- /landingTfLeft -->
+
+              <!-- RIGHT COLUMN: Preview panel -->
+              <div id="landingTfRight" class="landing-tf-right">
+                <div id="ltfPreviewRailLabel" class="ltf-preview-rail-label">
+                  <span class="ltf-preview-rail-label__icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 1.5L9.235 4.765L12.5 6L9.235 7.235L8 10.5L6.765 7.235L3.5 6L6.765 4.765L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path d="M12.5 10.5L13.1429 12.3571L15 13L13.1429 13.6429L12.5 15.5L11.8571 13.6429L10 13L11.8571 12.3571L12.5 10.5Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span>This could be your program</span>
+                </div>
+                <div class="ltf-preview-panel">
+                  <div class="ltf-preview-cards">
+
+                    <!-- Program Overview -->
+                    <div id="ltfOverviewCard" class="ltf-preview-card ltf-overview-card" data-preview-month="1" data-overview-spent="2500" data-overview-engaged="125">
+                      <div id="ltfOverviewCoreContent">
+                      <div id="ltfOverviewTop" class="ltf-overview-top">
+                        <div class="ltf-overview-top-row">
+                          <p class="ltf-overview-kicker">Program Overview</p>
+                          <span id="ltfOverviewCyclePill" class="ltf-overview-cycle-pill">Cycle ending</span>
+                        </div>
+                      </div>
+
+                      <div id="ltfOverviewGrid" class="ltf-overview-grid">
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Budget efficiency</p>
+                          <div class="ltf-overview-bar-wrap">
+                            <div class="ltf-overview-bar" style="width: 85%;"></div>
+                          </div>
+                          <p class="ltf-overview-value">85% used</p>
+                        </div>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Operations automated: <span class="ltf-overview-score-inline">93%</span></p>
+                          <p class="ltf-overview-meta ltf-overview-meta--check">End-to-end vendor coordination</p>
+                          <p class="ltf-overview-meta ltf-overview-meta--check">Internal marketing: polling, RSVP, all comms</p>
+                        </div>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Participation</p>
+                          <div class="ltf-overview-bar-wrap">
+                            <div class="ltf-overview-bar" style="width: 78%;"></div>
+                          </div>
+                          <p class="ltf-overview-value">78% <span class="ltf-overview-meta-inline">125 attendees of 190 invited</span></p>
+                        </div>
+
+                        <div class="ltf-overview-block">
+                          <p class="ltf-overview-label">Admin workload: <span class="ltf-overview-score-inline">60 minutes</span></p>
+                          <p class="ltf-overview-meta">Time saved this period: 14 hours</p>
+                        </div>
+                      </div>
+
+                      <div id="ltfOverviewMiniGrid" class="ltf-overview-mini-grid">
+                        <div id="ltfOverviewMiniSentiment" class="ltf-overview-block ltf-overview-block--mini">
+                          <p class="ltf-overview-sentiment-label">Employee sentiment:<span style="display: block; margin-top: 5px;" class="ltf-overview-sentiment-score">4.9 / 5</span></p>
+                        </div>
+                        <div id="ltfOverviewGoalsMiniCard" class="ltf-overview-block ltf-overview-block--mini">
+                          <p id="ltfOverviewGoalsLabel" class="ltf-overview-sentiment-label" style="visibility: hidden;" aria-hidden="true">Goals</p>
+                        </div>
+                        <div id="ltfOverviewGoalsPillsOverlay" class="ltf-overview-goals-pills-overlay">
+                          <p id="ltfOverviewGoalsOverlayLabel" class="ltf-overview-sentiment-label">Goals</p>
+                          <div class="ltf-overview-goals-pills-row">
+                            <span id="ltfGoalPillPerformance" class="ltf-pill" style="font-size: calc(1em - 8px);">performance</span>
+                            <span id="ltfGoalPillMorale" class="ltf-pill" style="font-size: calc(1em - 8px);">morale</span>
+                            <span id="ltfGoalPillWellbeing" class="ltf-pill" style="font-size: calc(1em - 8px);">wellbeing</span>
+                            <span id="ltfGoalPillConnection" class="ltf-pill" style="font-size: calc(1em - 8px);">connection</span>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+                    </div>
+
+                    <p class="ltf-overview-kicker ltf-events-cycle-label">Upcoming Program Schedule</p>
+
+                    <!-- Expanded UP NEXT card matching program reveal -->
+                    <div class="ltf-preview-card ltf-preview-card--expanded" data-preview-month="1">
+                      <div class="ltf-card-body">
+                        <div class="ltf-card-tags" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                          <div style="display: flex; align-items: baseline; gap: 10px; min-width: 0;">
+                            <span class="ltf-card-month">UP NEXT</span>
+                            <h4 class="ltf-card-title" style="margin: 0; font-weight: 700; line-height: 1.15;">Navigating Work While Parenting at Home</h4>
+                          </div>
+                          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #64748b; white-space: nowrap;">
+                            <span class="ltf-card-status-dot"></span>
+                            <span class="ltf-card-status-label">Ready to launch</span>
+                          </span>
+                        </div>
+                        <p class="ltf-card-desc">Workshop helping parents balance work and caregiving without losing productivity</p>
+                        <div class="flex gap-2">
+                          <span class="ltf-card-category" style="background:#d8e3d3; color:#315c39;">performance</span>
+                          <span class="ltf-card-format">remote</span>
+                          <span class="ltf-card-format">60 min</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Event list table matching program reveal -->
+                    <div class="ltf-preview-schedule-list" style="margin-top: 6px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 0 14px;">
+                      <table style="width: 100%; border-collapse: collapse; table-layout: auto;">
+                        <tbody>
+                          <tr>
+                            <td id="ltfWeek2Label" style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">Week 2</td>
+                            <td style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; vertical-align: top; min-width: 160px;">
+                              <div id="ltfWeek2Name" style="font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.2; margin-bottom: 2px;">Lunch &amp; Listen</div>
+                              <div id="ltfWeek2Desc" style="font-size: 12px; color: #475569; line-height: 1.25;">Chill yet productive coworking session</div>
+                            </td>
+                            <td id="ltfWeek2MetaCell" style="padding: 9px 0; border-bottom: 1px solid #e2e8f0; text-align: right; white-space: nowrap; vertical-align: top;">
+                              <div id="ltfWeek2PillsWrap" style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; flex-wrap: nowrap; white-space: nowrap;">
+                                <span id="ltfWeek2PillGoal" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">performance</span>
+                                <span id="ltfWeek2PillMode" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">remote</span>
+                                <span id="ltfWeek2PillDuration" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">30 min</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td id="ltfWeek3Label" style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">Week 3</td>
+                            <td style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; vertical-align: top; min-width: 160px;">
+                              <div id="ltfWeek3Name" style="font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.2; margin-bottom: 2px;">AMA: Teammate Edition</div>
+                              <div id="ltfWeek3Desc" style="font-size: 12px; color: #475569; line-height: 1.25;">Learn teammate stories, skills, and quirks</div>
+                            </td>
+                            <td id="ltfWeek3MetaCell" style="padding: 9px 0; border-bottom: 1px solid #e2e8f0; text-align: right; white-space: nowrap; vertical-align: top;">
+                              <div id="ltfWeek3PillsWrap" style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; flex-wrap: nowrap; white-space: nowrap;">
+                                <span id="ltfWeek3PillGoal" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">connection</span>
+                                <span id="ltfWeek3PillMode" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">async</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td id="ltfWeek4Label" style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">Week 4</td>
+                            <td style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; vertical-align: top; min-width: 160px;">
+                              <div id="ltfWeek4Name" style="font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.2; margin-bottom: 2px;">Coffee Meetup</div>
+                              <div id="ltfWeek4Desc" style="font-size: 12px; color: #475569; line-height: 1.25;">Relaxed hangout to help the team bond</div>
+                            </td>
+                            <td style="padding: 9px 0; border-bottom: 1px solid #e2e8f0; text-align: right; white-space: nowrap; vertical-align: top;">
+                              <div style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; flex-wrap: nowrap; white-space: nowrap;">
+                                <span id="ltfWeek4PillGoal" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">connection</span>
+                                <span id="ltfWeek4PillMode" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">remote</span>
+                                <span id="ltfWeek4PillDuration" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">30 min</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td id="ltfWeek5Label" style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">Week 5</td>
+                            <td style="padding: 9px 20px 9px 0; border-bottom: 1px solid #e2e8f0; vertical-align: top; min-width: 160px;">
+                              <div id="ltfWeek5Name" style="font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.2; margin-bottom: 2px;">Company Retreat <span style="font-style: italic; font-weight: 400;">(you added)</span></div>
+                              <div id="ltfWeek5Desc" style="font-size: 12px; color: #475569; line-height: 1.25; min-height: 1.25em;" aria-hidden="true"></div>
+                            </td>
+                            <td style="padding: 9px 0; border-bottom: 1px solid #e2e8f0; text-align: right; white-space: nowrap; vertical-align: top;">
+                              <div style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; flex-wrap: nowrap; white-space: nowrap;">
+                                <span id="ltfWeek5PillGoal" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">morale</span>
+                                <span id="ltfWeek5PillMode" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">in-person</span>
+                                <span id="ltfWeek5PillDuration" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">full-day</span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td id="ltfWeek6Label" style="padding: 9px 20px 9px 0; border-bottom: none; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; color: #64748b; white-space: nowrap; vertical-align: top;">Week 6</td>
+                            <td style="padding: 9px 20px 9px 0; border-bottom: none; vertical-align: top; min-width: 160px;">
+                              <div id="ltfWeek6Name" style="font-size: 14px; font-weight: 600; color: #0f172a; line-height: 1.2; margin-bottom: 2px;">Wednesday Wind Down</div>
+                              <div id="ltfWeek6Desc" style="font-size: 12px; color: #475569; line-height: 1.25;">Drop-in meditation session for EOD de-stress</div>
+                            </td>
+                            <td style="padding: 9px 0; border-bottom: none; text-align: right; white-space: nowrap; vertical-align: top;">
+                              <div style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; flex-wrap: nowrap; white-space: nowrap;">
+                                <span id="ltfWeek6PillGoal" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">wellbeing</span>
+                                <span id="ltfWeek6PillMode" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">remote</span>
+                                <span id="ltfWeek6PillDuration" class="ltf-pill" style="display: inline-flex; align-items: center; margin-right: 0; font-size: 9px; padding: 0.125em 0.45em;">15 min</span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </div><!-- /ltf-preview-cards -->
+                </div><!-- /ltf-preview-panel -->
+              </div><!-- /landingTfRight -->
+
+            </div><!-- /landing-tf-grid -->
+          </div><!-- /landingTypeformRoot -->
+          <!-- ======= END LANDING TYPEFORM ======= -->
+
+          <div id="landingHeroCopy" class="hidden mb-8 rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow-sm sm:px-10">
+            <div id="landingHeroBrandLogoWrap" class="hidden pb-2">
+              <img id="landingHeroBrandLogo" src="revelry.png" alt="Revelry Labs" class="mx-auto mb-6 block h-auto w-full max-w-[250px]" />
+            </div>
+            <p class="landing-tf-eyebrow">FOR PEOPLE LEADERS</p>
+            <h2 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Run consistent team engagement—<br>without the planning overhead</h2>
+            <p class="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:text-lg">Get a ready-to-run 12-week engagement plan tailored to your team, goals, and budget.</p>
+            <p class="mt-3 text-sm font-medium text-slate-500">Takes about 2 minutes • No signup required — your first two events are free.</p>
+            <div id="landingStartActions" class="mt-6">
+              <button id="landingStartBuilder" type="button" class="inline-flex h-11 items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800">Get Your Program →</button>
+            </div>
+          </div>
+
+          <div id="landingProgressCard" class="landing-progress-card hidden mb-8 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 shadow-sm sm:px-5">
+            <div class="landing-progress-track" aria-label="Builder progress">
+              <div class="landing-progress-step" data-landing-progress-step="1">
+                <div class="landing-progress-step-meta">
+                  <span class="landing-progress-dot" aria-hidden="true"></span>
+                  <span class="landing-progress-step-label">Step 1</span>
+                </div>
+                <div class="landing-progress-step-title">Tell us about your team</div>
+              </div>
+              <div class="landing-progress-connector" data-landing-progress-connector="1" aria-hidden="true"></div>
+              <div class="landing-progress-step" data-landing-progress-step="2">
+                <div class="landing-progress-step-meta">
+                  <span class="landing-progress-dot" aria-hidden="true"></span>
+                  <span class="landing-progress-step-label">Step 2</span>
+                </div>
+                <div class="landing-progress-step-title">Get your program</div>
+              </div>
+              <div class="landing-progress-connector" data-landing-progress-connector="2" aria-hidden="true"></div>
+              <div class="landing-progress-step" data-landing-progress-step="3">
+                <div class="landing-progress-step-meta">
+                  <span class="landing-progress-dot" aria-hidden="true"></span>
+                  <span class="landing-progress-step-label">Step 3</span>
+                </div>
+                <div class="landing-progress-step-title">Launch your first event</div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Setup Steps -->
+          <div id="setupStepsContainer" class="space-y-3 mb-8 hidden">
+            <div id="setupHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; position: relative; display: flex; align-items: center; justify-content: space-between; width: calc(100% - 60px);">
+              <span id="setupSectionIcon" aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; line-height: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0 .274 1.128 1.514 1.66 2.515 1.168 1.556-.765 3.323 1.002 2.558 2.558.492 1.001.04 2.241 1.168 2.515 1.756.426 1.756 2.924 0 3.35-1.128.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323-2.558 2.558-1.001-.492-2.241.04-2.515 1.168-.426 1.756-2.924 1.756-3.35 0-.274-1.128-1.514-1.66-2.515-1.168-1.556.765-3.323-1.002-2.558-2.558.492-1.001-.04-2.241-1.168-2.515-1.756-.426-1.756-2.924 0-3.35 1.128-.274 1.66-1.514 1.168-2.515-.765-1.556 1.002-3.323 2.558-2.558 1.001.492 2.241-.04 2.515-1.168Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span id="setupHeadingMainLabel">SETUP</span>
+              <a id="setupHeadingMainEdit" href="#" style="display: none; margin-left: auto; font-size: 12px; color: #94a3b8; font-weight: 500; text-decoration: none; text-transform: none;">Edit</a>
+            </div>
+            <!-- Step 1: Goals -->
+            <div class="setup-step active" data-step="1">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #1e293b; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600;">1</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium">Goals</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 1 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▾</span>
+              </div>
+              <div class="setup-step-content" style="padding: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="block text-sm font-medium mb-3">
+                  <p class="mb-2">What outcomes are you currently focused on improving?</p>
+                  <p class="text-xs font-normal text-slate-600">Select all that apply — we&rsquo;ll strengthen and accelerate the progress you're already working toward.</p>
+                </div>
+                <div id="landingGoalsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="1">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 2: Investment -->
+            <div class="setup-step" data-step="2">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">2</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Investment</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 2 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-6">
+                  <div class="mb-6">
+                    <div class="mb-3 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
+                      <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Team Size</h4>
+                    </div>
+                    <p class="mb-2 text-[14px] text-slate-600">How many employees are in this program?</p>
+                    <div class="relative max-w-[220px]">
+                      <input id="setupEmployeeCount" type="number" min="0" placeholder="e.g. 25" class="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2.5 pr-14 text-lg font-semibold text-slate-900 focus:border-blue-600 focus:outline-none" />
+                      <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">Emps</span>
+                    </div>
+                  </div>
+
+                  <div class="mb-4 mt-12">
+                    <div class="mb-3 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
+                      <h4 class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-900">Funding</h4>
+                    </div>
+                    <p class="mb-3 text-[14px] text-slate-600">Choose your total monthly investment range.</p>
+                  </div>
+
+                  <div class="overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm">
+                    <div class="p-4">
+                      <label id="setupBudgetInputLabel" class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Total Monthly Investment</label>
+                      <input id="setupTotalBudget" type="hidden" min="500" />
+                      <input id="setupPerEmployee" type="hidden" min="0" step="0.01" />
+                      <div id="setupTotalRangeOptions" class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-2"></div>
+
+                      <div class="mt-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                        <span id="setupBudgetHelper">Per Employee Per Month (Median): $0</span>
+                      </div>
+                      <p id="setupBudgetRangeExplainer" class="mt-2 text-xs text-slate-600">We'll use the high end of your range to maximize options. You'll never be charged more than this.</p>
+
+
+                    </div>
+
+                  </div>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="2">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 3: Cadence -->
+            <div class="setup-step" data-step="3">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">3</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Cadence</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 3 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-2">How often should events occur?</label>
+                  <select id="setupCadence" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></select>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="3">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 4: Preferred Schedule -->
+            <div class="setup-step" data-step="4">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">4</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Setting</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 4 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <label class="block text-sm font-medium mb-1">Which type of company events do you normally run?</label>
+                <div class="text-xs text-slate-500 mb-2">Selecting “Both virtual and in-person” gives you access to the full range of experiences your program can support.</div>
+                <div id="setupSchedule" class="flex flex-wrap gap-2 mb-4"></div>
+                <div id="setupLocalCityRow" class="hidden" style="margin-top: 24px; margin-bottom: 12px;">
+                  <label class="block text-sm font-medium mb-2">Where is your team primarily based?</label>
+                  <p class="mb-2 text-xs text-slate-500">We&rsquo;ll use this to enhance your existing plans with more local recommendations.</p>
+                  <div class="relative">
+                    <input id="setupLocalCity" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g. New Orleans, Minneapolis, Boston" autocomplete="off" />
+                    <div id="setupLocalCitySuggestions" class="hidden absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"></div>
+                  </div>
+                  <p id="setupLocalCityValidationMessage" class="mt-2 hidden text-xs text-rose-600">Please select a valid U.S. city</p>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="4">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 5: Availability -->
+            <div class="setup-step" data-step="5">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">5</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Availability</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 5 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="mb-6">
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">i</span>
+                      <span class="text-sm font-medium text-slate-700">When do your team’s group events usually take place?</span>
+                    </div>
+                    <p class="mb-2 text-xs text-slate-500">Select all that apply — some events only run on certain days, but we'll align with your current cadence more often than not.</p>
+                    <section>
+                      <div class="flex flex-wrap gap-1">
+                        <button id="setupAvailabilityDayM" data-availability-day="M" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">M</button>
+                        <button id="setupAvailabilityDayT" data-availability-day="T" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">T</button>
+                        <button id="setupAvailabilityDayW" data-availability-day="W" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">W</button>
+                        <button id="setupAvailabilityDayTh" data-availability-day="Th" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">Th</button>
+                        <button id="setupAvailabilityDayF" data-availability-day="F" type="button" class="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-xs font-bold text-slate-400 transition-all hover:border-slate-400">F</button>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">ii</span>
+                      <span class="text-sm font-medium text-slate-700">What time of day do your events typically happen?</span>
+                    </div>
+                    <p class="mb-2 text-xs text-slate-500">Select all that apply — we'll optimize around what already works best for your team.</p>
+                    <section>
+                      <div class="max-w-md rounded-sm bg-slate-100 p-1">
+                        <div class="grid grid-cols-1 gap-1 sm:grid-cols-3">
+                          <button data-availability-time="Before 9a" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">Before 9a</button>
+                          <button data-availability-time="12-1p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">12-1p (Lunch)</button>
+                          <button data-availability-time="After 5p" type="button" class="rounded-sm border border-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 transition-all">After 5p</button>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="mb-6">
+                    <div class="mb-2 flex items-center gap-2">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">iii</span>
+                      <span class="text-sm font-medium text-slate-700">Should we include Saturdays when scheduling your volunteering?</span>
+                    </div>
+                    <section>
+                      <button id="setupSaturdayToggle" type="button" class="flex w-full items-center justify-between rounded-sm border border-slate-200 bg-slate-50/50 p-4 text-left transition-all hover:border-slate-300">
+                        <div>
+                          <p id="setupSaturdayLabel" class="text-xs font-bold uppercase text-slate-700">Saturday Availability</p>
+                          <p class="mt-1 text-xs italic text-slate-500">ⓘ Most volunteer opportunities are scheduled on Saturdays.</p>
+                        </div>
+                        <span id="setupSaturdaySwitch" class="relative h-5 w-10 rounded-full bg-slate-300 transition-colors">
+                          <span id="setupSaturdaySwitchKnob" class="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition-all"></span>
+                        </span>
+                      </button>
+                    </section>
+                  </div>
+
+                  <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                    <p>Best days: <span id="setupAvailabilitySummaryDays" class="font-medium text-slate-800">Th</span><span id="setupAvailabilitySummarySaturday" class="font-medium text-slate-800">, Sa</span></p>
+                    <p class="mt-1">Best time of day: <span id="setupAvailabilitySummaryTimes" class="font-medium text-slate-800">After 5p</span></p>
+                    <p class="mt-1">Saturday availability? <span id="setupAvailabilitySummarySatEnabled" class="font-medium text-slate-800">YES</span></p>
+                  </div>
+                </div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="5">Next</button>
+              </div>
+            </div>
+
+
+            <!-- Step 6: Interests -->
+            <div class="setup-step" data-step="6">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">6</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Interests</h3>
+                </div>
+                <span class="setup-step-progress-label text-[11px] font-medium text-slate-400 whitespace-nowrap">Question 6 of 6</span>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div class="block text-sm font-medium mb-3">
+                  <p class="mb-2">What types of activities has your team responded best to so far?</p>
+                  <p class="text-xs font-normal text-slate-600">Select all that apply — this gets your program rolling; we'll build on this later with team input.</p>
+                </div>
+                <div id="landingInterestsSetup" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">See your employee experience program →</button>
+                <p class="text-xs text-slate-500 mt-2">We'll use these preferences to weight your first event recommendations.</p>
+              </div>
+            </div>
+
+
+            <!-- Save nudge: shown inline after steps 1 and 5 -->
+            <div id="saveNudge" class="hidden"></div>
+
+            <!-- Step 7: Events Shortlist -->
+            <div id="eventWorkflowHeadingMain" class="text-sm uppercase text-slate-500" style="margin-left: 60px; margin-top: 2em; position: relative; display: none;">
+              <span aria-hidden="true" style="position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h16M14 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span id="eventWorkflowHeadingMainLabel">EVENT WORKFLOW</span>
+            </div>
+            <div id="sidebarWorkflowEventSubtitle" style="margin-left: 60px; margin-top: 3px; font-size: 11px; font-weight: 500; color: #0f172a; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 72px); display: none;"></div>
+            <div class="setup-step" data-step="7">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                  <img src="clipboard.png" alt="" aria-hidden="true" style="width: 16px; height: 16px; object-fit: contain;" />
+                </div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Your People Program</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▾</span>
+              </div>
+              <div class="setup-step-content" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px; position: relative;">
+                <!-- 4-Month Program Overlay (shown during generation) -->
+                <div class="events-shortlist-overlay" id="fourMonthProgramOverlay" style="display: none;">
+                  <div class="events-overlay-card">
+                    <p class="events-overlay-title">Generating your 12-week Employee Experience Program</p>
+                    <p class="events-overlay-subtitle">Based on your team's goals, budget, and preferences.</p>
+                  </div>
+                </div>
+
+                <!-- 4-Month Program Display -->
+                <div id="fourMonthProgram">
+                  <div id="programOverviewCards" style="display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div style="font-size: 13px; font-weight: 700; color: #64748b;">Employees</div>
+                      <div id="progOverviewEmployees" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
+                    </div>
+                    <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="font-size: 13px; font-weight: 700; color: #64748b;">Monthly Budget</div>
+                        <button type="button" data-action="open-program-budget-info" style="margin-left: auto; border: none; background: transparent; padding: 0; font-size: 13px; font-weight: 400; color: #94a3b8; cursor: pointer;">Edit</button>
+                      </div>
+                      <div style="font-size: 13px; font-weight: 500; color: #64748b;">Includes the cost of all events and our platform fee of <span id="progPlatformFee">$0</span></div>
+                      <div id="progOverviewMonthlyBudget" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
+                    </div>
+                    <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div style="font-size: 13px; font-weight: 700; color: #64748b;">Program Goals</div>
+                      <div id="progOverviewGoals" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
+                    </div>
+                    <div style="min-height: 114px; border: 1px solid #dbe4ef; border-radius: 12px; background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%); padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div style="font-size: 13px; font-weight: 700; color: #64748b;">Setting</div>
+                      <div id="progOverviewSetting" style="text-align: right; font-size: 24px; line-height: 1; font-weight: 700; color: #0f172a;">-</div>
+                    </div>
+                  </div>
+
+                  <!-- Monthly Events Display -->
+                  <div id="monthlyEvents" style="display: grid; gap: 10px;">
+                    <!-- Dynamically populated -->
+                  </div>
+                </div>
+
+                <!-- Action Button -->
+                <div id="fourMonthActionContainer" style="padding-top: 16px;">
+                  <button id="fourMonthNextButton" type="button" class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="7">Continue to Next Step</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 8: Poll -->
+            <div class="setup-step" data-step="8">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="4" cy="5" r="2" fill="currentColor"/>
+                    <rect x="7" y="3.5" width="13" height="3" rx="1.5" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="2" fill="currentColor"/>
+                    <rect x="7" y="10.5" width="9" height="3" rx="1.5" fill="currentColor"/>
+                    <circle cx="4" cy="19" r="2" fill="currentColor"/>
+                    <rect x="7" y="17.5" width="13" height="3" rx="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Poll Team</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="pollBuilderIntroCard" style="margin: 0 0 12px 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
+                  <div style="display: flex; width: 100%; align-items: center; gap: 12px; min-width: 0;">
+                    <span style="font-size: 28px; line-height: 1;">📅</span>
+                    <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
+                      <span style="font-weight: 700;">Finalize your team poll by adding a deadline and proposed dates below. </span><span style="font-weight: 400;">We’ll generate a shareable link you can send out right away.</span>
+                    </p>
+                  </div>
+                </div>
+                <div id="pollBuilder" class="space-y-3">
+                  <div id="pollReadyBanner" class="hidden" style="margin: 0; padding: 12px 16px; background: #e8edf4; border-radius: 18px;">
+                    <div style="display: flex; width: 100%; align-items: center; gap: 12px; min-width: 0;">
+                      <span style="font-size: 28px; line-height: 1; color: #22c55e; font-weight: 700;">✓</span>
+                      <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.35;">
+                        <span style="font-weight: 700;">Your poll is ready:</span> <a id="pollReadyBannerLink" href="#" target="_blank" rel="noopener noreferrer" style="font-weight: 400; text-decoration: underline; color: inherit;">link</a><br>
+                        <span style="font-weight: 400;">Preview on the left. Share it to begin collecting responses</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div id="pollCardsRow" class="flex items-stretch gap-4">
+                  <article id="pollPreviewCard" class="w-[375px] shrink-0 rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                    <h4 class="text-base font-semibold text-slate-400">Choose the event you'd join</h4>
+
+                    <p id="pollIntroPreview" class="text-sm text-slate-400" style="white-space: pre-line;"></p>
+                    <div id="pollDeadlinePickerWrap" class="mt-1">
+                      <div class="flex items-center gap-2 text-sm text-slate-400">
+                        <span id="pollDeadlineLabel">Deadline to vote:</span>
+                        <div id="pollDeadlineDateTimePicker" class="flex-1"></div>
+                      </div>
+                    </div>
+
+                    <div style="height: 0.5rem;"></div>
+
+                    <div>
+                      <div class="flex items-baseline gap-2">
+                        <span id="pollEventsPromptPrimary" class="text-sm font-semibold text-slate-400">Which events would you attend?</span>
+                        <span id="pollEventsPromptSecondary" class="text-xs text-slate-400">Select all that apply.</span>
+                      </div>
+                      <div id="pollEventOptionsPreview" class="mt-2 space-y-2 text-sm text-slate-400"></div>
+                    </div>
+
+                    <div style="height: 1rem;"></div>
+
+                    <div>
+                      <div class="flex items-baseline gap-2">
+                        <span id="pollTimesPromptPrimary" class="text-sm font-semibold text-slate-400">Which times work for you?</span>
+                        <span id="pollTimesPromptSecondary" class="text-xs text-slate-400">Select all that apply.</span>
+                      </div>
+                      <div id="pollTimesTimezoneHint" class="text-xs italic text-slate-400 mt-0.5"></div>
+                      <ul id="pollTimesPreview" class="mt-2 space-y-2 text-sm text-slate-400"></ul>
+                    </div>
+
+                    <div id="pollPreviewSubmitWrap" class="hidden pt-6">
+                      <div class="flex justify-center">
+                        <button type="button" disabled aria-disabled="true" class="w-40 rounded-lg bg-slate-300 px-4 py-2.5 text-sm font-medium text-white opacity-90 cursor-not-allowed">Vote</button>
+                      </div>
+                    </div>
+
+                    <div id="pollDateTimeEntryCard" class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+                      <h5 class="text-sm font-semibold text-slate-800">Please enter dates and times for your team to choose from.<span id="pollAvailabilityWrap" class="relative inline-flex items-center gap-1 align-baseline">&nbsp;&nbsp;<a href="#" id="pollAvailabilityLink" class="text-sm text-slate-600 underline hover:text-slag7te-900 font-normal">Check availability</a><button type="button" id="pollAvailabilityChevron" aria-label="Choose calendar provider" class="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:text-slate-900"><span aria-hidden="true">▾</span></button><div id="pollAvailabilityPopover" class="hidden absolute left-0 top-full z-20 mt-1 w-[172px] rounded-md border border-slate-200 bg-white p-1 shadow-sm"><button type="button" data-poll-calendar-provider="google" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>Google Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" data-poll-calendar-provider="icloud" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>iCloud Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" data-poll-calendar-provider="outlook" class="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 whitespace-nowrap"><span>Outlook Calendar</span><span class="ml-auto inline-flex pl-[6px] text-slate-400"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-[10px] w-[10px]" xmlns="http://www.w3.org/2000/svg"><path d="M11 3H17V9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12L17 3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 11V16.5C17 16.7761 16.7761 17 16.5 17H3.5C3.22386 17 3 16.7761 3 16.5V3.5C3 3.22386 3.22386 3 3.5 3H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div></span></h5>
+                      <div id="pollDateTimesInputs" class="space-y-2"></div>
+                      <div id="pollDateTimesValidation" class="text-xs text-rose-600 hidden">Add at least 2 proposed times.</div>
+
+                      <div>
+                        <button id="pollCreateShareLink" type="button" class="w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700">Finalize poll → Generate link</button>
+                        <p class="mt-2 text-xs text-slate-600 text-center">Share this link in Slack or email so your team can vote.</p>
+                        <div id="pollShareLinkWrap" class="hidden mt-3 rounded-lg border border-slate-200 bg-white p-3">
+                          <div class="text-xs font-medium text-slate-500 mb-1">Share link</div>
+                          <div style="display:flex; align-items:center; gap:8px;">
+                            <input id="pollShareLinkOutput" readonly class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-slate-50" />
+                                     <button id="pollCopyShareLink" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Copy</button>
+                          </div>
+                          <div id="pollLinkSuccess" class="mt-2 text-xs text-emerald-600">Link created. Share it with your team to collect votes.</div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </article>
+
+                  <article id="pollSharePanelCard" class="hidden flex-1 rounded-xl border-2 border-sky-300 bg-sky-50 p-4 pb-10">
+                    <div id="pollFinalizeShareCards" class="hidden"></div>
+                  </article>
+                  </div>
+
+                  <div id="pollShareContinueRow" class="hidden flex flex-col items-end gap-2" style="margin-top: 1em; margin-bottom: 2em;">
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                      <input id="pollSharedConfirmed" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400">
+                      <span>I shared the poll with my team</span>
+                    </label>
+                    <button id="pollShareContinue" type="button" class="h-11 rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900">Review responses →</button>
+                  </div>
+
+                  <div id="pollResultsPage" class="hidden rounded-xl border border-slate-200 bg-white p-6 text-base font-semibold text-slate-900">
+                    Poll Responses
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 9: RSVP -->
+            <div class="setup-step" data-step="9">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">✓</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">RSVP</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="rsvpStepPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 10: Book Event -->
+            <div class="setup-step" data-step="10">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">↗</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Book Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="bookEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 11: Promote Event -->
+            <div class="setup-step" data-step="11">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">✉️</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Promote Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="promoteEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 12: Run Event -->
+            <div class="setup-step" data-step="12">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🏁</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Run Event</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="runEventPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 13: Collect Feedback -->
+            <div class="setup-step" data-step="13">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">📊</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Collect Feedback</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="collectFeedbackPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+            <!-- Step 14: Review Impact -->
+            <div class="setup-step" data-step="14">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px;">📈</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Review Impact</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <div id="reviewImpactPanel" class="space-y-4"></div>
+              </div>
+            </div>
+
+
+            <!-- Step 7: Employee Input Survey - Hidden during setup
+            <div class="setup-step" data-step="6">
+              <div class="setup-step-header" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer;">
+                <div class="setup-step-number" style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600;">6</div>
+                <div style="flex: 1;">
+                  <h3 class="text-sm font-medium text-slate-500">Employee Input Survey</h3>
+                </div>
+                <span class="setup-step-arrow" style="font-size: 12px; color: #64748b;">▸</span>
+              </div>
+              <div class="setup-step-content hidden" style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <label class="block text-sm font-medium mb-3">Answer these 10 questions</label>
+                <div id="setupSurvey" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"></div>
+                <button class="setup-step-next w-full rounded-lg bg-slate-800 text-white px-4 py-2.5 text-sm font-medium hover:bg-slate-700" data-step="6">Complete Setup</button>
+              </div>
+            </div>
+            -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="appView" class="hidden">
+      <header class="eeos-main-header">
+        <h1 class="text-xl font-semibold">Employee Experience Workflow</h1>
+      </header>
+
+
+
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section class="xl:col-span-2 rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="programSetupCard">
+          <h2 class="text-base font-semibold mb-3">Program Setup</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm mb-1">Budget Mode</label>
+                <select id="budgetMode" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                  <option value="total">Total Monthly Budget</option>
+                  <option value="perEmployee">Per Employee Budget + Employee Count</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Cadence</label>
+                <select id="cadence" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></select>
+              </div>
+            </div>
+
+
+
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-sm mb-1">Total Budget ($)</label>
+                <input id="totalBudget" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Per Employee ($)</label>
+                <input id="perEmployeeBudget" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Employee Count</label>
+                <input id="employeeCount" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Select Top 3 Goals</label>
+              <div id="goalOptions" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Preferred Schedule</label>
+              <div id="scheduleOptions" class="flex flex-wrap gap-2"></div>
+            </div>
+
+
+
+
+            <div>
+              <label class="block text-sm mb-2">Employee Input Survey (10 questions)</label>
+              <div id="surveyQuestions" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+            </div>
+
+
+
+
+            <button id="btnSaveProgramSetup" class="rounded-lg bg-slate-800 text-white px-4 py-2 text-sm font-medium hover:bg-slate-700">Save Program Setup</button>
+          </div>
+        </section>
+
+
+
+
+        <div class="space-y-4">
+          <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="impactSummary">
+            <h2 class="text-base font-semibold mb-3">Program Impact (ROI)</h2>
+            <div class="space-y-2 text-sm">
+              <div class="metric-row"><span>Total Spend</span><strong id="impactSpend">$0</strong></div>
+              <div class="metric-row"><span>Participation Trend</span><strong id="impactParticipation">0%</strong></div>
+              <div class="metric-row"><span>Avg Satisfaction</span><strong id="impactSatisfaction">0/5</strong></div>
+              <div class="metric-row"><span>Cost / Participant</span><strong id="impactCostPerParticipant">$0</strong></div>
+            </div>
+          </section>
+
+          <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm" id="teamEngagementCard">
+            <h2 class="text-base font-semibold mb-3">Team Engagement</h2>
+            <div class="space-y-2 text-sm text-slate-500">
+              <div>Loading engagement metrics...</div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+
+
+
+      <section class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm mt-4" id="activeWorkflowCard">
+        <h2 class="text-base font-semibold mb-3">Active Event Workflow</h2>
+        <ol id="workflowStepper" class="workflow-stepper space-y-4"></ol>
+      </section>
+
+
+
+
+      <section id="browserPanel" class="hidden rounded-xl bg-white border border-slate-200 p-4 shadow-sm mt-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold">Vendor Browser Tabs (Desktop)</h3>
+          <button id="btnCloseBrowserPanel" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs">Back to Dashboard</button>
+        </div>
+        <div id="browserTabs" class="flex flex-wrap gap-2 mb-3"></div>
+        <div id="browserHost" class="h-[520px] rounded-lg border border-slate-200 overflow-hidden">
+          <div id="browserPlaceholder" class="h-full flex items-center justify-center text-sm text-slate-500">Desktop keeps tabs embedded; web opens vendor links in normal browser tabs.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+<div id="setupSignUpPopup" class="hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+  <div style="position: relative; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; width: 100%; max-width: 420px; text-align: center;">
+    <button id="setupSignUpPopupCloseX" type="button" aria-label="Close" style="position: absolute; top: 8px; right: 10px; border: none; background: transparent; color: #64748b; font-size: 18px; line-height: 1; cursor: pointer;">×</button>
+    <p style="margin: 0 0 12px 0; font-size: 14px; color: #0f172a; font-weight: 600;">sign up goes here</p>
+    <button id="setupSignUpPopupClose" type="button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">Close</button>
+  </div>
+</div>
+<section id="programBudgetInfoModal" class="hidden fixed inset-0 z-[1100] bg-slate-900/35 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="programBudgetInfoTitle">
+  <div class="mx-auto mt-10 max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm" style="position: relative;">
+    <button id="programBudgetInfoModalClose" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-xl leading-none text-slate-500 transition hover:border-slate-300 hover:text-slate-700" aria-label="Close budget info modal" style="position: absolute; top: 16px; right: 16px;">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <div class="pr-12">
+      <h2 id="programBudgetInfoTitle" class="text-base font-semibold text-slate-900">Monthly Budget</h2>
+      <p class="mt-3 text-sm text-slate-600">You can update your exact budget later—no need to set a precise amount yet since your first two events are free.</p>
+    </div>
+  </div>
+</section>
+<!-- Tawk.to temporarily disabled
+Start of Tawk.to Script
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69acc229e13b5e1c381bf039/1jj5dkhkf';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+End of Tawk.to Script
+-->
+</body>
+</html>
+
+
+
