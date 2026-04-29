@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EEOS | Weekly Team Engagement</title>
+<link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
+<link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
+<link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="assets/tailwind.css" />
+<style>
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
+* { box-sizing: border-box; }
+
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin: 0 auto;
+  max-width: 80rem;
+  padding: 4rem 2rem 3rem;
+}
+
+@media (min-width: 1024px) {
+  .hero-section {
+    grid-template-columns: 0.9fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+}
+
+.site-header {
+  width: 100%;
+}
+
+.site-header-inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 80rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem 0.5rem;
+}
+
+.site-header-home {
+  display: flex;
+  align-items: center;
+}
+
+.site-logo {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
+.site-login {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0f172a;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-login:hover {
+  color: #475569;
+}
+
+.card {
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-rounded-lg { border-radius: 1.5rem; }
+
+.btn {
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0d9488;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #0f766e;
+}
+
+.btn-primary:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover {
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.hidden { display: none !important; }
+
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-5 { margin-top: 1.25rem; }
+.mb-4 { margin-bottom: 1rem; }
+
+h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.2; margin: 0; }
+h2 { font-size: 1.875rem; font-weight: 700; margin: 0; }
+h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #78909c;
+}
+
+.subtext {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .email-form {
+    flex-direction: row;
+  }
+}
+
+.email-input {
+  flex: 1;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.email-input::placeholder {
+  color: #a0aec0;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.badge {
+  display: inline-flex;
+  border-radius: 9999px;
+  border: 1px solid #d0f0e9;
+  background: #ecfdf5;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0d7b6b;
+}
+
+.success-message {
+  border-radius: 0.75rem;
+  border: 1px solid #0dcdc2;
+  background: #ecfdf5;
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0d7b6b;
+  margin-top: 1rem;
+}
+
+.copy-success {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0d7b6b;
+}
+
+.teaser-locked {
+  background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
+  height: 3rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.teaser-emphasized {
+  border-color: #0dcdc2;
+  background: rgba(236, 253, 245, 0.7);
+}
+
+.hero-event-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+</style>
+</head>
+<body>
+
+<main>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/" aria-label="EEOS home" class="site-header-home">
+        <img
+          src="/assets/eeos.svg"
+          alt="EEOS"
+          class="site-logo"
+        />
+      </a>
+
+      <a
+        href="/login"
+        class="site-login"
+      >
+        Log in
+      </a>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <div>
+      <p class="eyebrow mb-4">For people teams</p>
+      <h1>Take team engagement off your plate.</h1>
+      <p class="mt-5" style="max-width: 25rem; font-size: 1.125rem; line-height: 2;">
+        Run a simple, ready-to-post Slack activity with your team this week.
+        No planning, brainstorming, or coordination required.
+      </p>
+      <p class="mt-10 text-base font-semibold text-slate-800">Copy it from the card and paste it into Slack →</p>
+      <p class="mt-4 text-sm text-slate-500">Takes less than 2 minutes.</p>
+    </div>
+
+    <div class="card card-rounded-lg hero-event-card" id="heroEventCard">
+      <p class="eyebrow" style="margin: 0;">This week's event</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+        <h3>📸 Workspace Show & Tell</h3>
+        <span class="badge">Async · Slack · 5 min</span>
+      </div>
+      <p class="subtext">A quick visual prompt that helps teammates share where they're working from today.</p>
+
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 text-[15px] font-normal leading-7 text-slate-800">
+        <p style="margin: 0; font-weight: 600; color: #0f172a;">📸 Workspace Show & Tell</p>
+        <p style="margin: 1.25rem 0 0;">
+          Drop a photo of where you're working today — messy desk, coffee shop, couch, whatever.
+        </p>
+        <p style="margin: 1.25rem 0 0;">
+          No photo? Just say where you are and what's in your cup ☕
+        </p>
+        <p style="margin: 1.25rem 0 0;">
+          I’ll kick it off 👇
+        </p>
+      </div>
+
+      <div class="mb-2" style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1.25rem; margin-bottom: 0.125rem;">
+        <button class="btn btn-primary" id="copyBtn">Copy Slack post</button>
+      </div>
+
+      <div id="postCopyMeta" class="hidden space-y-1" style="margin-top: 0;">
+        <p id="copyStatus" class="m-0 text-emerald-600 font-medium" style="margin: 0;"></p>
+        <p id="adminTip" class="m-0 text-sm text-slate-600" style="margin: 0;">
+          <span class="font-semibold text-slate-700">Tip:</span> 
+          Adding the first reply yourself gets more responses.
+        </p>
+      </div>
+
+      <div id="emailCapture" class="card hidden mt-6">
+      <h3>Want next week handled too?</h3>
+
+      <form id="emailForm" class="email-form">
+        <input type="email" class="email-input" id="emailInput" placeholder="you@company.com" required />
+        <button type="submit" class="btn btn-primary">Send me next week's event</button>
+      </form>
+      <p class="subtext" style="margin-top: 0.75rem; font-size: 0.75rem;">We’ll only email you about your team events.</p>
+      <div id="emailSuccess" class="success-message hidden">
+        You're all set — we'll send next week's event when it's ready.
+      </div>
+    </div>
+
+      <div id="openSlackWrap" class="hidden" style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+        <p style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #334155;">Post it now:</p>
+        <button
+          type="button"
+          id="openSlackBtn"
+          class="btn btn-secondary"
+          style="margin-top: 0.75rem; font-weight: 600;"
+        >
+          Open Slack and paste it
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+const state = {
+  hasCopied: false,
+  copyError: false,
+  emailSubmitted: false,
+  emailSubmitting: false,
+  emailError: '',
+  email: ''
+};
+
+const slackPlainText = `📸 Workspace Show & Tell
+
+Drop a photo of where you're working today — messy desk, coffee shop, couch, whatever.
+
+No photo? Just say where you are and what's in your cup ☕
+
+I’ll kick it off 👇`;
+
+const slackHtml = `
+<div>
+  <div><strong>📸 Workspace Show &amp; Tell</strong></div>
+  <div><br/></div>
+  <div>Drop a photo of where you're working today — messy desk, coffee shop, couch, whatever.</div>
+  <div><br/></div>
+  <div>No photo? Just say where you are and what's in your cup ☕</div>
+  <div><br/></div>
+  <div>I’ll kick it off 👇</div>
+</div>
+`;
+
+function trackEvent(eventName) {
+  const win = window;
+  if (typeof win.analytics !== 'undefined' && typeof win.analytics.track === 'function') {
+    win.analytics.track(eventName);
+  }
+}
+
+function copyPlainTextOnly(text) {
+  return new Promise((resolve, reject) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const handleCopy = (event) => {
+      event.preventDefault();
+      if (!event.clipboardData) {
+        return;
+      }
+
+      event.clipboardData.clearData();
+      event.clipboardData.setData('text/plain', text);
+    };
+
+    document.addEventListener('copy', handleCopy);
+
+    try {
+      const successful = document.execCommand('copy');
+      document.removeEventListener('copy', handleCopy);
+      document.body.removeChild(textarea);
+
+      if (!successful) {
+        reject(new Error('Plain text copy failed'));
+        return;
+      }
+
+      resolve();
+    } catch (error) {
+      document.removeEventListener('copy', handleCopy);
+      document.body.removeChild(textarea);
+      reject(error);
+    }
+  });
+}
+
+async function copySlackPost() {
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      const htmlBlob = new Blob([slackHtml], { type: 'text/html' });
+      const textBlob = new Blob([slackPlainText], { type: 'text/plain' });
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': htmlBlob,
+          'text/plain': textBlob,
+        }),
+      ]);
+
+      state.hasCopied = true;
+      state.copyError = false;
+      trackEvent('landing_cta_clicked');
+      trackEvent('week_one_event_copied');
+      updateUI();
+      return;
+    }
+
+    throw new Error('Rich clipboard API unavailable');
+  } catch (error) {
+    try {
+      const listener = (event) => {
+        event.preventDefault();
+        event.clipboardData.setData('text/html', slackHtml);
+        event.clipboardData.setData('text/plain', slackPlainText);
+      };
+
+      document.addEventListener('copy', listener);
+
+      const textarea = document.createElement('textarea');
+      textarea.value = slackPlainText;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      document.execCommand('copy');
+
+      document.body.removeChild(textarea);
+      document.removeEventListener('copy', listener);
+
+      state.hasCopied = true;
+      state.copyError = false;
+      trackEvent('landing_cta_clicked');
+      trackEvent('week_one_event_copied');
+      updateUI();
+    } catch (fallbackError) {
+      state.copyError = true;
+      updateUI();
+    }
+  }
+}
+
+function updateUI() {
+  const copyBtn = document.getElementById('copyBtn');
+  const copyStatus = document.getElementById('copyStatus');
+  const postCopyMeta = document.getElementById('postCopyMeta');
+  const emailCapture = document.getElementById('emailCapture');
+  const openSlackWrap = document.getElementById('openSlackWrap');
+  const adminTip = document.getElementById('adminTip');
+
+  if (state.hasCopied) {
+    copyBtn.textContent = '✓ Copied';
+    copyBtn.disabled = true;
+    copyStatus.textContent = 'Paste it into Slack and post it.';
+    postCopyMeta.classList.remove('hidden');
+    adminTip.classList.remove('hidden');
+    emailCapture.classList.remove('hidden');
+    openSlackWrap.classList.remove('hidden');
+    trackEvent('email_capture_viewed');
+    setTimeout(() => {
+      emailCapture.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+
+  if (state.copyError) {
+    copyBtn.disabled = false;
+    copyBtn.textContent = 'Copy Slack post';
+    copyStatus.textContent = 'Copy failed. Please try again.';
+    postCopyMeta.classList.remove('hidden');
+    adminTip.classList.add('hidden');
+  }
+
+  if (state.emailSubmitting) {
+    const submitBtn = document.querySelector('#emailForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+    }
+  }
+  
+  if (state.emailError) {
+    const submitBtn = document.querySelector('#emailForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send me next week\'s event';
+    }
+    console.error('Email form error:', state.emailError);
+  }
+  
+  if (state.emailSubmitted && !state.emailSubmitting) {
+    const emailForm = document.getElementById('emailForm');
+    const emailSuccess = document.getElementById('emailSuccess');
+    emailForm.classList.add('hidden');
+    emailSuccess.classList.remove('hidden');
+  }
+}
+
+document.getElementById('copyBtn').addEventListener('click', copySlackPost);
+document.getElementById('openSlackBtn').addEventListener('click', () => {
+  window.open('https://app.slack.com/client', '_blank', 'noopener,noreferrer');
+});
+document.getElementById('emailForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const emailInput = document.getElementById('emailInput');
+  const trimmedEmail = emailInput.value.trim();
+  
+  if (!trimmedEmail || !trimmedEmail.includes('@')) {
+    state.emailError = 'Enter a valid email.';
+    updateUI();
+    return;
+  }
+  
+  state.emailSubmitting = true;
+  state.emailError = '';
+  updateUI();
+  
+  try {
+    const response = await fetch('/api/eeos-email-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: trimmedEmail,
+        source: 'eeos_landing_page',
+        event_id: 'workspace-show-and-tell',
+        event_name: 'Workspace Show & Tell',
+        capture_reason: 'next_week_event'
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || 'Email capture failed');
+    }
+    
+    state.email = trimmedEmail;
+    state.emailSubmitted = true;
+    state.emailSubmitting = false;
+    state.emailError = '';
+    trackEvent('email_submitted');
+  } catch (error) {
+    state.emailSubmitting = false;
+    state.emailError = 'Something went wrong. Please try again.';
+    console.error('Email capture error:', error);
+  }
+  
+  updateUI();
+});
+</script>
+
+</body>
+</html>

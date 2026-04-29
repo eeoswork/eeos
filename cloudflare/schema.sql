@@ -86,3 +86,19 @@ CREATE TABLE IF NOT EXISTS user_magic_login_links (
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_email ON user_magic_login_links(email);
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_expires_at ON user_magic_login_links(expires_at);
 CREATE INDEX IF NOT EXISTS idx_user_magic_login_links_company_created_at ON user_magic_login_links(company_id, created_at);
+
+CREATE TABLE IF NOT EXISTS email_captures (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  source TEXT DEFAULT 'landing_page',
+  event_id TEXT,
+  event_name TEXT,
+  capture_reason TEXT,
+  user_agent TEXT,
+  ip_address TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_captures_email ON email_captures(email);
+CREATE INDEX IF NOT EXISTS idx_email_captures_created_at ON email_captures(created_at);
+CREATE INDEX IF NOT EXISTS idx_email_captures_event_id ON email_captures(event_id);

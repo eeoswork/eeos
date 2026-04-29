@@ -1556,6 +1556,90 @@ async function handleAuthMagicLinkRedeem(request, env) {
   });
 }
 
+async function handleEmailCapture(request, env) {
+  if (request.method.toUpperCase() !== "POST") {
+    return errorResponse("METHOD_NOT_ALLOWED", "Only POST is allowed", 405);
+  }
+
+  try {
+    const body = await readJson(request);
+    const email = normalizeEmail(body.email);
+
+    if (!email || !email.includes("@")) {
+      return errorResponse("INVALID_EMAIL", "Enter a valid email.", 400);
+    }
+
+    const source = String(body.source || "landing_page").trim();
+    const eventId = String(body.event_id || "workspace-show-and-tell").trim();
+    const eventName = String(body.event_name || "Workspace Show & Tell").trim();
+    const captureReason = String(body.capture_reason || "next_week_event").trim();
+    const userAgent = String(request.headers.get("user-agent") || "");
+    const cfClientIp = String(request.headers.get("cf-connecting-ip") || "");
+    const createdAt = nowIso();
+
+    await env.DB.prepare(
+      `INSERT INTO email_captures
+        (email, source, event_id, event_name, capture_reason, user_agent, ip_address, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        email,
+        source,
+        eventId,
+        eventName,
+        captureReason,
+        userAgent,
+        cfClientIp,
+        createdAt
+      )
+      .run();
+
+    // Send notification email if RESEND_API_KEY is configured
+    const resendApiKey = String(env.RESEND_API_KEY || "").trim();
+    const notifyEmail = String(env.NOTIFY_EMAIL || "").trim();
+    const fromEmail = String(env.FROM_EMAIL || "no-reply@eeos.work").trim();
+
+    if (resendApiKey && notifyEmail) {
+      try {
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: `EEOS <${fromEmail}>`,
+            to: [notifyEmail],
+            subject: "New EEOS lead — next week's event",
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
+                <h2>New EEOS email capture</h2>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Source:</strong> ${source}</p>
+                <p><strong>Event:</strong> ${eventName}</p>
+                <p><strong>Capture reason:</strong> ${captureReason}</p>
+                <p><strong>Submitted at:</strong> ${createdAt}</p>
+                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+                <p style="font-size: 0.875rem; color: #64748b;">From EEOS email capture system</p>
+              </div>
+            `,
+          }),
+        }).catch((err) => {
+          console.error("Resend API error:", err);
+        });
+      } catch (resendError) {
+        console.error("Failed to send notification email:", resendError);
+        // Don't fail the lead capture if email notification fails
+      }
+    }
+
+    return jsonResponse({ ok: true });
+  } catch (error) {
+    console.error("Email capture error:", error);
+    return errorResponse("CAPTURE_ERROR", "Something went wrong. Please try again.", 500);
+  }
+}
+
 async function handleTestingResetWorkspace(request, env) {
   const session = await getSessionFromRequest(request, env);
   if (!session) {
@@ -1632,6 +1716,7 @@ export default {
       if (method === "POST" && path === "/magic-links/resolve") return withCors(await handleMagicLinkResolve(request, env), request, env);
       if (method === "POST" && path === "/onboarding/migrate-draft") return withCors(await handleOnboardingMigrateDraft(request, env), request, env);
       if (method === "POST" && path === "/recommendations/generate") return withCors(await handleRecommendationsGenerate(request, env), request, env);
+      if (method === "POST" && path === "/eeos-email-capture") return withCors(await handleEmailCapture(request, env), request, env);
       if (method === "POST" && path === "/testing/reset-workspace") return withCors(await handleTestingResetWorkspace(request, env), request, env);
 
       const pathAndQuery = `${path}${url.search || ""}`;
