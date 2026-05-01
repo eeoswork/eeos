@@ -222,6 +222,127 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
   flex-direction: column;
   gap: 1rem;
 }
+
+.login-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.login-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.login-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.2), 0 8px 10px -6px rgba(15, 23, 42, 0.15);
+}
+
+.login-modal-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.login-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #020617;
+  margin: 0;
+}
+
+.login-modal-subtitle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.login-modal-close {
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.login-modal-close:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.login-form {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.login-input {
+  margin-top: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.login-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.login-submit {
+  width: 100%;
+  border: none;
+  border-radius: 9999px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.login-submit:hover {
+  background: #6d28d9;
+}
+
+.login-footnote {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #64748b;
+}
 </style>
 </head>
 <body>
@@ -237,12 +358,14 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
         />
       </a>
 
-      <a
-        href="/login"
+      <button
+        type="button"
+        id="loginOpenBtn"
         class="site-login"
+        style="border: none; background: transparent;"
       >
         Log in
-      </a>
+      </button>
     </div>
   </header>
 
@@ -320,12 +443,59 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
     </div>
   </section>
 
+  <div id="loginModal" class="login-modal hidden" aria-hidden="true">
+    <div class="login-modal-overlay" id="loginModalOverlay"></div>
+
+    <div class="login-modal-card" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+      <div class="login-modal-top">
+        <div>
+          <h2 id="loginModalTitle" class="login-modal-title">Log in</h2>
+        </div>
+
+        <button
+          type="button"
+          id="loginModalCloseBtn"
+          class="login-modal-close"
+          aria-label="Close login modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <form id="loginModalForm" class="login-form">
+        <div>
+          <label class="login-label" for="loginEmailInput">Email</label>
+          <input
+            id="loginEmailInput"
+            type="email"
+            placeholder="you@company.com"
+            class="login-input"
+          />
+        </div>
+
+        <div>
+          <label class="login-label" for="loginPasswordInput">Password</label>
+          <input
+            id="loginPasswordInput"
+            type="password"
+            placeholder="Password"
+            class="login-input"
+          />
+        </div>
+
+        <button type="submit" class="login-submit">Log in</button>
+      </form>
+
+    </div>
+  </div>
+
 </main>
 
 <script>
 const state = {
   hasCopied: false,
   copyError: false,
+  loginOpen: false,
   emailSubmitted: false,
   emailSubmitting: false,
   emailError: '',
@@ -357,6 +527,26 @@ function trackEvent(eventName) {
   if (typeof win.analytics !== 'undefined' && typeof win.analytics.track === 'function') {
     win.analytics.track(eventName);
   }
+}
+
+function openLoginModal() {
+  state.loginOpen = true;
+  const loginModal = document.getElementById('loginModal');
+  if (!loginModal) {
+    return;
+  }
+  loginModal.classList.remove('hidden');
+  loginModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeLoginModal() {
+  state.loginOpen = false;
+  const loginModal = document.getElementById('loginModal');
+  if (!loginModal) {
+    return;
+  }
+  loginModal.classList.add('hidden');
+  loginModal.setAttribute('aria-hidden', 'true');
 }
 
 function copyPlainTextOnly(text) {
@@ -516,6 +706,12 @@ function updateUI() {
 document.getElementById('copyBtn').addEventListener('click', copySlackPost);
 document.getElementById('openSlackBtn').addEventListener('click', () => {
   window.open('https://app.slack.com/client', '_blank', 'noopener,noreferrer');
+});
+document.getElementById('loginOpenBtn').addEventListener('click', openLoginModal);
+document.getElementById('loginModalCloseBtn').addEventListener('click', closeLoginModal);
+document.getElementById('loginModalOverlay').addEventListener('click', closeLoginModal);
+document.getElementById('loginModalForm').addEventListener('submit', (event) => {
+  event.preventDefault();
 });
 document.getElementById('emailForm').addEventListener('submit', async (e) => {
   e.preventDefault();
