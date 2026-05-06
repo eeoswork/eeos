@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EEOS — Employee Engagement That Actually Happens</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F5F0;
+      --surface: #EFECEA;
+      --text: #1A1916;
+      --muted: #6B6860;
+      --border: rgba(26,25,22,0.12);
+      --accent: #1A1916;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+    }
+
+    .page {
+      max-width: 540px;
+      width: 100%;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .co {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .sub {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2.25rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 2.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      border: 0.5px solid var(--border);
+    }
+
+    .ct {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .cb {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    hr {
+      border: none;
+      border-top: 0.5px solid var(--border);
+      margin: 2.25rem 0;
+    }
+
+    .quote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 20px;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .attr {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .cta {
+      margin-top: 2.25rem;
+    }
+
+    .btn {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--bg);
+      background: var(--text);
+      border: none;
+      border-radius: 8px;
+      padding: 11px 24px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn:hover { opacity: 0.8; }
+
+    @media (max-width: 420px) {
+      h1 { font-size: 26px; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="co">EEOS</p>
+    <h1>Employee engagement that actually happens — every week.</h1>
+    <p class="sub">Engagement falls through the cracks when things get busy. EEOS runs a consistent weekly cadence for your team so it doesn't.</p>
+
+    <div class="row">
+      <div class="card">
+        <p class="ct">Software</p>
+        <p class="cb">Your team runs it. We give you the system.</p>
+      </div>
+      <div class="card">
+        <p class="ct">Done-for-you</p>
+        <p class="cb">We handle everything. No overhead on your end.</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <p class="quote">"I'm so proud to work at a place that does this for us."</p>
+    <p class="attr">— Mary, Product Manager</p>
+
+    <div class="cta">
+      <a class="btn" href="mailto:avery@eeos.work">Let's talk →</a>
+    </div>
+  </div>
+</body>
+</html>
