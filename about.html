@@ -190,49 +190,53 @@ h1 {
   color: #64748b;
 }
 
-.engagement-types {
-  margin-bottom: 2.5rem;
-}
-
 .section-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 0.9rem;
+  margin-bottom: 1.1rem;
 }
 
-.type-grid {
+.engagement-section {
+  max-width: 760px;
+  margin: 2.5rem 0 4rem;
+}
+
+.engagement-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 1rem;
 }
 
-.type-item {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.45);
+.engagement-item {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 1rem;
+  align-items: start;
 }
 
-.type-title {
-  font-size: 13px;
-  font-weight: 600;
+.engagement-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+  opacity: 0.65;
+  margin-top: 0.6rem;
+}
+
+.engagement-title {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.15rem;
 }
 
-.type-copy {
-  font-size: 13px;
-  line-height: 1.45;
+.engagement-copy {
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--muted);
-}
-
-@media (max-width: 720px) {
-  .type-grid {
-    grid-template-columns: 1fr;
-  }
+  max-width: 620px;
 }
 
 @media (max-width: 768px) {
@@ -267,23 +271,32 @@ h1 {
       </p>
     </section>
 
-    <section class="engagement-types">
+    <section class="engagement-section">
       <p class="section-label">What EEOS runs</p>
 
-      <div class="type-grid">
-        <div class="type-item">
-          <p class="type-title">Weekly async activities</p>
-          <p class="type-copy">Lightweight Slack-based moments that keep engagement visible.</p>
+      <div class="engagement-list">
+        <div class="engagement-item">
+          <span class="engagement-dot"></span>
+          <div>
+            <p class="engagement-title">Weekly async activities</p>
+            <p class="engagement-copy">Slack-based moments that keep engagement visible between bigger events.</p>
+          </div>
         </div>
 
-        <div class="type-item">
-          <p class="type-title">Monthly live events</p>
-          <p class="type-copy">Remote or in-person experiences your team can actually attend.</p>
+        <div class="engagement-item">
+          <span class="engagement-dot"></span>
+          <div>
+            <p class="engagement-title">Monthly live experiences</p>
+            <p class="engagement-copy">Remote or in-person events that give the team something to look forward to.</p>
+          </div>
         </div>
 
-        <div class="type-item">
-          <p class="type-title">Flexible event mix</p>
-          <p class="type-copy">Social, wellness, volunteering, team connection, and culture-building.</p>
+        <div class="engagement-item">
+          <span class="engagement-dot"></span>
+          <div>
+            <p class="engagement-title">A balanced event mix</p>
+            <p class="engagement-copy">Social, wellness, volunteering, team connection, and culture-building moments.</p>
+          </div>
         </div>
       </div>
     </section>
