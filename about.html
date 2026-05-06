@@ -1,170 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EEOS — Employee Engagement That Actually Happens</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EEOS - Employee Engagement That Actually Happens</title>
+<link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
+<link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
+<link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="assets/tailwind.css" />
+<style>
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
 
-    :root {
-      --bg: #F7F5F0;
-      --surface: #EFECEA;
-      --text: #1A1916;
-      --muted: #6B6860;
-      --border: rgba(26,25,22,0.12);
-      --accent: #1A1916;
-    }
+* { box-sizing: border-box; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.25rem;
-    }
+.site-header {
+  width: 100%;
+}
 
-    .page {
-      max-width: 540px;
-      width: 100%;
-      animation: fadeUp 0.5s ease both;
-    }
+.site-header-inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 80rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem 0.5rem;
+}
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+.site-header-home {
+  display: flex;
+  align-items: center;
+}
 
-    .co {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.25rem;
-    }
+.site-logo {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
 
-    h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 32px;
-      font-weight: 400;
-      line-height: 1.25;
-      color: var(--text);
-      margin-bottom: 1rem;
-    }
+.site-login {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0f172a;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
 
-    .sub {
-      font-size: 16px;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 2.25rem;
-    }
+.site-login:hover {
+  color: #475569;
+}
 
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 2.25rem;
-    }
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin: 0 auto;
+  max-width: 80rem;
+  padding: 4rem 2rem 3rem;
+}
 
-    .card {
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 1.1rem 1.2rem;
-      border: 0.5px solid var(--border);
-    }
+@media (min-width: 1024px) {
+  .hero-section {
+    grid-template-columns: 0.9fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+}
 
-    .ct {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
+h1 {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
 
-    .cb {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
+.subtext {
+  margin-top: 1.25rem;
+  max-width: 32rem;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #64748b;
+}
 
-    hr {
-      border: none;
-      border-top: 0.5px solid var(--border);
-      margin: 2.25rem 0;
-    }
+.cta {
+  margin-top: 1.75rem;
+}
 
-    .quote {
-      font-family: 'DM Serif Display', serif;
-      font-style: italic;
-      font-size: 20px;
-      color: var(--text);
-      line-height: 1.5;
-      margin-bottom: 0.5rem;
-    }
+.btn {
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
 
-    .attr {
-      font-size: 13px;
-      color: var(--muted);
-    }
+.btn-primary {
+  background-color: #0d9488;
+  color: #ffffff;
+}
 
-    .cta {
-      margin-top: 2.25rem;
-    }
+.btn-primary:hover {
+  background-color: #0f766e;
+}
 
-    .btn {
-      display: inline-block;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--bg);
-      background: var(--text);
-      border: none;
-      border-radius: 8px;
-      padding: 11px 24px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.15s ease;
-    }
+.card {
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-    .btn:hover { opacity: 0.8; }
+.card-rounded-lg { border-radius: 1.5rem; }
 
-    @media (max-width: 420px) {
-      h1 { font-size: 26px; }
-      .row { grid-template-columns: 1fr; }
-    }
-  </style>
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #78909c;
+  margin: 0;
+}
+
+.overview-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.overview-card {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0.9rem 1rem;
+}
+
+.overview-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.overview-body {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.quote-wrap {
+  margin-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.quote-label {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.quote {
+  margin: 0.6rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #0f172a;
+}
+
+.quote-author {
+  margin: 0.6rem 0 0;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .site-header-inner,
+  .hero-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  h1 {
+    font-size: 2.3rem;
+  }
+}
+</style>
 </head>
 <body>
-  <div class="page">
-    <p class="co">EEOS</p>
-    <h1>Employee engagement that actually happens — every week.</h1>
-    <p class="sub">Engagement falls through the cracks when things get busy. EEOS runs a consistent weekly cadence for your team so it doesn't.</p>
-
-    <div class="row">
-      <div class="card">
-        <p class="ct">Software</p>
-        <p class="cb">Your team runs it. We give you the system.</p>
-      </div>
-      <div class="card">
-        <p class="ct">Done-for-you</p>
-        <p class="cb">We handle everything. No overhead on your end.</p>
-      </div>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/" aria-label="EEOS home" class="site-header-home">
+        <img src="/assets/eeos.svg" alt="EEOS" class="site-logo" />
+      </a>
+      <a href="/login.html" class="site-login">Log in</a>
     </div>
+  </header>
 
-    <hr>
+  <main class="hero-section">
+    <section>
+      <p class="eyebrow">About EEOS</p>
+      <h1>Employee engagement that actually happens - every week.</h1>
+      <p class="subtext">
+        EEOS helps companies run a consistent weekly engagement cadence without adding internal overhead.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="mailto:avery@eeos.work">Let's talk -></a>
+      </div>
+    </section>
 
-    <p class="quote">"I'm so proud to work at a place that does this for us."</p>
-    <p class="attr">— Mary, Product Manager</p>
+    <section class="card card-rounded-lg">
+      <p class="eyebrow">How We Work</p>
+      <div class="overview-grid">
+        <div class="overview-card">
+          <p class="overview-title">Self-serve</p>
+          <p class="overview-body">Your team uses the system to run engagement internally.</p>
+        </div>
+        <div class="overview-card">
+          <p class="overview-title">Full-service</p>
+          <p class="overview-body">We own the cadence, execution, and participation.</p>
+        </div>
+      </div>
 
-    <div class="cta">
-      <a class="btn" href="mailto:avery@eeos.work">Let's talk →</a>
-    </div>
-  </div>
+      <div class="quote-wrap">
+        <p class="quote-label">What employees should feel:</p>
+        <blockquote class="quote">"I'm so proud to work at a place that does this for us."</blockquote>
+        <p class="quote-author">- Mary, Product Manager</p>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
