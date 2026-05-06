@@ -20,6 +20,12 @@ html, body {
   color: #0f172a;
 }
 
+:root {
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
 * { box-sizing: border-box; }
 
 .site-header {
@@ -184,6 +190,51 @@ h1 {
   color: #64748b;
 }
 
+.engagement-types {
+  margin-bottom: 2.5rem;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.type-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.type-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.type-copy {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .site-header-inner,
   .hero-section {
@@ -214,6 +265,27 @@ h1 {
       <p class="subtext">
         EEOS helps companies run a consistent weekly engagement cadence without adding internal overhead.
       </p>
+    </section>
+
+    <section class="engagement-types">
+      <p class="section-label">What EEOS runs</p>
+
+      <div class="type-grid">
+        <div class="type-item">
+          <p class="type-title">Weekly async activities</p>
+          <p class="type-copy">Lightweight Slack-based moments that keep engagement visible.</p>
+        </div>
+
+        <div class="type-item">
+          <p class="type-title">Monthly live events</p>
+          <p class="type-copy">Remote or in-person experiences your team can actually attend.</p>
+        </div>
+
+        <div class="type-item">
+          <p class="type-title">Flexible event mix</p>
+          <p class="type-copy">Social, wellness, volunteering, team connection, and culture-building.</p>
+        </div>
+      </div>
     </section>
 
     <section class="card card-rounded-lg">
