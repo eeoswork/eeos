@@ -39,8 +39,11 @@ async function serveStaticHostRequest(request, fallbackPath) {
     return errorResponse("METHOD_NOT_ALLOWED", "Only GET/HEAD are allowed for this route.", 405);
   }
 
-  const targetPath = shouldProxyAsStaticAsset(url.pathname)
-    ? `${url.pathname}${url.search || ""}`
+  const normalizedPath = String(url.pathname || "/").replace(/\/+$/, "") || "/";
+  const rewrittenPath = normalizedPath === "/about" ? "/about.html" : url.pathname;
+
+  const targetPath = shouldProxyAsStaticAsset(rewrittenPath)
+    ? `${rewrittenPath}${url.search || ""}`
     : fallbackPath;
   const upstreamUrl = `${APP_ORIGIN_BASE}${targetPath}`;
   return fetch(upstreamUrl, {
