@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import type { KeyboardEvent, MouseEvent } from "react";
 import type { Article } from "@/types";
 
 type ArticleCardProps = {
@@ -30,8 +31,37 @@ export default function ArticleCard({
   isGenerating = false,
   disableCreate = false,
 }: ArticleCardProps) {
+  function activateFromCard() {
+    if (!disableCreate) {
+      onCreatePost(article);
+    }
+  }
+
+  function handleCardClick(event: MouseEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest("button, a")) {
+      return;
+    }
+    activateFromCard();
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    activateFromCard();
+  }
+
   return (
-    <article className="overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_16px_35px_rgba(31,41,55,0.05)]">
+    <article
+      className="overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_16px_35px_rgba(31,41,55,0.05)] transition hover:border-accent/60"
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Create Instagram post for ${article.title}`}
+    >
       <div className="relative aspect-[16/9] border-b border-border bg-[#edf1f4]">
         {article.image ? (
           <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
