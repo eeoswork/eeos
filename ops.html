@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avery Automation</title>
+    <style>
+      :root {
+        --bg: #fafaf7;
+        --text: #111111;
+        --muted: #626262;
+        --card: #ffffff;
+        --border: rgba(17, 17, 17, 0.12);
+        --cta: #0d1024;
+        --cta-hover: #060817;
+        --radius: 12px;
+        --max: 1020px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        text-rendering: geometricPrecision;
+      }
+
+      .container {
+        width: min(100% - 2rem, var(--max));
+        margin: 0 auto;
+      }
+
+      .site-header {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .logo {
+        font-size: 1.02rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .header-link {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 500;
+      }
+
+      .header-link:hover {
+        color: var(--text);
+      }
+
+      main {
+        padding: 4.4rem 0 4.75rem;
+      }
+
+      section + section {
+        margin-top: 4.25rem;
+      }
+
+      .hero {
+        padding-top: 0.5rem;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 17ch;
+        font-size: clamp(2.15rem, 5.4vw, 4.15rem);
+        letter-spacing: -0.04em;
+      }
+
+      h2 {
+        font-size: clamp(1.2rem, 2.1vw, 1.62rem);
+        letter-spacing: -0.02em;
+      }
+
+      .hero p {
+        max-width: 65ch;
+      }
+
+      .lead {
+        margin-top: 1.35rem;
+        color: var(--muted);
+        font-size: clamp(1.02rem, 1.5vw, 1.28rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.72rem 1.12rem;
+        border-radius: 9px;
+        border: 1px solid var(--border);
+        text-decoration: none;
+        font-weight: 650;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 140ms ease, border-color 140ms ease, color 140ms ease,
+          transform 140ms ease;
+      }
+
+      .btn-primary {
+        background: var(--cta);
+        color: #ffffff;
+        border-color: var(--cta);
+      }
+
+      .btn-primary:hover {
+        background: var(--cta-hover);
+        border-color: var(--cta-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      .btn-secondary:hover {
+        border-color: color-mix(in srgb, var(--cta) 20%, var(--border));
+        background: rgba(255, 255, 255, 0.45);
+      }
+
+      .direct-contact {
+        margin-top: 1rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .direct-contact a {
+        color: var(--text);
+      }
+
+      .card {
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        border-radius: 0;
+        padding: 0.92rem 0.2rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 0;
+      }
+
+      .use-cases {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .item-title {
+        margin: 0;
+        font-size: 1.01rem;
+        font-weight: 500;
+      }
+
+      .step-number {
+        display: inline-flex;
+        width: 1.6rem;
+        height: 1.6rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        margin-bottom: 0.55rem;
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+
+      .form-wrap {
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.35rem;
+      }
+
+      .form-wrap p {
+        margin-top: 0.65rem;
+        margin-bottom: 1.2rem;
+        color: var(--muted);
+      }
+
+      form {
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .field {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      label {
+        font-size: 0.92rem;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.72rem 0.78rem;
+        font: inherit;
+        color: var(--text);
+        background: #ffffff;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: 2px solid color-mix(in srgb, var(--cta) 35%, transparent);
+        outline-offset: 1px;
+        border-color: color-mix(in srgb, var(--cta) 35%, var(--border));
+      }
+
+      .submit-btn {
+        justify-self: start;
+      }
+
+      .success {
+        display: none;
+        margin-top: 0.6rem;
+        border-radius: 9px;
+        border: 1px solid color-mix(in srgb, var(--cta) 18%, var(--border));
+        background: #ffffff;
+        padding: 0.8rem;
+        font-weight: 500;
+      }
+
+      .success.show {
+        display: block;
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 1.35rem 0 2.1rem;
+      }
+
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        color: var(--muted);
+      }
+
+      .footer-inner a {
+        color: var(--text);
+      }
+
+      @media (max-width: 760px) {
+        main {
+          padding-top: 2.1rem;
+        }
+
+        .use-cases,
+        .steps {
+          grid-template-columns: 1fr;
+        }
+
+        .header-inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="logo">Avery Automation</div>
+        <nav class="header-actions" aria-label="Primary">
+          <a
+            class="header-link"
+            href="https://calendly.com/YOUR-LINK"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Book a call</a
+          >
+          <a class="header-link" href="tel:+15555555555">Call/text: (555) 555-5555</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title">Automate the manual work your business keeps repeating.</h1>
+        <p class="lead">
+          I help small businesses simplify repetitive admin, follow-ups, reporting, intake, and
+          "work about work" using lightweight AI automations.
+        </p>
+
+        <div class="hero-actions">
+          <a
+            class="btn btn-primary"
+            href="https://calendly.com/YOUR-LINK"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Book a quick call</a
+          >
+          <a class="btn btn-secondary" href="#lead-form">Tell me what you want automated</a>
+        </div>
+
+        <p class="direct-contact">
+          Prefer to talk directly? <a href="tel:+15555555555">Call or text: (555) 555-5555</a>
+        </p>
+      </section>
+
+      <section aria-labelledby="use-cases-title">
+        <h2 id="use-cases-title">Things I can help with</h2>
+        <div class="grid use-cases" style="margin-top: 1rem">
+          <article class="card"><p class="item-title">Lead intake + follow-up</p></article>
+          <article class="card"><p class="item-title">Customer emails</p></article>
+          <article class="card"><p class="item-title">Quote / proposal workflows</p></article>
+          <article class="card"><p class="item-title">Spreadsheet cleanup</p></article>
+          <article class="card"><p class="item-title">Reports + summaries</p></article>
+          <article class="card"><p class="item-title">Scheduling reminders</p></article>
+          <article class="card"><p class="item-title">Review requests</p></article>
+          <article class="card"><p class="item-title">CRM updates</p></article>
+        </div>
+      </section>
+
+      <section aria-labelledby="how-title">
+        <h2 id="how-title">How it works</h2>
+        <div class="grid steps" style="margin-top: 1rem">
+          <article class="card">
+            <span class="step-number">1</span>
+            <p class="item-title">Show me the annoying manual process</p>
+          </article>
+          <article class="card">
+            <span class="step-number">2</span>
+            <p class="item-title">I map a simpler workflow</p>
+          </article>
+          <article class="card">
+            <span class="step-number">3</span>
+            <p class="item-title">I build a lightweight automation</p>
+          </article>
+          <article class="card">
+            <span class="step-number">4</span>
+            <p class="item-title">You save time every week</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="lead-form" aria-labelledby="form-title">
+        <div class="form-wrap">
+          <h2 id="form-title">Tell me what you want automated</h2>
+          <p>
+            Describe one repetitive process in your business. I'll take a look and follow up with
+            ideas.
+          </p>
+
+          <form id="automationForm" novalidate>
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" required autocomplete="name" />
+            </div>
+
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required autocomplete="email" />
+            </div>
+
+            <div class="field">
+              <label for="business">Business</label>
+              <input id="business" name="business" type="text" autocomplete="organization" />
+            </div>
+
+            <div class="field">
+              <label for="process">What manual process do you want automated?</label>
+              <textarea id="process" name="process" required></textarea>
+            </div>
+
+            <button class="btn btn-primary submit-btn" type="submit">Send automation idea</button>
+          </form>
+
+          <div class="success" id="successMessage" role="status" aria-live="polite">
+            Got it - I'll take a look and follow up.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <p style="margin: 0">Practical AI automations for repetitive business work.</p>
+        <a href="tel:+15555555555">Call/text: (555) 555-5555</a>
+      </div>
+    </footer>
+
+    <script>
+      const form = document.getElementById("automationForm");
+      const successMessage = document.getElementById("successMessage");
+      const submitButton = form.querySelector("button[type='submit']");
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        submitButton.disabled = true;
+        Array.from(form.elements).forEach(function (element) {
+          element.disabled = true;
+        });
+
+        form.style.display = "none";
+        successMessage.classList.add("show");
+      });
+    </script>
+  </body>
+</html>

@@ -10,6 +10,9 @@ const HOME_PAGE_HOSTS = new Set([
 const TODO_PAGE_HOSTS = new Set([
   "todo.eeos.work"
 ]);
+const OPS_PAGE_HOSTS = new Set([
+  "ops.eeos.work"
+]);
 const MAGIC_LINK_HOSTS = new Set([
   "avery.eeos.work",
   "neel.eeos.work",
@@ -73,6 +76,10 @@ async function serveHomePageHostRequest(request) {
 
 async function serveTodoPageHostRequest(request) {
   return serveStaticHostRequest(request, "/todo.html");
+}
+
+async function serveOpsPageHostRequest(request) {
+  return serveStaticHostRequest(request, "/ops.html");
 }
 
 function resolveCorsOrigin(request, env) {
@@ -1686,6 +1693,12 @@ export default {
           return Response.redirect(`${url.origin}/`, 301);
         }
         return withCors(await serveTodoPageHostRequest(request), request, env);
+      }
+      if (OPS_PAGE_HOSTS.has(host)) {
+        if (url.pathname === "/ops.html") {
+          return Response.redirect(`${url.origin}/`, 301);
+        }
+        return withCors(await serveOpsPageHostRequest(request), request, env);
       }
       if (MAGIC_LINK_HOSTS.has(host)) {
         return withCors(await serveMagicLinkHostRequest(request), request, env);
