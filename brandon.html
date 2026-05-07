@@ -461,7 +461,7 @@
 
       let copiedTimeout = null;
       function showDraft(article, draft) {
-        const fullPost = `${article.url}\n\n${draft.summary}`;
+        const fullPost = `${draft.summary}\n\n${article.url}`;
 
         document.getElementById('draft-content').innerHTML = `
           <div class="draft-block">
