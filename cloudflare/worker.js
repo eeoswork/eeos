@@ -1787,6 +1787,9 @@ async function handleEmailCapture(request, env) {
   try {
     const body = await readJson(request);
     const email = normalizeEmail(body.email);
+    const name = String(body.name || "").trim();
+    const business = String(body.business || "").trim();
+    const process = String(body.process || "").trim();
 
     if (!email || !email.includes("@")) {
       return errorResponse("INVALID_EMAIL", "Enter a valid email.", 400);
@@ -1824,6 +1827,23 @@ async function handleEmailCapture(request, env) {
 
     if (resendApiKey && notifyEmail) {
       try {
+        const esc = (value) => String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+        const subject = source === "ops_eeos_work"
+          ? "New OPS lead — automation inquiry"
+          : "New EEOS lead — next week's event";
+
+        const detailsHtml = [
+          name ? `<p><strong>Name:</strong> ${esc(name)}</p>` : "",
+          business ? `<p><strong>Business:</strong> ${esc(business)}</p>` : "",
+          process ? `<p><strong>Process request:</strong><br/>${esc(process).replace(/\n/g, "<br/>")}</p>` : "",
+        ].filter(Boolean).join("\n");
+
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -1833,11 +1853,12 @@ async function handleEmailCapture(request, env) {
           body: JSON.stringify({
             from: `EEOS <${fromEmail}>`,
             to: [notifyEmail],
-            subject: "New EEOS lead — next week's event",
+            subject,
             html: `
               <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
                 <h2>New EEOS email capture</h2>
                 <p><strong>Email:</strong> ${email}</p>
+                ${detailsHtml}
                 <p><strong>Source:</strong> ${source}</p>
                 <p><strong>Event:</strong> ${eventName}</p>
                 <p><strong>Capture reason:</strong> ${captureReason}</p>

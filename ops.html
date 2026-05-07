@@ -621,7 +621,10 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              name: document.getElementById("name").value.trim(),
               email: document.getElementById("email").value.trim(),
+              business: document.getElementById("business").value.trim(),
+              process: document.getElementById("process").value.trim(),
               source: "ops_eeos_work",
               event_id: "ops-automation-inquiry",
               event_name: "Ops Automation Inquiry",
