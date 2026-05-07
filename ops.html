@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Avery Automation</title>
+    <link rel="icon" href="/eeos-logo-svg-default.svg" type="image/svg+xml">
+    <link rel="icon" href="/eeos-logo-png-default.png" type="image/png">
+    <link rel="icon" href="/eeos-logo-svg-black.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="/eeos-logo-png-black.png" type="image/png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="/eeos-logo-svg-white.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/eeos-logo-png-white.png" type="image/png" media="(prefers-color-scheme: dark)">
     <style>
       :root {
         --bg: #fafaf7;
@@ -53,9 +59,15 @@
       }
 
       .logo {
-        font-size: 1.02rem;
-        font-weight: 700;
-        letter-spacing: 0.01em;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+      }
+
+      .logo img {
+        height: 1.7rem;
+        width: auto;
+        object-fit: contain;
       }
 
       .header-actions {
@@ -78,6 +90,23 @@
 
       .header-link:hover {
         color: var(--text);
+      }
+
+      .header-button {
+        text-decoration: none;
+        color: var(--text);
+        font-size: 0.92rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 0.42rem 0.75rem;
+        background: transparent;
+        transition: border-color 140ms ease, background 140ms ease;
+      }
+
+      .header-button:hover {
+        border-color: color-mix(in srgb, var(--cta) 24%, var(--border));
+        background: rgba(255, 255, 255, 0.45);
       }
 
       main {
@@ -324,16 +353,18 @@
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <div class="logo">Avery Automation</div>
+        <a class="logo" href="/" aria-label="EEOS home">
+          <img src="/assets/eeos.svg" alt="EEOS" />
+        </a>
         <nav class="header-actions" aria-label="Primary">
           <a
-            class="header-link"
-            href="https://calendly.com/YOUR-LINK"
+            class="header-button"
+            href="https://calendly.com/avery-eeos/30min"
             target="_blank"
             rel="noopener noreferrer"
             >Book a call</a
           >
-          <a class="header-link" href="tel:+15555555555">Call/text: (555) 555-5555</a>
+          <a class="header-link" href="tel:+15044186356">Call/text: (504) 418-6356</a>
         </nav>
       </div>
     </header>
@@ -349,7 +380,7 @@
         <div class="hero-actions">
           <a
             class="btn btn-primary"
-            href="https://calendly.com/YOUR-LINK"
+            href="https://calendly.com/avery-eeos/30min"
             target="_blank"
             rel="noopener noreferrer"
             >Book a quick call</a
@@ -358,7 +389,7 @@
         </div>
 
         <p class="direct-contact">
-          Prefer to talk directly? <a href="tel:+15555555555">Call or text: (555) 555-5555</a>
+          Prefer to talk directly? <a href="tel:+15044186356">Call or text: (504) 418-6356</a>
         </p>
       </section>
 
@@ -440,7 +471,7 @@
     <footer>
       <div class="container footer-inner">
         <p style="margin: 0">Practical AI automations for repetitive business work.</p>
-        <a href="tel:+15555555555">Call/text: (555) 555-5555</a>
+        <a href="tel:+15044186356">Call/text: (504) 418-6356</a>
       </div>
     </footer>
 
