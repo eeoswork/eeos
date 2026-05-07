@@ -94,11 +94,13 @@ async function handleBrandonArticles(request, env) {
     "https://therealdeal.com/la/feed/",
     "https://la.urbanize.city/rss.xml",
     "https://www.latimes.com/business/real-estate/rss2.0.xml",
-    "https://www.inman.com/feed/",
-    "https://www.redfin.com/news/feed/",
-    "https://www.realtor.com/news/feed/",
-    "https://www.commercialobserver.com/feed/",
-    "https://www.multihousingnews.com/feed/"
+    "https://www.bisnow.com/rss-feed/los-angeles",
+    "https://feeds.feedburner.com/curbed/la",
+    "https://labusinessjournal.com/real-estate/feed/",
+    "https://www.hollywoodreporter.com/tag/real-estate/feed/",
+    "https://www.dwell.com/feed/tag/los-angeles",
+    "https://www.laconservancy.org/feed/",
+    "https://www.globest.com/markets/west/california/feed/"
   ];
 
   const requestHeaders = {
