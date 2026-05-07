@@ -373,6 +373,21 @@
         display: block;
       }
 
+      .error {
+        display: none;
+        margin-top: 0.6rem;
+        border-radius: 9px;
+        border: 1px solid color-mix(in srgb, #b91c1c 28%, var(--border));
+        background: #ffffff;
+        color: #991b1b;
+        padding: 0.8rem;
+        font-weight: 500;
+      }
+
+      .error.show {
+        display: block;
+      }
+
       footer {
         border-top: 1px solid var(--border);
         padding: 1.35rem 0 2.1rem;
@@ -571,6 +586,7 @@
           <div class="success" id="successMessage" role="status" aria-live="polite">
             Got it - I'll take a look and follow up.
           </div>
+          <div class="error" id="errorMessage" role="alert" aria-live="assertive"></div>
         </div>
       </section>
     </main>
@@ -584,9 +600,10 @@
     <script>
       const form = document.getElementById("automationForm");
       const successMessage = document.getElementById("successMessage");
+      const errorMessage = document.getElementById("errorMessage");
       const submitButton = form.querySelector("button[type='submit']");
 
-      form.addEventListener("submit", function (event) {
+      form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         if (!form.checkValidity()) {
@@ -594,13 +611,41 @@
           return;
         }
 
+        errorMessage.classList.remove("show");
+        errorMessage.textContent = "";
         submitButton.disabled = true;
-        Array.from(form.elements).forEach(function (element) {
-          element.disabled = true;
-        });
+        submitButton.textContent = "Sending...";
 
-        form.style.display = "none";
-        successMessage.classList.add("show");
+        try {
+          const response = await fetch("/api/eeos-email-capture", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: document.getElementById("email").value.trim(),
+              source: "ops_eeos_work",
+              event_id: "ops-automation-inquiry",
+              event_name: "Ops Automation Inquiry",
+              capture_reason: "automation_form_submission",
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData?.error?.message || "Submission failed");
+          }
+
+          Array.from(form.elements).forEach(function (element) {
+            element.disabled = true;
+          });
+          form.style.display = "none";
+          successMessage.classList.add("show");
+        } catch (error) {
+          console.error("Ops email capture error:", error);
+          submitButton.disabled = false;
+          submitButton.textContent = "Send automation idea";
+          errorMessage.textContent = "Something went wrong. Please try again.";
+          errorMessage.classList.add("show");
+        }
       });
     </script>
   </body>
