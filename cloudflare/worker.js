@@ -90,32 +90,48 @@ async function serveBrandonHostRequest(request) {
 }
 
 async function handleBrandonArticles(request, env) {
-  const GOOGLE_RSS = "https://news.google.com/rss/search?q=los+angeles+real+estate&hl=en-US&gl=US&ceid=US:en";
-  const PROXY_URL = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(GOOGLE_RSS);
-  const rssRes = await fetch(PROXY_URL, {
-    headers: { "user-agent": "Mozilla/5.0 (compatible; brandon-content-assistant/1.0)" }
+  const RSS_URL = "https://rss.app/feeds/sCcJmHm7buFhcWXs.xml";
+  const rssRes = await fetch(RSS_URL, {
+    headers: {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "accept": "application/rss+xml, application/xml, text/xml, */*",
+      "accept-language": "en-US,en;q=0.9"
+    },
+    redirect: "follow"
   });
   if (!rssRes.ok) {
-    return errorResponse("RSS_FETCH_FAILED", "Could not load news feed.", 502);
+    return errorResponse("RSS_FETCH_FAILED", `Could not load news feed (status ${rssRes.status}).`, 502);
   }
-  const data = await rssRes.json();
-  if (data.status !== "ok" || !Array.isArray(data.items)) {
-    return errorResponse("RSS_PARSE_FAILED", "Could not parse news feed.", 502);
-  }
+  const xml = await rssRes.text();
 
-  const raw = data.items.slice(0, 15);
-  const items = raw.map(item => {
-    const cleanTitle = (item.title || "").replace(/<[^>]*>/g, "").trim();
-    // Extract publisher name from title (format: "Headline - Publisher")
-    const dashIdx = cleanTitle.lastIndexOf(" - ");
-    const title = dashIdx !== -1 ? cleanTitle.slice(0, dashIdx).trim() : cleanTitle;
-    const source = dashIdx !== -1 ? cleanTitle.slice(dashIdx + 3).trim() : "Google News";
-    const googleUrl = (item.link || "").trim();
-    const publishedAt = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
-    const snippet = (item.description || "").replace(/<[^>]*>/g, "").trim().slice(0, 200);
-    if (!title || !googleUrl) return null;
-    return { title, source, publishedAt, snippet, googleUrl };
-  }).filter(Boolean);
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null && items.length < 15) {
+    const block = match[1];
+    const title = (/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title[^>]*>([^<]*)<\/title>/.exec(block) || [])[1] || "";
+    const link = (/<link>([^<]*)<\/link>/.exec(block) || [])[1] || "";
+    const pubDate = (/<pubDate>([^<]*)<\/pubDate>/.exec(block) || [])[1] || "";
+    const description = (/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/.exec(block) || /<description>([^<]*)<\/description>/.exec(block) || [])[1] || "";
+    const sourceMatch = /<source[^>]*>([^<]*)<\/source>/.exec(block);
+    const source = sourceMatch ? sourceMatch[1] : "Google News";
+
+    const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
+    const cleanSnippet = description.replace(/<[^>]*>/g, "").trim().slice(0, 200);
+    const cleanSource = source.replace(/<[^>]*>/g, "").trim();
+    const cleanLink = link.trim();
+    const publishedAt = pubDate ? new Date(pubDate).toISOString() : new Date().toISOString();
+
+    if (!cleanTitle || !cleanLink) continue;
+
+    items.push({
+      title: cleanTitle,
+      source: cleanSource,
+      publishedAt,
+      snippet: cleanSnippet,
+      googleUrl: cleanLink
+    });
+  }
 
   // Resolve Google News redirect URLs to actual article URLs in parallel
   const resolved = await Promise.all(items.map(async (item) => {
