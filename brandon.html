@@ -313,7 +313,6 @@
                 <p class="section-label">Draft</p>
                 <h2>Facebook Draft</h2>
               </div>
-              <a class="btn btn-outline" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" style="flex-shrink:0">Open Facebook</a>
             </div>
 
             <div id="draft-content">
@@ -462,34 +461,15 @@
 
       let copiedTimeout = null;
       function showDraft(article, draft) {
-        const fullPost = `${draft.hook}\n\n${draft.caption}\n\n${draft.hashtags.join(' ')}`;
+        const fullPost = `${article.url}\n\n${draft.summary}`;
 
         document.getElementById('draft-content').innerHTML = `
-          <div class="draft-block">
-            <div class="draft-block-label">Article</div>
-            <div class="draft-block-text" style="font-weight:600">${article.title}</div>
-            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.2rem">${article.source}</div>
-          </div>
-          <div class="draft-block">
-            <div class="draft-block-label">Hook</div>
-            <div class="draft-block-text">${draft.hook}</div>
-          </div>
-          <div class="draft-block">
-            <div class="draft-block-label">Caption</div>
-            <div class="draft-block-text">${draft.caption}</div>
-          </div>
-          <div class="draft-block">
-            <div class="draft-block-label">Hashtags</div>
-            <div class="draft-block-text">${draft.hashtags.join(' ')}</div>
-          </div>
           <div class="draft-block">
             <div class="draft-block-label">Full Post</div>
             <div class="draft-block-text" id="full-post-text">${fullPost}</div>
           </div>
           <div class="draft-actions">
             <button class="btn btn-primary" id="copy-btn" onclick="copyPost(${JSON.stringify(fullPost).replace(/</g,'\\u003c')})">Copy Post</button>
-            <a class="btn btn-outline" href="${article.url}" target="_blank" rel="noopener noreferrer">Open Article</a>
-            <a class="btn btn-outline" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Open Facebook</a>
           </div>
           <div class="disclaimer">Review the draft and confirm facts in the source article before posting. This tool never auto-posts to Facebook.</div>
         `;
