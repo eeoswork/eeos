@@ -421,6 +421,7 @@
         generatingId = id;
         renderList();
         showDraftLoading(article);
+        scrollToDraftOnSmallScreens();
 
         try {
           const res = await fetch(`${API_BASE}/generate`, {
@@ -439,6 +440,13 @@
           generatingId = null;
           renderList();
         }
+      }
+
+      function scrollToDraftOnSmallScreens() {
+        if (!window.matchMedia('(max-width: 768px)').matches) return;
+        const panel = document.getElementById('draft-panel');
+        if (!panel) return;
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
 
       function showDraftLoading(article) {
