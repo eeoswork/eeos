@@ -249,7 +249,7 @@ async function handleBrandonGenerate(request, env) {
     return errorResponse("INVALID_ARTICLE", "Article with title and url is required.", 422);
   }
 
-  const prompt = `Create a clear, useful Facebook post based on the article information below.\n\nImportant rules:\n- Do not pretend you read the full article if only headline/snippet/link are provided.\n- Do not exaggerate or make unsupported claims.\n- Do not give legal, tax, or financial advice.\n- Do not sound like an AI.\n- Keep the tone conversational, helpful, professional, and local.\n- Write for homeowners, buyers, sellers, and real estate followers in the Los Angeles area.\n- Include a short line encouraging people to reach out with local real estate questions.\n- Include 3-6 relevant hashtags.\n- Keep the caption suitable for Facebook.\n\nReturn valid JSON only:\n{\n  "hook": "...",\n  "summary": "...",\n  "caption": "...",\n  "hashtags": ["...", "..."]\n}\n\nArticle title: ${String(article.title || "")}\nSource: ${String(article.source || "")}\nSnippet: ${String(article.snippet || "")}\nURL: ${String(article.url || "")}`;
+  const prompt = `You are helping a Los Angeles real estate agent create humorous, engaging Facebook and Instagram content based on real estate news.\n\nCreate a social media post draft using the article information below.\n\nThe tone should feel:\n- conversational\n- slightly witty/humorous\n- observational\n- locally aware\n- human\n- social-media friendly\n\nDo NOT:\n- sound corporate\n- sound like an AI\n- overdo the humor\n- use cringe memes/slang\n- exaggerate claims\n- make unsupported statements\n- give legal, tax, or financial advice\n- include hashtags\n\nThe humor should feel more like:\n- LA market reality\n- relatable homeowner/buyer frustration\n- mild sarcasm\n- market observations\n- light commentary\n\nNOT:\n- stand-up comedy\n- forced jokes\n- internet meme spam\n\nVERY IMPORTANT STRUCTURE:\nAlways return:\n1. Hook\n2. Caption body\n\nThe hook should:\n- be short\n- attention-grabbing\n- sound natural/social\n- make people want to keep reading\n\nThe caption body should:\n- summarize the article clearly\n- explain why it matters\n- feel conversational\n- include a subtle opinion or humorous observation when appropriate\n- end with a soft engagement line or CTA\n\nDo not force jokes if the topic is serious.\n\nReturn valid JSON only:\n{\n  "hook": "...",\n  "captionBody": "..."\n}\n\nArticle title: ${String(article.title || "")}\nSource: ${String(article.source || "")}\nSnippet: ${String(article.snippet || "")}\nURL: ${String(article.url || "")}`;
 
   const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -264,7 +264,7 @@ async function handleBrandonGenerate(request, env) {
       messages: [
         {
           role: "system",
-          content: "You are helping a California real estate agent create educational Facebook content based on real estate news. Return valid JSON only."
+          content: "You are helping a Los Angeles real estate agent create humorous, engaging social media content based on real estate news. Return valid JSON only."
         },
         { role: "user", content: prompt }
       ]
@@ -289,9 +289,9 @@ async function handleBrandonGenerate(request, env) {
 
   return jsonResponse({
     hook: String(draft.hook || ""),
-    summary: String(draft.summary || ""),
-    caption: String(draft.caption || ""),
-    hashtags: Array.isArray(draft.hashtags) ? draft.hashtags.map(String) : []
+    summary: String(draft.captionBody || draft.summary || ""),
+    caption: String(draft.captionBody || draft.caption || ""),
+    hashtags: []
   });
 }
 
