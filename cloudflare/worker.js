@@ -13,6 +13,9 @@ const TODO_PAGE_HOSTS = new Set([
 const OPS_PAGE_HOSTS = new Set([
   "ops.eeos.work"
 ]);
+const BRANDON_HOSTS = new Set([
+  "brandon.eeos.work"
+]);
 const MAGIC_LINK_HOSTS = new Set([
   "avery.eeos.work",
   "neel.eeos.work",
@@ -80,6 +83,112 @@ async function serveTodoPageHostRequest(request) {
 
 async function serveOpsPageHostRequest(request) {
   return serveStaticHostRequest(request, "/ops.html");
+}
+
+async function serveBrandonHostRequest(request) {
+  return serveStaticHostRequest(request, "/brandon.html");
+}
+
+async function handleBrandonArticles(request, env) {
+  const RSS_URL = "https://news.google.com/rss/search?q=los+angeles+real+estate&hl=en-US&gl=US&ceid=US:en";
+  const rssRes = await fetch(RSS_URL, {
+    headers: { "user-agent": "Mozilla/5.0 (compatible; brandon-content-assistant/1.0)" }
+  });
+  if (!rssRes.ok) {
+    return errorResponse("RSS_FETCH_FAILED", "Could not load news feed.", 502);
+  }
+  const xml = await rssRes.text();
+
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null && items.length < 15) {
+    const block = match[1];
+    const title = (/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title[^>]*>([^<]*)<\/title>/.exec(block) || [])[1] || "";
+    const link = (/<link>([^<]*)<\/link>/.exec(block) || [])[1] || "";
+    const pubDate = (/<pubDate>([^<]*)<\/pubDate>/.exec(block) || [])[1] || "";
+    const description = (/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/.exec(block) || /<description>([^<]*)<\/description>/.exec(block) || [])[1] || "";
+    const sourceMatch = /<source[^>]*>([^<]*)<\/source>/.exec(block);
+    const source = sourceMatch ? sourceMatch[1] : "Google News";
+
+    const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
+    const cleanSnippet = description.replace(/<[^>]*>/g, "").trim().slice(0, 200);
+    const cleanSource = source.replace(/<[^>]*>/g, "").trim();
+    const cleanLink = link.trim();
+    const publishedAt = pubDate ? new Date(pubDate).toISOString() : new Date().toISOString();
+
+    if (!cleanTitle || !cleanLink) continue;
+
+    const id = await sha256Hex(cleanLink);
+    items.push({
+      id: id.slice(0, 16),
+      title: cleanTitle,
+      source: cleanSource,
+      publishedAt,
+      snippet: cleanSnippet,
+      url: cleanLink
+    });
+  }
+
+  return jsonResponse(items);
+}
+
+async function handleBrandonGenerate(request, env) {
+  const openaiKey = String(env.OPENAI_API_KEY || "").trim();
+  if (!openaiKey) {
+    return errorResponse("OPENAI_NOT_CONFIGURED", "OpenAI API key is not configured.", 503);
+  }
+
+  const body = await readJson(request);
+  const article = body.article && typeof body.article === "object" ? body.article : null;
+  if (!article || !article.title || !article.url) {
+    return errorResponse("INVALID_ARTICLE", "Article with title and url is required.", 422);
+  }
+
+  const prompt = `Create a clear, useful Facebook post based on the article information below.\n\nImportant rules:\n- Do not pretend you read the full article if only headline/snippet/link are provided.\n- Do not exaggerate or make unsupported claims.\n- Do not give legal, tax, or financial advice.\n- Do not sound like an AI.\n- Keep the tone conversational, helpful, professional, and local.\n- Write for homeowners, buyers, sellers, and real estate followers in the Los Angeles area.\n- Include a short line encouraging people to reach out with local real estate questions.\n- Include 3-6 relevant hashtags.\n- Keep the caption suitable for Facebook.\n\nReturn valid JSON only:\n{\n  "hook": "...",\n  "summary": "...",\n  "caption": "...",\n  "hashtags": ["...", "..."]\n}\n\nArticle title: ${String(article.title || "")}\nSource: ${String(article.source || "")}\nSnippet: ${String(article.snippet || "")}\nURL: ${String(article.url || "")}`;
+
+  const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      temperature: 0.7,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "You are helping a California real estate agent create educational Facebook content based on real estate news. Return valid JSON only."
+        },
+        { role: "user", content: prompt }
+      ]
+    })
+  });
+
+  if (!aiRes.ok) {
+    if (aiRes.status === 401) {
+      return errorResponse("OPENAI_AUTH_FAILED", "OpenAI authentication failed. Check the OPENAI_API_KEY secret.", 502);
+    }
+    return errorResponse("OPENAI_ERROR", `OpenAI returned ${aiRes.status}.`, 502);
+  }
+
+  const aiData = await aiRes.json();
+  const raw = String(aiData?.choices?.[0]?.message?.content || "");
+  let draft;
+  try {
+    draft = JSON.parse(raw);
+  } catch (_) {
+    return errorResponse("PARSE_ERROR", "Failed to parse AI response.", 502);
+  }
+
+  return jsonResponse({
+    hook: String(draft.hook || ""),
+    summary: String(draft.summary || ""),
+    caption: String(draft.caption || ""),
+    hashtags: Array.isArray(draft.hashtags) ? draft.hashtags.map(String) : []
+  });
 }
 
 function resolveCorsOrigin(request, env) {
@@ -1700,6 +1809,12 @@ export default {
         }
         return withCors(await serveOpsPageHostRequest(request), request, env);
       }
+      if (BRANDON_HOSTS.has(host)) {
+        if (url.pathname === "/brandon.html") {
+          return Response.redirect(`${url.origin}/`, 301);
+        }
+        return withCors(await serveBrandonHostRequest(request), request, env);
+      }
       if (MAGIC_LINK_HOSTS.has(host)) {
         return withCors(await serveMagicLinkHostRequest(request), request, env);
       }
@@ -1734,6 +1849,8 @@ export default {
       if (method === "POST" && path === "/recommendations/generate") return withCors(await handleRecommendationsGenerate(request, env), request, env);
       if (method === "POST" && path === "/eeos-email-capture") return withCors(await handleEmailCapture(request, env), request, env);
       if (method === "POST" && path === "/testing/reset-workspace") return withCors(await handleTestingResetWorkspace(request, env), request, env);
+      if (method === "GET" && path === "/brandon/articles") return withCors(await handleBrandonArticles(request, env), request, env);
+      if (method === "POST" && path === "/brandon/generate") return withCors(await handleBrandonGenerate(request, env), request, env);
 
       const pathAndQuery = `${path}${url.search || ""}`;
       return withCors(await proxyToPollApi(request, env, pathAndQuery), request, env);

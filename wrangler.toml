@@ -15,7 +15,9 @@ routes = [
 	{ pattern = "susco.eeos.work/api/*", zone_name = "eeos.work" },
 	{ pattern = "susco.eeos.work/*", zone_name = "eeos.work" },
 	{ pattern = "todo.eeos.work/*", zone_name = "eeos.work" },
-	{ pattern = "ops.eeos.work/*", zone_name = "eeos.work" }
+	{ pattern = "ops.eeos.work/*", zone_name = "eeos.work" },
+	{ pattern = "brandon.eeos.work/api/*", zone_name = "eeos.work" },
+	{ pattern = "brandon.eeos.work/*", zone_name = "eeos.work" }
 ]
 
 [vars]
