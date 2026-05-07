@@ -443,9 +443,11 @@
       }
 
       function scrollToDraftOnSmallScreens() {
-        if (!window.matchMedia('(max-width: 768px)').matches) return;
         const panel = document.getElementById('draft-panel');
         if (!panel) return;
+        const panelRect = panel.getBoundingClientRect();
+        const isBelowViewport = panelRect.top > (window.innerHeight * 0.65);
+        if (!isBelowViewport) return;
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
 
