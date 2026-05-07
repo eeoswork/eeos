@@ -56,7 +56,7 @@ export default function ArticleCard({
       onKeyDown={handleRowKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Create Instagram post for ${article.title}`}
+      aria-label={`Create Facebook post for ${article.title}`}
     >
       {/* Content */}
       <div className="min-w-0 flex-1">

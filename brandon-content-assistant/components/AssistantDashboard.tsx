@@ -117,10 +117,10 @@ export default function AssistantDashboard({
                 Brandon Real Estate Content Assistant
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-                Fresh California real estate articles turned into ready-to-edit Instagram drafts.
+                Fresh California real estate articles turned into ready-to-edit Facebook drafts.
               </p>
               <p className="mt-4 max-w-2xl rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-6 text-muted">
-                Drafts are based on article headlines and previews. Review before posting. This workflow creates a draft only and never auto-posts to Instagram.
+                Drafts are based on article headlines and previews. Review before posting. This workflow creates a draft only and never auto-posts to Facebook.
               </p>
             </div>
 

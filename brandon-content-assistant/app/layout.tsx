@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Brandon Content Assistant | EEOS",
-  description: "Private review-and-copy dashboard for turning California real estate news into ready-to-edit Instagram drafts.",
+  description: "Private review-and-copy dashboard for turning California real estate news into ready-to-edit Facebook drafts.",
 };
 
 export default function RootLayout({

@@ -1,4 +1,4 @@
-import { generateInstagramDraft } from "@/lib/openai";
+import { generateFacebookDraft } from "@/lib/openai";
 import type { Article } from "@/types";
 
 export const runtime = "nodejs";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid article payload." }, { status: 400 });
     }
 
-    const draft = await generateInstagramDraft(body.article);
+    const draft = await generateFacebookDraft(body.article);
     return Response.json(draft);
   } catch (error) {
     if (error instanceof Error && error.message.includes("OPENAI_API_KEY")) {

@@ -59,7 +59,7 @@ function parseGeneratedPost(content: string): GeneratedPost {
   };
 }
 
-export async function generateInstagramDraft(article: Article): Promise<GeneratedPost> {
+export async function generateFacebookDraft(article: Article): Promise<GeneratedPost> {
   const client = getClient();
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
@@ -71,11 +71,11 @@ export async function generateInstagramDraft(article: Article): Promise<Generate
       {
         role: "system",
         content:
-          "You are helping a California real estate agent create educational Instagram content based on real estate news. Return valid JSON only.",
+          "You are helping a California real estate agent create educational Facebook content based on real estate news. Return valid JSON only.",
       },
       {
         role: "user",
-        content: `Create a clear, useful Instagram caption based on the article information below.
+        content: `Create a clear, useful Facebook post based on the article information below.
 
 Important rules:
 - Do not pretend you read the full article if only headline/snippet/link are provided.
@@ -87,7 +87,7 @@ Important rules:
 - Write for homeowners, buyers, sellers, and real estate followers.
 - Include a short line encouraging people to reach out with local real estate questions.
 - Include 3-6 relevant hashtags.
-- Keep the caption suitable for Instagram.
+- Keep the caption suitable for Facebook.
 
 Return valid JSON only:
 {

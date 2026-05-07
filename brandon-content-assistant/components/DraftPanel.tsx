@@ -25,7 +25,7 @@ export default function DraftPanel({
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.22em] text-accent">Draft</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Instagram Draft</h2>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Facebook Draft</h2>
           </div>
           <a
             href="https://www.facebook.com/"
@@ -63,7 +63,7 @@ export default function DraftPanel({
 
             {isLoading ? (
               <div className="rounded-[22px] border border-dashed border-border bg-background p-5 text-sm text-muted">
-                Generating Instagram draft...
+                Generating Facebook draft...
               </div>
             ) : null}
 
@@ -129,7 +129,7 @@ export default function DraftPanel({
                 </div>
 
                 <p className="rounded-[22px] border border-border bg-background px-4 py-3 text-sm leading-6 text-muted">
-                  Review the draft, confirm the facts in the source article, and post manually. This MVP does not auto-post to Instagram.
+                  Review the draft, confirm the facts in the source article, and post manually. This MVP does not auto-post to Facebook.
                 </p>
               </div>
             ) : null}
