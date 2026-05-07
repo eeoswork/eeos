@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import type { KeyboardEvent, MouseEvent } from "react";
 import type { Article } from "@/types";
 
@@ -8,21 +6,20 @@ type ArticleCardProps = {
   onCreatePost: (article: Article) => void;
   isGenerating?: boolean;
   disableCreate?: boolean;
+  isSelected?: boolean;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
-
-function formatDate(input: string) {
+function formatRelativeTime(input: string): string {
   const date = new Date(input);
-  if (Number.isNaN(date.getTime())) {
-    return input;
-  }
-
-  return dateFormatter.format(date);
+  if (Number.isNaN(date.getTime())) return input;
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} hr ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay}d ago`;
 }
 
 export default function ArticleCard({
@@ -30,6 +27,7 @@ export default function ArticleCard({
   onCreatePost,
   isGenerating = false,
   disableCreate = false,
+  isSelected = false,
 }: ArticleCardProps) {
   function activateFromCard() {
     if (!disableCreate) {
@@ -37,71 +35,76 @@ export default function ArticleCard({
     }
   }
 
-  function handleCardClick(event: MouseEvent<HTMLElement>) {
+  function handleRowClick(event: MouseEvent<HTMLElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest("button, a")) {
-      return;
-    }
+    if (target.closest("a")) return;
     activateFromCard();
   }
 
-  function handleCardKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
+  function handleRowKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     activateFromCard();
   }
 
+  const sourceInitial = article.source.charAt(0).toUpperCase();
+
   return (
     <article
-      className="overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_16px_35px_rgba(31,41,55,0.05)] transition hover:border-accent/60"
-      onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}
+      className={`flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors hover:bg-background/70 ${
+        isSelected ? "bg-accent/5" : ""
+      }`}
+      onClick={handleRowClick}
+      onKeyDown={handleRowKeyDown}
       role="button"
       tabIndex={0}
       aria-label={`Create Instagram post for ${article.title}`}
     >
-      <div className="relative aspect-[16/9] border-b border-border bg-[#edf1f4]">
-        {article.image ? (
-          <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center px-6 text-center text-sm text-muted">
-            No image available
-          </div>
-        )}
+      {/* Source initial badge */}
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent/10 text-xs font-bold text-accent-strong">
+        {sourceInitial}
       </div>
 
-      <div className="flex h-full flex-col p-5">
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
-            <span>{article.source}</span>
-            <span className="text-border">•</span>
-            <span>{formatDate(article.publishedAt)}</span>
-          </div>
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+          {article.title}
+        </p>
+        <p className="mt-0.5 text-xs text-muted">
+          {article.source} · {formatRelativeTime(article.publishedAt)}
+        </p>
+      </div>
 
-          <h3 className="mt-3 text-xl font-semibold leading-8 tracking-tight text-foreground">{article.title}</h3>
-          <p className="mt-3 text-sm leading-6 text-muted">{article.snippet}</p>
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => onCreatePost(article)}
-            disabled={disableCreate}
-            className="inline-flex items-center justify-center rounded-full bg-accent-strong px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+      {/* Actions */}
+      <div className="flex shrink-0 items-center gap-2 pl-2">
+        {isGenerating ? (
+          <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent-strong">
+            Drafting…
+          </span>
+        ) : (
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+              isSelected
+                ? "bg-accent-strong text-white"
+                : "bg-accent/10 text-accent-strong hover:bg-accent-strong hover:text-white"
+            } transition-colors`}
           >
-            {isGenerating ? "Generating Instagram draft..." : "Create Instagram Post"}
-          </button>
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-accent hover:text-accent-strong"
-          >
-            Open Article
-          </a>
-        </div>
+            {isSelected ? "Selected" : "Create"}
+          </span>
+        )}
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-muted transition-colors hover:text-foreground"
+          aria-label="Open article"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5">
+            <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
+            <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
+          </svg>
+        </a>
       </div>
     </article>
   );

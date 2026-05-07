@@ -172,13 +172,14 @@ export default function AssistantDashboard({
               </div>
             ) : null}
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="overflow-hidden rounded-[20px] border border-border bg-card divide-y divide-border shadow-[0_16px_35px_rgba(31,41,55,0.05)]">
               {articles.map((article) => (
                 <ArticleCard
                   key={article.id}
                   article={article}
                   isGenerating={generatingArticleId === article.id}
                   disableCreate={Boolean(generatingArticleId)}
+                  isSelected={selectedArticle?.id === article.id}
                   onCreatePost={handleCreatePost}
                 />
               ))}
