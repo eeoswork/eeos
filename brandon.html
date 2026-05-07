@@ -466,20 +466,21 @@
         document.getElementById('draft-content').innerHTML = `
           <div class="draft-block">
             <div class="draft-block-label">Full Post</div>
-            <div class="draft-block-text" id="full-post-text">${fullPost}</div>
+            <div class="draft-block-text" id="full-post-text">${fullPost.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
           </div>
           <div class="draft-actions">
-            <button class="btn btn-primary" id="copy-btn" onclick="copyPost(${JSON.stringify(fullPost).replace(/</g,'\\u003c')})">Copy Post</button>
+            <button class="btn btn-primary" id="copy-btn" data-copy-text="${fullPost.replace(/"/g, '&quot;')}" onclick="copyPost()">Copy Post</button>
             <a class="btn btn-outline" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Open Facebook</a>
           </div>
           <div class="disclaimer">Review the draft and confirm facts in the source article before posting. This tool never auto-posts to Facebook.</div>
         `;
       }
 
-      async function copyPost(text) {
+      async function copyPost() {
+        const btn = document.getElementById('copy-btn');
+        const text = btn.getAttribute('data-copy-text');
         try {
           await navigator.clipboard.writeText(text);
-          const btn = document.getElementById('copy-btn');
           if (btn) {
             btn.textContent = 'Copied!';
             clearTimeout(copiedTimeout);
