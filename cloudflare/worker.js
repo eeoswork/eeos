@@ -119,18 +119,40 @@ async function handleBrandonArticles(request, env) {
 
     if (!cleanTitle || !cleanLink) continue;
 
-    const id = await sha256Hex(cleanLink);
     items.push({
-      id: id.slice(0, 16),
       title: cleanTitle,
       source: cleanSource,
       publishedAt,
       snippet: cleanSnippet,
-      url: cleanLink
+      googleUrl: cleanLink
     });
   }
 
-  return jsonResponse(items);
+  // Resolve Google News redirect URLs to actual article URLs in parallel
+  const resolved = await Promise.all(items.map(async (item) => {
+    let finalUrl = item.googleUrl;
+    try {
+      const res = await fetch(item.googleUrl, {
+        method: "HEAD",
+        redirect: "follow",
+        headers: { "user-agent": "Mozilla/5.0 (compatible; brandon-content-assistant/1.0)" }
+      });
+      if (res.url && res.url !== item.googleUrl) finalUrl = res.url;
+    } catch (_) {
+      // keep original if redirect fails
+    }
+    const id = await sha256Hex(item.googleUrl);
+    return {
+      id: id.slice(0, 16),
+      title: item.title,
+      source: item.source,
+      publishedAt: item.publishedAt,
+      snippet: item.snippet,
+      url: finalUrl
+    };
+  }));
+
+  return jsonResponse(resolved);
 }
 
 async function handleBrandonGenerate(request, env) {
