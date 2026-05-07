@@ -28,12 +28,12 @@ export default function DraftPanel({
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Instagram Draft</h2>
           </div>
           <a
-            href="https://www.instagram.com/"
+            href="https://www.facebook.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-accent hover:text-accent-strong"
           >
-            Open Instagram
+            Open Facebook
           </a>
         </div>
 
@@ -111,12 +111,12 @@ export default function DraftPanel({
                     {copied ? "Copied" : "Copy Post"}
                   </button>
                   <a
-                    href="https://www.instagram.com/"
+                    href="https://www.facebook.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-accent hover:text-accent-strong"
                   >
-                    Open Instagram
+                    Open Facebook
                   </a>
                   <a
                     href={article.url}

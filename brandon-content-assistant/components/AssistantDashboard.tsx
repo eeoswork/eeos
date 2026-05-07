@@ -134,12 +134,12 @@ export default function AssistantDashboard({
                 {articlesLoading ? "Loading articles..." : "Refresh Articles"}
               </button>
               <a
-                href="https://www.instagram.com/"
+                href="https://www.facebook.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-full bg-accent-strong px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent"
               >
-                Open Instagram
+                Open Facebook
               </a>
             </div>
           </div>

@@ -47,8 +47,6 @@ export default function ArticleCard({
     activateFromCard();
   }
 
-  const sourceInitial = article.source.charAt(0).toUpperCase();
-
   return (
     <article
       className={`flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors hover:bg-background/70 ${
@@ -60,11 +58,6 @@ export default function ArticleCard({
       tabIndex={0}
       aria-label={`Create Instagram post for ${article.title}`}
     >
-      {/* Source initial badge */}
-      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent/10 text-xs font-bold text-accent-strong">
-        {sourceInitial}
-      </div>
-
       {/* Content */}
       <div className="min-w-0 flex-1">
         <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
