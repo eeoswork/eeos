@@ -90,74 +90,149 @@ async function serveBrandonHostRequest(request) {
 }
 
 async function handleBrandonArticles(request, env) {
-  const RSS_URL = "https://rss.app/feeds/sCcJmHm7buFhcWXs.xml";
-  const rssRes = await fetch(RSS_URL, {
-    headers: {
-      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      "accept": "application/rss+xml, application/xml, text/xml, */*",
-      "accept-language": "en-US,en;q=0.9"
-    },
-    redirect: "follow"
-  });
-  if (!rssRes.ok) {
-    return errorResponse("RSS_FETCH_FAILED", `Could not load news feed (status ${rssRes.status}).`, 502);
-  }
-  const xml = await rssRes.text();
+  const RSS_FEEDS = [
+    "https://therealdeal.com/la/feed/",
+    "https://la.urbanize.city/rss.xml",
+    "https://www.latimes.com/business/real-estate/rss2.0.xml",
+    "https://www.inman.com/feed/",
+    "https://www.redfin.com/news/feed/",
+    "https://www.realtor.com/news/feed/",
+    "https://www.commercialobserver.com/feed/",
+    "https://www.multihousingnews.com/feed/"
+  ];
 
-  const items = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
-  while ((match = itemRegex.exec(xml)) !== null && items.length < 15) {
-    const block = match[1];
-    const title = (/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title[^>]*>([^<]*)<\/title>/.exec(block) || [])[1] || "";
-    const link = (/<link>([^<]*)<\/link>/.exec(block) || [])[1] || "";
-    const pubDate = (/<pubDate>([^<]*)<\/pubDate>/.exec(block) || [])[1] || "";
-    const description = (/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/.exec(block) || /<description>([^<]*)<\/description>/.exec(block) || [])[1] || "";
-    const sourceMatch = /<source[^>]*>([^<]*)<\/source>/.exec(block);
-    const source = sourceMatch ? sourceMatch[1] : "Google News";
+  const requestHeaders = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "accept": "application/rss+xml, application/xml, text/xml, application/atom+xml, */*",
+    "accept-language": "en-US,en;q=0.9"
+  };
 
-    const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
-    const cleanSnippet = description.replace(/<[^>]*>/g, "").trim().slice(0, 200);
-    const cleanSource = source.replace(/<[^>]*>/g, "").trim();
-    const cleanLink = link.trim();
-    const publishedAt = pubDate ? new Date(pubDate).toISOString() : new Date().toISOString();
+  const extractTagValue = (block, tagName) => {
+    const cdata = new RegExp(`<${tagName}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tagName}>`, "i").exec(block);
+    if (cdata && cdata[1]) return cdata[1];
+    const text = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, "i").exec(block);
+    return text && text[1] ? text[1] : "";
+  };
 
-    if (!cleanTitle || !cleanLink) continue;
+  const decodeEntities = (value) => String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-    items.push({
-      title: cleanTitle,
-      source: cleanSource,
-      publishedAt,
-      snippet: cleanSnippet,
-      googleUrl: cleanLink
-    });
-  }
-
-  // Resolve Google News redirect URLs to actual article URLs in parallel
-  const resolved = await Promise.all(items.map(async (item) => {
-    let finalUrl = item.googleUrl;
+  const feedResults = await Promise.all(RSS_FEEDS.map(async (feedUrl) => {
     try {
-      const res = await fetch(item.googleUrl, {
-        method: "HEAD",
-        redirect: "follow",
-        headers: { "user-agent": "Mozilla/5.0 (compatible; brandon-content-assistant/1.0)" }
+      const rssRes = await fetch(feedUrl, {
+        headers: requestHeaders,
+        redirect: "follow"
       });
-      if (res.url && res.url !== item.googleUrl) finalUrl = res.url;
+      if (!rssRes.ok) {
+        return { feedUrl, ok: false, status: rssRes.status, items: [] };
+      }
+
+      const xml = await rssRes.text();
+      const channelTitle = decodeEntities(extractTagValue(xml, "title"));
+      const fallbackSource = (() => {
+        try {
+          return new URL(feedUrl).hostname.replace(/^www\./, "");
+        } catch (_) {
+          return "RSS Feed";
+        }
+      })();
+
+      const entries = [];
+      const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+      const atomRegex = /<entry>([\s\S]*?)<\/entry>/gi;
+      let match;
+
+      while ((match = itemRegex.exec(xml)) !== null) {
+        const block = match[1];
+        const title = decodeEntities(extractTagValue(block, "title"));
+        const link = decodeEntities(extractTagValue(block, "link"));
+        const guid = decodeEntities(extractTagValue(block, "guid"));
+        const description = decodeEntities(extractTagValue(block, "description") || extractTagValue(block, "content:encoded"));
+        const source = decodeEntities(extractTagValue(block, "source") || channelTitle || fallbackSource);
+        const rawDate = extractTagValue(block, "pubDate") || extractTagValue(block, "dc:date") || extractTagValue(block, "published") || extractTagValue(block, "updated");
+
+        const parsedDate = rawDate ? new Date(rawDate) : new Date(0);
+        const publishedAt = Number.isNaN(parsedDate.getTime()) ? new Date(0).toISOString() : parsedDate.toISOString();
+        const cleanLink = (link || guid || "").trim();
+        const cleanSnippet = description.slice(0, 240);
+        if (!title || !cleanLink) continue;
+
+        entries.push({
+          title,
+          source,
+          publishedAt,
+          snippet: cleanSnippet,
+          url: cleanLink
+        });
+      }
+
+      while ((match = atomRegex.exec(xml)) !== null) {
+        const block = match[1];
+        const title = decodeEntities(extractTagValue(block, "title"));
+        const description = decodeEntities(extractTagValue(block, "summary") || extractTagValue(block, "content"));
+        const updated = extractTagValue(block, "updated") || extractTagValue(block, "published");
+        const linkHref = (/<link[^>]*href=["']([^"']+)["'][^>]*>/i.exec(block) || [])[1] || "";
+        const source = decodeEntities(channelTitle || fallbackSource);
+
+        const parsedDate = updated ? new Date(updated) : new Date(0);
+        const publishedAt = Number.isNaN(parsedDate.getTime()) ? new Date(0).toISOString() : parsedDate.toISOString();
+        const cleanLink = decodeEntities(linkHref).trim();
+        const cleanSnippet = description.slice(0, 240);
+        if (!title || !cleanLink) continue;
+
+        entries.push({
+          title,
+          source,
+          publishedAt,
+          snippet: cleanSnippet,
+          url: cleanLink
+        });
+      }
+
+      return { feedUrl, ok: true, items: entries };
     } catch (_) {
-      // keep original if redirect fails
+      return { feedUrl, ok: false, status: 0, items: [] };
     }
-    const id = await sha256Hex(item.googleUrl);
+  }));
+
+  const allItems = feedResults.flatMap((result) => result.items || []);
+  if (!allItems.length) {
+    return errorResponse("RSS_FETCH_FAILED", "Could not load any configured RSS feeds.", 502);
+  }
+
+  const seen = new Set();
+  const deduped = [];
+  for (const item of allItems) {
+    const key = `${item.url}::${item.title}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(item);
+  }
+
+  deduped.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  const finalItems = deduped.slice(0, 50);
+
+  const withIds = await Promise.all(finalItems.map(async (item) => {
+    const id = await sha256Hex(item.url);
     return {
       id: id.slice(0, 16),
       title: item.title,
       source: item.source,
       publishedAt: item.publishedAt,
       snippet: item.snippet,
-      url: finalUrl
+      url: item.url
     };
   }));
 
-  return jsonResponse(resolved);
+  return jsonResponse(withIds);
 }
 
 async function handleBrandonGenerate(request, env) {
