@@ -71,13 +71,14 @@ export default function AssistantDashboard({
       });
 
       if (!response.ok) {
-        throw new Error(GENERATION_ERROR);
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || GENERATION_ERROR);
       }
 
       const data = (await response.json()) as GeneratedPost;
       setDraft(data);
-    } catch {
-      setDraftError(GENERATION_ERROR);
+    } catch (error) {
+      setDraftError(error instanceof Error ? error.message : GENERATION_ERROR);
     } finally {
       setGeneratingArticleId(null);
     }

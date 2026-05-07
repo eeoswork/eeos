@@ -16,6 +16,16 @@ function isArticle(value: unknown): value is Article {
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        {
+          error:
+            "OPENAI_API_KEY is missing. Add it to .env.local, then restart the dev server.",
+        },
+        { status: 500 },
+      );
+    }
+
     const body = (await request.json()) as { article?: unknown };
 
     if (!isArticle(body.article)) {
@@ -24,7 +34,30 @@ export async function POST(request: Request) {
 
     const draft = await generateInstagramDraft(body.article);
     return Response.json(draft);
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("OPENAI_API_KEY")) {
+      return Response.json(
+        {
+          error:
+            "OPENAI_API_KEY is missing. Add it to .env.local, then restart the dev server.",
+        },
+        { status: 500 },
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      /(incorrect api key|invalid api key|authentication|401)/i.test(error.message)
+    ) {
+      return Response.json(
+        {
+          error:
+            "OpenAI authentication failed. Check OPENAI_API_KEY in .env.local and restart the dev server.",
+        },
+        { status: 500 },
+      );
+    }
+
     return Response.json(
       { error: "Couldn’t generate a post for this article. Try another article or refresh." },
       { status: 500 },
