@@ -311,82 +311,29 @@
         box-shadow: 0 2px 10px rgba(17, 17, 17, 0.08);
       }
 
-      .about-avery-trigger {
+      .about-avery-name {
         margin-top: 0.85rem;
-        border: 0;
-        background: transparent;
-        color: var(--text);
-        text-decoration: underline;
-        text-underline-offset: 3px;
         font-size: 1.05rem;
         font-weight: 650;
         letter-spacing: -0.01em;
-        padding: 0;
-        cursor: pointer;
       }
 
-      .about-avery-trigger:hover {
+      .about-avery-desc {
+        margin-top: 0.55rem;
         color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.55;
+        max-width: 340px;
+        margin-left: auto;
+        margin-right: auto;
       }
 
-      .about-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 50;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.32);
-        padding: 1rem;
-      }
-
-      .about-modal[hidden] {
-        display: none;
-      }
-
-      .about-modal-card {
-        width: min(100%, 440px);
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: #ffffff;
-        box-shadow: 0 14px 35px rgba(17, 17, 17, 0.14);
-        padding: 1.5rem;
-      }
-
-      .about-modal-card h3 {
-        font-size: 1.18rem;
-        letter-spacing: -0.02em;
-      }
-
-      .about-modal-body {
-        margin-top: 0.85rem;
-        color: color-mix(in srgb, var(--text) 82%, #555555);
-        font-size: 0.95rem;
-        line-height: 1.6;
-      }
-
-      .about-modal-body p {
+      .about-avery-desc p {
         margin: 0;
       }
 
-      .about-modal-body p + p {
-        margin-top: 0.9rem;
-      }
-
-      .about-modal-close {
-        margin-top: 1.25rem;
-        border: 1px solid var(--border);
-        background: #ffffff;
-        color: var(--text);
-        border-radius: 10px;
-        padding: 0.45rem 0.85rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .about-modal-close:hover {
-        background: rgba(17, 17, 17, 0.03);
+      .about-avery-desc p + p {
+        margin-top: 0.75rem;
       }
 
       #lead-form {
@@ -551,11 +498,7 @@
           width: min(100%, 420px);
         }
 
-        .about-modal-card {
-          padding: 1.25rem;
-        }
-
-        #lead-form {
+                #lead-form {
           margin-top: 0;
         }
 
@@ -664,30 +607,12 @@
           loading="lazy"
           decoding="async"
         />
-        <button
-          class="about-avery-trigger"
-          id="openAboutAvery"
-          type="button"
-          aria-label="Open About Me"
-          aria-haspopup="dialog"
-          aria-controls="aboutAveryModal"
-        >
-          About Me
-        </button>
-      </section>
-
-      <div class="about-modal" id="aboutAveryModal" hidden aria-hidden="true">
-        <div class="about-modal-card" role="dialog" aria-modal="true" aria-labelledby="aboutAveryTitle">
-          <h3 id="aboutAveryTitle">About Avery</h3>
-          <div class="about-modal-body">
-            <p>I’m Avery. I work on practical operational workflows for small businesses — the kind of repetitive admin, intake, follow-up, reporting, and process work that quietly eats up time every week.</p>
-            <p>My goal is not to sell you a huge “AI transformation.” It’s to understand where your workflow is getting bogged down and help you simplify it with a lightweight, useful system.</p>
-          </div>
-          <button class="about-modal-close" id="closeAboutAvery" type="button" aria-label="Close About Avery">
-            Close
-          </button>
+        <p class="about-avery-name">Avery Jolly</p>
+        <div class="about-avery-desc">
+          <p>I’m Avery. I work on practical operational workflows for small businesses — the kind of repetitive admin, intake, follow-up, reporting, and process work that quietly eats up time every week.</p>
+          <p>My goal is not to sell you a huge “AI transformation.” It’s to understand where your workflow is getting bogged down and help you simplify it with a lightweight, useful system.</p>
         </div>
-      </div>
+      </section>
 
       <section id="lead-form" aria-labelledby="form-title">
         <div class="form-wrap">
@@ -739,39 +664,8 @@
       const successMessage = document.getElementById("successMessage");
       const errorMessage = document.getElementById("errorMessage");
       const submitButton = form.querySelector("button[type='submit']");
-      const openAboutAveryButton = document.getElementById("openAboutAvery");
-      const closeAboutAveryButton = document.getElementById("closeAboutAvery");
-      const aboutAveryModal = document.getElementById("aboutAveryModal");
-      const aboutAveryModalCard = aboutAveryModal.querySelector(".about-modal-card");
 
-      function openAboutAveryModal() {
-        aboutAveryModal.hidden = false;
-        aboutAveryModal.setAttribute("aria-hidden", "false");
-      }
 
-      function closeAboutAveryModal() {
-        aboutAveryModal.hidden = true;
-        aboutAveryModal.setAttribute("aria-hidden", "true");
-      }
-
-      openAboutAveryButton.addEventListener("click", openAboutAveryModal);
-      closeAboutAveryButton.addEventListener("click", closeAboutAveryModal);
-
-      aboutAveryModal.addEventListener("click", function (event) {
-        if (event.target === aboutAveryModal) {
-          closeAboutAveryModal();
-        }
-      });
-
-      aboutAveryModalCard.addEventListener("click", function (event) {
-        event.stopPropagation();
-      });
-
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && !aboutAveryModal.hidden) {
-          closeAboutAveryModal();
-        }
-      });
 
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
