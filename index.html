@@ -144,39 +144,17 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
   color: #64748b;
 }
 
-.email-capture-features {
-  list-style: none;
-  margin: 0.875rem 0 0;
-  padding: 0;
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  color: #475569;
-}
-
-.email-capture-features li {
-  position: relative;
-  margin-top: 0.3125rem;
-  padding-left: 0.875rem;
-}
-
-.email-capture-features li:first-child {
-  margin-top: 0;
-}
-
-.email-capture-features li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 3px;
-  height: 3px;
-  border-radius: 9999px;
-  background: currentColor;
-}
-
-.email-capture-lede {
+.email-capture-platform-copy {
   margin: 3rem 0 0;
+}
+
+.email-capture-platform-copy .subtext {
+  margin: 0;
   color: #475569;
+}
+
+.email-capture-platform-copy .subtext + .subtext {
+  margin-top: 0.875rem;
 }
 
 .email-form {
@@ -462,16 +440,17 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
         Go post this one in Slack.
       </div>
 
-      <p class="subtext email-capture-lede">
-        EEOS helps People Ops teams run scalable engagement and culture initiatives consistently without the planning and coordination overhead.
-      </p>
-      <ul class="email-capture-features" aria-label="What you can run with EEOS">
-        <li>Weekly team activities ready to post</li>
-        <li>Virtual and in-person team experiences monthly</li>
-        <li>Track participation, sentiment, and what your team responds to</li>
-        <li>Keep culture spend visible and organized</li>
-        <li>Eliminate most of the admin work</li>
-      </ul>
+      <div class="email-capture-platform-copy">
+        <p class="subtext">
+          Just like we handled this Slack activity for you, EEOS handles the planning, coordination, communication, and follow-through for your broader employee engagement program too.
+        </p>
+        <p class="subtext">
+          Weekly team activities, virtual experiences, and in-person events — without the constant admin work, planning overhead, and coordination burden.
+        </p>
+        <p class="subtext">
+          Track participation, engagement, sentiment, and culture spend in one place while keeping initiatives consistent across your team.
+        </p>
+      </div>
     </div>
 
       <div id="openSlackWrap" class="hidden" style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
