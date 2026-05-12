@@ -1,4 +1,4 @@
-# Email Capture System Setup Guide
+wrangler --version# Email Capture System Setup Guide
 
 ## Overview
 

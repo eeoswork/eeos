@@ -144,6 +144,40 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
   color: #64748b;
 }
 
+.email-capture-features {
+  list-style: none;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.email-capture-features li {
+  position: relative;
+  margin-top: 0.3125rem;
+  padding-left: 0.875rem;
+}
+
+.email-capture-features li:first-child {
+  margin-top: 0;
+}
+
+.email-capture-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+.email-capture-lede {
+  margin: 0.75rem 0 0;
+}
+
 .email-form {
   display: flex;
   flex-direction: column;
@@ -415,7 +449,21 @@ h3 { font-size: 1.25rem; font-weight: 600; margin: 0; }
       </div>
 
       <div id="emailCapture" class="card hidden mt-6">
-      <h3>Want next week handled too?</h3>
+      <h3>Want your engagement program handled too?</h3>
+      <p class="subtext email-capture-lede">
+        EEOS helps People Ops teams run engagement and culture initiatives more consistently without the planning and coordination overhead.
+      </p>
+      <ul class="email-capture-features" aria-label="What you can run with EEOS">
+        <li>Weekly team activities ready to post</li>
+        <li>Virtual events for distributed teams</li>
+        <li>In-person experiences when possible</li>
+        <li>Keep engagement consistent over time</li>
+        <li>Track participation and engagement</li>
+        <li>See what your team actually responds to</li>
+        <li>Keep culture spend visible and organized</li>
+        <li>Less planning, coordination, and admin work</li>
+        <li>Run everything in one place</li>
+      </ul>
 
       <form id="emailForm" class="email-form">
         <input type="email" class="email-input" id="emailInput" placeholder="you@company.com" required />
